@@ -3,6 +3,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { BlurImage } from "../blur-image";
+import { Z } from "@/lib/z-layer-guide";
 
 export const SkeletonOne = () => {
   return (
@@ -54,8 +55,8 @@ export const SkeletonOne = () => {
           </div>
         </div>
       </div>
-      <div className="absolute bottom-0 z-40 inset-x-0 h-60 bg-gradient-to-t from-white dark:from-black via-white dark:via-black to-transparent w-full pointer-events-none" />
-      <div className="absolute top-0 z-40 inset-x-0 h-60 bg-gradient-to-b from-white dark:from-black via-transparent to-transparent w-full pointer-events-none" />
+      <div className={`absolute bottom-0 z-[${Z.FLOAT}] inset-x-0 h-60 bg-gradient-to-t from-white dark:from-black via-white dark:via-black to-transparent w-full pointer-events-none`} />
+      <div className={`absolute top-0 z-[${Z.FLOAT}] inset-x-0 h-60 bg-gradient-to-b from-white dark:from-black via-transparent to-transparent w-full pointer-events-none`} />
     </div>
   );
 };

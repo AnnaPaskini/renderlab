@@ -3,9 +3,6 @@ import nextMDX from "@next/mdx";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ["ts", "tsx", "mdx"],
-  turbopack: {
-    root: "/Users/manuarora/Documents/personal/renderlab",
-  },
   images: {
     remotePatterns: [
       {

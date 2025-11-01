@@ -3,10 +3,11 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import React, { useId } from "react";
+import { Z } from "@/lib/z-layer-guide";
 
 export const Background = () => {
   return (
-    <div className="absolute inset-0 h-full w-full pointer-events-none z-0">
+    <div className={`absolute inset-0 h-full w-full pointer-events-none z-[${Z.BASE}]`}>
       <div className="absolute inset-0 h-full w-full bg-white dark:bg-black pointer-events-none [mask-image:radial-gradient(ellipse_at_center,transparent,white)]" />
       {Array.from({ length: 6 }).map((_, index) => (
         <div className="flex" key={"grid-column" + index}>

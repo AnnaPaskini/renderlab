@@ -2,6 +2,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { InfiniteMovingCards } from "@/components/ui/infinite-moving-cards";
 import { Globe } from "../globe";
+import { Z } from "@/lib/z-layer-guide";
 export const SkeletonFour = () => {
   return (
     <div className="h-full  flex flex-col items-center relative bg-white dark:bg-black mt-10">
@@ -22,7 +23,7 @@ export const SkeletonFour = () => {
 
 const MovingGrid = () => {
   return (
-    <div className="flex space-x-4 flex-shrink-0 mb-4 relative z-40">
+    <div className={`flex space-x-4 flex-shrink-0 mb-4 relative z-[${Z.FLOAT}]`}>
       <span
         className={cn(
           " space-x-1 min-w-24 flex justify-center items-center bg-white dark:bg-neutral-900 px-2 py-1 text-sm rounded-md  shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]"

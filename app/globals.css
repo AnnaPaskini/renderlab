@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* @import "./prism.css"; */
+
 
 :root {
   --foreground-rgb: 0, 0, 0;
@@ -27,3 +27,120 @@ html {
     text-wrap: balance;
   }
 }
+body.actions-open nav {
+  filter: blur(2px);
+  opacity: 0.85;
+  pointer-events: none !important;
+  transition: filter 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+/* Designer Grid (dot pattern) — с управляемой плотностью и контрастом */
+.dot-grid {
+  /* Базовые значения — можно переопределять инлайном или модификаторами */
+  --dot-size: 18px;        /* шаг между точками (меньше = плотнее) */
+  --dot-radius: 1.4px;     /* радиус точки (больше = жирнее) */
+  --dot-alpha: 0.35;       /* прозрачность точки (больше = контрастнее) */
+
+  background-image: radial-gradient(
+    circle,
+    rgba(0, 0, 0, var(--dot-alpha)) var(--dot-radius),
+    transparent var(--dot-radius)
+  );
+  background-size: var(--dot-size) var(--dot-size);
+  background-position: 0 0;
+  transition: background-color 200ms ease, background-image 200ms ease, background-size 200ms ease;
+}
+
+.dark .dot-grid {
+  /* в тёмной теме делаем точки светлее и чуть контрастнее */
+  --dot-alpha: 0.30;
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 255, 255, var(--dot-alpha)) var(--dot-radius),
+    transparent var(--dot-radius)
+  );
+}
+
+/* Модификаторы на классы — чтобы не лезть в инлайн каждый раз */
+.dot-grid {
+  --dot-size: 14px;     /* шаг между точками: меньше = плотнее */
+  --dot-radius: 1.6px;  /* радиус точки: больше = жирнее */
+  --dot-alpha: 0.50;    /* контраст: больше = сильнее видно */
+
+  background-image: radial-gradient(
+    circle,
+    rgba(0, 0, 0, var(--dot-alpha)) var(--dot-radius),
+    transparent var(--dot-radius)
+  );
+  background-size: var(--dot-size) var(--dot-size);
+  background-position: 0 0;
+  transition: background-color 200ms ease, background-image 200ms ease, background-size 200ms ease;
+}
+
+.dark .dot-grid {
+  --dot-alpha: 0.40;  /* в тёмной теме чуть мягче */
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 255, 255, var(--dot-alpha)) var(--dot-radius),
+    transparent var(--dot-radius)
+  );
+}
+/* =========================
+   Designer Dot Grid Presets
+   ========================= */
+.dot-grid {
+  --dot-size: 18px;     /* шаг: меньше = плотнее */
+  --dot-radius: 1.4px;  /* радиус точки: больше = жирнее */
+  --dot-alpha: 0.35;    /* контраст: больше = заметнее */
+
+  background-image: radial-gradient(
+    circle,
+    rgba(0,0,0,var(--dot-alpha)) var(--dot-radius),
+    transparent var(--dot-radius)
+  );
+  background-size: var(--dot-size) var(--dot-size);
+  background-position: 0 0;
+  transition: background-color .2s, background-image .2s, background-size .2s;
+}
+
+.dark .dot-grid {
+  background-image: radial-gradient(
+    circle,
+    rgba(255,255,255,var(--dot-alpha)) var(--dot-radius),
+    transparent var(--dot-radius)
+  );
+}
+
+/* Шаг сетки */
+.dots-xl { --dot-size: 28px; }
+.dots-lg { --dot-size: 24px; }
+.dots-md { --dot-size: 18px; }
+.dots-sm { --dot-size: 14px; }
+.dots-xs { --dot-size: 10px; }
+
+/* Контраст */
+.dots-faint { --dot-alpha: 0.15; }
+.dots-soft  { --dot-alpha: 0.22; }
+.dots-mid   { --dot-alpha: 0.32; }
+.dots-bold  { --dot-alpha: 0.45; }
+.dots-heavy { --dot-alpha: 0.55; }
+
+/* Жирность точки */
+.dots-thin { --dot-radius: 1px; }
+.dots-reg  { --dot-radius: 1.4px; }
+.dots-fat  { --dot-radius: 1.8px; }
+
+/* Classic Designer Grid */
+.designer-grid {
+  --grid-size: 24px;         /* шаг сетки */
+  --grid-line: rgba(0, 0, 0, 0.06);  /* цвет линий (для светлой темы) */
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+  background-position: 0 0;
+}
+
+.dark .designer-grid {
+  --grid-line: rgba(255, 255, 255, 0.08); /* более мягкие линии в тёмной теме */
+}
+

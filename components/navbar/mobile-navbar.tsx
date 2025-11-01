@@ -8,6 +8,7 @@ import { Button } from "../button";
 import { Logo } from "../Logo";
 import { useMotionValueEvent, useScroll } from "framer-motion";
 import { ModeToggle } from "../mode-toggle";
+import { Z } from "@/lib/z-layer-guide";
 
 export const MobileNavbar = ({ navItems }: any) => {
   const [open, setOpen] = useState(false);
@@ -38,7 +39,7 @@ export const MobileNavbar = ({ navItems }: any) => {
         onClick={() => setOpen(!open)}
       />
       {open && (
-        <div className="fixed inset-0 bg-white dark:bg-black z-50 flex flex-col items-start justify-start space-y-10  pt-5  text-xl text-zinc-600  transition duration-200 hover:text-zinc-800">
+        <div className={`fixed inset-0 bg-white dark:bg-black z-[${Z.NAV}] flex flex-col items-start justify-start space-y-10  pt-5  text-xl text-zinc-600  transition duration-200 hover:text-zinc-800`}>
           <div className="flex items-center justify-between w-full px-5">
             <Logo />
             <div className="flex items-center space-x-2">

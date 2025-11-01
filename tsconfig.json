@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
+    /* === Core settings === */
+    "target": "esnext",
     "lib": [
       "dom",
       "dom.iterable",
@@ -8,30 +9,38 @@
     ],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": false,
+    "strict": true,
     "noEmit": true,
-    "incremental": true,
-  "module": "esnext",
-  "esModuleInterop": true,
-  "moduleResolution": "bundler",
-    "baseUrl": ".",
-    "paths": { "@/*": ["./*"] },
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    /* === The key line that fixes your JSX errors === */
     "jsx": "react-jsx",
+    /* === Path alias === */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
+    /* === Experimental / quality of life === */
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
     "plugins": [
       {
         "name": "next"
       }
     ]
   },
+  /* === Files to include === */
   "include": [
     "next-env.d.ts",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "**/*.mts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

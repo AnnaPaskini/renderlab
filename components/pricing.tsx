@@ -5,6 +5,7 @@ import { tiers } from "@/constants/tier";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "./button";
+import { Z } from "@/lib/z-layer-guide";
 
 export function Pricing() {
   const [active, setActive] = useState("monthly");
@@ -32,11 +33,11 @@ export function Pricing() {
                 className="absolute inset-0 bg-black dark:bg-white"
               />
             )}
-            <span className="relative z-10">{tab.name}</span>
+            <span className={`relative z-[${Z.LOW}]`}>{tab.name}</span>
           </button>
         ))}
       </div>
-      <div className="mx-auto mt-4 md:mt-20   grid relative z-20 grid-cols-1 gap-4 items-center  md:grid-cols-2 xl:grid-cols-4">
+      <div className={`mx-auto mt-4 md:mt-20   grid relative z-[${Z.FLOAT}] grid-cols-1 gap-4 items-center  md:grid-cols-2 xl:grid-cols-4`}>
         {tiers.map((tier, tierIdx) => (
           <div
             key={tier.id}

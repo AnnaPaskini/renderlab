@@ -7,6 +7,7 @@ import { SkeletonOne } from "./skeletons/first";
 import { SkeletonTwo } from "./skeletons/second";
 import { SkeletonFour } from "./skeletons/fourth";
 import { SkeletonThree } from "./skeletons/third";
+import { Z } from "@/lib/z-layer-guide";
 
 export const Features = () => {
   const features = [
@@ -41,7 +42,7 @@ export const Features = () => {
     },
   ];
   return (
-    <div className="relative z-20 py-10 lg:py-40 overflow-hidden">
+    <div className={`relative z-[${Z.FLOAT}] py-10 lg:py-40 overflow-hidden`}>
       <Heading as="h2">Packed with thousands of features</Heading>
       <Subheading className="text-center ">
         From Image generation to video generation, Everything AI has APIs for

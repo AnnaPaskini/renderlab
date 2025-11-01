@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import "../globals.css";
 import { GeistSans } from "geist/font/sans";
 import { NavBar } from "@/components/navbar";
-import { cn } from "@/lib/utils";
 import { Footer } from "@/components/footer";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Everything AI",
+  title: "RenderLab",
   description:
-    "Everything AI is a platform that provides a wide range of AI tools and services to help you stay on top of your business. Generate images, text and everything else that you need to get your business off the ground.",
+    "RenderLab — AI workspace and marketing platform for architects. Generate, edit, and visualize ideas instantly.",
   openGraph: {
     images: ["https://ai-saas-template-aceternity.vercel.app/banner.png"],
   },
@@ -16,14 +16,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <main>
+    <div
+      className={cn(
+        GeistSans.className,
+        "bg-neutral-950 text-white overflow-x-hidden"
+      )}
+    >
       <NavBar />
-      {children}
+      <main className="overflow-hidden">{children}</main>
       <Footer />
-    </main>
+    </div>
   );
 }
