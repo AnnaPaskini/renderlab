@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    /* === Core settings === */
     "target": "esnext",
     "lib": [
       "dom",
@@ -16,16 +15,13 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    /* === The key line that fixes your JSX errors === */
     "jsx": "react-jsx",
-    /* === Path alias === */
     "baseUrl": ".",
     "paths": {
       "@/*": [
         "./*"
       ]
     },
-    /* === Experimental / quality of life === */
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
     "plugins": [
@@ -34,7 +30,6 @@
       }
     ]
   },
-  /* === Files to include === */
   "include": [
     "next-env.d.ts",
     "**/*.ts",
