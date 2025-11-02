@@ -233,3 +233,5 @@ export function WorkspaceLayout({
     </div>
   );
 }
+
+export default WorkspaceLayout;

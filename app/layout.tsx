@@ -1,14 +1,21 @@
-import type { Metadata } from "next";
 import "./globals.css";
 import { GeistSans } from "geist/font/sans";
 import { cn } from "@/lib/utils";
 import { ViewTransitions } from "next-view-transitions";
-import { ThemeProvider } from "@/context/theme-provider";
 
-export const metadata: Metadata = {
+import { SupabaseAuthProvider } from "@/components/providers/SupabaseAuthProvider";
+import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
+
+export function ThemeProvider({
+  children,
+  ...props
+}: React.ComponentProps<typeof NextThemesProvider>) {
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+}
+export const metadata = {
   title: "Everything AI",
-  description:
-    "Everything AI is a platform that provides a wide range of AI tools and services to help you stay on top of your business. Generate images, text and everything else that you need to get your business off the ground.",
+  description: "Everything AI platform built on RenderLab template",
   openGraph: {
     images: ["https://ai-saas-template-aceternity.vercel.app/banner.png"],
   },
@@ -16,25 +23,28 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <ViewTransitions>
       <html lang="en" suppressHydrationWarning>
         <body
           className={cn(
             GeistSans.className,
-            "bg-white dark:bg-black antialiased h-full w-full"
+            "bg-white dark:bg-black antialiased min-h-screen"
           )}
         >
           <ThemeProvider
             attribute="class"
             enableSystem
             disableTransitionOnChange
-            defaultTheme="light"
+            defaultTheme="dark"
           >
-            {children}
+            <SupabaseAuthProvider>
+              {children}
+              <Toaster />
+            </SupabaseAuthProvider>
           </ThemeProvider>
         </body>
       </html>
