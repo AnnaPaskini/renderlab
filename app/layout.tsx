@@ -4,7 +4,6 @@ import { GeistSans } from "geist/font/sans";
 import { cn } from "@/lib/utils";
 import { ViewTransitions } from "next-view-transitions";
 import { ThemeProvider } from "@/context/theme-provider";
-import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "Everything AI",
@@ -35,7 +34,6 @@ export default function RootLayout({
             disableTransitionOnChange
             defaultTheme="light"
           >
-            <Toaster position="bottom-center" />
             {children}
           </ThemeProvider>
         </body>

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   ReactNode,
@@ -7,18 +7,19 @@ import {
   cloneElement,
   useState,
   useEffect,
-} from "react"
-import { motion } from "framer-motion"
-import { CollectionsPanel } from "./CollectionPanel"
-import { PromptTemplates } from "./PromptTemplates"
-import { Z } from "@/lib/z-layer-guide"
+} from "react";
+import { motion } from "framer-motion";
+import { CollectionsPanel } from "./CollectionPanel";
+import { PromptTemplates } from "./PromptTemplates";
+import { Z } from "@/lib/z-layer-guide";
+import { Toaster } from "react-hot-toast";
 
 interface WorkspaceLayoutProps {
-  leftPanel: ReactNode
-  rightPanel: ReactNode
-  bottomPanel?: ReactNode
-  uploadedImage?: string | null
-  previews?: string[]
+  leftPanel: ReactNode;
+  rightPanel: ReactNode;
+  bottomPanel?: ReactNode;
+  uploadedImage?: string | null;
+  previews?: string[];
 }
 
 export function WorkspaceLayout({
@@ -28,45 +29,53 @@ export function WorkspaceLayout({
   uploadedImage,
   previews = [],
 }: WorkspaceLayoutProps) {
-  const [activeTab, setActiveTab] = useState<"builder" | "custom">("builder")
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<"builder" | "custom">("builder");
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // ESC и блокировка скролла на модалке
   useEffect(() => {
-    if (!selectedImage) return
-    document.body.style.overflow = "hidden"
+    if (!selectedImage) {
+      return;
+    }
+
+    document.body.style.overflow = "hidden";
+
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setSelectedImage(null)
-    }
-    window.addEventListener("keydown", handleEscape)
+      if (e.key === "Escape") {
+        setSelectedImage(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+
     return () => {
-      document.body.style.overflow = ""
-      window.removeEventListener("keydown", handleEscape)
-    }
-  }, [selectedImage])
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [selectedImage]);
 
   const enhancedRightPanel = isValidElement(rightPanel)
     ? cloneElement(rightPanel as ReactElement<any>, {
         activeTab,
         onTabChange: setActiveTab,
       })
-    : rightPanel
+    : rightPanel;
 
   return (
-    <div
-  className="relative w-full min-h-screen bg-background text-foreground dot-grid"
-  style={
-    {
-      ["--dot-size" as any]: "20px",   // расстояние между точками
-      ["--dot-radius" as any]: "1.2px", // толщина точки
-      ["--dot-alpha" as any]: 0.32,    // контраст точек
-    } as React.CSSProperties
-  }
->
-   
-      {/* MAIN GRID */}
+    <div className="relative w-full min-h-screen bg-background text-foreground dot-grid">
+      {/* GRID BACKGROUND */}
+      <div
+        className={`absolute inset-0 z-[${Z.BASE}] opacity-40 dark:opacity-20`}
+        style={{
+          backgroundImage: `
+            linear-gradient(0deg, transparent 24%, rgba(120,120,255,0.05) 25%, rgba(120,120,255,0.05) 26%, transparent 27%, transparent 74%, rgba(120,120,255,0.05) 75%, rgba(120,120,255,0.05) 76%, transparent 77%, transparent),
+            linear-gradient(90deg, transparent 24%, rgba(120,120,255,0.05) 25%, rgba(120,120,255,0.05) 26%, transparent 27%, transparent 74%, rgba(120,120,255,0.05) 75%, rgba(120,120,255,0.05) 76%, transparent 77%, transparent)
+          `,
+          backgroundSize: "40px 40px",
+        }}
+      />
+
+      {/* MAIN CONTENT */}
       <div className={`pt-20 md:pt-24 px-4 md:px-8 pb-8 min-h-screen flex flex-col relative z-[${Z.LOW}]`}>
-        {/* Tabs */}
         <div className="flex gap-2 mb-6">
           <button
             onClick={() => setActiveTab("builder")}
@@ -94,22 +103,35 @@ export function WorkspaceLayout({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className={
-            activeTab === "custom"
-              ? "grid grid-cols-2 grid-rows-2 gap-6 flex-1 overflow-hidden min-h-[70vh]"
-              : "grid grid-cols-[520px_1fr] gap-6 flex-1 overflow-hidden min-h-[70vh]"
-          }
+          className="flex-1 w-full"
         >
           {activeTab === "builder" ? (
-            <>
-              {/* LEFT COLUMN */}
-              <div className="flex flex-col justify-between h-full gap-6">
-                <div className="flex-1 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 md:p-8 overflow-auto shadow-sm hover:shadow-md transition-shadow">
+            <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+              <div className="flex flex-col gap-6">
+                <div className="relative bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 md:p-8 overflow-auto shadow-sm hover:shadow-md transition-shadow">
                   {leftPanel}
+                  <div className={`pointer-events-none absolute inset-0 z-[${Z.TOAST}]`}>
+                    <Toaster
+                      position="bottom-right"
+                      reverseOrder={false}
+                      gutter={8}
+                      containerStyle={{ position: "absolute" }}
+                      toastOptions={{
+                        duration: 1800,
+                        className:
+                          "pointer-events-auto flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium shadow-lg",
+                        style: {
+                          backgroundColor: "rgba(var(--background-end-rgb), 0.92)",
+                          color: "rgb(var(--foreground-rgb))",
+                          border: "1px solid rgba(var(--foreground-rgb), 0.12)",
+                          boxShadow: "0 16px 32px rgba(15, 15, 35, 0.18)",
+                          backdropFilter: "blur(8px)",
+                        },
+                      }}
+                    />
+                  </div>
                 </div>
-
-                {/* Images History */}
-                <div className="flex-1 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 md:p-8 overflow-auto shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 md:p-8 overflow-auto shadow-sm hover:shadow-md transition-shadow">
                   <h3 className="text-lg font-semibold mb-4">Images History</h3>
                   <div className="h-[20vh] bg-neutral-50 dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 p-4 overflow-hidden">
                     {uploadedImage || previews.length > 0 ? (
@@ -120,7 +142,11 @@ export function WorkspaceLayout({
                             className="relative flex-shrink-0 w-32 h-full cursor-pointer rounded-lg overflow-hidden group transition-transform hover:scale-105"
                             onClick={() => setSelectedImage(preview)}
                           >
-                            <img src={preview} alt={`Preview ${previews.length - idx}`} className="w-full h-full object-cover rounded-lg" />
+                            <img
+                              src={preview}
+                              alt={`Preview ${previews.length - idx}`}
+                              className="w-full h-full object-cover rounded-lg"
+                            />
                             <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
                               #{previews.length - idx}
                             </div>
@@ -131,8 +157,14 @@ export function WorkspaceLayout({
                             className="relative flex-shrink-0 w-32 h-full cursor-pointer rounded-lg overflow-hidden group transition-transform hover:scale-105"
                             onClick={() => setSelectedImage(uploadedImage)}
                           >
-                            <img src={uploadedImage} alt="Uploaded" className="w-full h-full object-cover rounded-lg" />
-                            <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">Original</div>
+                            <img
+                              src={uploadedImage}
+                              alt="Uploaded"
+                              className="w-full h-full object-cover rounded-lg"
+                            />
+                            <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                              Original
+                            </div>
                           </div>
                         )}
                       </div>
@@ -141,50 +173,49 @@ export function WorkspaceLayout({
                         No images yet. Upload an image to start!
                       </div>
                     )}
-
-                    {selectedImage && (
-                      <div
-                        className={`fixed inset-0 z-[${Z.MODAL}] flex items-center justify-center bg-black/30 backdrop-blur-md transition-opacity duration-300`}
-                        onClick={() => setSelectedImage(null)}
-                      >
-                        <div className="relative max-w-[90vw] max-h-[80vh] p-4" onClick={(e) => e.stopPropagation()}>
-                          <img src={selectedImage} alt="Enlarged view" className="w-full h-full object-contain rounded-lg shadow-2xl" />
-                          <button
-                            className="absolute -top-2 -right-2 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-neutral-100 dark:hover:bg-neutral-700 shadow-lg transition-colors"
-                            onClick={() => setSelectedImage(null)}
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
 
-              {/* RIGHT COLUMN */}
-              <div className="flex flex-col h-full overflow-hidden">{enhancedRightPanel}</div>
-            </>
-          ) : (
-            <>
-              {/* CUSTOM TAB */}
-              <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 md:p-8 overflow-auto shadow-sm hover:shadow-md transition-shadow">
-                {leftPanel}
+              <div className="flex flex-col h-full">
+                {enhancedRightPanel}
               </div>
-
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+              <div className="relative bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 md:p-8 overflow-auto shadow-sm hover:shadow-md transition-shadow">
+                {leftPanel}
+                <div className={`pointer-events-none absolute inset-0 z-[${Z.TOAST}]`}>
+                  <Toaster
+                    position="bottom-right"
+                    reverseOrder={false}
+                    gutter={8}
+                    containerStyle={{ position: "absolute" }}
+                    toastOptions={{
+                      duration: 1800,
+                      className:
+                        "pointer-events-auto flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium shadow-lg",
+                      style: {
+                        backgroundColor: "rgba(var(--background-end-rgb), 0.92)",
+                        color: "rgb(var(--foreground-rgb))",
+                        border: "1px solid rgba(var(--foreground-rgb), 0.12)",
+                        boxShadow: "0 16px 32px rgba(15, 15, 35, 0.18)",
+                        backdropFilter: "blur(8px)",
+                      },
+                    }}
+                  />
+                </div>
+              </div>
               <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 overflow-auto shadow-sm hover:shadow-md transition-shadow">
                 <PromptTemplates activeTab={activeTab} setActiveTab={setActiveTab} />
               </div>
-
               <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 md:p-8 overflow-auto shadow-sm hover:shadow-md transition-shadow">
                 <h3 className="text-lg font-semibold mb-4">Images History</h3>
-                {/* тот же блок истории как выше — оставляю без дублирования кода */}
               </div>
-
               <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 overflow-auto shadow-sm hover:shadow-md transition-shadow">
                 <CollectionsPanel />
               </div>
-            </>
+            </div>
           )}
         </motion.div>
 
@@ -200,5 +231,5 @@ export function WorkspaceLayout({
         )}
       </div>
     </div>
-  )
+  );
 }
