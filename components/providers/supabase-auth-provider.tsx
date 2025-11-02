@@ -1,108 +1,159 @@
 "use client";
 
 import {
-  useState,
-  useEffect,
   createContext,
   useContext,
+  useEffect,
+  useMemo,
   useRef,
+  useState,
   type ReactNode,
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabaseClient";
 
-type AuthContextType = {
+type AuthContextValue = {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  profile: Profile | null;
 };
 
-const AuthContext = createContext<AuthContextType>({
+type Profile = {
+  full_name: string | null;
+  avatar_url: string | null;
+};
+
+const AuthContext = createContext<AuthContextValue>({
   user: null,
   session: null,
   loading: true,
+  profile: null,
 });
 
 function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const ensuredProfilesRef = useRef<Set<string>>(new Set());
+  const [profile, setProfile] = useState<Profile | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const ensuredProfilesRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    let ignore = false;
+    let isMounted = true;
 
-    const fetchSession = async () => {
+    const isAuthRoute = () =>
+      pathname.startsWith("/auth/login") || pathname.startsWith("/auth/signup");
+
+    const handleSession = (nextSession: Session | null) => {
+      if (!isMounted) {
+        return;
+      }
+
+      setSession(nextSession);
+
+      if (nextSession && isAuthRoute()) {
+        router.replace("/workspace");
+      }
+    };
+
+    const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
-      if (!ignore) {
-        setSession(data.session);
-        setUser(data.session?.user ?? null);
+      handleSession(data.session);
+      if (isMounted) {
         setLoading(false);
       }
     };
 
-    fetchSession();
+    void checkSession();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      if (!ignore) {
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
-        setLoading(false);
-      }
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      handleSession(nextSession);
     });
 
     return () => {
-      ignore = true;
-      subscription.unsubscribe();
+      isMounted = false;
+      listener.subscription.unsubscribe();
     };
-  }, []);
+  }, [pathname, router]);
 
   useEffect(() => {
     if (!session?.user) {
+      ensuredProfilesRef.current.clear();
+      setProfile(null);
       return;
     }
 
     const userId = session.user.id;
+    const shouldEnsure = !ensuredProfilesRef.current.has(userId);
 
-    if (ensuredProfilesRef.current.has(userId)) {
-      return;
+    if (shouldEnsure) {
+      ensuredProfilesRef.current.add(userId);
     }
 
-    ensuredProfilesRef.current.add(userId);
+    let isMounted = true;
 
-    ensureProfileForUser(session.user).catch((error) => {
-      ensuredProfilesRef.current.delete(userId);
-      console.error("Error ensuring profile", error);
-    });
+    const loadProfile = async () => {
+      try {
+        if (shouldEnsure) {
+          await ensureProfileForUser(session.user);
+        }
+      } catch (error) {
+        if (shouldEnsure) {
+          ensuredProfilesRef.current.delete(userId);
+        }
+        console.error("Error ensuring profile", error);
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("full_name, avatar_url")
+          .eq("id", userId)
+          .maybeSingle();
+
+        if (!isMounted) {
+          return;
+        }
+
+        if (error) {
+          console.error("Failed loading profile", error);
+          setProfile(null);
+          return;
+        }
+
+        setProfile((data as Profile) ?? null);
+      } catch (error) {
+        if (isMounted) {
+          console.error("Unexpected error loading profile", error);
+          setProfile(null);
+        }
+      }
+    };
+
+    void loadProfile();
+
+    return () => {
+      isMounted = false;
+    };
   }, [session]);
 
-  useEffect(() => {
-    if (loading) {
-      return;
-    }
-
-    if (session?.user) {
-      if (pathname === "/login" || pathname === "/signup") {
-        router.replace("/workspace");
-      }
-    }
-  }, [session, loading, pathname, router]);
-
-  return (
-    <AuthContext.Provider value={{ user, session, loading }}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo<AuthContextValue>(
+    () => ({ user: session?.user ?? null, session, loading, profile }),
+    [session, loading, profile]
   );
+
+  if (loading) {
+    return null;
+  }
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export default SupabaseAuthProvider;
 export const useAuth = () => useContext(AuthContext);
-export type { AuthContextType };
+export type { AuthContextValue as AuthContextType, Profile };
 
 async function ensureProfileForUser(user: User) {
   try {
@@ -112,17 +163,12 @@ async function ensureProfileForUser(user: User) {
       .eq("id", user.id)
       .maybeSingle();
 
-    if (error) {
-      if (error.code === "PGRST116") {
-        // no row found, create one below
-      } else {
-        console.error("Failed checking profile existence", error);
-        return;
-      }
+    if (error && error.code !== "PGRST116") {
+      console.error("Failed checking profile existence", error);
+      return;
     }
 
     if (data?.id) {
-      console.log(`[profiles] Existing profile found for ${user.id}`);
       return;
     }
 
@@ -134,8 +180,6 @@ async function ensureProfileForUser(user: User) {
 
     if (insertError) {
       console.error("Failed creating profile", insertError);
-    } else {
-      console.log(`[profiles] Created profile for ${user.id}`);
     }
   } catch (unknownError) {
     console.error("Unexpected error ensuring profile", unknownError);

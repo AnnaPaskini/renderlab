@@ -2,10 +2,12 @@ import "./globals.css";
 import { GeistSans } from "geist/font/sans";
 import { cn } from "@/lib/utils";
 import { ViewTransitions } from "next-view-transitions";
+import { headers } from "next/headers";
 
 import { SupabaseAuthProvider } from "@/components/providers/SupabaseAuthProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { NavBar } from "@/components/navbar";
 
 export function ThemeProvider({
   children,
@@ -21,11 +23,19 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") ?? "";
+  const showNavbar =
+    pathname === "/" ||
+    pathname.startsWith("/pricing") ||
+    pathname.startsWith("/blog") ||
+    pathname.startsWith("/contact");
+
   return (
     <ViewTransitions>
       <html lang="en" suppressHydrationWarning>
@@ -42,6 +52,7 @@ export default function RootLayout({
             defaultTheme="dark"
           >
             <SupabaseAuthProvider>
+              {showNavbar && <NavBar />}
               {children}
               <Toaster />
             </SupabaseAuthProvider>

@@ -2,12 +2,12 @@ export const Z = {
   BASE: 0,
   LOW: 10,
   FLOAT: 20,
-  OVERLAY: 40,   // background blur
-  NAV: 50,       // navbar sits ABOVE overlay
-  DROPDOWN: 60,
-  SIDEBAR: 80,   // Collection Actions panel
-  MODAL: 90,
-  TOAST: 100,
+  OVERLAY: 30,
+  NAV: 20,
+  DROPDOWN: 30,
+  SIDEBAR: 30,
+  MODAL: 40,
+  TOASTER: 50,
 } as const;
 
 
@@ -17,5 +17,5 @@ export const Z_INDEX = {
   modal: Z.MODAL,
   sidebar: Z.SIDEBAR,
   overlay: Z.OVERLAY,
-  toast: Z.TOAST,
+  toast: Z.TOASTER,
 }
