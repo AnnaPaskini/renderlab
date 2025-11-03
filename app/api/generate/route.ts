@@ -1,43 +1,38 @@
-// app/api/generate/route.ts
 import { NextResponse } from "next/server";
 
 /**
- * CREATE генерация без референса.
- * Сейчас — безопасная заглушка: принимает prompt/model и возвращает валидный URL картинки.
- * Позже сюда воткнём реальную интеграцию (Replicate/Flux/etc).
+ * CREATE endpoint without reference image.
+ * Temporary stub that accepts prompt/model and returns a valid image URL.
  */
 export async function POST(req: Request) {
   try {
-    const body = await req.json().catch(() => ({}));
-    const { prompt, model } = body ?? {};
-
-    if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
-      return NextResponse.json(
-        { error: "prompt is required" },
-        { status: 400 }
-      );
+    const contentType = req.headers.get("content-type") || "";
+    if (contentType && !contentType.includes("application/json")) {
+      return NextResponse.json({ error: "content-type must be application/json" }, { status: 415 });
     }
 
-    // Простой «seed» для детерминированного URL (без Node crypto)
-    const seedBase = `${prompt.slice(0, 64)}::${model || "default"}::${Date.now()}`;
+    const body = await req.json().catch(() => ({}));
+    const prompt = typeof body?.prompt === "string" ? body.prompt.trim() : "";
+    const model = typeof body?.model === "string" ? body.model.trim() : "default";
+
+    if (!prompt) return NextResponse.json({ error: "prompt is required" }, { status: 400 });
+    if (prompt.length > 4000) return NextResponse.json({ error: "prompt is too long" }, { status: 413 });
+
+    const seedBase = `${prompt.slice(0, 64)}::${model}::${Date.now()}`;
     const seed = encodeURIComponent(seedBase.replace(/\s+/g, "-"));
+    const imageUrl = `https://picsum.photos/seed/${seed}/1024/768`;
 
-    // Заглушка: валидный URL, чтобы фронт показал превью
-    const generatedUrl = `https://picsum.photos/seed/${seed}/1024/768`;
-
-    console.log("[GENERATE] model:", model || "(default)", " prompt.len:", prompt.length);
-
-    // Отдаём формат, который твой фронт уже понимает
     return NextResponse.json({
-      success: true,
-      result: generatedUrl,   // фронт читает result/publicUrl/url/…
-      meta: { model: model || "default", promptLength: prompt.length },
+      id: `stub-${seed}`,
+      status: "succeeded",
+      output: { imageUrl },
+      meta: { model, promptLength: prompt.length, stub: true },
     });
   } catch (err: any) {
-    console.error("[GENERATE] error:", err);
-    return NextResponse.json(
-      { error: err?.message || "Generate failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: err?.message || "Generate failed" }, { status: 500 });
   }
+}
+
+export async function GET() {
+  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
