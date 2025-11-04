@@ -62,10 +62,10 @@ export function ImageUploadPanel({ image, onImageChange }: ImageUploadPanelProps
   };
 
   return (
-    <div className="flex flex-col gap-4 w-full h-auto max-w-full">
+    <div className="flex flex-col gap-3 w-full h-auto max-w-full">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-neutral-700 dark:text-white">
+        <h2 className="text- font-semibold text-neutral-700 dark:text-white">
           Upload Image
         </h2>
         {image && (
@@ -75,9 +75,9 @@ export function ImageUploadPanel({ image, onImageChange }: ImageUploadPanelProps
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onImageChange(null)}
-            className="flex items-center gap-1.5 text-sm font-medium bg-black/70 hover:bg-black/80 text-white px-3 py-1.5 rounded-lg shadow-md backdrop-blur-sm transition-colors"
+            className="flex items-center gap-1.5 text-sm font-medium bg-black/60 hover:bg-black/80 text-white px-3 py-1.5 rounded-lg shadow-md backdrop-blur-sm transition-colors"
           >
-            <X size={8} strokeWidth={1} />
+            <X size={8} strokeWidth={2} />
             Clear
           </motion.button>
         )}

@@ -25,11 +25,10 @@ export default function WorkspacePage() {
     }
 
     console.log("Model used:", model || "google/nano-banana");
-
     setIsGenerating(true);
 
     try {
-      const response = await fetch("/api/generate/replicate", {
+      const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -39,27 +38,38 @@ export default function WorkspacePage() {
         }),
       });
 
-      let data;
+      const rawBody = await response.text();
 
+      if (!response.ok) {
+        console.error(
+          "Edit request failed:",
+          response.status,
+          response.statusText,
+          rawBody
+        );
+        throw new Error(`Edit failed with status ${response.status}`);
+      }
+
+      let data: any = null;
       try {
-        // безопасный парсинг
-        data = await response.json();
+        data = rawBody ? JSON.parse(rawBody) : null;
       } catch (parseErr) {
-        console.error("Failed to parse JSON:", parseErr);
-        const text = await response.text();
-        console.log("Raw response:", text);
+        console.error("Failed to parse JSON:", rawBody);
         throw new Error("Server returned invalid JSON");
       }
 
-      console.log("Edit response:", data);
+      console.log("API response:", data);
 
-      if (data.success && data.result) {
-        // сервер возвращает result, не imageUrl
-        setPreviews((prev) => [...prev, data.result]);
-        alert("Image edited successfully!");
+      // === главное изменение ===
+      if (data?.status === "succeeded" && data?.output?.imageUrl) {
+        const nextImage = data.output.imageUrl;
+        setPreviews((prev) => [...prev, nextImage]);
+        alert("Image generated successfully!");
       } else {
-        alert("Edit failed: " + (data.error || "Unknown error"));
+        console.error("Unexpected API response:", data);
+        alert("Edit failed: " + (data?.error || "Unknown error"));
       }
+      // =========================
     } catch (error) {
       console.error("Edit error:", error);
       alert("Edit failed - check console for details.");
@@ -83,6 +93,7 @@ export default function WorkspacePage() {
             onPromptChange={setPrompt}
             onGenerate={handleGenerate}
             isGenerating={isGenerating}
+            onPreviewAdd={(url) => setPreviews((prev) => [...prev, url])}
           />
         }
         uploadedImage={uploadedImage}

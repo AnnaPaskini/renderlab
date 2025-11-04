@@ -1,42 +1,37 @@
-// app/api/upload/route.ts
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: Request) {
-  const formData = await req.formData();
-  const file = formData.get("file") as File | null;
+  try {
+    const formData = await req.formData();
+    const file = formData.get("file") as File | null;
 
-  if (!file) {
-    return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
-  }
+    if (!file) {
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    }
 
-  // делаем безопасное имя
-  const safeName = (file.name ?? "image").replace(/\s+/g, "_").toLowerCase();
-  const fileName = `${Date.now()}_${safeName}`;
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_ANON_KEY!
+    );
 
-  // грузим в Storage (bucket renderlab-images)
-  const { error: uploadError } = await supabase
-    .storage
-    .from("renderlab-images")
-    .upload(fileName, file, {
-      upsert: false,
-      contentType: file.type || "image/png",
-      cacheControl: "3600",
+    const fileName = `${Date.now()}_${file.name}`;
+    const { data, error } = await supabase.storage
+      .from("renderlab-images")
+      .upload(fileName, file, { upsert: false });
+
+    if (error) throw error;
+
+    const { data: publicUrl } = supabase.storage
+      .from("renderlab-images")
+      .getPublicUrl(fileName);
+
+    return NextResponse.json({
+      status: "succeeded",
+      output: { publicUrl: publicUrl.publicUrl },
     });
-
-  if (uploadError) {
-    console.error("Upload error:", uploadError);
-    return NextResponse.json({ error: uploadError.message }, { status: 500 });
+  } catch (err: any) {
+    console.error("[UPLOAD] error:", err);
+    return NextResponse.json({ error: err.message || "Upload failed" }, { status: 500 });
   }
-
-  // получаем публичный URL — ВАЖНО: этот вызов синхронный, без await
-  const { data: publicData } = supabase
-    .storage
-    .from("renderlab-images")
-    .getPublicUrl(fileName);
-
-  const publicUrl = publicData.publicUrl;
-
-  // Не пишем в БД до появления auth
-  return NextResponse.json({ url: publicUrl, name: fileName });
 }

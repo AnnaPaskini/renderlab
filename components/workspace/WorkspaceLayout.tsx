@@ -9,7 +9,7 @@ import {
   useEffect,
   useMemo,
 } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { CollectionsPanel } from "./CollectionPanel";
 import { PromptTemplates } from "./PromptTemplates";
 import { Z } from "@/lib/z-layer-guide";
@@ -185,37 +185,50 @@ export function WorkspaceLayout({
                   <div className="h-[20vh] bg-neutral-50 dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 p-4 overflow-hidden">
                     {uploadedImage || previews.length > 0 ? (
                       <div className="flex gap-4 overflow-x-auto h-full">
-                        {[...previews].reverse().map((preview, idx) => (
-                          <div
-                            key={idx}
-                            className="relative flex-shrink-0 w-32 h-full cursor-pointer rounded-lg overflow-hidden group transition-transform hover:scale-105"
-                            onClick={() => setSelectedImage(preview)}
-                          >
-                            <img
-                              src={preview}
-                              alt={`Preview ${previews.length - idx}`}
-                              className="w-full h-full object-cover rounded-lg"
-                            />
-                            <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-                              #{previews.length - idx}
-                            </div>
-                          </div>
-                        ))}
-                        {uploadedImage && (
-                          <div
-                            className="relative flex-shrink-0 w-32 h-full cursor-pointer rounded-lg overflow-hidden group transition-transform hover:scale-105"
-                            onClick={() => setSelectedImage(uploadedImage)}
-                          >
-                            <img
-                              src={uploadedImage}
-                              alt="Uploaded"
-                              className="w-full h-full object-cover rounded-lg"
-                            />
-                            <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
-                              Original
-                            </div>
-                          </div>
-                        )}
+                        <AnimatePresence initial={false}>
+                          {[...previews].reverse().map((preview, idx) => (
+                            <motion.div
+                              key={`${preview}-${idx}`}
+                              layout
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.9 }}
+                              transition={{ duration: 0.3 }}
+                              className="relative flex-shrink-0 w-32 h-full cursor-pointer rounded-lg overflow-hidden group transition-transform hover:scale-105"
+                              onClick={() => setSelectedImage(preview)}
+                            >
+                              <img
+                                src={preview}
+                                alt={`Preview ${previews.length - idx}`}
+                                className="w-full h-full object-cover rounded-lg"
+                              />
+                              <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                                #{previews.length - idx}
+                              </div>
+                            </motion.div>
+                          ))}
+                          {uploadedImage && (
+                            <motion.div
+                              key="uploaded-image"
+                              layout
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.9 }}
+                              transition={{ duration: 0.3 }}
+                              className="relative flex-shrink-0 w-32 h-full cursor-pointer rounded-lg overflow-hidden group transition-transform hover:scale-105"
+                              onClick={() => setSelectedImage(uploadedImage)}
+                            >
+                              <img
+                                src={uploadedImage}
+                                alt="Uploaded"
+                                className="w-full h-full object-cover rounded-lg"
+                              />
+                              <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                                Original
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
                     ) : (
                       <div className="flex items-center justify-center h-full text-sm text-neutral-500 dark:text-neutral-400">

@@ -11,22 +11,22 @@ export async function POST(req: Request) {
       );
     }
 
-    // === Подключаем Replicate ===
     const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
     if (!REPLICATE_API_TOKEN) {
       throw new Error("Missing REPLICATE_API_TOKEN in .env.local");
     }
 
-    console.log("🎨 Starting inpainting via Replicate...");
+    console.log("[EDIT] Creating Replicate prediction with google/nano-banana...");
 
-    // === Запрос к Replicate API ===
-    const response = await fetch("https://api.replicate.com/v1/models/black-forest-labs/flux-inpaint/predictions", {
+    // 1. Создаем задачу генерации
+    const create = await fetch("https://api.replicate.com/v1/predictions", {
       method: "POST",
       headers: {
         Authorization: `Token ${REPLICATE_API_TOKEN}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        version: "google/nano-banana",
         input: {
           image: imageUrl,
           mask: maskUrl,
@@ -35,22 +35,50 @@ export async function POST(req: Request) {
       }),
     });
 
-    const result = await response.json();
+    const prediction = await create.json();
 
-    if (!response.ok) {
-      console.error("❌ Replicate error:", result);
-      return NextResponse.json({ error: result }, { status: 500 });
+    if (!create.ok) {
+      console.error("[EDIT] Replicate creation error:", prediction);
+      return NextResponse.json({ error: prediction }, { status: 500 });
     }
 
-    console.log("✅ Inpaint request sent to Replicate");
+    const getUrl = prediction.urls?.get;
+    if (!getUrl) {
+      throw new Error("No polling URL returned by Replicate");
+    }
 
+    // 2. Polling — ждем, пока задача завершится
+    let result = prediction;
+    const maxAttempts = 50; // максимум 50 проверок (50 секунд)
+    let attempt = 0;
+
+    while (
+      result.status !== "succeeded" &&
+      result.status !== "failed" &&
+      attempt < maxAttempts
+    ) {
+      await new Promise((r) => setTimeout(r, 1000));
+      const poll = await fetch(getUrl, {
+        headers: { Authorization: `Token ${REPLICATE_API_TOKEN}` },
+      });
+      result = await poll.json();
+      attempt++;
+    }
+
+    if (result.status !== "succeeded") {
+      throw new Error(`Generation failed or timed out: ${result.status}`);
+    }
+
+    console.log("[EDIT] Replicate generation succeeded");
+
+    // 3. Возвращаем финальный результат
     return NextResponse.json({
       success: true,
-      replicateUrl: result.urls?.get,
+      output: result.output?.[0] || null,
       status: result.status,
     });
   } catch (error: any) {
-    console.error("🔥 Edit route error:", error.message);
+    console.error("[EDIT] Route error:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

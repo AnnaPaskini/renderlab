@@ -23,6 +23,7 @@ type ProgressPayload = {
   status: "ok" | "error";
   url?: string | null;
   error?: string;
+  httpStatus?: number;
 };
 
 type StartPayload = {
@@ -67,7 +68,16 @@ function normalizeTemplate(template: TemplateInput, fallback: number) {
     ? directImage[0] ?? null
     : directImage ?? null;
 
-  return { id, prompt, imageUrl };
+  const modelCandidates = [
+    template.model,
+    template.aiModel,
+    template.formData?.aiModel,
+  ];
+  const model = modelCandidates.find(
+    (value) => typeof value === "string" && value.trim().length > 0,
+  )?.trim();
+
+  return { id, prompt, imageUrl, model };
 }
 
 function buildErrorEvent(
@@ -104,6 +114,7 @@ export async function POST(req: Request) {
     }
 
     const limit = pLimit(5);
+    const hasReplicateToken = Boolean(process.env.REPLICATE_API_TOKEN);
 
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
@@ -115,6 +126,30 @@ export async function POST(req: Request) {
           collectionId,
           total: templates.length,
         });
+
+        if (!hasReplicateToken) {
+          templates.forEach((template, index) => {
+            const payload = buildErrorEvent(
+              index,
+              template,
+              collectionId,
+              "Missing REPLICATE_API_TOKEN environment variable.",
+            );
+            payload.httpStatus = 401;
+            enqueue(controller, payload);
+          });
+
+          enqueue(controller, {
+            type: "done",
+            collectionId,
+            completed: templates.length,
+            succeeded: 0,
+            failed: templates.length,
+          });
+
+          controller.close();
+          return;
+        }
 
         const tasks = templates.map((template, index) =>
           limit(async () => {
@@ -134,6 +169,7 @@ export async function POST(req: Request) {
                 id: normalized.id,
                 prompt: normalized.prompt,
                 imageUrl: normalized.imageUrl ?? undefined,
+                model: normalized.model,
               });
 
               if (result.status === "ok") {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { toast } from "react-hot-toast";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,7 @@ export interface PromptBuilderPanelProps {
   isGenerating?: boolean;
   activeTab?: "builder" | "custom";
   onTabChange?: (tab: "builder" | "custom") => void;
+  onPreviewAdd?: (url: string) => void;
 }
 
 type TemplateRecord = {
@@ -40,12 +41,14 @@ type TemplateRecord = {
 export function PromptBuilderPanel({
   onPromptChange,
   onGenerate,
-  isGenerating = false,
-  activeTab: controlledActiveTab,
+  isGenerating: controlledIsGenerating,
+  activeTab,
   onTabChange,
+  onPreviewAdd,
 }: PromptBuilderPanelProps) {
+  const [internalIsGenerating, setInternalIsGenerating] = useState(false);
   const [internalActiveTab, setInternalActiveTab] = useState<"builder" | "custom">(
-    controlledActiveTab ?? "builder"
+    activeTab ?? "builder"
   );
   const [aiModel, setAiModel] = useState("google/nano-banana");
   const [style, setStyle] = useState("");
@@ -53,12 +56,27 @@ export function PromptBuilderPanel({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [templateName, setTemplateName] = useState("");
 
+  const shouldUseInternalGenerating = controlledIsGenerating === undefined;
+  const isGenerating = controlledIsGenerating ?? internalIsGenerating;
+
+  const setGeneratingState = (value: boolean) => {
+    if (shouldUseInternalGenerating) {
+      setInternalIsGenerating(value);
+    }
+  };
+
   // Collection and template state
   const { collections } = useCollections();
   const [templates, setTemplates] = useState<any[]>([]);
   const [activeCollectionId, setActiveCollectionId] = useState<string | null>(null);
   const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
   const [activeMode, setActiveMode] = useState<"template" | "collection">("template");
+  const [selectedCollection, setSelectedCollection] = useState<any>(null);
+  const collectionPreviewSetRef = useRef<Set<string>>(new Set());
+  const getInitialProgressState = () => ({ total: 0, succeeded: 0, failed: 0, active: false });
+  const [collectionProgress, setCollectionProgress] = useState(getInitialProgressState);
+  const [isCollectionRun, setIsCollectionRun] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const resolveString = (...values: unknown[]) => {
     for (const value of values) {
@@ -145,14 +163,34 @@ export function PromptBuilderPanel({
   }, [activeTemplateId, templateOptions]);
 
   useEffect(() => {
-    if (activeCollectionId && !collections.some((collection) => collection.id === activeCollectionId)) {
-      setActiveCollectionId(null);
+    if (!activeCollectionId) {
+      setSelectedCollection(null);
+      return;
     }
-  }, [activeCollectionId, collections]);
 
-  const activeTab = controlledActiveTab ?? internalActiveTab;
-  const isTabControlled =
-    controlledActiveTab !== undefined || typeof onTabChange === "function";
+    const match = collections.find((collection) => collection.id === activeCollectionId);
+
+    if (!match) {
+      setActiveCollectionId(null);
+      setSelectedCollection(null);
+      return;
+    }
+
+    if (selectedCollection?.id !== match.id) {
+      setSelectedCollection(match);
+    }
+  }, [activeCollectionId, collections, selectedCollection?.id]);
+
+  const currentTab = activeTab ?? internalActiveTab;
+  const isTabControlled = typeof activeTab !== "undefined";
+  const hasCollectionSelection = Boolean(activeCollectionId || selectedCollection);
+  const processedCount = collectionProgress.succeeded + collectionProgress.failed;
+  const showCollectionProgress = isCollectionRun && collectionProgress.active;
+  const progressMessage = showCollectionProgress
+    ? `Processing ${processedCount} / ${collectionProgress.total}…`
+    : isCollectionRun
+      ? "Preparing collection..."
+      : "Processing...";
 
   const handleTabChange = (tab: "builder" | "custom") => {
     if (!isTabControlled) {
@@ -176,7 +214,7 @@ export function PromptBuilderPanel({
 
   // Reload templates when returning to builder tab or when custom tab is active
   useEffect(() => {
-    if (activeTab === "builder" || activeTab === "custom") {
+    if (currentTab === "builder" || currentTab === "custom") {
       const savedTemplates = JSON.parse(
         localStorage.getItem("RenderAI_customTemplates") || "[]"
       );
@@ -186,13 +224,36 @@ export function PromptBuilderPanel({
       }));
       setTemplates(templatesWithIds);
     }
-  }, [activeTab]);
+  }, [currentTab]);
+
+  useEffect(() => {
+    if (currentTab === "builder") {
+      setSelectedCollection(null);
+      setActiveCollectionId(null);
+      setDetails("");
+      collectionPreviewSetRef.current.clear();
+      setCollectionProgress(getInitialProgressState());
+      setIsCollectionRun(false);
+      abortControllerRef.current?.abort();
+    }
+  }, [currentTab]);
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
 
   const handleModeChange = (value: string) => {
     if (value === "template" || value === "collection") {
       setActiveMode(value);
       if (value === "template") {
         setActiveCollectionId(null);
+        setSelectedCollection(null);
+        collectionPreviewSetRef.current.clear();
+        setCollectionProgress(getInitialProgressState());
+        setIsCollectionRun(false);
+        abortControllerRef.current?.abort();
       } else {
         setActiveTemplateId(null);
       }
@@ -202,6 +263,10 @@ export function PromptBuilderPanel({
   // Handler for collection change
   const handleCollectionChange = (id: string) => {
     setActiveCollectionId(id);
+    const collection = collections.find((item) => item.id === id) ?? null;
+    setSelectedCollection(collection);
+    collectionPreviewSetRef.current.clear();
+    setCollectionProgress(getInitialProgressState());
   };
 
   // Handler for template change
@@ -239,10 +304,10 @@ export function PromptBuilderPanel({
   };
 
   useEffect(() => {
-    if (controlledActiveTab) {
-      setInternalActiveTab(controlledActiveTab);
+    if (typeof activeTab !== "undefined") {
+      setInternalActiveTab(activeTab);
     }
-  }, [controlledActiveTab]);
+  }, [activeTab]);
 
   useEffect(() => {
     const loadFromStorage = () => {
@@ -278,7 +343,7 @@ export function PromptBuilderPanel({
   }, []);
 
   useEffect(() => {
-    if (onPromptChange && details) {
+    if (onPromptChange) {
       onPromptChange(details);
     }
   }, [details, onPromptChange]);
@@ -329,72 +394,317 @@ export function PromptBuilderPanel({
     }, 500);
   };
 
-  const handleGenerateCollection = async () => {
-    console.log("Starting collection generation...");
-
-    const selectedCollection = collections.find((collection) => collection.id === activeCollectionId);
-
-    if (!selectedCollection) {
-      console.error("No collection selected!");
-      alert("Please select a collection before generating.");
+  const handleGenerateTemplate = async () => {
+    const prompt = details.trim();
+    if (!prompt) {
+      toast.error("Please enter a prompt or load a template first.");
       return;
     }
 
-    console.log("Payload sent to API:", {
-      collectionId: selectedCollection.id,
-      templates: selectedCollection.templates,
+    console.log("[stream] generating template", {
+      tab: currentTab,
+      model: aiModel,
     });
 
     try {
+      setGeneratingState(true);
+      if (onGenerate) {
+        await onGenerate(aiModel);
+      }
+    } catch (error) {
+      console.error("Template generation failed", error);
+      toast.error("Template generation failed. Check console for details.");
+    } finally {
+      setGeneratingState(false);
+    }
+  };
+
+  const handleCancelCollection = () => {
+    abortControllerRef.current?.abort();
+  };
+
+  const handleGenerateCollection = async () => {
+    const collection =
+      selectedCollection ||
+      (activeCollectionId
+        ? collections.find((c) => c.id === activeCollectionId)
+        : null);
+
+    if (!collection) {
+      toast.error("No collection selected.");
+      return;
+    }
+
+    const templatesPayload = Array.isArray(collection.templates)
+      ? collection.templates
+      : [];
+
+    if (!templatesPayload.length) {
+      toast.error("Selected collection has no templates.");
+      return;
+    }
+
+    abortControllerRef.current?.abort();
+
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
+    let totalItems = templatesPayload.length;
+    let succeededCount = 0;
+    let failedCount = 0;
+    let sawAuthError = false;
+    let sawErrorToast = false;
+
+    try {
+      setGeneratingState(true);
+      setIsCollectionRun(true);
+      setCollectionProgress({
+        total: totalItems,
+        succeeded: 0,
+        failed: 0,
+        active: true,
+      });
+      collectionPreviewSetRef.current.clear();
+
+      console.log("[stream] starting collection generation", {
+        collectionId: collection.id,
+        total: totalItems,
+      });
+
       const response = await fetch("/api/generate/collection", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          collectionId: selectedCollection.id,
-          templates: selectedCollection.templates,
+          collectionId: collection.id,
+          templates: templatesPayload,
         }),
+        signal: abortController.signal,
       });
 
+      const contentType = response.headers.get("content-type") ?? "unknown";
+      console.log("Collection response status:", response.status, "Content-Type:", contentType);
+
       if (!response.ok) {
-        console.error("Failed to generate collection", response.status, response.statusText);
-        alert("Failed to generate the collection. Please try again.");
+        toast.error(`Collection generation failed: ${response.status}`);
         return;
       }
 
-      if (!response.body) {
-        console.error("No response body received from collection generation");
-        return;
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
       let buffer = "";
+      let finalEvent: Record<string, any> | null = null;
 
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
-        for (const line of lines) {
-          if (!line.trim()) continue;
+      if (!reader) {
+        console.error("Collection response body did not provide a reader");
+        toast.error("Server did not provide a readable stream.");
+        return;
+      }
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+
+          if (done) {
+            buffer += decoder.decode();
+            break;
+          }
+
+          if (!value) {
+            continue;
+          }
+
+          console.log(`[stream] chunk: ${value.length} bytes`);
+          buffer += decoder.decode(value, { stream: true });
+
+          const parts = buffer.split("\n");
+
+          for (let i = 0; i < parts.length - 1; i++) {
+            const line = parts[i].trim();
+            if (!line) continue;
+
+            try {
+              const event = JSON.parse(line);
+              console.log("[stream] event:", event);
+
+              if (event.type === "start") {
+                totalItems = typeof event.total === "number" ? event.total : totalItems;
+                succeededCount = 0;
+                failedCount = 0;
+                setCollectionProgress({
+                  total: totalItems,
+                  succeeded: 0,
+                  failed: 0,
+                  active: true,
+                });
+                collectionPreviewSetRef.current.clear();
+                continue;
+              }
+
+              if (event.type === "progress") {
+                if (event.status === "ok") {
+                  succeededCount += 1;
+                  setCollectionProgress((prev) => ({
+                    ...prev,
+                    succeeded: prev.succeeded + 1,
+                  }));
+
+                  if (typeof event.url === "string" && event.url) {
+                    if (!collectionPreviewSetRef.current.has(event.url)) {
+                      collectionPreviewSetRef.current.add(event.url);
+                      onPreviewAdd?.(event.url);
+                    }
+                  }
+                } else if (event.status === "error") {
+                  failedCount += 1;
+                  setCollectionProgress((prev) => ({
+                    ...prev,
+                    failed: prev.failed + 1,
+                  }));
+
+                  if (!sawAuthError && event.httpStatus === 401) {
+                    sawAuthError = true;
+                    toast.error("Missing Replicate API token. Please configure REPLICATE_API_TOKEN.");
+                  } else if (!sawErrorToast) {
+                    sawErrorToast = true;
+                    toast.error("One or more templates failed to generate.");
+                  }
+
+                  if (event.error) {
+                    console.warn("Collection item failed:", event.error);
+                  }
+                }
+
+                if (typeof event.index === "number") {
+                  console.log(`[stream] progress: item ${event.index + 1} of ${totalItems}`);
+                }
+              }
+
+              if (event.type === "done") {
+                finalEvent = event;
+              }
+            } catch (parseError) {
+              console.warn("Skipping malformed line:", line);
+            }
+          }
+
+          buffer = parts[parts.length - 1];
+        }
+
+        const trailing = buffer.trim();
+        if (trailing) {
           try {
-            const event = JSON.parse(line);
-            console.log("Event:", event);
-          } catch (error) {
-            console.error("Failed to parse event", error, line);
+            const event = JSON.parse(trailing);
+            console.log("[stream] event (trailing):", event);
+
+            if (event.type === "start") {
+              totalItems = typeof event.total === "number" ? event.total : totalItems;
+              succeededCount = 0;
+              failedCount = 0;
+              setCollectionProgress({
+                total: totalItems,
+                succeeded: 0,
+                failed: 0,
+                active: true,
+              });
+              collectionPreviewSetRef.current.clear();
+            } else if (event.type === "progress") {
+              if (event.status === "ok") {
+                succeededCount += 1;
+                setCollectionProgress((prev) => ({
+                  ...prev,
+                  succeeded: prev.succeeded + 1,
+                }));
+                if (typeof event.url === "string" && event.url) {
+                  if (!collectionPreviewSetRef.current.has(event.url)) {
+                    collectionPreviewSetRef.current.add(event.url);
+                    onPreviewAdd?.(event.url);
+                  }
+                }
+              } else if (event.status === "error") {
+                failedCount += 1;
+                setCollectionProgress((prev) => ({
+                  ...prev,
+                  failed: prev.failed + 1,
+                }));
+                if (!sawAuthError && event.httpStatus === 401) {
+                  sawAuthError = true;
+                  toast.error("Missing Replicate API token. Please configure REPLICATE_API_TOKEN.");
+                } else if (!sawErrorToast) {
+                  sawErrorToast = true;
+                  toast.error("One or more templates failed to generate.");
+                }
+                if (event.error) {
+                  console.warn("Collection item failed:", event.error);
+                }
+              }
+            } else if (event.type === "done") {
+              finalEvent = event;
+            }
+          } catch (parseError) {
+            console.warn("Skipping malformed trailing line:", trailing);
           }
         }
+      } catch (streamError) {
+        if (streamError instanceof DOMException && streamError.name === "AbortError") {
+          console.log("Collection stream aborted by user");
+          toast("Generation canceled by user.", { icon: "⚠️" });
+        } else {
+          console.error("Stream reading failed:", streamError);
+          toast.error("Collection generation failed during stream read.");
+        }
+        return;
+      } finally {
+        reader.releaseLock();
+      }
+
+      if (finalEvent) {
+        const succeeded =
+          typeof finalEvent.succeeded === "number"
+            ? finalEvent.succeeded
+            : typeof finalEvent.completed === "number"
+              ? finalEvent.completed
+              : succeededCount;
+        const failed =
+          typeof finalEvent.failed === "number"
+            ? finalEvent.failed
+            : typeof finalEvent.errors === "number"
+              ? finalEvent.errors
+              : failedCount;
+
+        console.log(`[stream] done: ${succeeded} succeeded, ${failed} failed`);
+
+        if (failed > 0) {
+          toast(`Collection completed with ${failed} failure${failed === 1 ? "" : "s"}.`, {
+            icon: "⚠️",
+          });
+        } else {
+          toast.success(`✅ Collection completed: ${succeeded} succeeded, 0 failed.`);
+        }
+      } else {
+        console.log("Collection stream completed without a terminal event.");
+        toast("Collection generation finalized.", { icon: "ℹ️" });
       }
     } catch (error) {
-      console.error("Error during collection generation", error);
+      if (error instanceof DOMException && error.name === "AbortError") {
+        console.log("Collection fetch aborted by user");
+        toast("Generation canceled by user.", { icon: "⚠️" });
+      } else {
+        console.error("Collection generation failed", error);
+        toast.error("Collection generation failed. Check console for details.");
+      }
+    } finally {
+      abortControllerRef.current = null;
+      collectionPreviewSetRef.current.clear();
+      setCollectionProgress(getInitialProgressState());
+      setIsCollectionRun(false);
+      setGeneratingState(false);
     }
   };
 
   return (
     <section className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 shadow-sm flex flex-col gap-4 h-full overflow-auto">
       <div className="flex-1 overflow-y-auto">
-        {activeTab === "builder" && (
+  {currentTab === "builder" && (
           <motion.div
             key="builder"
             initial={{ opacity: 0, y: 8 }}
@@ -549,55 +859,75 @@ export function PromptBuilderPanel({
                 />
               </div>
 
-              <div className="flex flex-col gap-2 mt-4 transition-all duration-300">
+              <div className="flex flex-col gap-3 mt-4 transition-all duration-300">
                 <div className="flex w-full gap-3">
                   <Button
                     variant="outline"
-                    className="w-1/2 border border-neutral-300 bg-white text-neutral-900 font-medium hover:bg-neutral-100 transition-all rounded-xl"
+                    className="flex-1 border border-neutral-300 bg-white text-neutral-900 font-medium hover:bg-neutral-100 transition-all rounded-xl"
                     onClick={() => setIsDialogOpen(true)}
                   >
                     Save as Template
                   </Button>
-                  <div className="w-1/2">
-                    <AnimatePresence mode="wait" initial={false}>
-                      <motion.div
-                        key={activeCollectionId ? "collection-generate" : "template-generate"}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <Button
-                          className={cn(
-                            "w-full bg-gradient-to-r from-neutral-900 to-violet-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all rounded-xl",
-                            isGenerating &&
-                              "from-neutral-500 to-neutral-500 text-neutral-200 hover:shadow-lg",
-                          )}
-                          onClick={() =>
-                            activeCollectionId
-                              ? handleGenerateCollection()
-                              : onGenerate?.(aiModel)
-                          }
-                          disabled={isGenerating}
-                        >
-                          {isGenerating
-                            ? activeCollectionId
-                              ? "Generating Collection..."
-                              : "Generating..."
-                            : activeCollectionId
-                              ? "Generate Collection"
-                              : "Generate"}
-                        </Button>
-                      </motion.div>
-                    </AnimatePresence>
-                  </div>
+                  {isCollectionRun && (
+                    <Button
+                      variant="outline"
+                      className="flex-1 border border-amber-400 bg-amber-50 text-amber-700 font-medium hover:bg-amber-100 transition-all rounded-xl dark:border-amber-500 dark:bg-amber-500/10 dark:text-amber-200"
+                      onClick={handleCancelCollection}
+                    >
+                      Cancel
+                    </Button>
+                  )}
                 </div>
+
+                <AnimatePresence>
+                  {(isGenerating || isCollectionRun) && (
+                    <motion.div
+                      key="collection-progress"
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.25 }}
+                      className="text-sm text-muted-foreground flex items-center gap-2"
+                    >
+                      <span className="inline-flex h-2 w-2 flex-shrink-0 rounded-full bg-gradient-to-r from-violet-500 to-neutral-900 animate-pulse" />
+                      <span>{progressMessage}</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div
+                    key={hasCollectionSelection ? "collection-generate" : "template-generate"}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Button
+                      className={cn(
+                        "w-full bg-gradient-to-r from-neutral-900 to-violet-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all rounded-xl",
+                        (isGenerating || isCollectionRun) &&
+                          "from-neutral-500 to-neutral-500 text-neutral-200 hover:shadow-lg",
+                      )}
+                      onClick={hasCollectionSelection ? handleGenerateCollection : handleGenerateTemplate}
+                      disabled={isGenerating || isCollectionRun}
+                    >
+                      {hasCollectionSelection
+                        ? isCollectionRun
+                          ? "Generating Collection..."
+                          : "Generate Collection"
+                        : isGenerating
+                          ? "Generating..."
+                          : "Generate"}
+                    </Button>
+                  </motion.div>
+                </AnimatePresence>
               </div>
             </div>
           </motion.div>
         )}
 
-        {activeTab === "custom" && (
+  {currentTab === "custom" && (
           <motion.div
             key="custom"
             initial={{ opacity: 0, y: 8 }}

@@ -1,32 +1,55 @@
-import type { Metadata } from "next";
-import "../globals.css";
-import { GeistSans } from "geist/font/sans";
-import { NavBar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
-import { cn } from "@/lib/utils";
+import { NextResponse } from "next/server";
 
-export const metadata: Metadata = {
-  title: "RenderLab",
-  description:
-    "RenderLab — AI workspace and marketing platform for architects. Generate, edit, and visualize ideas instantly.",
-  openGraph: {
-    images: ["https://ai-saas-template-aceternity.vercel.app/banner.png"],
-  },
-};
+export async function POST(req: Request) {
+  try {
+    const { imageUrl, maskUrl, prompt } = await req.json();
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <div
-      className={cn(
-        GeistSans.className,
-        "bg-neutral-950 text-white overflow-x-hidden"
-      )}
-    >
-      <NavBar />
-      <main className="overflow-hidden">{children}</main>
-      <Footer />
-    </div>
-  );
+    if (!imageUrl || !maskUrl) {
+      return NextResponse.json(
+        { error: "Missing image or mask" },
+        { status: 400 }
+      );
+    }
+
+    const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
+    if (!REPLICATE_API_TOKEN) {
+      throw new Error("Missing REPLICATE_API_TOKEN in .env.local");
+    }
+
+    console.log("[EDIT] Sending inpaint request via google/nano-banana...");
+
+    const response = await fetch("https://api.replicate.com/v1/predictions", {
+      method: "POST",
+      headers: {
+        Authorization: `Token ${REPLICATE_API_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        version: "google/nano-banana", // название модели
+        input: {
+          image: imageUrl,
+          mask: maskUrl,
+          prompt: prompt || "restore and blend seamlessly",
+        },
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error("[EDIT] Replicate error:", result);
+      return NextResponse.json({ error: result }, { status: 500 });
+    }
+
+    console.log("[EDIT] Request accepted by Replicate");
+
+    return NextResponse.json({
+      success: true,
+      replicateUrl: result.urls?.get,
+      status: result.status,
+    });
+  } catch (error: any) {
+    console.error("[EDIT] Route error:", error.message);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 }
