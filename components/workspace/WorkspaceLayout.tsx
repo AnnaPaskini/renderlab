@@ -13,7 +13,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CollectionsPanel } from "./CollectionPanel";
 import { PromptTemplates } from "./PromptTemplates";
 import { Z } from "@/lib/z-layer-guide";
-import { Toaster } from "react-hot-toast";
+import { Toaster, ToastBar } from "react-hot-toast";
 import { useAuth } from "@/components/providers/SupabaseAuthProvider";
 import UserMenu from "@/components/navbar/UserMenu";
 
@@ -83,6 +83,46 @@ export function WorkspaceLayout({
 
   return (
     <main className="relative z-0 flex min-h-screen w-full flex-col overflow-hidden bg-background text-foreground">
+      <Toaster
+        position="top-right"
+        gutter={12}
+        containerStyle={{
+          position: "fixed",
+          top: 24,
+          right: 24,
+          zIndex: Z.TOASTER,
+          pointerEvents: "none",
+        }}
+        toastOptions={{
+          duration: 2200,
+        }}
+      >
+        {(toast) => (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+          >
+            <ToastBar
+              toast={toast}
+              style={{
+                background: "transparent",
+                boxShadow: "none",
+                padding: 0,
+                pointerEvents: "auto",
+              }}
+            >
+              {({ icon, message }) => (
+                <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-neutral-950/80 px-3 py-2 text-sm font-medium text-white shadow-lg shadow-black/30 backdrop-blur-sm">
+                  {icon}
+                  <span className="leading-tight">{message}</span>
+                </div>
+              )}
+            </ToastBar>
+          </motion.div>
+        )}
+      </Toaster>
       <div className="relative z-20 flex w-full items-center justify-between border-b border-neutral-200/70 bg-gradient-to-r from-white/95 via-white/85 to-white/70 px-4 py-3 backdrop-blur-sm shadow-sm dark:border-neutral-800/70 dark:from-neutral-950/95 dark:via-neutral-950/90 dark:to-neutral-950/80 md:px-8">
         <h1 className="text-sm font-medium text-neutral-600 dark:text-neutral-200 md:text-base">
           Hey, {greetingName} — keep crafting!
@@ -159,26 +199,6 @@ export function WorkspaceLayout({
               <div className="flex flex-col gap-6">
                 <div className="relative bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 md:p-8 overflow-auto shadow-sm hover:shadow-md transition-shadow">
                   {leftPanel}
-                  <div className={`pointer-events-none absolute inset-0 z-[${Z.TOASTER}]`}>
-                    <Toaster
-                      position="bottom-right"
-                      reverseOrder={false}
-                      gutter={8}
-                      containerStyle={{ position: "absolute" }}
-                      toastOptions={{
-                        duration: 1800,
-                        className:
-                          "pointer-events-auto flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium shadow-lg",
-                        style: {
-                          backgroundColor: "rgba(var(--background-end-rgb), 0.92)",
-                          color: "rgb(var(--foreground-rgb))",
-                          border: "1px solid rgba(var(--foreground-rgb), 0.12)",
-                          boxShadow: "0 16px 32px rgba(15, 15, 35, 0.18)",
-                          backdropFilter: "blur(8px)",
-                        },
-                      }}
-                    />
-                  </div>
                 </div>
                 <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 md:p-8 overflow-auto shadow-sm hover:shadow-md transition-shadow">
                   <h3 className="text-lg font-semibold mb-4">Images History</h3>
@@ -247,26 +267,6 @@ export function WorkspaceLayout({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
               <div className="relative bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 md:p-8 overflow-auto shadow-sm hover:shadow-md transition-shadow">
                 {leftPanel}
-                <div className={`pointer-events-none absolute inset-0 z-[${Z.TOASTER}]`}>
-                  <Toaster
-                    position="bottom-right"
-                    reverseOrder={false}
-                    gutter={8}
-                    containerStyle={{ position: "absolute" }}
-                    toastOptions={{
-                      duration: 1800,
-                      className:
-                        "pointer-events-auto flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium shadow-lg",
-                      style: {
-                        backgroundColor: "rgba(var(--background-end-rgb), 0.92)",
-                        color: "rgb(var(--foreground-rgb))",
-                        border: "1px solid rgba(var(--foreground-rgb), 0.12)",
-                        boxShadow: "0 16px 32px rgba(15, 15, 35, 0.18)",
-                        backdropFilter: "blur(8px)",
-                      },
-                    }}
-                  />
-                </div>
               </div>
               <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 overflow-auto shadow-sm hover:shadow-md transition-shadow">
                 <PromptTemplates activeTab={activeTab} setActiveTab={setActiveTab} />

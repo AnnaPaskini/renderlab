@@ -9,7 +9,7 @@ type TemplateInput = {
   templateId?: string;
   prompt?: string;
   imageUrl?: string | string[] | null;
-  image?: string | null;
+  image?: string | string[] | null;
   image_url?: string | null;
   details?: string;
   [key: string]: any;
@@ -54,7 +54,11 @@ function resolveTemplateId(template: TemplateInput, fallback: number) {
   return typeof value === "string" ? value : String(value);
 }
 
-function normalizeTemplate(template: TemplateInput, fallback: number) {
+function normalizeTemplate(
+  template: TemplateInput,
+  fallback: number,
+  baseImage: string | null,
+) {
   const id = resolveTemplateId(template, fallback);
   const prompt =
     typeof template.prompt === "string" && template.prompt.trim()
@@ -63,10 +67,33 @@ function normalizeTemplate(template: TemplateInput, fallback: number) {
         ? template.details
         : "";
 
-  const directImage = template.imageUrl ?? template.image ?? template.image_url;
-  const imageUrl = Array.isArray(directImage)
-    ? directImage[0] ?? null
-    : directImage ?? null;
+  const imageCandidates = [template.image, template.imageUrl, template.image_url];
+  let imageUrl: string | null = null;
+
+  for (const candidate of imageCandidates) {
+    if (typeof candidate === "string" && candidate.trim().length > 0) {
+      imageUrl = candidate.trim();
+      break;
+    }
+
+    if (Array.isArray(candidate)) {
+      const firstValid = candidate.find((value: unknown) => {
+        if (typeof value !== "string") {
+          return false;
+        }
+        return value.trim().length > 0;
+      });
+
+      if (firstValid && typeof firstValid === "string") {
+        imageUrl = firstValid.trim();
+        break;
+      }
+    }
+  }
+
+  if (!imageUrl && baseImage) {
+    imageUrl = baseImage;
+  }
 
   const modelCandidates = [
     template.model,
@@ -77,7 +104,7 @@ function normalizeTemplate(template: TemplateInput, fallback: number) {
     (value) => typeof value === "string" && value.trim().length > 0,
   )?.trim();
 
-  return { id, prompt, imageUrl, model };
+  return { id, prompt, imageUrl, model, image: imageUrl };
 }
 
 function buildErrorEvent(
@@ -105,6 +132,10 @@ export async function POST(req: Request) {
     const templates: TemplateInput[] = Array.isArray(body?.templates)
       ? body.templates
       : [];
+    const baseImage: string | null =
+      typeof body?.baseImage === "string" && body.baseImage.trim().length > 0
+        ? body.baseImage.trim()
+        : null;
 
     if (!templates.length) {
       return NextResponse.json(
@@ -153,7 +184,7 @@ export async function POST(req: Request) {
 
         const tasks = templates.map((template, index) =>
           limit(async () => {
-            const normalized = normalizeTemplate(template, index);
+            const normalized = normalizeTemplate(template, index, baseImage);
 
             if (!normalized.prompt) {
               failed += 1;
@@ -169,6 +200,7 @@ export async function POST(req: Request) {
                 id: normalized.id,
                 prompt: normalized.prompt,
                 imageUrl: normalized.imageUrl ?? undefined,
+                image: normalized.image ?? undefined,
                 model: normalized.model,
               });
 

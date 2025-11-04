@@ -1,46 +1,46 @@
 import { NextResponse } from "next/server";
+import { generateSingle } from "@/lib/generateSingle";
 
-/**
- * CREATE endpoint without reference image.
- * Temporary stub that accepts prompt/model and returns a valid image URL.
- */
 export async function POST(req: Request) {
   try {
-    const contentType = req.headers.get("content-type") || "";
-    if (contentType && !contentType.includes("application/json")) {
-      return NextResponse.json(
-        { error: "content-type must be application/json" },
-        { status: 415 }
-      );
+    const body = await req.json().catch(() => ({}));
+
+    const prompt = typeof body?.prompt === "string" ? body.prompt.trim() : "";
+    const model = typeof body?.model === "string" ? body.model.trim() : null;
+    const baseImage =
+      typeof body?.baseImage === "string" && body.baseImage.trim().length > 0
+        ? body.baseImage.trim()
+        : undefined;
+
+    if (!prompt) {
+      return NextResponse.json({ error: "prompt is required" }, { status: 400 });
     }
 
-    const body = await req.json().catch(() => ({}));
-    const prompt = typeof body?.prompt === "string" ? body.prompt.trim() : "";
-    const model = typeof body?.model === "string" ? body.model.trim() : "default";
-
-    if (!prompt)
-      return NextResponse.json({ error: "prompt is required" }, { status: 400 });
-    if (prompt.length > 4000)
-      return NextResponse.json({ error: "prompt is too long" }, { status: 413 });
-
-    const seedBase = `${prompt.slice(0, 64)}::${model}::${Date.now()}`;
-    const seed = encodeURIComponent(seedBase.replace(/\s+/g, "-"));
-
-    // 👇 добавляем анти-кеш параметр
-    const imageUrl = `https://picsum.photos/seed/${seed}/1024/768?random=${Date.now()}`;
-
-    const timestamp = new Date().toISOString();
-
-    return NextResponse.json({
-      id: `stub-${seed}`,
-      status: "succeeded",
-      output: { imageUrl },
-      meta: { model, promptLength: prompt.length, generatedAt: timestamp },
+    const result = await generateSingle({
+      prompt,
+      model,
+      image: baseImage,
+      imageUrl: baseImage,
     });
-  } catch (err: any) {
+
+    if (result.status === "ok" && result.url) {
+      return NextResponse.json({
+        status: "succeeded",
+        output: { imageUrl: result.url },
+        templateId: result.templateId,
+      });
+    }
+
+    const message = result.message || "Generation failed";
+    const statusCode =
+      message.includes("REPLICATE_API_TOKEN") || message.includes("token") ? 401 : 400;
+
+    return NextResponse.json({ error: message }, { status: statusCode });
+  } catch (error: any) {
+    console.error("[api/generate]", error);
     return NextResponse.json(
-      { error: err?.message || "Generate failed" },
-      { status: 500 }
+      { error: error?.message || "Generate failed" },
+      { status: 500 },
     );
   }
 }

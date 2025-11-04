@@ -34,7 +34,7 @@ export default function WorkspacePage() {
         body: JSON.stringify({
           prompt,
           model: model || "google/nano-banana",
-          imageUrl: uploadedImage,
+          baseImage: uploadedImage,
         }),
       });
 
@@ -94,6 +94,7 @@ export default function WorkspacePage() {
             onGenerate={handleGenerate}
             isGenerating={isGenerating}
             onPreviewAdd={(url) => setPreviews((prev) => [...prev, url])}
+            uploadedImage={uploadedImage}
           />
         }
         uploadedImage={uploadedImage}

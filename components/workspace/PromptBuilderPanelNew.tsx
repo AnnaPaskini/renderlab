@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ export interface PromptBuilderPanelProps {
   activeTab?: "builder" | "custom";
   onTabChange?: (tab: "builder" | "custom") => void;
   onPreviewAdd?: (url: string) => void;
+  uploadedImage?: string | null;
 }
 
 type TemplateRecord = {
@@ -38,6 +39,8 @@ type TemplateRecord = {
   templateName: string;
 };
 
+const DEFAULT_AI_MODEL = "google/nano-banana";
+
 export function PromptBuilderPanel({
   onPromptChange,
   onGenerate,
@@ -45,12 +48,13 @@ export function PromptBuilderPanel({
   activeTab,
   onTabChange,
   onPreviewAdd,
+  uploadedImage,
 }: PromptBuilderPanelProps) {
   const [internalIsGenerating, setInternalIsGenerating] = useState(false);
   const [internalActiveTab, setInternalActiveTab] = useState<"builder" | "custom">(
     activeTab ?? "builder"
   );
-  const [aiModel, setAiModel] = useState("google/nano-banana");
+  const [aiModel, setAiModel] = useState(DEFAULT_AI_MODEL);
   const [style, setStyle] = useState("");
   const [details, setDetails] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -59,11 +63,25 @@ export function PromptBuilderPanel({
   const shouldUseInternalGenerating = controlledIsGenerating === undefined;
   const isGenerating = controlledIsGenerating ?? internalIsGenerating;
 
+  const onPromptChangeRef = useRef(onPromptChange);
+
+  useEffect(() => {
+    onPromptChangeRef.current = onPromptChange;
+  }, [onPromptChange]);
+
   const setGeneratingState = (value: boolean) => {
     if (shouldUseInternalGenerating) {
       setInternalIsGenerating(value);
     }
   };
+
+  const resetTemplateState = useCallback(() => {
+    setActiveTemplateId(null);
+    setAiModel(DEFAULT_AI_MODEL);
+    setStyle("");
+    setDetails("");
+    onPromptChangeRef.current?.("");
+  }, []);
 
   // Collection and template state
   const { collections } = useCollections();
@@ -72,6 +90,7 @@ export function PromptBuilderPanel({
   const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
   const [activeMode, setActiveMode] = useState<"template" | "collection">("template");
   const [selectedCollection, setSelectedCollection] = useState<any>(null);
+  const previousActiveTabRef = useRef<"builder" | "custom">(activeTab ?? "builder");
   const collectionPreviewSetRef = useRef<Set<string>>(new Set());
   const getInitialProgressState = () => ({ total: 0, succeeded: 0, failed: 0, active: false });
   const [collectionProgress, setCollectionProgress] = useState(getInitialProgressState);
@@ -193,10 +212,14 @@ export function PromptBuilderPanel({
       : "Processing...";
 
   const handleTabChange = (tab: "builder" | "custom") => {
+    if (tab === currentTab) {
+      return;
+    }
     if (!isTabControlled) {
       setInternalActiveTab(tab);
     }
     onTabChange?.(tab);
+    resetTemplateState();
   };
 
   // Load templates from localStorage
@@ -246,7 +269,12 @@ export function PromptBuilderPanel({
 
   const handleModeChange = (value: string) => {
     if (value === "template" || value === "collection") {
+      if (value === activeMode) {
+        return;
+      }
+
       setActiveMode(value);
+      resetTemplateState();
       if (value === "template") {
         setActiveCollectionId(null);
         setSelectedCollection(null);
@@ -280,7 +308,7 @@ export function PromptBuilderPanel({
 
     const resolvedAiModel =
       resolveString(templateData.aiModel, templateData.formData?.aiModel) ||
-      "google/nano-banana";
+      DEFAULT_AI_MODEL;
     const resolvedStyle = resolveString(
       templateData.style,
       templateData.formData?.style,
@@ -306,8 +334,12 @@ export function PromptBuilderPanel({
   useEffect(() => {
     if (typeof activeTab !== "undefined") {
       setInternalActiveTab(activeTab);
+      if (previousActiveTabRef.current !== activeTab) {
+        resetTemplateState();
+        previousActiveTabRef.current = activeTab;
+      }
     }
-  }, [activeTab]);
+  }, [activeTab, resetTemplateState]);
 
   useEffect(() => {
     const loadFromStorage = () => {
@@ -370,7 +402,7 @@ export function PromptBuilderPanel({
           t.aiModel === aiModel &&
           t.style === style &&
           t.details === details &&
-          t.name === finalTemplateName
+      t.name === finalTemplateName
       );
 
     if (isDuplicate) {
@@ -444,6 +476,45 @@ export function PromptBuilderPanel({
       return;
     }
 
+    const trimmedBaseImage =
+      typeof uploadedImage === "string" && uploadedImage.trim().length > 0
+        ? uploadedImage.trim()
+        : null;
+
+    const templatesForRequest = templatesPayload.map((template: any) => {
+      if (!trimmedBaseImage) {
+        return template;
+      }
+
+      const hasExplicitImage = (() => {
+        if (typeof template?.image === "string" && template.image.trim().length > 0) {
+          return true;
+        }
+
+        if (typeof template?.imageUrl === "string" && template.imageUrl.trim().length > 0) {
+          return true;
+        }
+
+        if (Array.isArray(template?.imageUrl)) {
+          return template.imageUrl.some(
+            (value: unknown) => typeof value === "string" && value.trim().length > 0,
+          );
+        }
+
+        return false;
+      })();
+
+      if (hasExplicitImage) {
+        return template;
+      }
+
+      return {
+        ...template,
+        image: trimmedBaseImage,
+        imageUrl: trimmedBaseImage,
+      };
+    });
+
     abortControllerRef.current?.abort();
 
     const abortController = new AbortController();
@@ -476,7 +547,8 @@ export function PromptBuilderPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           collectionId: collection.id,
-          templates: templatesPayload,
+          templates: templatesForRequest,
+          baseImage: trimmedBaseImage,
         }),
         signal: abortController.signal,
       });

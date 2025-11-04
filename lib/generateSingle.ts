@@ -1,4 +1,5 @@
 // lib/generateSingle.ts
+console.log("⚙️ Loaded model version:", process.env.REPLICATE_MODEL_VERSION);
 
 export type GenerateSingleInput = {
   id?: string;
@@ -6,6 +7,7 @@ export type GenerateSingleInput = {
   prompt?: string;
   model?: string | null;
   imageUrl?: string | string[] | null;
+  image?: string | string[] | null;
   negativePrompt?: string | null;
   guidanceScale?: number | null;
   numInferenceSteps?: number | null;
@@ -19,29 +21,32 @@ export type GenerateSingleResult = {
   message?: string;
 };
 
+// ⚙️ Модель берётся из .env.local
+// Пример: REPLICATE_MODEL_VERSION=black-forest-labs/flux-schnell:9a2b7e46...
 const DEFAULT_MODEL_VERSION =
-  process.env.REPLICATE_MODEL_VERSION ?? "google/nano-banana";
+  process.env.REPLICATE_MODEL_VERSION ?? "unknown-model-version";
 
 const parsedAttempts = Number(process.env.REPLICATE_MAX_ATTEMPTS);
-const MAX_POLL_ATTEMPTS = Number.isFinite(parsedAttempts) && parsedAttempts > 0 ? parsedAttempts : 60;
+const MAX_POLL_ATTEMPTS =
+  Number.isFinite(parsedAttempts) && parsedAttempts > 0 ? parsedAttempts : 60;
 
 const parsedInterval = Number(process.env.REPLICATE_POLL_INTERVAL_MS);
-const POLL_INTERVAL_MS = Number.isFinite(parsedInterval) && parsedInterval > 0 ? parsedInterval : 2000;
+const POLL_INTERVAL_MS =
+  Number.isFinite(parsedInterval) && parsedInterval > 0
+    ? parsedInterval
+    : 2000;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function resolveTemplateId(input: GenerateSingleInput): string | undefined {
-  if (typeof input.id === "string" && input.id.trim()) {
-    return input.id;
-  }
-  if (typeof input.templateId === "string" && input.templateId.trim()) {
+  if (typeof input.id === "string" && input.id.trim()) return input.id;
+  if (typeof input.templateId === "string" && input.templateId.trim())
     return input.templateId;
-  }
   return undefined;
 }
 
 export async function generateSingle(
-  template: GenerateSingleInput,
+  template: GenerateSingleInput
 ): Promise<GenerateSingleResult> {
   try {
     const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
@@ -72,22 +77,53 @@ export async function generateSingle(
       (typeof template.model === "string" && template.model.trim()) ||
       DEFAULT_MODEL_VERSION;
 
-    const imageCandidate = Array.isArray(template.imageUrl)
-      ? template.imageUrl[0]
-      : template.imageUrl ?? null;
+    // ---- Собираем возможные ссылки на reference image ----
+    const imageSources: Array<string | string[] | null | undefined> = [
+      template.image,
+      template.imageUrl,
+    ];
 
-    const requestBody: Record<string, any> = {
-      version: model,
-      input: {
-        prompt,
-      },
-    };
+    let imageCandidate: string | string[] | null = null;
 
-    if (imageCandidate) {
-      requestBody.input.image = imageCandidate;
+    for (const src of imageSources) {
+      if (typeof src === "string" && src.trim().length > 0) {
+        imageCandidate = src.trim();
+        break;
+      }
+      if (Array.isArray(src)) {
+        const valid = src.filter(
+          (v): v is string => typeof v === "string" && v.trim().length > 0
+        );
+        if (valid.length > 0) {
+          imageCandidate = valid;
+          break;
+        }
+      }
     }
 
-    if (typeof template.negativePrompt === "string" && template.negativePrompt.trim()) {
+    // ---- Формируем тело запроса к Replicate ----
+    const requestBody: Record<string, any> = {
+      version: model,
+      input: { prompt },
+    };
+
+    // ✅ Универсальная поддержка reference-image
+    if (imageCandidate) {
+      const imageArray = Array.isArray(imageCandidate)
+        ? imageCandidate
+        : [imageCandidate];
+
+      // Поддержка разных полей, чтобы работало с любой моделью
+      requestBody.input.image = imageArray[0];
+      requestBody.input.image_input = imageArray;
+      requestBody.input.input_image = imageArray;
+      requestBody.input.init_image = imageArray[0];
+    }
+
+    if (
+      typeof template.negativePrompt === "string" &&
+      template.negativePrompt.trim()
+    ) {
       requestBody.input.negative_prompt = template.negativePrompt.trim();
     }
 
@@ -99,14 +135,23 @@ export async function generateSingle(
       requestBody.input.num_inference_steps = template.numInferenceSteps;
     }
 
-    const createResponse = await fetch("https://api.replicate.com/v1/predictions", {
-      method: "POST",
-      headers: {
-        Authorization: `Token ${REPLICATE_API_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    });
+    console.log(
+      "[generateSingle] → Sending requestBody:",
+      JSON.stringify(requestBody, null, 2)
+    );
+
+    // ---- Запрос к Replicate ----
+    const createResponse = await fetch(
+      "https://api.replicate.com/v1/predictions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Token ${REPLICATE_API_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
 
     const created = await createResponse.json();
 
@@ -134,6 +179,7 @@ export async function generateSingle(
       };
     }
 
+    // ---- Polling ----
     let attempt = 0;
     let prediction = created;
 
@@ -144,12 +190,10 @@ export async function generateSingle(
     ) {
       await sleep(POLL_INTERVAL_MS);
       const pollResponse = await fetch(pollUrl, {
-        headers: {
-          Authorization: `Token ${REPLICATE_API_TOKEN}`,
-        },
+        headers: { Authorization: `Token ${REPLICATE_API_TOKEN}` },
       });
       prediction = await pollResponse.json();
-      attempt += 1;
+      attempt++;
     }
 
     if (prediction.status !== "succeeded") {
@@ -166,6 +210,7 @@ export async function generateSingle(
       };
     }
 
+    // ---- Обработка результата ----
     const output = prediction.output;
     let imageUrl: string | null = null;
 
@@ -178,8 +223,8 @@ export async function generateSingle(
         typeof output.image === "string"
           ? output.image
           : Array.isArray(output.images) && typeof output.images[0] === "string"
-            ? output.images[0]
-            : null;
+          ? output.images[0]
+          : null;
     }
 
     if (!imageUrl) {

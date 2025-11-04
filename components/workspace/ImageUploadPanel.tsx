@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { Upload, X } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "react-hot-toast";
 
 interface ImageUploadPanelProps {
   onImageChange: (image: string | null) => void;
@@ -19,31 +20,58 @@ export function ImageUploadPanel({ image, onImageChange }: ImageUploadPanelProps
     setIsDragActive(e.type === "dragenter" || e.type === "dragover");
   }, []);
 
-  const processFile = useCallback(
-    (file: File) => {
-      if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
-        alert("Please upload a JPG or PNG image");
-        return;
-      }
-      if (file.size > 50 * 1024 * 1024) {
-        alert("File size should be less than 50MB");
-        return;
+  const uploadFile = useCallback(async (file: File) => {
+    if (isLoading) {
+      toast("Upload in progress...", { icon: "⏳" });
+      setIsDragActive(false);
+      return;
+    }
+
+    if (!file) {
+      setIsDragActive(false);
+      return;
+    }
+
+    if (!["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(file.type)) {
+      toast.error("Please upload a JPG, PNG, or WEBP image.");
+      setIsDragActive(false);
+      return;
+    }
+
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("File size should be less than 50MB.");
+      setIsDragActive(false);
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || typeof data?.url !== "string") {
+        const message = data?.error || "Image upload failed.";
+        throw new Error(message);
       }
 
-      setIsLoading(true);
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        onImageChange(event.target?.result as string);
-        setIsLoading(false);
-      };
-      reader.onerror = () => {
-        alert("Error reading file");
-        setIsLoading(false);
-      };
-      reader.readAsDataURL(file);
-    },
-    [onImageChange]
-  );
+      onImageChange(data.url);
+      toast.success("Image uploaded successfully.");
+    } catch (error: any) {
+      console.error("[upload] failed", error);
+      toast.error(error?.message || "Unable to upload image.");
+    } finally {
+      setIsLoading(false);
+      setIsDragActive(false);
+    }
+  }, [isLoading, onImageChange]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -51,14 +79,18 @@ export function ImageUploadPanel({ image, onImageChange }: ImageUploadPanelProps
       e.stopPropagation();
       setIsDragActive(false);
       const file = e.dataTransfer.files?.[0];
-      if (file) processFile(file);
+      if (file) {
+        void uploadFile(file);
+      }
     },
-    [processFile]
+    [uploadFile]
   );
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) processFile(file);
+    if (file) {
+      void uploadFile(file);
+    }
   };
 
   return (
@@ -119,7 +151,7 @@ export function ImageUploadPanel({ image, onImageChange }: ImageUploadPanelProps
             </p>
             <input
               type="file"
-              accept="image/jpeg,image/png,image/jpg"
+              accept="image/jpeg,image/png,image/jpg,image/webp"
               onChange={handleFileInput}
               className="hidden"
               disabled={isLoading}
@@ -170,7 +202,7 @@ export function ImageUploadPanel({ image, onImageChange }: ImageUploadPanelProps
             </div>
             <input
               type="file"
-              accept="image/jpeg,image/png,image/jpg"
+              accept="image/jpeg,image/png,image/jpg,image/webp"
               onChange={handleFileInput}
               className="hidden"
               disabled={isLoading}
