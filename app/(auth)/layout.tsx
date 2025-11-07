@@ -1,4 +1,3 @@
-
 import "../globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -18,10 +17,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className={`${inter.variable} font-sans bg-background text-foreground antialiased min-h-screen`}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <SupabaseAuthProvider>{children}</SupabaseAuthProvider>
-      </ThemeProvider>
-    </div>
+    <html lang="en">
+      <body
+        className={`${inter.variable} font-sans bg-background text-foreground antialiased min-h-screen`}
+      >
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <SupabaseAuthProvider>{children}</SupabaseAuthProvider>
+        </ThemeProvider>
+      </body>
+    </html>
   );
 }

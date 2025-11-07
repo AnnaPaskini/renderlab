@@ -32,10 +32,11 @@ export function NavBar() {
         duration: 0.8,
       }}
       className={clsx(
-        "fixed top-0 left-0 right-0 z-20 backdrop-blur-md bg-white/80 shadow-sm transition-all duration-300"
+        "fixed top-0 left-0 right-0 z-[60] w-full border-b border-white/10 transition-all duration-300",
+        "nav-overlay nav-surface shadow-[0_22px_48px_-22px_rgba(12,12,18,0.6)]"
       )}
     >
-      <div className="flex w-full items-center justify-between px-4 py-3 md:px-8">
+  <div className="relative z-[1] flex w-full items-center justify-between px-4 py-3 text-sm font-medium text-white tracking-tight md:px-8 md:text-base">
         <div className="hidden w-full lg:block">
           <DesktopNavbar navItems={navItems} />
         </div>

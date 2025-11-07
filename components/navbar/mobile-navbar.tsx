@@ -28,24 +28,27 @@ export const MobileNavbar = ({ navItems }: any) => {
   return (
     <div
       className={cn(
-        "flex justify-between bg-white dark:bg-neutral-900 items-center w-full rounded-full px-2.5 py-1.5 transition duration-200",
+        "nav-surface nav-overlay flex w-full items-center justify-between rounded-full border border-white/20 px-2.5 py-1.5 text-white text-shadow-soft transition duration-200 dark:border-white/20",
+        "shadow-[0_24px_48px_-20px_rgba(12,12,24,0.55)]",
         showBackground &&
-          "bg-neutral-50 dark:bg-neutral-900 shadow-[0px_-2px_0px_0px_var(--neutral-100),0px_2px_0px_0px_var(--neutral-100)] dark:shadow-[0px_-2px_0px_0px_var(--neutral-800),0px_2px_0px_0px_var(--neutral-800)]"
+          "shadow-[0_30px_60px_-20px_rgba(12,12,24,0.65)]"
       )}
     >
       <Logo />
       <IoIosMenu
-        className="text-black dark:text-white h-6 w-6"
+        className="h-6 w-6 text-white drop-shadow"
         onClick={() => setOpen(!open)}
       />
       {open && (
-        <div className={`fixed inset-0 bg-white dark:bg-black z-[20] flex flex-col items-start justify-start space-y-10  pt-5  text-xl text-zinc-600  transition duration-200 hover:text-zinc-800`}>
+        <div
+          className={`fixed inset-0 z-[${Z.MODAL}] flex flex-col items-start justify-start space-y-10 bg-[radial-gradient(circle_at_12%_20%,rgba(244,114,182,0.2),transparent_45%),radial-gradient(circle_at_88%_25%,rgba(250,204,21,0.14),transparent_40%),radial-gradient(circle_at_50%_88%,rgba(129,140,248,0.2),transparent_50%)] bg-white/20 text-white text-shadow-soft transition duration-200 dark:bg-[#050505]/75 glass-blur-24`}
+        >
           <div className="flex items-center justify-between w-full px-5">
             <Logo />
             <div className="flex items-center space-x-2">
               <ModeToggle />
               <IoIosClose
-                className="h-8 w-8 text-black dark:text-white"
+                className="h-8 w-8 text-white drop-shadow"
                 onClick={() => setOpen(!open)}
               />
             </div>
@@ -62,7 +65,7 @@ export const MobileNavbar = ({ navItems }: any) => {
                         onClick={() => setOpen(false)}
                         className="relative max-w-[15rem] text-left text-2xl"
                       >
-                        <span className="block text-black">
+                        <span className="block text-white text-shadow-soft">
                           {childNavItem.title}
                         </span>
                       </Link>
@@ -73,9 +76,9 @@ export const MobileNavbar = ({ navItems }: any) => {
                     key={`link=${idx}`}
                     href={navItem.link}
                     onClick={() => setOpen(false)}
-                    className="relative"
+                    className="relative font-semibold tracking-tight"
                   >
-                    <span className="block text-[26px] text-black dark:text-white">
+                    <span className="block text-[26px] text-white text-shadow-soft">
                       {navItem.title}
                     </span>
                   </Link>
@@ -83,11 +86,20 @@ export const MobileNavbar = ({ navItems }: any) => {
               </>
             ))}
           </div>
-          <div className="flex flex-row w-full items-start gap-2.5  px-8 py-4 ">
-            <Button as={Link} href="/signup">
+          <div className="flex flex-row w-full items-start gap-2.5 px-8 py-4">
+            <Button
+              as={Link}
+              href="/signup"
+              className="aura bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 font-semibold tracking-tight text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] transition-colors hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400 focus-visible:ring-2 focus-visible:ring-fuchsia-300 focus-visible:ring-offset-0"
+            >
               Sign Up
             </Button>
-            <Button variant="simple" as={Link} href="/login">
+            <Button
+              variant="simple"
+              as={Link}
+              href="/login"
+              className="aura bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 font-semibold tracking-tight text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] transition-colors hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400 focus-visible:ring-2 focus-visible:ring-fuchsia-300 focus-visible:ring-offset-0"
+            >
               Login
             </Button>
           </div>

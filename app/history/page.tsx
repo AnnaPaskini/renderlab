@@ -1,132 +1,95 @@
-"use client";
+// app/history/page.tsx
+'use client'
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import { Trash2, RotateCw, Download } from "lucide-react";
-import { NavBar } from "@/components/navbar";
-import { Container } from "@/components/container";
-import { Button } from "@/components/button";
-import Link from "next/link";
+import { useEffect, useState } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
 
-interface HistoryItem {
-  id: string;
-  inputImage: string;
-  outputImages: string[];
-  prompt: string;
-  createdAt: Date;
+interface ImageRecord {
+  id: string
+  user_id: string
+  name: string
+  url: string
+  created_at: string
 }
 
-const MOCK_HISTORY: HistoryItem[] = [];
-
 export default function HistoryPage() {
-  const [items, setItems] = useState<HistoryItem[]>(MOCK_HISTORY);
+  const [images, setImages] = useState<ImageRecord[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const handleDelete = (id: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
-  };
+  useEffect(() => {
+    async function fetchImages() {
+      try {
+        const response = await fetch('/api/images')
+        if (!response.ok) throw new Error('Failed to fetch images')
+        
+        const data = await response.json()
+        console.log('Loaded images:', data.images)
+        setImages(data.images || [])
+      } catch (error) {
+        console.error('Error loading images:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchImages()
+  }, [])
 
   return (
-    <>
-      <NavBar />
-      <Container>
-        <div className="pt-32 pb-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <h1 className="text-4xl font-bold mb-4 dark:text-white">
-              Generation History
-            </h1>
-            <p className="text-neutral-600 dark:text-neutral-400 mb-8">
-              All your previous generations in one place
-            </p>
-          </motion.div>
-
-          {items.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-20"
-            >
-              <p className="text-neutral-600 dark:text-neutral-400 mb-4">
-                No generations yet
-              </p>
-              <Link href="/workspace">
-                <Button>Start Creating</Button>
-              </Link>
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="grid gap-4"
-            >
-              {items.map((item, idx) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  className="bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 overflow-hidden hover:shadow-lg transition-shadow p-4"
-                >
-                  <div className="flex gap-4">
-                    {/* Input Image */}
-                    <div className="w-24 h-24 flex-shrink-0 relative">
-                      <Image
-                        src={item.inputImage}
-                        alt="Input"
-                        fill
-                        className="object-cover rounded-lg"
-                      />
-                    </div>
-
-                    {/* Output Images */}
-                    <div className="flex gap-2">
-                      {item.outputImages.map((img, idx) => (
-                        <div key={idx} className="w-24 h-24 flex-shrink-0 relative">
-                          <Image
-                            src={img}
-                            alt="Output"
-                            fill
-                            className="object-cover rounded-lg"
-                          />
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Details */}
-                    <div className="flex-1">
-                      <p className="text-sm dark:text-neutral-300 mb-2">
-                        {item.prompt}
-                      </p>
-                      <p className="text-xs text-neutral-500">
-                        {item.createdAt.toLocaleDateString()}
-                      </p>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-2">
-                      <button className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition">
-                        <RotateCw size={18} />
-                      </button>
-                      <button className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition">
-                        <Download size={18} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(item.id)}
-                        className="p-2 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 rounded-lg transition"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            Generation History
+          </h1>
+          <p className="text-gray-600">
+            All your previous generations in one place
+          </p>
         </div>
-      </Container>
-    </>
-  );
+
+        {loading ? (
+          <div className="text-center py-12 text-gray-500">
+            Loading history...
+          </div>
+        ) : images.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 mb-4">No generations yet</p>
+            <Link 
+              href="/workspace"
+              className="inline-block bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Start Creating
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {images.map((img) => (
+              <div 
+                key={img.id} 
+                className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-blue-500 transition-colors cursor-pointer group"
+              >
+                <Image
+                  src={img.url}
+                  alt={img.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors" />
+                <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-2 truncate opacity-0 group-hover:opacity-100 transition-opacity">
+                  {img.name}
+                </div>
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-xs text-white bg-black/70 px-2 py-1 rounded">
+                    {new Date(img.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }

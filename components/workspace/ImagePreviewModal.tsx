@@ -188,12 +188,12 @@ function ImagePreviewModal({ src, onClose }: ImagePreviewModalProps) {
       </div>
 
       {/* Подсказка */}
-      <div className="absolute bottom-6 text-white/80 text-sm select-none">
+      <div className="absolute bottom-6 text-white text-sm select-none">
         Scroll to zoom (×{scale.toFixed(1)}) · Drag to pan · Double-click to reset
       </div>
       {message && (
         <div
-          className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[10000] text-white/80 text-sm bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm transition-opacity duration-300 pointer-events-none ${isMessageVisible ? "opacity-100" : "opacity-0"}`}
+          className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[10000] text-white text-sm bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm transition-opacity duration-300 pointer-events-none ${isMessageVisible ? "opacity-100" : "opacity-0"}`}
         >
           {message}
         </div>

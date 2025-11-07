@@ -36,9 +36,10 @@ export const DesktopNavbar = ({ navItems }: Props) => {
   return (
     <div
       className={cn(
-        "w-full flex relative justify-between px-4 py-2 rounded-full bg-transparent transition duration-200",
+  "nav-surface nav-overlay relative flex w-full items-center justify-between gap-4 rounded-full border border-white/20 px-4 py-2 text-white text-shadow-soft transition duration-200 dark:border-white/20",
+        "shadow-[0_24px_48px_-20px_rgba(12,12,24,0.55)]",
         showBackground &&
-          "bg-neutral-50 dark:bg-neutral-900 shadow-[0px_-2px_0px_0px_var(--neutral-100),0px_2px_0px_0px_var(--neutral-100)] dark:shadow-[0px_-2px_0px_0px_var(--neutral-800),0px_2px_0px_0px_var(--neutral-800)]"
+          "shadow-[0_30px_60px_-20px_rgba(12,12,24,0.65)]"
       )}
     >
       <AnimatePresence>
@@ -50,13 +51,13 @@ export const DesktopNavbar = ({ navItems }: Props) => {
             transition={{
               duration: 1,
             }}
-            className="absolute inset-0 h-full w-full bg-neutral-100 dark:bg-neutral-800 pointer-events-none [mask-image:linear-gradient(to_bottom,white,transparent,white)] rounded-full"
+            className="pointer-events-none absolute inset-0 h-full w-full rounded-full bg-[radial-gradient(circle_at_12%_20%,rgba(244,114,182,0.18),transparent_45%),radial-gradient(circle_at_85%_30%,rgba(250,204,21,0.14),transparent_40%),radial-gradient(circle_at_50%_90%,rgba(129,140,248,0.2),transparent_45%)]"
           />
         )}
       </AnimatePresence>
-      <div className="flex flex-row gap-2 items-center">
+      <div className="flex flex-row items-center gap-2 text-sm font-medium tracking-tight">
         <Logo />
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 text-white">
           {navItems.map((item) => (
             <NavBarItem href={item.link} key={item.title} target={item.target}>
               {item.title}
@@ -64,12 +65,21 @@ export const DesktopNavbar = ({ navItems }: Props) => {
           ))}
         </div>
       </div>
-      <div className="flex space-x-2 items-center">
+      <div className="flex items-center space-x-2">
         <ModeToggle />
-        <Button variant="simple" as={Link} href="/login">
+        <Button
+          variant="simple"
+          as={Link}
+          href="/login"
+          className="aura bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 font-semibold tracking-tight text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] transition-colors hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400 focus-visible:ring-2 focus-visible:ring-fuchsia-300 focus-visible:ring-offset-0"
+        >
           Login
         </Button>
-        <Button as={Link} href="/signup">
+        <Button
+          as={Link}
+          href="/signup"
+          className="aura bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 font-semibold tracking-tight text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] transition-colors hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400 focus-visible:ring-2 focus-visible:ring-fuchsia-300 focus-visible:ring-offset-0"
+        >
           Sign Up
         </Button>
       </div>

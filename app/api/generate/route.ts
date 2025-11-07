@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabaseServer";
+import { generateSingle } from "@/lib/generateSingle";
 
 /**
  * CREATE endpoint without reference image.
- * Temporary stub that accepts prompt/model and returns a valid image URL.
+ * Generates image via Replicate and saves to database.
  */
 export async function POST(req: Request) {
   try {
@@ -14,30 +16,90 @@ export async function POST(req: Request) {
       );
     }
 
+    // 🔵 Проверяем авторизацию
+    const supabase = createClient();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    console.log('🔵 [GENERATE] User:', user?.id, 'Error:', userError);
+
+    if (userError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await req.json().catch(() => ({}));
     const prompt = typeof body?.prompt === "string" ? body.prompt.trim() : "";
-    const model = typeof body?.model === "string" ? body.model.trim() : "default";
+    const model = typeof body?.model === "string" ? body.model.trim() : undefined;
 
     if (!prompt)
       return NextResponse.json({ error: "prompt is required" }, { status: 400 });
     if (prompt.length > 4000)
       return NextResponse.json({ error: "prompt is too long" }, { status: 413 });
 
-    const seedBase = `${prompt.slice(0, 64)}::${model}::${Date.now()}`;
-    const seed = encodeURIComponent(seedBase.replace(/\s+/g, "-"));
+    console.log('🔵 [GENERATE] Starting Replicate generation...');
+    console.log('🔵 [GENERATE] Prompt:', prompt);
+    console.log('🔵 [GENERATE] Model:', model || 'default (google/nano-banana)');
 
-    // 👇 добавляем анти-кеш параметр
-    const imageUrl = `https://picsum.photos/seed/${seed}/1024/768?random=${Date.now()}`;
+    // 🎨 Генерируем через Replicate API
+    const result = await generateSingle({
+      prompt,
+      model,
+    });
 
+    if (result.status !== "ok" || !result.url) {
+      console.error('❌ [GENERATE] Replicate failed:', result.message);
+      return NextResponse.json(
+        { error: result.message || "Generation failed" },
+        { status: 500 }
+      );
+    }
+
+    const imageUrl = result.url;
     const timestamp = new Date().toISOString();
 
+    console.log('✅ [GENERATE] Image generated:', imageUrl);
+
+    // 🔵 Создаём имя файла для базы
+    const imageName = `generated_${Date.now()}_${prompt.slice(0, 30).replace(/\s+/g, '_')}`;
+
+    console.log('🔵 [GENERATE] Inserting into DB:', {
+      user_id: user.id,
+      name: imageName,
+      url: imageUrl,
+    });
+
+    // 🔵 Сохраняем в таблицу images
+    const { error: dbError } = await supabase
+      .from("images")
+      .insert([{
+        user_id: user.id,
+        name: imageName,
+        url: imageUrl,
+      }]);
+
+    console.log('🔵 [GENERATE] DB Insert result - Error:', dbError);
+
+    if (dbError) {
+      console.error('❌ [GENERATE] DB Error:', dbError);
+      // Не падаем, просто логируем — генерация всё равно успешна
+    } else {
+      console.log('✅ [GENERATE] Successfully saved to DB');
+    }
+
     return NextResponse.json({
-      id: `stub-${seed}`,
+      id: result.templateId || `gen-${Date.now()}`,
       status: "succeeded",
       output: { imageUrl },
-      meta: { model, promptLength: prompt.length, generatedAt: timestamp },
+      meta: { 
+        model: model || "google/nano-banana", 
+        promptLength: prompt.length, 
+        generatedAt: timestamp 
+      },
     });
   } catch (err: any) {
+    console.error("❌ [GENERATE] error:", err);
     return NextResponse.json(
       { error: err?.message || "Generate failed" },
       { status: 500 }

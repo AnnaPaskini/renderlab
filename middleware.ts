@@ -1,101 +1,46 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const SUPABASE_URL = process.env.SUPABASE_URL!;
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY!;
-const ACCESS_COOKIE_NAME = "renderlab-access-token";
-
-const projectRef = SUPABASE_URL?.replace(/^https?:\/\//, "").split(".")[0];
-const SUPABASE_COOKIE_NAME = projectRef ? `sb-${projectRef}-auth-token` : undefined;
-
-const getAccessTokenFromCookie = (req: NextRequest): string | null => {
-  const directToken = req.cookies.get(ACCESS_COOKIE_NAME)?.value;
-  if (directToken) return directToken;
-
-  const supabaseCookieValue = SUPABASE_COOKIE_NAME
-    ? req.cookies.get(SUPABASE_COOKIE_NAME)?.value
-    : undefined;
-
-  if (!supabaseCookieValue) return null;
-
-  try {
-    const parsed = JSON.parse(supabaseCookieValue);
-    if (typeof parsed === "string") {
-      return parsed;
-    }
-    if (Array.isArray(parsed)) {
-      const candidate = parsed.find((entry) => entry?.access_token);
-      return candidate?.access_token ?? null;
-    }
-    if (parsed && typeof parsed === "object") {
-      return parsed.access_token ?? parsed?.currentSession?.access_token ?? null;
-    }
-  } catch {
-    return null;
-  }
-
-  return null;
-};
-
-const hasActiveSession = async (req: NextRequest): Promise<boolean> => {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    return false;
-  }
-
-  const accessToken = getAccessTokenFromCookie(req);
-  if (!accessToken) {
-    return false;
-  }
-
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
-
-  try {
-    const { data, error } = await supabase.auth.getUser(accessToken);
-    if (error) {
-      return false;
-    }
-    return Boolean(data.user);
-  } catch {
-    return false;
-  }
-};
+import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+  // Копируем запрос, чтобы можно было модифицировать заголовки
+  const res = NextResponse.next();
 
-  const requiresAuth =
-    pathname.startsWith("/workspace") || pathname.startsWith("/history");
-
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    if (requiresAuth) {
-      const redirectUrl = req.nextUrl.clone();
-      redirectUrl.pathname = "/login";
-      return NextResponse.redirect(redirectUrl);
+  // Инициализация Supabase SSR клиента
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return req.cookies.get(name)?.value;
+        },
+        set(name: string, value: string) {
+          res.cookies.set(name, value);
+        },
+        remove(name: string) {
+          res.cookies.delete(name);
+        },
+      },
     }
-    return NextResponse.next();
-  }
+  );
 
-  if (!requiresAuth) {
-    return NextResponse.next();
-  }
+  // Проверяем текущего пользователя
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const authenticated = await hasActiveSession(req);
-
-  if (!authenticated) {
+  // Если нет авторизации — редиректим на /login
+  if (!user && req.nextUrl.pathname.startsWith("/workspace")) {
     const redirectUrl = req.nextUrl.clone();
     redirectUrl.pathname = "/login";
     return NextResponse.redirect(redirectUrl);
   }
 
-  return NextResponse.next();
+  return res;
 }
 
+// Настройки middleware
 export const config = {
-  matcher: ["/workspace/:path*", "/history/:path*"],
+  matcher: ["/workspace/:path*"],
 };
