@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { toast } from "react-hot-toast";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,6 @@ export interface PromptBuilderPanelProps {
   activeTab?: "builder" | "custom";
   onTabChange?: (tab: "builder" | "custom") => void;
   onPreviewAdd?: (url: string) => void;
-  uploadedImage?: string | null;
 }
 
 type TemplateRecord = {
@@ -39,8 +38,6 @@ type TemplateRecord = {
   templateName: string;
 };
 
-const DEFAULT_AI_MODEL = "google/nano-banana";
-
 export function PromptBuilderPanel({
   onPromptChange,
   onGenerate,
@@ -48,13 +45,12 @@ export function PromptBuilderPanel({
   activeTab,
   onTabChange,
   onPreviewAdd,
-  uploadedImage,
 }: PromptBuilderPanelProps) {
   const [internalIsGenerating, setInternalIsGenerating] = useState(false);
   const [internalActiveTab, setInternalActiveTab] = useState<"builder" | "custom">(
     activeTab ?? "builder"
   );
-  const [aiModel, setAiModel] = useState(DEFAULT_AI_MODEL);
+  const [aiModel, setAiModel] = useState("google/nano-banana");
   const [style, setStyle] = useState("");
   const [details, setDetails] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -63,25 +59,11 @@ export function PromptBuilderPanel({
   const shouldUseInternalGenerating = controlledIsGenerating === undefined;
   const isGenerating = controlledIsGenerating ?? internalIsGenerating;
 
-  const onPromptChangeRef = useRef(onPromptChange);
-
-  useEffect(() => {
-    onPromptChangeRef.current = onPromptChange;
-  }, [onPromptChange]);
-
   const setGeneratingState = (value: boolean) => {
     if (shouldUseInternalGenerating) {
       setInternalIsGenerating(value);
     }
   };
-
-  const resetTemplateState = useCallback(() => {
-    setActiveTemplateId(null);
-    setAiModel(DEFAULT_AI_MODEL);
-    setStyle("");
-    setDetails("");
-    onPromptChangeRef.current?.("");
-  }, []);
 
   // Collection and template state
   const { collections } = useCollections();
@@ -90,12 +72,16 @@ export function PromptBuilderPanel({
   const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
   const [activeMode, setActiveMode] = useState<"template" | "collection">("template");
   const [selectedCollection, setSelectedCollection] = useState<any>(null);
-  const previousActiveTabRef = useRef<"builder" | "custom">(activeTab ?? "builder");
   const collectionPreviewSetRef = useRef<Set<string>>(new Set());
   const getInitialProgressState = () => ({ total: 0, succeeded: 0, failed: 0, active: false });
   const [collectionProgress, setCollectionProgress] = useState(getInitialProgressState);
   const [isCollectionRun, setIsCollectionRun] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  const selectTriggerClass =
+    "h-12 w-full rounded-xl border border-white/40 bg-white/65 px-3 text-left text-sm font-medium text-neutral-900 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 dark:border-white/24 dark:bg-[#111111]/70 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]";
+  const inputSurfaceClass =
+    "w-full rounded-xl border border-white/40 bg-white/65 px-3 py-2 text-sm font-medium text-neutral-900 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 dark:border-white/24 dark:bg-[#111111]/70 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)] placeholder:text-neutral-500 dark:placeholder:text-neutral-300";
 
   const resolveString = (...values: unknown[]) => {
     for (const value of values) {
@@ -212,14 +198,10 @@ export function PromptBuilderPanel({
       : "Processing...";
 
   const handleTabChange = (tab: "builder" | "custom") => {
-    if (tab === currentTab) {
-      return;
-    }
     if (!isTabControlled) {
       setInternalActiveTab(tab);
     }
     onTabChange?.(tab);
-    resetTemplateState();
   };
 
   // Load templates from localStorage
@@ -269,12 +251,7 @@ export function PromptBuilderPanel({
 
   const handleModeChange = (value: string) => {
     if (value === "template" || value === "collection") {
-      if (value === activeMode) {
-        return;
-      }
-
       setActiveMode(value);
-      resetTemplateState();
       if (value === "template") {
         setActiveCollectionId(null);
         setSelectedCollection(null);
@@ -308,7 +285,7 @@ export function PromptBuilderPanel({
 
     const resolvedAiModel =
       resolveString(templateData.aiModel, templateData.formData?.aiModel) ||
-      DEFAULT_AI_MODEL;
+      "google/nano-banana";
     const resolvedStyle = resolveString(
       templateData.style,
       templateData.formData?.style,
@@ -334,12 +311,8 @@ export function PromptBuilderPanel({
   useEffect(() => {
     if (typeof activeTab !== "undefined") {
       setInternalActiveTab(activeTab);
-      if (previousActiveTabRef.current !== activeTab) {
-        resetTemplateState();
-        previousActiveTabRef.current = activeTab;
-      }
     }
-  }, [activeTab, resetTemplateState]);
+  }, [activeTab]);
 
   useEffect(() => {
     const loadFromStorage = () => {
@@ -402,7 +375,7 @@ export function PromptBuilderPanel({
           t.aiModel === aiModel &&
           t.style === style &&
           t.details === details &&
-      t.name === finalTemplateName
+          t.name === finalTemplateName
       );
 
     if (isDuplicate) {
@@ -476,45 +449,6 @@ export function PromptBuilderPanel({
       return;
     }
 
-    const trimmedBaseImage =
-      typeof uploadedImage === "string" && uploadedImage.trim().length > 0
-        ? uploadedImage.trim()
-        : null;
-
-    const templatesForRequest = templatesPayload.map((template: any) => {
-      if (!trimmedBaseImage) {
-        return template;
-      }
-
-      const hasExplicitImage = (() => {
-        if (typeof template?.image === "string" && template.image.trim().length > 0) {
-          return true;
-        }
-
-        if (typeof template?.imageUrl === "string" && template.imageUrl.trim().length > 0) {
-          return true;
-        }
-
-        if (Array.isArray(template?.imageUrl)) {
-          return template.imageUrl.some(
-            (value: unknown) => typeof value === "string" && value.trim().length > 0,
-          );
-        }
-
-        return false;
-      })();
-
-      if (hasExplicitImage) {
-        return template;
-      }
-
-      return {
-        ...template,
-        image: trimmedBaseImage,
-        imageUrl: trimmedBaseImage,
-      };
-    });
-
     abortControllerRef.current?.abort();
 
     const abortController = new AbortController();
@@ -547,8 +481,7 @@ export function PromptBuilderPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           collectionId: collection.id,
-          templates: templatesForRequest,
-          baseImage: trimmedBaseImage,
+          templates: templatesPayload,
         }),
         signal: abortController.signal,
       });
@@ -774,7 +707,7 @@ export function PromptBuilderPanel({
   };
 
   return (
-    <section className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 shadow-sm flex flex-col gap-4 h-full overflow-auto">
+  <section className="flex h-full flex-col gap-4 overflow-hidden rounded-3xl border border-white/40 bg-white/85 p-6 text-neutral-900 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_40px_-10px_rgba(0,0,0,0.25)] dark:border-white/24 dark:bg-[#0c0c12]/78 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_18px_48px_-18px_rgba(0,0,0,0.6)]">
       <div className="flex-1 overflow-y-auto">
   {currentTab === "builder" && (
           <motion.div
@@ -785,11 +718,11 @@ export function PromptBuilderPanel({
             transition={{ duration: 0.3 }}
             className="space-y-4"
           >
-            <h2 className="text-lg font-semibold">Edit Image</h2>
+            <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Edit Image</h2>
 
             <motion.div
               layout
-              className="rounded-2xl border border-neutral-200 bg-neutral-50/80 p-4 shadow-sm transition-all duration-300 dark:border-neutral-800 dark:bg-neutral-900/60"
+              className="rounded-2xl border border-white/40 bg-white/65 p-4 text-neutral-900 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:border-white/24 dark:bg-[#111111]/70 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]"
             >
               <div className="flex flex-col gap-4">
                 <ToggleGroup.Root
@@ -835,7 +768,7 @@ export function PromptBuilderPanel({
                           value={activeTemplateId ?? undefined}
                           onValueChange={handleTemplateChange}
                         >
-                          <SelectTrigger className="h-12 w-full rounded-xl border border-neutral-200 bg-white/90 px-3 text-left text-sm font-medium text-neutral-700 shadow-sm transition-all duration-300 hover:border-neutral-300 focus:ring-0 dark:border-neutral-700 dark:bg-neutral-900/80 dark:text-neutral-100">
+                          <SelectTrigger className={selectTriggerClass}>
                             <SelectValue placeholder="Select a saved template" />
                           </SelectTrigger>
                           <SelectContent>
@@ -847,7 +780,7 @@ export function PromptBuilderPanel({
                           </SelectContent>
                         </Select>
                       ) : (
-                        <div className="rounded-xl border border-dashed border-neutral-200 bg-white/80 p-4 text-sm text-neutral-500 transition-all duration-300 dark:border-neutral-700 dark:bg-neutral-900/40 dark:text-neutral-400">
+                        <div className="rounded-xl border border-dashed border-white/40 bg-white/65 p-4 text-sm font-medium text-neutral-600 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:border-white/24 dark:bg-[#111111]/70 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
                           No saved templates found.
                         </div>
                       )}
@@ -866,7 +799,7 @@ export function PromptBuilderPanel({
                           value={activeCollectionId ?? undefined}
                           onValueChange={handleCollectionChange}
                         >
-                          <SelectTrigger className="h-12 w-full rounded-xl border border-neutral-200 bg-white/90 px-3 text-left text-sm font-medium text-neutral-700 shadow-sm transition-all duration-300 hover:border-neutral-300 focus:ring-0 dark:border-neutral-700 dark:bg-neutral-900/80 dark:text-neutral-100">
+                          <SelectTrigger className={selectTriggerClass}>
                             <SelectValue placeholder="Select a collection" />
                           </SelectTrigger>
                           <SelectContent>
@@ -878,7 +811,7 @@ export function PromptBuilderPanel({
                           </SelectContent>
                         </Select>
                       ) : (
-                        <div className="rounded-xl border border-dashed border-neutral-200 bg-white/80 p-4 text-sm text-neutral-500 transition-all duration-300 dark:border-neutral-700 dark:bg-neutral-900/40 dark:text-neutral-400">
+                        <div className="rounded-xl border border-dashed border-white/40 bg-white/65 p-4 text-sm font-medium text-neutral-600 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:border-white/24 dark:bg-[#111111]/70 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
                           No saved collections yet.
                         </div>
                       )}
@@ -890,26 +823,26 @@ export function PromptBuilderPanel({
 
             <div className="space-y-3">
               <div>
-                <label className="text-sm text-gray-500 dark:text-gray-400">
+                <label className="text-sm font-medium text-neutral-900 dark:text-white">
                   AI Model
                 </label>
                 <select
                   value={aiModel}
                   onChange={(e) => setAiModel(e.target.value)}
-                  className="w-full border border-neutral-200 dark:border-neutral-700 bg-transparent rounded-md px-3 py-2 text-sm"
+                  className={inputSurfaceClass}
                 >
                   <option>google/nano-banana</option>
                 </select>
               </div>
 
               <div>
-                <label className="text-sm text-gray-500 dark:text-gray-400">
+                <label className="text-sm font-medium text-neutral-900 dark:text-white">
                   Style
                 </label>
                 <select
                   value={style}
                   onChange={(e) => setStyle(e.target.value)}
-                  className="w-full border border-neutral-200 dark:border-neutral-700 bg-transparent rounded-md px-3 py-2 text-sm"
+                  className={inputSurfaceClass}
                 >
                   <option value="">Select style</option>
                   <option>Photorealistic</option>
@@ -919,23 +852,23 @@ export function PromptBuilderPanel({
               </div>
 
               <div>
-                <label className="text-sm text-gray-500 dark:text-gray-400">
+                <label className="text-sm font-medium text-neutral-900 dark:text-white">
                   Additional Details
                 </label>
                 <textarea
                   value={details}
                   onChange={(e) => setDetails(e.target.value)}
-                  className="w-full border border-neutral-200 dark:border-neutral-700 bg-transparent rounded-md px-3 py-2 text-sm"
+                  className={cn(inputSurfaceClass, "min-h-[96px] resize-none")}
                   placeholder="Describe scene details..."
                   rows={3}
                 />
               </div>
 
-              <div className="flex flex-col gap-3 mt-4 transition-all duration-300">
+              <div className="mt-4 flex flex-col gap-3 transition-all duration-300">
                 <div className="flex w-full gap-3">
                   <Button
-                    variant="outline"
-                    className="flex-1 border border-neutral-300 bg-white text-neutral-900 font-medium hover:bg-neutral-100 transition-all rounded-xl"
+                    variant="ghost"
+                    className="flex-1 rounded-2xl bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 font-semibold tracking-tight text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] transition-all duration-300 hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400 focus-visible:ring-fuchsia-300 focus-visible:ring-offset-0"
                     onClick={() => setIsDialogOpen(true)}
                   >
                     Save as Template
@@ -943,10 +876,10 @@ export function PromptBuilderPanel({
                   {isCollectionRun && (
                     <Button
                       variant="outline"
-                      className="flex-1 border border-amber-400 bg-amber-50 text-amber-700 font-medium hover:bg-amber-100 transition-all rounded-xl dark:border-amber-500 dark:bg-amber-500/10 dark:text-amber-200"
+                      className="flex-1 rounded-2xl border border-amber-400 bg-amber-50/95 text-sm font-semibold text-amber-700 transition-all duration-200 hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 dark:border-amber-500 dark:bg-amber-500/10 dark:text-amber-200"
                       onClick={handleCancelCollection}
                     >
-                      Cancel
+                        Cancel
                     </Button>
                   )}
                 </div>
@@ -959,7 +892,7 @@ export function PromptBuilderPanel({
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -4 }}
                       transition={{ duration: 0.25 }}
-                      className="text-sm text-muted-foreground flex items-center gap-2"
+                      className="flex items-center gap-2 text-sm font-medium text-neutral-600 dark:text-white"
                     >
                       <span className="inline-flex h-2 w-2 flex-shrink-0 rounded-full bg-gradient-to-r from-violet-500 to-neutral-900 animate-pulse" />
                       <span>{progressMessage}</span>
@@ -976,10 +909,11 @@ export function PromptBuilderPanel({
                     transition={{ duration: 0.3 }}
                   >
                     <Button
+                      variant="ghost"
                       className={cn(
-                        "w-full bg-gradient-to-r from-neutral-900 to-violet-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all rounded-xl",
+                        "w-full rounded-2xl bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 font-semibold tracking-tight text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] transition-all duration-300 hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400 focus-visible:ring-fuchsia-300 focus-visible:ring-offset-0",
                         (isGenerating || isCollectionRun) &&
-                          "from-neutral-500 to-neutral-500 text-neutral-200 hover:shadow-lg",
+                          "from-purple-300 via-fuchsia-300 to-indigo-300 text-white opacity-80 hover:from-purple-300 hover:via-fuchsia-300 hover:to-indigo-300",
                       )}
                       onClick={hasCollectionSelection ? handleGenerateCollection : handleGenerateTemplate}
                       disabled={isGenerating || isCollectionRun}
@@ -1008,7 +942,7 @@ export function PromptBuilderPanel({
             transition={{ duration: 0.3 }}
             className="space-y-4"
           >
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm font-medium text-neutral-600 dark:text-white">
               Browse and manage your saved templates in the Custom panel below.
             </p>
           </motion.div>
@@ -1016,9 +950,9 @@ export function PromptBuilderPanel({
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-2xl">
+  <DialogContent className="rounded-3xl border border-white/40 bg-white/85 text-neutral-900 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_40px_-10px_rgba(0,0,0,0.25)] dark:border-white/24 dark:bg-[#0c0c12]/78 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_18px_48px_-18px_rgba(0,0,0,0.6)]">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">
+            <DialogTitle className="text-lg font-semibold text-neutral-900 dark:text-white">
               Save Template
             </DialogTitle>
           </DialogHeader>
@@ -1027,14 +961,20 @@ export function PromptBuilderPanel({
             placeholder="Enter template name..."
             value={templateName}
             onChange={(e) => setTemplateName(e.target.value)}
-            className="mt-4"
+            className={cn("mt-4", inputSurfaceClass)}
           />
 
           <DialogFooter className="mt-6 flex justify-end gap-3">
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <Button
+              variant="ghost"
+              className="rounded-2xl border border-white/40 bg-white/65 px-4 py-2 text-sm font-semibold text-neutral-900 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 dark:border-white/24 dark:bg-[#111111]/70 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]"
+              onClick={() => setIsDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button
+              variant="ghost"
+              className="rounded-2xl bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 px-4 py-2 font-semibold tracking-tight text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] transition-all duration-300 hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400 focus-visible:ring-fuchsia-300 focus-visible:ring-offset-0"
               onClick={() => {
                 handleSaveTemplate();
                 setTemplateName("");
