@@ -9,25 +9,25 @@ export interface Collection {
   createdAt: string;
 }
 
+const STORAGE_KEY = "RenderLab_collections";
+
 export function useCollections() {
-  const STORAGE_KEY = "RenderLab_collections";
   const [collections, setCollections] = useState<Collection[]>([]);
 
   // === LOAD COLLECTIONS FROM LOCALSTORAGE ===
-useEffect(() => {
-  try {
-    const saved = localStorage.getItem("collections");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed)) {
-        // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
-        setCollections(parsed);
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY); // ← ИСПРАВЛЕНО
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          setCollections(parsed);
+        }
       }
+    } catch (err) {
+      console.error("Error restoring collections:", err);
     }
-  } catch (err) {
-    console.error("Error restoring collections:", err);
-  }
-}, []);
+  }, []);
 
   // === SAVE COLLECTIONS ===
   const saveCollections = (data: Collection[]) => {

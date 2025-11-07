@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import pLimit from "p-limit";
 import { generateSingle } from "@/lib/generateSingle";
+import { createClient } from "@/lib/supabaseServer";
 
 export const runtime = "nodejs";
 
@@ -126,9 +127,22 @@ function buildErrorEvent(
 
 export async function POST(req: Request) {
   try {
+    // 🔵 Проверяем авторизацию
+    const supabase = createClient();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await req.json();
     const collectionId: string | null =
       typeof body?.collectionId === "string" ? body.collectionId : null;
+    const collectionName: string | null =
+      typeof body?.collectionName === "string" ? body.collectionName : null;
     const templates: TemplateInput[] = Array.isArray(body?.templates)
       ? body.templates
       : [];
@@ -204,15 +218,35 @@ export async function POST(req: Request) {
                 model: normalized.model,
               });
 
-              if (result.status === "ok") {
+              if (result.status === "ok" && result.url) {
                 succeeded += 1;
+
+                // 🔵 Сохраняем в базу данных
+                const imageName = collectionName 
+                  ? `${collectionName}_${index + 1}_${Date.now()}`
+                  : `collection_${collectionId || 'unknown'}_${index + 1}_${Date.now()}`;
+
+                const { error: dbError } = await supabase
+                  .from("images")
+                  .insert([{
+                    user_id: user.id,
+                    name: imageName,
+                    url: result.url,
+                  }]);
+
+                if (dbError) {
+                  console.error('❌ [COLLECTION] DB Error:', dbError);
+                } else {
+                  console.log('✅ [COLLECTION] Saved to DB:', imageName);
+                }
+
                 enqueue(controller, {
                   type: "progress",
                   index,
                   collectionId,
                   templateId: normalized.id,
                   status: "ok",
-                  url: result.url ?? null,
+                  url: result.url,
                 });
               } else {
                 failed += 1;

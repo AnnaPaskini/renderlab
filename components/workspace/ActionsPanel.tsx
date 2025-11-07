@@ -11,10 +11,11 @@ type ActionsPanelProps = {
   onRename: () => void;
   onSave: () => void;
   onAddTemplate: () => void;
+  onDelete?: () => void;
   onBack: () => void;
 };
 
-export function ActionsPanel({ onDuplicate, onRename, onSave, onAddTemplate, onBack }: ActionsPanelProps) {
+export function ActionsPanel({ onDuplicate, onRename, onSave, onAddTemplate, onDelete, onBack }: ActionsPanelProps) {
   const [open, setOpen] = useState(false);
 useEffect(() => {
   document.body.classList.toggle("actions-open", open);
@@ -120,22 +121,50 @@ useEffect(() => {
                 </div>
 
                 <div className="flex flex-col items-center space-y-3 mt-4">
-  {[
-    { label: "Duplicate", onClick: onDuplicate },
-    { label: "Rename", onClick: onRename },
-    { label: "Save", onClick: onSave },
-    { label: "+ Add Template", onClick: onAddTemplate },
-    { label: "Back", onClick: onBack },
-  ].map(({ label, onClick }) => (
+  <Button
+    variant="ghost"
+    onClick={onDuplicate}
+    className="min-w-[260px] bg-gray-100 text-gray-900 text-base font-semibold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
+  >
+    Duplicate
+  </Button>
+  <Button
+    variant="ghost"
+    onClick={onRename}
+    className="min-w-[260px] bg-gray-100 text-gray-900 text-base font-semibold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
+  >
+    Rename
+  </Button>
+  <Button
+    variant="ghost"
+    onClick={onSave}
+    className="min-w-[260px] bg-gray-100 text-gray-900 text-base font-semibold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
+  >
+    Save
+  </Button>
+  <Button
+    variant="ghost"
+    onClick={onAddTemplate}
+    className="min-w-[260px] bg-gray-100 text-gray-900 text-base font-semibold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
+  >
+    + Add Template
+  </Button>
+  {onDelete && (
     <Button
-      key={label}
       variant="ghost"
-      onClick={onClick}
-      className="min-w-[260px] bg-gray-100 text-gray-900 text-base font-semibold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
+      onClick={onDelete}
+      className="min-w-[260px] bg-red-50 text-red-600 text-base font-semibold py-2 px-6 rounded-lg hover:bg-red-100 hover:text-red-700 transition"
     >
-      {label}
+      Delete
     </Button>
-  ))}
+  )}
+  <Button
+    variant="ghost"
+    onClick={onBack}
+    className="min-w-[260px] bg-gray-100 text-gray-900 text-base font-semibold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
+  >
+    Back
+  </Button>
 </div>
 
 

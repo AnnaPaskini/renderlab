@@ -15,6 +15,7 @@ export function ThemeProvider({
 }: React.ComponentProps<typeof NextThemesProvider>) {
   return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
 }
+
 export const metadata = {
   title: "Everything AI",
   description: "Everything AI platform built on RenderLab template",
@@ -54,7 +55,18 @@ export default async function RootLayout({
             <SupabaseAuthProvider>
               {showNavbar && <NavBar />}
               {children}
-              <Toaster />
+              <Toaster 
+                position="bottom-right"
+                toastOptions={{
+                  style: {
+                    background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    color: 'white',
+                    borderRadius: '12px',
+                    padding: '16px',
+                  },
+                }}
+              />
             </SupabaseAuthProvider>
           </ThemeProvider>
         </body>
