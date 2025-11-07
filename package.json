@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -20,6 +20,7 @@
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-toggle-group": "^1.1.0",
+    "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.78.0",
     "@tabler/icons-react": "^3.35.0",
     "@tailwindcss/typography": "^0.5.19",

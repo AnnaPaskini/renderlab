@@ -14,20 +14,20 @@ export function useCollections() {
   const [collections, setCollections] = useState<Collection[]>([]);
 
   // === LOAD COLLECTIONS FROM LOCALSTORAGE ===
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          setCollections(parsed);
-        }
+useEffect(() => {
+  try {
+    const saved = localStorage.getItem("collections");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+        setCollections(parsed);
       }
-    } catch (err) {
-      console.error("Failed to parse collections from localStorage:", err);
-      setCollections([]);
     }
-  }, []);
+  } catch (err) {
+    console.error("Error restoring collections:", err);
+  }
+}, []);
 
   // === SAVE COLLECTIONS ===
   const saveCollections = (data: Collection[]) => {

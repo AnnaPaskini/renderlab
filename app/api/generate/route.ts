@@ -1,6 +1,16 @@
 import { NextResponse } from "next/server";
+<<<<<<< HEAD
 import { generateSingle } from "@/lib/generateSingle";
 
+=======
+import { createClient } from "@/lib/supabaseServer";
+import { generateSingle } from "@/lib/generateSingle";
+
+/**
+ * CREATE endpoint without reference image.
+ * Generates image via Replicate and saves to database.
+ */
+>>>>>>> milestone-preview-v1
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));

@@ -3,6 +3,14 @@
 @tailwind utilities;
 
 
+*,
+*::before,
+*::after {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -22,10 +30,144 @@ html {
   scroll-behavior: smooth;
 }
 
+body {
+  background-attachment: fixed;
+  background-image:
+    radial-gradient(circle at 12% 20%, rgba(244,114,182,0.05), transparent 42%),
+    radial-gradient(circle at 88% 25%, rgba(250,204,21,0.04), transparent 40%),
+    radial-gradient(circle at 50% 88%, rgba(129,140,248,0.06), transparent 45%);
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+
+  .text-shadow-soft {
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .glass-blur-24 {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  .panel-dimmer {
+    --panel-surface: rgba(255, 255, 255, 0.65);
+    --panel-border: rgba(255, 255, 255, 0.4);
+    --panel-shadow-top: inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    --panel-shadow-bottom: inset 0 -1px 2px rgba(0, 0, 0, 0.05);
+    --panel-shadow-glow: inset 0 0 8px rgba(0, 0, 0, 0.04);
+    --panel-shadow-outer: 0 8px 30px -12px rgba(0, 0, 0, 0.08);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--panel-shadow-top), var(--panel-shadow-bottom), var(--panel-shadow-glow), var(--panel-shadow-outer);
+  background: transparent;
+  }
+
+  .panel-dimmer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--panel-surface);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+    z-index: -1;
+  }
+
+  .panel-soft {
+    --panel-surface: rgba(255, 255, 255, 0.65);
+  }
+
+  .panel-strong {
+    --panel-surface: rgba(255, 255, 255, 0.85);
+    --panel-shadow-outer: 0 8px 40px -10px rgba(0, 0, 0, 0.25);
+  }
+
+  .panel-divider {
+    box-shadow: inset -2px 0 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .nav-surface {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .nav-surface::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: -1;
+    background: rgba(18, 18, 30, 0.28);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+  }
+
+  .nav-surface::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: -2;
+    background: radial-gradient(circle at 12% 20%, rgba(244, 114, 182, 0.18), transparent 45%),
+      radial-gradient(circle at 82% 25%, rgba(250, 204, 21, 0.14), transparent 45%),
+      radial-gradient(circle at 50% 90%, rgba(129, 140, 248, 0.18), transparent 45%);
+  }
+
+  .nav-overlay {
+    position: relative;
+  }
+
+  .nav-overlay::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: 0;
+    background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.25), transparent);
+  }
+
+  .nav-overlay > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .btn-gradient {
+    background-image: linear-gradient(to right, var(--tw-gradient-stops));
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 4px 15px rgba(150, 100, 255, 0.4);
+  }
+}
+.dark .panel-dimmer {
+  --panel-surface: rgba(17, 17, 17, 0.7);
+  --panel-border: rgba(255, 255, 255, 0.24);
+  --panel-shadow-top: inset 0 1px 1px rgba(255, 255, 255, 0.16);
+  --panel-shadow-bottom: inset 0 -1px 2px rgba(0, 0, 0, 0.45);
+  --panel-shadow-glow: inset 0 0 10px rgba(0, 0, 0, 0.26);
+  --panel-shadow-outer: 0 12px 36px -14px rgba(0, 0, 0, 0.55);
+}
+.dark .panel-strong {
+  --panel-surface: rgba(12, 12, 18, 0.78);
+  --panel-shadow-outer: 0 18px 48px -18px rgba(0, 0, 0, 0.6);
+}
+
+.dark .panel-divider {
+  box-shadow: inset -2px 0 4px rgba(0, 0, 0, 0.35);
+}
+
+.dark .nav-surface::before {
+  background: rgba(8, 8, 12, 0.6);
+}
+
+.dark .nav-surface::after {
+  background: radial-gradient(circle at 12% 20%, rgba(244, 114, 182, 0.18), transparent 45%),
+    radial-gradient(circle at 82% 25%, rgba(250, 204, 21, 0.12), transparent 45%),
+    radial-gradient(circle at 50% 90%, rgba(129, 140, 248, 0.2), transparent 45%);
 }
 body.actions-open nav {
   filter: blur(2px);
@@ -38,7 +180,7 @@ body.actions-open nav {
   /* Базовые значения — можно переопределять инлайном или модификаторами */
   --dot-size: 18px;        /* шаг между точками (меньше = плотнее) */
   --dot-radius: 1.4px;     /* радиус точки (больше = жирнее) */
-  --dot-alpha: 0.35;       /* прозрачность точки (больше = контрастнее) */
+  --dot-alpha: 0.14;       /* прозрачность точки (больше = контрастнее) */
 
   background-image: radial-gradient(
     circle,
@@ -52,7 +194,7 @@ body.actions-open nav {
 
 .dark .dot-grid {
   /* в тёмной теме делаем точки светлее и чуть контрастнее */
-  --dot-alpha: 0.30;
+  --dot-alpha: 0.15;
   background-image: radial-gradient(
     circle,
     rgba(255, 255, 255, var(--dot-alpha)) var(--dot-radius),
@@ -64,7 +206,7 @@ body.actions-open nav {
 .dot-grid {
   --dot-size: 14px;     /* шаг между точками: меньше = плотнее */
   --dot-radius: 1.6px;  /* радиус точки: больше = жирнее */
-  --dot-alpha: 0.50;    /* контраст: больше = сильнее видно */
+  --dot-alpha: 0.15;    /* контраст: больше = сильнее видно */
 
   background-image: radial-gradient(
     circle,
@@ -77,7 +219,7 @@ body.actions-open nav {
 }
 
 .dark .dot-grid {
-  --dot-alpha: 0.40;  /* в тёмной теме чуть мягче */
+  --dot-alpha: 0.15;  /* в тёмной теме чуть мягче */
   background-image: radial-gradient(
     circle,
     rgba(255, 255, 255, var(--dot-alpha)) var(--dot-radius),
@@ -90,7 +232,7 @@ body.actions-open nav {
 .dot-grid {
   --dot-size: 18px;     /* шаг: меньше = плотнее */
   --dot-radius: 1.4px;  /* радиус точки: больше = жирнее */
-  --dot-alpha: 0.35;    /* контраст: больше = заметнее */
+  --dot-alpha: 0.15;    /* контраст: больше = заметнее */
 
   background-image: radial-gradient(
     circle,
@@ -144,3 +286,45 @@ body.actions-open nav {
   --grid-line: rgba(255, 255, 255, 0.08); /* более мягкие линии в тёмной теме */
 }
 
+/* =========================
+   RenderLab Aura Glow System
+   ========================= */
+.aura {
+  position: relative;
+  transition: box-shadow 0.35s ease, transform 0.25s ease;
+  box-shadow:
+    inset 0 0 0 0 rgba(200,140,255,0.12),
+    0 0 0 0 rgba(200,140,255,0.12);
+}
+
+.aura:hover {
+  box-shadow:
+    inset 0 0 10px rgba(200,140,255,0.25),
+    0 0 15px rgba(200,140,255,0.18);
+  transform: translateY(-1px);
+}
+
+.dark .aura {
+  box-shadow:
+    inset 0 0 0 0 rgba(200,140,255,0.08),
+    0 0 0 0 rgba(200,140,255,0.08);
+}
+
+.dark .aura:hover {
+  box-shadow:
+    inset 0 0 10px rgba(200,140,255,0.25),
+    0 0 18px rgba(200,140,255,0.22);
+}
+
+/* Optionally, a soft glow pulse for premium UI elements */
+@keyframes auraPulse {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(255,255,255,0.15);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255,255,255,0.25);
+  }
+}
+.aura-glow {
+  animation: auraPulse 4s ease-in-out infinite;
+}
