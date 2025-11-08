@@ -90,6 +90,22 @@ const supabase = createClient();
           </div>
         </div>
 
+        <div className="flex items-center justify-between text-sm">
+          <label className="flex items-center gap-2 cursor-pointer group">
+            <input
+              type="checkbox"
+              className="h-4 w-4 rounded border-white/20 bg-white/10 text-purple-500 focus:ring-2 focus:ring-purple-400 focus:ring-offset-0 transition-colors"
+            />
+            <span className="text-neutral-300 group-hover:text-white transition-colors">Remember me</span>
+          </label>
+          <Link
+            href="/forgot-password"
+            className="text-purple-300 hover:text-purple-200 transition-colors font-medium"
+          >
+            Forgot password?
+          </Link>
+        </div>
+
         <Button
           type="submit"
           disabled={loading}

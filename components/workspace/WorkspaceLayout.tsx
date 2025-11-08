@@ -133,28 +133,19 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
         />
 
         <div className={`relative z-[${Z.LOW}] flex min-h-full flex-col gap-6 px-4 pb-10 pt-16 md:px-8 md:pt-20`}>
-          <div className="relative z-10 flex w-full items-center justify-between rounded-2xl border border-white/40 bg-white/85 px-4 py-3 text-sm font-semibold tracking-tight text-white backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_40px_-10px_rgba(0,0,0,0.25)] dark:border-white/24 dark:bg-[#0c0c12]/78 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_18px_48px_-18px_rgba(0,0,0,0.6)] md:px-8 md:text-base">
-            <h1 className="font-semibold text-white">
+          <div className="relative z-10 flex w-full items-center justify-between rounded-2xl border border-white/40 bg-white/85 px-4 py-3 text-sm font-semibold tracking-tight backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_40px_-10px_rgba(0,0,0,0.25)] dark:border-white/24 dark:bg-[#0c0c12]/78 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_18px_48px_-18px_rgba(0,0,0,0.6)] md:px-8 md:text-base">
+            <h1 className="font-semibold text-neutral-900 dark:text-white">
               Hey, {greetingName} — keep crafting!
             </h1>
             <div className="flex items-center gap-2">
-              <div className="hidden items-center gap-2 rounded-full border border-white/25 bg-white/20 px-3 py-1.5 text-sm font-medium text-neutral-900 shadow-[inset_0_0_6px_rgba(0,0,0,0.04),0_12px_24px_-12px_rgba(12,12,24,0.45)] dark:border-white/20 dark:bg-white/10 dark:text-white sm:flex">
-                <img
-                  src={avatarUrl || "/default-avatar.png"}
-                  alt="User avatar"
-                  className="h-7 w-7 flex-shrink-0 rounded-full border border-white/40 object-cover"
-                  referrerPolicy="no-referrer"
-                />
-                <span className="max-w-[160px] truncate text-neutral-900 dark:text-white">{displayName}</span>
-              </div>
               <UserMenu />
             </div>
           </div>
 
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-white md:text-3xl">Welcome back</h2>
-              <p className="text-sm font-medium text-white">Keep crafting stunning visuals with RenderLab.</p>
+              <h2 className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-white md:text-3xl">Welcome back</h2>
+              <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Keep crafting stunning visuals with RenderLab.</p>
             </div>
           </div>
 

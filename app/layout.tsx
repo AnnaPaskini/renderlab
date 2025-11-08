@@ -39,7 +39,7 @@ export default async function RootLayout({
 
   return (
     <ViewTransitions>
-      <html lang="en" suppressHydrationWarning>
+     <html lang="en" className="light" suppressHydrationWarning>
         <body
   className={cn(
     GeistSans.className,
