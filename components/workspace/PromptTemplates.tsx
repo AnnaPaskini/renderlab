@@ -234,12 +234,12 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
   };
 
   return (
-    <div className="p-4 h-full overflow-auto">
+    <div className="h-full overflow-auto">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">My Templates</h2>
+        <h2 className="text-lg font-semibold leading-none text-gray-900 dark:text-gray-100">My Templates</h2>
         <Button
           onClick={() => setIsCreateOpen(true)}
-          className="bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-lg shadow-purple-500/30"
+          className="h-9 bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-lg shadow-purple-500/30"
         >
           + New Template
         </Button>

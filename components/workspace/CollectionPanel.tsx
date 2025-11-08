@@ -403,12 +403,12 @@ export function CollectionsPanel() {
 					onDragLeave={handleDragLeave}
 					onDragEnd={handleDragEnd}
 				>
-					<div className="flex items-center justify-between border-b border-neutral-200 pb-3 mb-5 dark:border-neutral-800">
+					<div className="flex items-center justify-between border-b border-neutral-200 pb-3 mb-6 dark:border-neutral-800">
 						<div>
-							<h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+							<h2 className="text-lg font-semibold leading-none text-neutral-900 dark:text-neutral-100">
 								{activeCollection?.title || "Untitled Collection"}
 							</h2>
-							<div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+							<div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
 								{(activeCollection.templates?.length ?? 0)}/5 templates
 							</div>
 						</div>
@@ -491,11 +491,11 @@ export function CollectionsPanel() {
 				</div>
 			) : (
 				<div className="flex h-full flex-col gap-4 overflow-auto">
-					<div className="flex items-center justify-between">
-						<h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">My Collections</h2>
+					<div className="flex items-center justify-between mb-6">
+						<h2 className="text-lg font-semibold leading-none text-gray-900 dark:text-gray-100">My Collections</h2>
 						<Button
 							onClick={() => setIsCreateOpen(true)}
-							className="bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-lg shadow-purple-500/30"
+							className="h-9 bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-lg shadow-purple-500/30"
 						>
 							+ New Collection
 						</Button>
