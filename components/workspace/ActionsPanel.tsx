@@ -123,28 +123,40 @@ useEffect(() => {
                 <div className="flex flex-col items-center space-y-3 mt-4">
   <Button
     variant="ghost"
-    onClick={onDuplicate}
+    onClick={() => {
+      onDuplicate();
+      closePanel();
+    }}
     className="min-w-[260px] bg-gray-100 text-gray-900 text-base font-semibold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
   >
     Duplicate
   </Button>
   <Button
     variant="ghost"
-    onClick={onRename}
+    onClick={() => {
+      onRename();
+      closePanel();
+    }}
     className="min-w-[260px] bg-gray-100 text-gray-900 text-base font-semibold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
   >
     Rename
   </Button>
   <Button
     variant="ghost"
-    onClick={onSave}
+    onClick={() => {
+      onSave();
+      closePanel();
+    }}
     className="min-w-[260px] bg-gray-100 text-gray-900 text-base font-semibold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
   >
     Save
   </Button>
   <Button
     variant="ghost"
-    onClick={onAddTemplate}
+    onClick={() => {
+      onAddTemplate();
+      closePanel();
+    }}
     className="min-w-[260px] bg-gray-100 text-gray-900 text-base font-semibold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
   >
     + Add Template
@@ -152,7 +164,10 @@ useEffect(() => {
   {onDelete && (
     <Button
       variant="ghost"
-      onClick={onDelete}
+      onClick={() => {
+        onDelete();
+        closePanel();
+      }}
       className="min-w-[260px] bg-red-50 text-red-600 text-base font-semibold py-2 px-6 rounded-lg hover:bg-red-100 hover:text-red-700 transition"
     >
       Delete
@@ -160,7 +175,10 @@ useEffect(() => {
   )}
   <Button
     variant="ghost"
-    onClick={onBack}
+    onClick={() => {
+      onBack();
+      closePanel();
+    }}
     className="min-w-[260px] bg-gray-100 text-gray-900 text-base font-semibold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
   >
     Back

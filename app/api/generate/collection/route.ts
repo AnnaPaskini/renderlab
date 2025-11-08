@@ -128,7 +128,7 @@ function buildErrorEvent(
 export async function POST(req: Request) {
   try {
     // 🔵 Проверяем авторизацию
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
       error: userError,

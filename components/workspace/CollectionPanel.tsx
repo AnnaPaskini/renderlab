@@ -84,15 +84,15 @@ function LeonardoDialog({
 	if (!open || !mounted) return null;
 
 	const dialog = (
-		<div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 animate-in fade-in duration-200">
+		<div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 lg:p-8 animate-in fade-in duration-200">
 			{/* Backdrop */}
 			<div
-				className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+				className="absolute inset-0 bg-black/50 backdrop-blur-md"
 				onClick={onClose}
 			/>
 
 			{/* Dialog */}
-			<div className="relative w-full max-w-md rounded-xl bg-white dark:bg-gray-900 p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+			<div className="relative w-full max-w-md mx-auto rounded-xl bg-white dark:bg-gray-900 p-6 shadow-2xl animate-in zoom-in-95 duration-200">
 				<h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{title}</h3>
 				<div className="space-y-4">{children}</div>
 				{footer && <div className="mt-6 flex justify-end gap-3">{footer}</div>}
@@ -129,6 +129,27 @@ export function CollectionsPanel() {
 	const [duplicateDraft, setDuplicateDraft] = useState("");
 	const [isDropActive, setIsDropActive] = useState(false);
 
+	// Validation helpers
+	const isCollectionNameExists = (name: string, excludeId?: string): boolean => {
+		const trimmedName = name.trim().toLowerCase();
+		return collections.some(collection => 
+			collection.title.toLowerCase() === trimmedName && 
+			collection.id !== excludeId
+		);
+	};
+
+	const generateUniqueCollectionName = (baseName: string): string => {
+		let name = baseName.trim();
+		let counter = 1;
+		
+		while (isCollectionNameExists(name)) {
+			counter++;
+			name = `${baseName.trim()} ${counter}`;
+		}
+		
+		return name;
+	};
+
 	const handleSaveCollection = () => {
 		toast.success("Collection saved successfully!", {
 			description: "Your changes have been saved",
@@ -150,6 +171,13 @@ export function CollectionsPanel() {
 		if (!renameTargetId) return;
 		const trimmed = renameDraft.trim();
 		if (!trimmed) return;
+
+		if (isCollectionNameExists(trimmed, renameTargetId)) {
+			toast.error("Collection name already exists", {
+				description: "Please choose a different name",
+			});
+			return;
+		}
 
 		const shouldKeepSelection = selectedCollectionId === renameTargetId;
 		renameCollection(renameTargetId, trimmed);
@@ -174,12 +202,19 @@ export function CollectionsPanel() {
 		const trimmed = duplicateDraft.trim();
 		if (!trimmed) return;
 
-		const newId = duplicateCollection(duplicateTargetId, trimmed);
+		// Generate unique name if duplicate exists
+		const uniqueName = generateUniqueCollectionName(trimmed);
+		
+		const newId = duplicateCollection(duplicateTargetId, uniqueName);
 		setDuplicateTargetId(null);
 		setDuplicateDraft("");
 
+		const message = uniqueName !== trimmed 
+			? `Created "${uniqueName}" (name was adjusted to avoid duplicate)`
+			: `Created "${uniqueName}"`;
+
 		toast.success("Collection duplicated!", {
-			description: `Created "${trimmed}"`,
+			description: message,
 		});
 
 		if (newId) setSelectedCollectionId(newId);
@@ -188,6 +223,13 @@ export function CollectionsPanel() {
 	const handleCreateCollection = () => {
 		const trimmed = newCollectionTitle.trim();
 		if (!trimmed) return;
+
+		if (isCollectionNameExists(trimmed)) {
+			toast.error("Collection name already exists", {
+				description: "Please choose a different name",
+			});
+			return;
+		}
 
 		const newId = createCollection(trimmed);
 		setIsCreateOpen(false);
@@ -213,6 +255,16 @@ export function CollectionsPanel() {
 
 	const handleAddTemplateToCollection = () => {
 		if (!selectedCollectionId || !templateSelection) return;
+		
+		// Check template limit
+		const currentCollection = collections.find(c => c.id === selectedCollectionId);
+		if (currentCollection && (currentCollection.templates?.length ?? 0) >= 5) {
+			toast.error("Collection limit reached", {
+				description: "Maximum 5 templates per collection",
+			});
+			return;
+		}
+
 		addTemplate(selectedCollectionId, prepareTemplateForCollection(templateSelection));
 		setIsTemplatePickerOpen(false);
 		
@@ -233,6 +285,16 @@ export function CollectionsPanel() {
 
 		try {
 			const parsed = JSON.parse(payload) as TemplateLike;
+			
+			// Check template limit
+			const currentCollection = collections.find(c => c.id === selectedCollectionId);
+			if (currentCollection && (currentCollection.templates?.length ?? 0) >= 5) {
+				toast.error("Collection limit reached", {
+					description: "Maximum 5 templates per collection",
+				});
+				return;
+			}
+
 			addTemplate(selectedCollectionId, prepareTemplateForCollection(parsed));
 			
 			toast.success("Template added!", {
@@ -251,7 +313,11 @@ export function CollectionsPanel() {
 	};
 
 	const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
-		if (event.currentTarget === event.target) setIsDropActive(false);
+		setIsDropActive(false);
+	};
+
+	const handleDragEnd = () => {
+		setIsDropActive(false);
 	};
 
 	const handleRemoveTemplate = () => {
@@ -330,16 +396,22 @@ export function CollectionsPanel() {
 			{activeCollection ? (
 				<div
 					className={`flex h-full flex-col gap-4 overflow-auto transition-colors ${
-						isDropActive ? "bg-blue-50 dark:bg-blue-950/20" : ""
+						isDropActive ? "bg-purple-50 dark:bg-purple-950/20" : ""
 					}`}
 					onDrop={handleTemplateDrop}
 					onDragOver={handleDragOver}
 					onDragLeave={handleDragLeave}
+					onDragEnd={handleDragEnd}
 				>
 					<div className="flex items-center justify-between border-b border-neutral-200 pb-3 mb-5 dark:border-neutral-800">
-						<h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-							{activeCollection?.title || "Untitled Collection"}
-						</h2>
+						<div>
+							<h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+								{activeCollection?.title || "Untitled Collection"}
+							</h2>
+							<div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+								{(activeCollection.templates?.length ?? 0)}/5 templates
+							</div>
+						</div>
 						<ActionsPanel
 							onDuplicate={() => {
 								if (activeCollection) {
@@ -478,7 +550,7 @@ export function CollectionsPanel() {
 					<>
 						<button
 							onClick={() => setIsCreateOpen(false)}
-							className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition rounded-lg"
+							className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800 transition rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
 						>
 							Cancel
 						</button>
@@ -496,7 +568,7 @@ export function CollectionsPanel() {
 					value={newCollectionTitle}
 					onChange={(event) => setNewCollectionTitle(event.target.value)}
 					placeholder="Collection name"
-					className="bg-white/5 border-white/10 text-white placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500/20"
+					className="w-full px-4 py-2 text-gray-900 bg-white border-2 border-purple-300 rounded-lg focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200 placeholder:text-gray-400"
 					autoFocus
 					onKeyDown={(event) => {
 						if (event.key === "Enter") {
@@ -518,7 +590,7 @@ export function CollectionsPanel() {
 								setDuplicateTargetId(null);
 								setDuplicateDraft("");
 							}}
-							className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition rounded-lg"
+							className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800 transition rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
 						>
 							Cancel
 						</button>
@@ -536,7 +608,7 @@ export function CollectionsPanel() {
 					value={duplicateDraft}
 					onChange={(event) => setDuplicateDraft(event.target.value)}
 					placeholder="New collection name"
-					className="bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-500 dark:bg-white/5 dark:border-white/10 dark:text-white dark:placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500/20"
+					className="w-full px-4 py-2 text-gray-900 bg-white border-2 border-purple-300 rounded-lg focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200 placeholder:text-gray-400"
 					autoFocus
 					onKeyDown={(event) => {
 						if (event.key === "Enter") {
@@ -558,13 +630,13 @@ export function CollectionsPanel() {
 								setRenameTargetId(null);
 								setRenameDraft("");
 							}}
-							className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition rounded-lg"
+							className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800 transition rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
 						>
 							Cancel
 						</button>
 						<button
 							onClick={handleRenameSubmit}
-							disabled={!renameDraft.trim()}
+							disabled={!renameDraft.trim() || isCollectionNameExists(renameDraft.trim(), renameTargetId || undefined)}
 							className="px-6 py-2 text-sm font-medium bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg shadow-purple-500/30"
 						>
 							Rename
@@ -576,7 +648,11 @@ export function CollectionsPanel() {
 					value={renameDraft}
 					onChange={(event) => setRenameDraft(event.target.value)}
 					placeholder="New name"
-					className="bg-white/5 border-white/10 text-white placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500/20"
+					className={`w-full px-4 py-2 bg-white rounded-lg focus:outline-none focus:ring-2 placeholder:text-gray-400 ${
+						renameDraft.trim() && isCollectionNameExists(renameDraft.trim(), renameTargetId || undefined)
+							? "text-red-600 border-2 border-red-300 focus:border-red-500 focus:ring-red-200"
+							: "text-gray-900 border-2 border-purple-300 focus:border-purple-500 focus:ring-purple-200"
+					}`}
 					autoFocus
 					onKeyDown={(event) => {
 						if (event.key === "Enter") {
@@ -595,7 +671,7 @@ export function CollectionsPanel() {
 					<>
 						<button
 							onClick={() => setDeleteTargetId(null)}
-							className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition rounded-lg"
+							className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800 transition rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
 						>
 							Cancel
 						</button>
@@ -608,9 +684,23 @@ export function CollectionsPanel() {
 					</>
 				}
 			>
-				<p className="text-gray-600 dark:text-gray-300 text-sm">
-					This action cannot be undone. All templates in this collection will be removed.
-				</p>
+				<div
+					tabIndex={0}
+					onKeyDown={(event) => {
+						if (event.key === "Enter") {
+							event.preventDefault();
+							handleDeleteCollection();
+						} else if (event.key === "Escape") {
+							event.preventDefault();
+							setDeleteTargetId(null);
+						}
+					}}
+					className="focus:outline-none"
+				>
+					<p className="text-gray-600 dark:text-gray-300 text-sm">
+						This action cannot be undone. All templates in this collection will be removed.
+					</p>
+				</div>
 			</LeonardoDialog>
 
 			<LeonardoDialog
@@ -621,7 +711,7 @@ export function CollectionsPanel() {
 					<>
 						<button
 							onClick={() => setRemoveTemplateId(null)}
-							className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition rounded-lg"
+							className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800 transition rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
 						>
 							Cancel
 						</button>
@@ -634,9 +724,24 @@ export function CollectionsPanel() {
 					</>
 				}
 			>
-				<p className="text-gray-300 text-sm">
-					The template will be removed from this collection only.
-				</p>
+				<div
+					tabIndex={0}
+					autoFocus
+					onKeyDown={(event) => {
+						if (event.key === "Enter") {
+							event.preventDefault();
+							handleRemoveTemplate();
+						} else if (event.key === "Escape") {
+							event.preventDefault();
+							setRemoveTemplateId(null);
+						}
+					}}
+					className="focus:outline-none"
+				>
+					<p className="text-gray-600 dark:text-gray-300 text-sm">
+						The template will be removed from this collection only.
+					</p>
+				</div>
 			</LeonardoDialog>
 
 			<LeonardoDialog
@@ -647,7 +752,7 @@ export function CollectionsPanel() {
 					<>
 						<button
 							onClick={() => setIsTemplatePickerOpen(false)}
-							className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition rounded-lg"
+							className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800 transition rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
 						>
 							Cancel
 						</button>

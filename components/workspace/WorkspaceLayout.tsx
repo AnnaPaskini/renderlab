@@ -185,10 +185,10 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex-1 w-full"
+            className="flex-1 w-full max-w-7xl mx-auto"
           >
             {activeTab === "builder" ? (
-              <div className="grid w-full max-w-[1400px] grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[1.4fr_1fr] lg:px-8">
+              <div className="grid w-full max-w-[1400px] mx-auto grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[1.4fr_1fr] lg:px-8">
                 <div className="flex flex-col gap-6">
                   <div className="relative overflow-hidden rounded-3xl border border-white/40 bg-white/65 p-6 text-neutral-900 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-shadow dark:border-white/24 dark:bg-[#111111]/70 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)] md:p-8">
                     {leftPanel}
@@ -222,7 +222,7 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
                             {reversedPreviews.map((preview, idx) => {
                               const timestampIso = previewTimestampsRef.current.get(preview ?? "");
                               const formattedTimestamp = timestampIso
-                                ? format(new Date(timestampIso), "MMM d yyyy, HH:mm")
+                                ? format(new Date(timestampIso), "MMM d, yy")
                                 : null;
 
                               return (
@@ -242,7 +242,7 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
                                     className="h-full w-full rounded-lg object-cover"
                                   />
                                   {formattedTimestamp && (
-                                    <div className="absolute bottom-2 right-2 rounded bg-black/70 px-2 py-1 text-[11px] font-medium text-white">
+                                    <div className="absolute top-2 right-2 rounded-md bg-black/70 backdrop-blur-sm px-2 py-1 text-xs font-medium text-white">
                                       {formattedTimestamp}
                                     </div>
                                   )}
@@ -286,7 +286,7 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
                 </div>
               </div>
             ) : (
-              <div className="grid w-full max-w-[1400px] grid-cols-1 gap-6 px-4 py-6 sm:px-6 md:grid-cols-2 lg:px-8">
+              <div className="grid w-full max-w-[1400px] mx-auto grid-cols-1 gap-6 px-4 py-6 sm:px-6 md:grid-cols-2 lg:px-8">
                 <div className="relative overflow-hidden rounded-3xl border border-white/40 bg-white/65 p-6 text-neutral-900 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-shadow dark:border-white/24 dark:bg-[#111111]/70 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)] md:p-8">
                   {leftPanel}
                   <div className={`pointer-events-none absolute inset-0 z-[${Z.TOASTER}]`}>

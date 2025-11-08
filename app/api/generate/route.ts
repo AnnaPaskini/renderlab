@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     }
 
     // Проверяем авторизацию
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
       error: userError,

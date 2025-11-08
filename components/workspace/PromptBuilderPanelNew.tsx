@@ -19,9 +19,16 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useCollections } from "@/lib/useCollections";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
 import { cn } from "@/lib/utils";
+import { IconDotsVertical, IconChevronDown } from "@tabler/icons-react";
 
 export interface PromptBuilderPanelProps {
   onPromptChange?: (prompt: string) => void;
@@ -78,6 +85,14 @@ export function PromptBuilderPanel({
   const [isCollectionRun, setIsCollectionRun] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
+  // Template management state
+  const [renameTemplateTarget, setRenameTemplateTarget] = useState<any | null>(null);
+  const [renameTemplateName, setRenameTemplateName] = useState('');
+  const [isRenameTemplateOpen, setIsRenameTemplateOpen] = useState(false);
+  const [deleteTemplateTarget, setDeleteTemplateTarget] = useState<any | null>(null);
+  const [isDeleteTemplateOpen, setIsDeleteTemplateOpen] = useState(false);
+  const [isTemplateDropdownOpen, setIsTemplateDropdownOpen] = useState(false);
+
   const selectTriggerClass =
     "h-12 w-full rounded-xl border border-white/40 bg-white/65 px-3 text-left text-sm font-medium text-neutral-900 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 dark:border-white/24 dark:bg-[#111111]/70 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]";
   const inputSurfaceClass =
@@ -101,6 +116,19 @@ export function PromptBuilderPanel({
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "") || "template";
+
+    // Filter function to exclude collection-generated templates
+    const isOriginalTemplate = (template: any) => {
+      const name = template?.name || template?.title || '';
+      
+      // Exclude collection-generated templates
+      if (name.includes(' • ')) return false;  // "Winter day • 3"
+      if (name.includes(' - Copy')) return false;  // "autumn scene - Copy"
+      if (/^\d+$/.test(name)) return false;  // Pure numbers like "999"
+      if (/^\d+ • \d+$/.test(name)) return false;  // "9 • 56"
+      
+      return true;
+    };
 
     const registerTemplate = (
       template: any,
@@ -136,18 +164,15 @@ export function PromptBuilderPanel({
       options.push({ id: uniqueId, label: displayLabel });
     };
 
-    templates.forEach((template, index) =>
-      registerTemplate(template, { fallbackIndex: index }),
-    );
-
-    collections.forEach((collection, collectionIndex) => {
-      (collection.templates || []).forEach((template, index) =>
-        registerTemplate(template, {
-          collectionTitle: collection.title,
-          fallbackIndex: collectionIndex * 100 + index,
-        }),
+    // Only register original templates (not collection-generated ones)
+    templates
+      .filter(isOriginalTemplate)
+      .forEach((template, index) =>
+        registerTemplate(template, { fallbackIndex: index }),
       );
-    });
+
+    // Collections are handled separately in Load Collection mode
+    // So we don't register collection templates here anymore
 
     return { options, lookup: map };
   }, [collections, templates]);
@@ -706,6 +731,93 @@ export function PromptBuilderPanel({
     }
   };
 
+  // Template management handlers
+  const CUSTOM_TEMPLATES_STORAGE = "RenderAI_customTemplates";
+
+  const readTemplatesFromStorage = () => {
+    try {
+      const raw = localStorage.getItem(CUSTOM_TEMPLATES_STORAGE);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      console.error("Failed to read templates from storage", error);
+      return [];
+    }
+  };
+
+  const saveTemplatesToStorage = (templates: any[]) => {
+    localStorage.setItem(CUSTOM_TEMPLATES_STORAGE, JSON.stringify(templates));
+    // Refresh the templates list
+    setTemplates(templates);
+  };
+
+  const handleDuplicateTemplate = (template: any) => {
+    const duplicated = {
+      ...template,
+      id: `${template.id || 'template'}-copy-${Date.now()}`,
+      name: `${template.name || template.title || 'Template'} - Copy`,
+      createdAt: new Date().toISOString(),
+    };
+    
+    const existingTemplates = readTemplatesFromStorage();
+    const updatedTemplates = [...existingTemplates, duplicated];
+    saveTemplatesToStorage(updatedTemplates);
+    
+    toast.success(`Template duplicated: ${duplicated.name}`);
+  };
+
+  const handleRenameTemplate = (template: any) => {
+    setRenameTemplateTarget(template);
+    setRenameTemplateName(template.name || template.title || '');
+    setIsRenameTemplateOpen(true);
+  };
+
+  const handleRenameTemplateSubmit = () => {
+    if (!renameTemplateTarget || !renameTemplateName.trim()) return;
+
+    const existingTemplates = readTemplatesFromStorage();
+    const updatedTemplates = existingTemplates.map((t: any) =>
+      t.id === renameTemplateTarget.id || t.createdAt === renameTemplateTarget.createdAt
+        ? { ...t, name: renameTemplateName.trim() }
+        : t
+    );
+    
+    saveTemplatesToStorage(updatedTemplates);
+    
+    toast.success(`Template renamed to: ${renameTemplateName.trim()}`);
+    
+    setIsRenameTemplateOpen(false);
+    setRenameTemplateTarget(null);
+    setRenameTemplateName('');
+  };
+
+  const handleDeleteTemplate = (template: any) => {
+    setDeleteTemplateTarget(template);
+    setIsDeleteTemplateOpen(true);
+  };
+
+  const handleDeleteTemplateConfirm = () => {
+    if (!deleteTemplateTarget) return;
+
+    const existingTemplates = readTemplatesFromStorage();
+    const updatedTemplates = existingTemplates.filter((t: any) =>
+      t.id !== deleteTemplateTarget.id && t.createdAt !== deleteTemplateTarget.createdAt
+    );
+    
+    saveTemplatesToStorage(updatedTemplates);
+    
+    // If this was the active template, clear it
+    if (activeTemplateId === deleteTemplateTarget.id || activeTemplateId === deleteTemplateTarget.createdAt) {
+      setActiveTemplateId(null);
+    }
+    
+    toast.success("Template deleted!");
+    
+    setIsDeleteTemplateOpen(false);
+    setDeleteTemplateTarget(null);
+  };
+
   return (
   <section className="flex h-full flex-col gap-4 overflow-hidden rounded-3xl border border-white/40 bg-white/85 p-6 text-neutral-900 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_40px_-10px_rgba(0,0,0,0.25)] dark:border-white/24 dark:bg-[#0c0c12]/78 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_18px_48px_-18px_rgba(0,0,0,0.6)]">
       <div className="flex-1 overflow-y-auto">
@@ -764,21 +876,93 @@ export function PromptBuilderPanel({
                       className="transition-all duration-300"
                     >
                       {templateOptions.length > 0 ? (
-                        <Select
-                          value={activeTemplateId ?? undefined}
-                          onValueChange={handleTemplateChange}
-                        >
-                          <SelectTrigger className={selectTriggerClass}>
-                            <SelectValue placeholder="Select a saved template" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {templateOptions.map((option) => (
-                              <SelectItem key={option.id} value={option.id}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <DropdownMenu open={isTemplateDropdownOpen} onOpenChange={setIsTemplateDropdownOpen}>
+                          <DropdownMenuTrigger asChild>
+                            <button className={cn(selectTriggerClass, "flex items-center justify-between")}>
+                              <span className="truncate">
+                                {activeTemplateId 
+                                  ? templateOptions.find(opt => opt.id === activeTemplateId)?.label || "Select a saved template"
+                                  : "Select a saved template"
+                                }
+                              </span>
+                              <IconChevronDown size={16} className="ml-2 flex-shrink-0" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent 
+                            className="w-[400px] max-h-[400px] overflow-y-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg"
+                            align="start"
+                          >
+                            {templateOptions.map((option) => {
+                              const template = templateLookup.get(option.id)?.template;
+                              return (
+                                <div
+                                  key={option.id}
+                                  className="flex items-center justify-between w-full group hover:bg-gray-50 dark:hover:bg-gray-800 px-3 py-2 cursor-pointer"
+                                >
+                                  <div 
+                                    className="flex-1 min-w-0"
+                                    onClick={() => {
+                                      handleTemplateChange(option.id);
+                                      setIsTemplateDropdownOpen(false);
+                                    }}
+                                  >
+                                    <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                                      {template?.name || template?.title || "Untitled template"}
+                                    </div>
+                                    {(template?.style || template?.scenario) && (
+                                      <div className="text-sm text-gray-600 dark:text-gray-400 truncate mt-0.5">
+                                        {template.style || template.scenario}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <button
+                                        type="button"
+                                        aria-label="Template options"
+                                        className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-opacity rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 ml-2"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <IconDotsVertical size={16} stroke={1.5} />
+                                      </button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-32">
+                                      <DropdownMenuItem
+                                        onSelect={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          handleDuplicateTemplate(template);
+                                        }}
+                                      >
+                                        Duplicate
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        onSelect={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          handleRenameTemplate(template);
+                                        }}
+                                      >
+                                        Rename
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
+                                        onSelect={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          handleDeleteTemplate(template);
+                                        }}
+                                      >
+                                        Delete
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                              );
+                            })}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       ) : (
                         <div className="rounded-xl border border-dashed border-white/40 bg-white/65 p-4 text-sm font-medium text-neutral-600 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:border-white/24 dark:bg-[#111111]/70 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
                           No saved templates found.
@@ -982,6 +1166,75 @@ export function PromptBuilderPanel({
               }}
             >
               Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rename Template Dialog */}
+      <Dialog open={isRenameTemplateOpen} onOpenChange={setIsRenameTemplateOpen}>
+        <DialogContent className="rounded-3xl border border-white/40 bg-white/85 text-neutral-900 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_40px_-10px_rgba(0,0,0,0.25)] dark:border-white/24 dark:bg-[#0c0c12]/78 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_18px_48px_-18px_rgba(0,0,0,0.6)]">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold text-neutral-900 dark:text-white">
+              Rename Template
+            </DialogTitle>
+          </DialogHeader>
+
+          <Input
+            placeholder="Enter new name..."
+            value={renameTemplateName}
+            onChange={(e) => setRenameTemplateName(e.target.value)}
+            className={cn("mt-4", inputSurfaceClass)}
+            autoFocus
+          />
+
+          <DialogFooter className="mt-6 flex justify-end gap-3">
+            <Button
+              variant="ghost"
+              className="rounded-2xl border border-white/40 bg-white/65 px-4 py-2 text-sm font-semibold text-neutral-900 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 dark:border-white/24 dark:bg-[#111111]/70 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]"
+              onClick={() => setIsRenameTemplateOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="ghost"
+              className="rounded-2xl bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 px-4 py-2 font-semibold tracking-tight text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] transition-all duration-300 hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400 focus-visible:ring-fuchsia-300 focus-visible:ring-offset-0"
+              onClick={handleRenameTemplateSubmit}
+              disabled={!renameTemplateName.trim()}
+            >
+              Rename
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Template Dialog */}
+      <Dialog open={isDeleteTemplateOpen} onOpenChange={setIsDeleteTemplateOpen}>
+        <DialogContent className="rounded-3xl border border-white/40 bg-white/85 text-neutral-900 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_40px_-10px_rgba(0,0,0,0.25)] dark:border-white/24 dark:bg-[#0c0c12]/78 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_18px_48px_-18px_rgba(0,0,0,0.6)]">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold text-neutral-900 dark:text-white">
+              Delete Template?
+            </DialogTitle>
+          </DialogHeader>
+
+          <p className="text-sm text-neutral-600 dark:text-neutral-300 mt-4">
+            Are you sure you want to delete "{deleteTemplateTarget?.name || deleteTemplateTarget?.title || 'this template'}"? This action cannot be undone.
+          </p>
+
+          <DialogFooter className="mt-6 flex justify-end gap-3">
+            <Button
+              variant="ghost"
+              className="rounded-2xl border border-white/40 bg-white/65 px-4 py-2 text-sm font-semibold text-neutral-900 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 dark:border-white/24 dark:bg-[#111111]/70 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]"
+              onClick={() => setIsDeleteTemplateOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="ghost"
+              className="rounded-2xl bg-gradient-to-r from-red-600 to-red-700 px-4 py-2 font-semibold text-white shadow-lg shadow-red-500/30 transition-all duration-300 hover:from-red-700 hover:to-red-800 focus-visible:ring-red-300 focus-visible:ring-offset-0"
+              onClick={handleDeleteTemplateConfirm}
+            >
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -51,25 +51,41 @@ export default function ImagesHistory() {
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-4">
-      {images.map((img) => (
-        <div 
-          key={img.id} 
-          className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-blue-500 transition-colors cursor-pointer group"
-        >
-          <Image
-            src={img.url}
-            alt={img.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
-          />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors" />
-          <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-2 truncate opacity-0 group-hover:opacity-100 transition-opacity">
-            {img.name}
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4 justify-items-center">
+      {images.map((img) => {
+        const date = new Date(img.created_at);
+        const formattedDate = date.toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric', 
+          year: '2-digit' 
+        });
+        
+        return (
+          <div 
+            key={img.id} 
+            className="relative w-full aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-purple-500 dark:hover:border-purple-400 transition-colors cursor-pointer group"
+          >
+            <Image
+              src={img.url}
+              alt={img.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+            />
+            
+            {/* Date overlay - always visible */}
+            <div className="absolute top-2 right-2 px-2 py-1 rounded-md bg-black/70 backdrop-blur-sm text-white text-xs font-medium">
+              {formattedDate}
+            </div>
+            
+            {/* Hover overlay with name */}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors" />
+            <div className="absolute bottom-0 left-0 right-0 bg-black/70 backdrop-blur-sm text-white text-xs p-2 truncate opacity-0 group-hover:opacity-100 transition-opacity">
+              {img.name}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   )
 }

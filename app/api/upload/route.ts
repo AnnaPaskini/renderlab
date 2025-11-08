@@ -5,7 +5,7 @@ export async function POST(req: Request) {
   console.log('🔵 [UPLOAD] Route called');
   
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     console.log('🔵 [UPLOAD] Supabase client created');
     
     const {
