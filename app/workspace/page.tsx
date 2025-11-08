@@ -17,16 +17,12 @@ export default function WorkspacePage() {
 
   const handleGenerate = async (model: string) => {
     if (!prompt) {
-      toast.error("Please build a prompt first", { style: defaultToastStyle });
-      return;
-    }
-
-    if (!uploadedImage) {
-      toast.error("Please upload an image first", { style: defaultToastStyle });
+      toast.error("Please enter a prompt", { style: defaultToastStyle });
       return;
     }
 
     console.log("Model used:", model || "google/nano-banana");
+    console.log("Has reference image:", !!uploadedImage);
     setIsGenerating(true);
 
     try {
@@ -36,7 +32,7 @@ export default function WorkspacePage() {
         body: JSON.stringify({
           prompt,
           model: model || "google/nano-banana",
-          imageUrl: uploadedImage,
+          imageUrl: uploadedImage || null,
         }),
       });
 
@@ -44,12 +40,12 @@ export default function WorkspacePage() {
 
       if (!response.ok) {
         console.error(
-          "Edit request failed:",
+          "Generation request failed:",
           response.status,
           response.statusText,
           rawBody
         );
-        throw new Error(`Edit failed with status ${response.status}`);
+        throw new Error(`Generation failed with status ${response.status}`);
       }
 
       let data: any = null;
@@ -62,19 +58,23 @@ export default function WorkspacePage() {
 
       console.log("API response:", data);
 
-      // === главное изменение ===
       if (data?.status === "succeeded" && data?.output?.imageUrl) {
         const nextImage = data.output.imageUrl;
         setPreviews((prev) => [...prev, nextImage]);
-        toast.success("Image generated successfully!", { style: defaultToastStyle });
+        
+        // Show different toast based on mode
+        if (uploadedImage) {
+          toast.success("✨ Generated from reference image", { style: defaultToastStyle });
+        } else {
+          toast.success("✨ Generated from text prompt only", { style: defaultToastStyle });
+        }
       } else {
         console.error("Unexpected API response:", data);
-        toast.error("Edit failed: " + (data?.error || "Unknown error"), { style: defaultToastStyle });
+        toast.error("Generation failed: " + (data?.error || "Unknown error"), { style: defaultToastStyle });
       }
-      // =========================
     } catch (error) {
-      console.error("Edit error:", error);
-      toast.error("Edit failed - check console for details.", { style: defaultToastStyle });
+      console.error("Generation error:", error);
+      toast.error("Generation failed - check console for details.", { style: defaultToastStyle });
     } finally {
       setIsGenerating(false);
     }
@@ -96,6 +96,7 @@ export default function WorkspacePage() {
             onGenerate={handleGenerate}
             isGenerating={isGenerating}
             onPreviewAdd={(url) => setPreviews((prev) => [...prev, url])}
+            uploadedImage={uploadedImage}
           />
         }
         uploadedImage={uploadedImage}

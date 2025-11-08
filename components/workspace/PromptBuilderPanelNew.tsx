@@ -37,6 +37,7 @@ export interface PromptBuilderPanelProps {
   activeTab?: "builder" | "custom";
   onTabChange?: (tab: "builder" | "custom") => void;
   onPreviewAdd?: (url: string) => void;
+  uploadedImage?: string | null;
 }
 
 type TemplateRecord = {
@@ -52,6 +53,7 @@ export function PromptBuilderPanel({
   activeTab,
   onTabChange,
   onPreviewAdd,
+  uploadedImage,
 }: PromptBuilderPanelProps) {
   const [internalIsGenerating, setInternalIsGenerating] = useState(false);
   const [internalActiveTab, setInternalActiveTab] = useState<"builder" | "custom">(
@@ -460,8 +462,16 @@ export function PromptBuilderPanel({
       return;
     }
 
+    // ✅ ДОБАВЬ ЭТО:
+    console.log("Collection structure:", JSON.stringify(collection, null, 2));
+    console.log("First template:", JSON.stringify(collection.templates?.[0], null, 2));
+
     const templatesPayload = Array.isArray(collection.templates)
-      ? collection.templates
+      ? collection.templates.map((template: any) => ({
+          id: template.id || `template-${Date.now()}`,
+          prompt: template.details || template.name || "",
+          model: template.aiModel || "google/nano-banana",
+        }))
       : [];
 
     if (!templatesPayload.length) {
@@ -496,12 +506,30 @@ export function PromptBuilderPanel({
         total: totalItems,
       });
 
+      // Конвертируем uploadedImage (data URI) в public URL
+      let publicImageUrl = null;
+      if (uploadedImage && uploadedImage.startsWith('data:')) {
+        const blob = await fetch(uploadedImage).then(r => r.blob());
+        const formData = new FormData();
+        formData.append('file', blob, 'reference.png');
+        
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        const uploadData = await uploadRes.json();
+        publicImageUrl = uploadData.output?.publicUrl || null;
+        console.log('✅ Uploaded reference image:', publicImageUrl);
+      }
+
       const response = await fetch("/api/generate/collection", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          collectionId: collection.id,
           templates: templatesPayload,
+          collectionName: collection.name || "Untitled Collection",
+          baseImage: publicImageUrl || uploadedImage || null, // ✅ Используем public URL
         }),
         signal: abortController.signal,
       });
@@ -574,10 +602,20 @@ export function PromptBuilderPanel({
                   }));
 
                   if (typeof event.url === "string" && event.url) {
+                    console.log("✅ [PREVIEW] Adding image to UI:", event.url);
                     if (!collectionPreviewSetRef.current.has(event.url)) {
                       collectionPreviewSetRef.current.add(event.url);
-                      onPreviewAdd?.(event.url);
+                      if (onPreviewAdd) {
+                        onPreviewAdd(event.url);
+                        console.log("✅ [PREVIEW] Called onPreviewAdd with:", event.url);
+                      } else {
+                        console.warn("⚠️ [PREVIEW] onPreviewAdd is not defined");
+                      }
+                    } else {
+                      console.log("⚠️ [PREVIEW] Image already in set, skipping");
                     }
+                  } else {
+                    console.warn("⚠️ [PREVIEW] No URL in event:", event);
                   }
                 } else if (event.status === "error") {
                   failedCount += 1;
@@ -640,9 +678,13 @@ export function PromptBuilderPanel({
                   succeeded: prev.succeeded + 1,
                 }));
                 if (typeof event.url === "string" && event.url) {
+                  console.log("✅ [PREVIEW/TRAILING] Adding image to UI:", event.url);
                   if (!collectionPreviewSetRef.current.has(event.url)) {
                     collectionPreviewSetRef.current.add(event.url);
-                    onPreviewAdd?.(event.url);
+                    if (onPreviewAdd) {
+                      onPreviewAdd(event.url);
+                      console.log("✅ [PREVIEW/TRAILING] Called onPreviewAdd with:", event.url);
+                    }
                   }
                 }
               } else if (event.status === "error") {

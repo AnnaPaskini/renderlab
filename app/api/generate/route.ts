@@ -3,27 +3,24 @@ import { createClient } from "@/lib/supabaseServer";
 import { generateSingle } from "@/lib/generateSingle";
 
 /**
- * CREATE endpoint without reference image.
- * Generates image via Replicate and saves to database.
+ * CREATE endpoint with optional reference image support.
+ * Generates image via Replicate and saves to Supabase DB.
  */
 export async function POST(req: Request) {
   try {
     const contentType = req.headers.get("content-type") || "";
-    if (contentType && !contentType.includes("application/json")) {
+    if (!contentType.includes("application/json")) {
       return NextResponse.json(
         { error: "content-type must be application/json" },
         { status: 415 }
       );
     }
 
-    // Проверяем авторизацию
     const supabase = await createClient();
     const {
       data: { user },
       error: userError,
     } = await supabase.auth.getUser();
-
-    console.log('🔵 [GENERATE] User:', user?.id, 'Error:', userError);
 
     if (userError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -33,23 +30,31 @@ export async function POST(req: Request) {
     const prompt = typeof body?.prompt === "string" ? body.prompt.trim() : "";
     const model = typeof body?.model === "string" ? body.model.trim() : undefined;
 
-    if (!prompt)
+    // ✅ Reference image
+    let referenceImageUrl: string | null = null;
+    if (typeof body?.imageUrl === "string" && body.imageUrl.trim()) {
+      referenceImageUrl = body.imageUrl.trim();
+    } else if (typeof body?.image === "string" && body.image.trim()) {
+      referenceImageUrl = body.image.trim();
+    }
+
+    console.log("🔵 [GENERATE] Prompt:", prompt);
+    console.log("🔵 [GENERATE] Model:", model || "default");
+    console.log("🔵 [GENERATE] Reference:", referenceImageUrl || "none");
+
+    if (!prompt) {
       return NextResponse.json({ error: "prompt is required" }, { status: 400 });
-    if (prompt.length > 4000)
-      return NextResponse.json({ error: "prompt is too long" }, { status: 413 });
+    }
 
-    console.log('🔵 [GENERATE] Starting Replicate generation...');
-    console.log('🔵 [GENERATE] Prompt:', prompt);
-    console.log('🔵 [GENERATE] Model:', model || 'default (google/nano-banana)');
-
-    // Генерируем через Replicate API
+    // ✅ Generate via Replicate
     const result = await generateSingle({
       prompt,
       model,
+      imageUrl: referenceImageUrl,
     });
 
     if (result.status !== "ok" || !result.url) {
-      console.error('❌ [GENERATE] Replicate failed:', result.message);
+      console.error("❌ [GENERATE] Replicate failed:", result.message);
       return NextResponse.json(
         { error: result.message || "Generation failed" },
         { status: 500 }
@@ -58,47 +63,42 @@ export async function POST(req: Request) {
 
     const imageUrl = result.url;
     const timestamp = new Date().toISOString();
+    const imageName = `generated_${Date.now()}_${prompt
+      .slice(0, 30)
+      .replace(/\s+/g, "_")}`;
 
-    console.log('✅ [GENERATE] Image generated:', imageUrl);
+    console.log("🔵 [DB INSERT] referenceImageUrl =", referenceImageUrl);
 
-    // Сохраняем в базу
-    const imageName = `generated_${Date.now()}_${prompt.slice(0, 30).replace(/\s+/g, '_')}`;
-
-    console.log('🔵 [GENERATE] Inserting into DB:', {
-      user_id: user.id,
-      name: imageName,
-      url: imageUrl,
-    });
-
-    const { error: dbError } = await supabase
-      .from("images")
-      .insert([{
+    // ✅ Save to DB with reference_url
+    const { error: dbError } = await supabase.from("images").insert([
+      {
         user_id: user.id,
         name: imageName,
         url: imageUrl,
-      }]);
-
-    console.log('🔵 [GENERATE] DB Insert result - Error:', dbError);
+        reference_url: referenceImageUrl || null,
+        created_at: timestamp,
+      },
+    ]);
 
     if (dbError) {
-      console.error('❌ [GENERATE] DB Error:', dbError);
-      // Не падаем - генерация успешна, просто не сохранилась в базу
+      console.error("❌ [DB ERROR]", dbError);
     } else {
-      console.log('✅ [GENERATE] Successfully saved to DB');
+      console.log("✅ [DB SAVED] Image + Reference URL inserted");
     }
 
     return NextResponse.json({
-      id: result.templateId || `gen-${Date.now()}`,
+      id: `gen-${Date.now()}`,
       status: "succeeded",
       output: { imageUrl },
-      meta: { 
-        model: model || "google/nano-banana", 
-        promptLength: prompt.length, 
-        generatedAt: timestamp 
+      meta: {
+        model: model || "google/nano-banana",
+        promptLength: prompt.length,
+        reference_url: referenceImageUrl || null,
+        generatedAt: timestamp,
       },
     });
   } catch (err: any) {
-    console.error("❌ [GENERATE] error:", err);
+    console.error("❌ [GENERATE ERROR]", err);
     return NextResponse.json(
       { error: err?.message || "Generate failed" },
       { status: 500 }

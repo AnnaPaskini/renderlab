@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabaseServer";
 
 export async function POST(req: Request) {
   try {
-    const { imageUrl, maskUrl, prompt } = await req.json();
+    const { imageUrl, maskUrl, prompt, baseImageUrl } = await req.json();
 
     if (!imageUrl || !maskUrl) {
       return NextResponse.json(
@@ -11,12 +12,24 @@ export async function POST(req: Request) {
       );
     }
 
+    // Проверяем авторизацию
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
     if (!REPLICATE_API_TOKEN) {
       throw new Error("Missing REPLICATE_API_TOKEN in .env.local");
     }
 
     console.log("[EDIT] Creating Replicate prediction with google/nano-banana...");
+    console.log("[EDIT] Base Image URL:", baseImageUrl || imageUrl);
 
     // 1. Создаем задачу генерации
     const create = await fetch("https://api.replicate.com/v1/predictions", {
@@ -71,10 +84,33 @@ export async function POST(req: Request) {
 
     console.log("[EDIT] Replicate generation succeeded");
 
-    // 3. Возвращаем финальный результат
+    const outputUrl = result.output?.[0] || null;
+
+    // 3. Сохраняем в базу
+    if (outputUrl) {
+      const imageName = `edited_${Date.now()}_${prompt?.slice(0, 30).replace(/\s+/g, '_') || 'inpaint'}`;
+      const referenceUrl = baseImageUrl || imageUrl;
+
+      const { error: dbError } = await supabase
+        .from("images")
+        .insert([{
+          user_id: user.id,
+          name: imageName,
+          url: outputUrl,
+          reference_url: referenceUrl,
+        }]);
+
+      if (dbError) {
+        console.error("[EDIT] DB Error:", dbError);
+      } else {
+        console.log("[EDIT] Successfully saved to DB with reference_url:", referenceUrl);
+      }
+    }
+
+    // 4. Возвращаем финальный результат
     return NextResponse.json({
       success: true,
-      output: result.output?.[0] || null,
+      output: outputUrl,
       status: result.status,
     });
   } catch (error: any) {

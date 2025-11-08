@@ -10,7 +10,7 @@ type TemplateInput = {
   templateId?: string;
   prompt?: string;
   imageUrl?: string | string[] | null;
-  image?: string | string[] | null;
+  image?: string | null;
   image_url?: string | null;
   details?: string;
   [key: string]: any;
@@ -55,11 +55,7 @@ function resolveTemplateId(template: TemplateInput, fallback: number) {
   return typeof value === "string" ? value : String(value);
 }
 
-function normalizeTemplate(
-  template: TemplateInput,
-  fallback: number,
-  baseImage: string | null,
-) {
+function normalizeTemplate(template: TemplateInput, fallback: number) {
   const id = resolveTemplateId(template, fallback);
   const prompt =
     typeof template.prompt === "string" && template.prompt.trim()
@@ -68,33 +64,10 @@ function normalizeTemplate(
         ? template.details
         : "";
 
-  const imageCandidates = [template.image, template.imageUrl, template.image_url];
-  let imageUrl: string | null = null;
-
-  for (const candidate of imageCandidates) {
-    if (typeof candidate === "string" && candidate.trim().length > 0) {
-      imageUrl = candidate.trim();
-      break;
-    }
-
-    if (Array.isArray(candidate)) {
-      const firstValid = candidate.find((value: unknown) => {
-        if (typeof value !== "string") {
-          return false;
-        }
-        return value.trim().length > 0;
-      });
-
-      if (firstValid && typeof firstValid === "string") {
-        imageUrl = firstValid.trim();
-        break;
-      }
-    }
-  }
-
-  if (!imageUrl && baseImage) {
-    imageUrl = baseImage;
-  }
+  const directImage = template.imageUrl ?? template.image ?? template.image_url;
+  const imageUrl = Array.isArray(directImage)
+    ? directImage[0] ?? null
+    : directImage ?? null;
 
   const modelCandidates = [
     template.model,
@@ -105,7 +78,7 @@ function normalizeTemplate(
     (value) => typeof value === "string" && value.trim().length > 0,
   )?.trim();
 
-  return { id, prompt, imageUrl, model, image: imageUrl };
+  return { id, prompt, imageUrl, model };
 }
 
 function buildErrorEvent(
@@ -127,14 +100,10 @@ function buildErrorEvent(
 
 export async function POST(req: Request) {
   try {
-    // 🔵 Проверяем авторизацию
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (userError || !user) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -143,13 +112,11 @@ export async function POST(req: Request) {
       typeof body?.collectionId === "string" ? body.collectionId : null;
     const collectionName: string | null =
       typeof body?.collectionName === "string" ? body.collectionName : null;
+    const baseImage: string | null =
+      typeof body?.baseImage === "string" && body.baseImage.trim() ? body.baseImage.trim() : null;
     const templates: TemplateInput[] = Array.isArray(body?.templates)
       ? body.templates
       : [];
-    const baseImage: string | null =
-      typeof body?.baseImage === "string" && body.baseImage.trim().length > 0
-        ? body.baseImage.trim()
-        : null;
 
     if (!templates.length) {
       return NextResponse.json(
@@ -198,7 +165,7 @@ export async function POST(req: Request) {
 
         const tasks = templates.map((template, index) =>
           limit(async () => {
-            const normalized = normalizeTemplate(template, index, baseImage);
+            const normalized = normalizeTemplate(template, index);
 
             if (!normalized.prompt) {
               failed += 1;
@@ -211,43 +178,52 @@ export async function POST(req: Request) {
 
             try {
               const result = await generateSingle({
-                id: normalized.id,
                 prompt: normalized.prompt,
-                imageUrl: normalized.imageUrl ?? undefined,
-                image: normalized.image ?? undefined,
+                imageUrl: normalized.imageUrl || baseImage || undefined, // ✅ Use baseImage from request
                 model: normalized.model,
               });
 
-              if (result.status === "ok" && result.url) {
+              console.log(`🔵 [COLLECTION] Result for item #${index}:`, {
+                status: result.status,
+                hasUrl: !!result.url,
+                url: result.url,
+              });
+
+              if (result.status === "ok") {
                 succeeded += 1;
-
-                // 🔵 Сохраняем в базу данных
-                const imageName = collectionName 
-                  ? `${collectionName}_${index + 1}_${Date.now()}`
-                  : `collection_${collectionId || 'unknown'}_${index + 1}_${Date.now()}`;
-
-                const { error: dbError } = await supabase
-                  .from("images")
-                  .insert([{
-                    user_id: user.id,
-                    name: imageName,
-                    url: result.url,
-                  }]);
-
-                if (dbError) {
-                  console.error('❌ [COLLECTION] DB Error:', dbError);
-                } else {
-                  console.log('✅ [COLLECTION] Saved to DB:', imageName);
+                
+                // Save to database
+                try {
+                  const imageName = `${collectionName || "Collection"} - ${index + 1}`;
+                  const { error: dbError } = await supabase
+                    .from("images")
+                    .insert([{
+                      user_id: user.id,
+                      name: imageName,
+                      url: result.url,
+                      reference_url: normalized.imageUrl || baseImage || null,
+                      collection_id: collectionId,
+                    }]);
+                  
+                  if (dbError) {
+                    console.error(`❌ [COLLECTION] DB Error #${index}:`, dbError);
+                  } else {
+                    console.log(`✅ [COLLECTION] Saved to DB with reference_url:`, normalized.imageUrl || baseImage || null);
+                  }
+                } catch (dbErr) {
+                  console.error(`❌ [COLLECTION] DB Exception:`, dbErr);
                 }
 
-                enqueue(controller, {
+                const progressPayload: ProgressPayload = {
                   type: "progress",
                   index,
                   collectionId,
                   templateId: normalized.id,
                   status: "ok",
-                  url: result.url,
-                });
+                  url: result.url ?? null,
+                };
+                console.log(`🔵 [COLLECTION] Enqueuing progress #${index}:`, progressPayload);
+                enqueue(controller, progressPayload);
               } else {
                 failed += 1;
                 enqueue(
