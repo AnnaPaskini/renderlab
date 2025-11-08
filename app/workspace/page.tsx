@@ -6,6 +6,8 @@ import { WorkspaceLayout } from "@/components/workspace/WorkspaceLayout";
 import { ImageUploadPanel } from "@/components/workspace/ImageUploadPanel";
 import { PromptBuilderPanel } from "@/components/workspace/PromptBuilderPanelNew";
 import { PreviewStrip } from "@/components/workspace/PreviewStrip";
+import { toast } from "sonner";
+import { defaultToastStyle } from "@/lib/toast-config";
 
 export default function WorkspacePage() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -15,12 +17,12 @@ export default function WorkspacePage() {
 
   const handleGenerate = async (model: string) => {
     if (!prompt) {
-      alert("Please build a prompt first");
+      toast.error("Please build a prompt first", { style: defaultToastStyle });
       return;
     }
 
     if (!uploadedImage) {
-      alert("Please upload an image first");
+      toast.error("Please upload an image first", { style: defaultToastStyle });
       return;
     }
 
@@ -64,15 +66,15 @@ export default function WorkspacePage() {
       if (data?.status === "succeeded" && data?.output?.imageUrl) {
         const nextImage = data.output.imageUrl;
         setPreviews((prev) => [...prev, nextImage]);
-        alert("Image generated successfully!");
+        toast.success("Image generated successfully!", { style: defaultToastStyle });
       } else {
         console.error("Unexpected API response:", data);
-        alert("Edit failed: " + (data?.error || "Unknown error"));
+        toast.error("Edit failed: " + (data?.error || "Unknown error"), { style: defaultToastStyle });
       }
       // =========================
     } catch (error) {
       console.error("Edit error:", error);
-      alert("Edit failed - check console for details.");
+      toast.error("Edit failed - check console for details.", { style: defaultToastStyle });
     } finally {
       setIsGenerating(false);
     }

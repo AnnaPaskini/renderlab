@@ -4,6 +4,8 @@ import { useState, useCallback } from "react";
 import { Upload, X } from "lucide-react";
 import { motion } from "framer-motion";
 import clsx from "clsx";
+import { toast } from "sonner";
+import { defaultToastStyle } from "@/lib/toast-config";
 
 interface ImageUploadPanelProps {
   onImageChange: (image: string | null) => void;
@@ -23,11 +25,11 @@ export function ImageUploadPanel({ image, onImageChange }: ImageUploadPanelProps
   const processFile = useCallback(
     (file: File) => {
       if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
-        alert("Please upload a JPG or PNG image");
+        toast.error("Please upload a JPG or PNG image", { style: defaultToastStyle });
         return;
       }
       if (file.size > 50 * 1024 * 1024) {
-        alert("File size should be less than 50MB");
+        toast.error("File size should be less than 50MB", { style: defaultToastStyle });
         return;
       }
 
@@ -38,7 +40,7 @@ export function ImageUploadPanel({ image, onImageChange }: ImageUploadPanelProps
         setIsLoading(false);
       };
       reader.onerror = () => {
-        alert("Error reading file");
+        toast.error("Error reading file", { style: defaultToastStyle });
         setIsLoading(false);
       };
       reader.readAsDataURL(file);

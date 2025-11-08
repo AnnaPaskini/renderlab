@@ -8,6 +8,7 @@ import { SupabaseAuthProvider } from "@/components/providers/SupabaseAuthProvide
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { NavBar } from "@/components/navbar";
+import { toastConfig } from "@/lib/toast-config";
 
 export function ThemeProvider({
   children,
@@ -39,7 +40,8 @@ export default async function RootLayout({
 
   return (
     <ViewTransitions>
-     <html lang="en" className="light" suppressHydrationWarning>
+      <html lang="en" suppressHydrationWarning>
+
         <body
   className={cn(
     GeistSans.className,
@@ -57,18 +59,7 @@ export default async function RootLayout({
               {children}
               <Toaster 
                 position="bottom-right"
-                toastOptions={{
-                  style: {
-                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)',
-                    border: '2px solid rgba(168, 85, 247, 0.6)',
-                    color: 'white',
-                    borderRadius: '12px',
-                    padding: '16px 20px',
-                    fontSize: '15px',
-                    fontWeight: '600',
-                    filter: 'drop-shadow(0 0 20px rgba(168, 85, 247, 0.4))',
-                  },
-                }}
+                toastOptions={toastConfig}
               />
             </SupabaseAuthProvider>
           </ThemeProvider>

@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Input } from "../ui/input";
 import { IconDotsVertical } from "@tabler/icons-react";
+import { defaultToastStyle } from "@/lib/toast-config";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -71,7 +72,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     // Show success message
     toast.success("Template loaded into Builder", {
       duration: 1500,
-      style: { fontSize: "14px" },
+      style: defaultToastStyle,
     });
 
     // Close modal
@@ -81,31 +82,6 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     setTimeout(() => {
       if (setActiveTab) setActiveTab("builder");
     }, 400);
-  };
-
-  const handleDeleteTemplate = (templateToDelete: any) => {
-    if (!templateToDelete) return;
-
-    const confirmed = confirm(
-      `Delete "${templateToDelete.name || templateToDelete.title || "this template"}"?`
-    );
-    if (!confirmed) return;
-
-    const stored = JSON.parse(
-      localStorage.getItem("RenderAI_customTemplates") || "[]"
-    );
-    const updated = stored.filter(
-      (t: any) => t.createdAt !== templateToDelete.createdAt
-    );
-    localStorage.setItem("RenderAI_customTemplates", JSON.stringify(updated));
-    setTemplates(updated);
-
-    toast.success("Template deleted", {
-      duration: 1200,
-      style: { fontSize: "14px" },
-    });
-
-    setPreviewTemplate(null);
   };
 
   // === HANDLE CANCEL ===
@@ -135,7 +111,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     if (isTemplateNameExists(proposedName)) {
       toast.error(`A template named '${proposedName}' already exists. Please choose a different name.`, {
         duration: 2500,
-        style: { fontSize: "14px" },
+        style: defaultToastStyle,
       });
       return;
     }
@@ -153,7 +129,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     
     toast.success(`Template duplicated: ${duplicated.name}`, {
       duration: 1500,
-      style: { fontSize: "14px" },
+      style: defaultToastStyle,
     });
   };
 
@@ -172,7 +148,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     if (isTemplateNameExists(newName, renameTarget.createdAt)) {
       toast.error(`A template named '${newName}' already exists. Please choose a different name.`, {
         duration: 2500,
-        style: { fontSize: "14px" },
+        style: defaultToastStyle,
       });
       return;
     }
@@ -189,7 +165,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     
     toast.success(`Template renamed to: ${newName}`, {
       duration: 1500,
-      style: { fontSize: "14px" },
+      style: defaultToastStyle,
     });
     
     setIsRenameOpen(false);
@@ -213,7 +189,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     
     toast.success("Template deleted", {
       duration: 1200,
-      style: { fontSize: "14px" },
+      style: defaultToastStyle,
     });
     
     setIsDeleteOpen(false);
@@ -230,7 +206,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     if (isTemplateNameExists(templateName)) {
       toast.error(`A template named '${templateName}' already exists. Please choose a different name.`, {
         duration: 2500,
-        style: { fontSize: "14px" },
+        style: defaultToastStyle,
       });
       return;
     }
@@ -250,7 +226,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     
     toast.success(`Template created: ${templateName}`, {
       duration: 1500,
-      style: { fontSize: "14px" },
+      style: defaultToastStyle,
     });
     
     setIsCreateOpen(false);
@@ -404,7 +380,10 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                 <Button
                   variant="outline"
                   className="border-red-500 text-red-600 hover:bg-red-50 dark:border-red-500 dark:text-red-400 dark:hover:bg-red-500/10"
-                  onClick={() => handleDeleteTemplate(previewTemplate)}
+                  onClick={() => {
+                    setPreviewTemplate(null); // закрываем preview modal
+                    openDeleteDialog(previewTemplate); // открываем delete dialog
+                  }}
                 >
                   Delete
                 </Button>
