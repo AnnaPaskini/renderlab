@@ -41,16 +41,16 @@ export default async function RootLayout({
     <ViewTransitions>
       <html lang="en" suppressHydrationWarning>
         <body
-          className={cn(
-            GeistSans.className,
-            "bg-white dark:bg-black antialiased min-h-screen"
-          )}
-        >
+  className={cn(
+    GeistSans.className,
+    "bg-neutral-50 text-neutral-900 antialiased"
+  )}
+>
           <ThemeProvider
             attribute="class"
-            enableSystem
+      
             disableTransitionOnChange
-            defaultTheme="dark"
+            defaultTheme="light"
           >
             <SupabaseAuthProvider>
               {showNavbar && <NavBar />}
