@@ -381,6 +381,23 @@ export function PromptBuilderPanel({
   const handleSaveTemplate = () => {
     const finalTemplateName = templateName?.trim() || "Untitled Template";
 
+    const stored = JSON.parse(
+      localStorage.getItem("RenderAI_customTemplates") || "[]"
+    );
+
+    // Check for duplicate names (case-insensitive, name only)
+    const nameExists = stored.some(
+      (t: any) => (t.name || t.title || '').toLowerCase() === finalTemplateName.toLowerCase()
+    );
+
+    if (nameExists) {
+      toast.error(`A template named '${finalTemplateName}' already exists. Please choose a different name.`, {
+        duration: 2500,
+        style: { fontSize: "14px" },
+      });
+      return;
+    }
+
     const template = {
       name: finalTemplateName,
       aiModel,
@@ -388,28 +405,6 @@ export function PromptBuilderPanel({
       details,
       createdAt: new Date().toISOString(),
     };
-
-    const stored = JSON.parse(
-      localStorage.getItem("RenderAI_customTemplates") || "[]"
-    );
-
-    const isDuplicate =
-      stored.length > 0 &&
-      stored.some(
-        (t: any) =>
-          t.aiModel === aiModel &&
-          t.style === style &&
-          t.details === details &&
-          t.name === finalTemplateName
-      );
-
-    if (isDuplicate) {
-      toast.error(`Template "${finalTemplateName}" already exists`, {
-        duration: 2000,
-        style: { fontSize: "14px" },
-      });
-      return;
-    }
 
     stored.push(template);
     localStorage.setItem("RenderAI_customTemplates", JSON.stringify(stored));
