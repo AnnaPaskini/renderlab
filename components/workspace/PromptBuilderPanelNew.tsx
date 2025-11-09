@@ -79,6 +79,27 @@ export function PromptBuilderPanel({
   // WorkspaceContext integration
   const { activeItem, loadTemplate, loadCollection, clear } = useWorkspace();
 
+  // Dynamic page title based on activeItem
+  const getPageTitle = () => {
+    if (activeItem.type === 'template') {
+      return `Editing: ${activeItem.data.name}`;
+    }
+    if (activeItem.type === 'collection') {
+      return `Editing Collection: ${activeItem.data.name}`;
+    }
+    if (activeItem.type === 'temporary') {
+      return 'Editing from History';
+    }
+    return 'Welcome back';
+  };
+
+  const getPageSubtitle = () => {
+    if (activeItem.type === null) {
+      return 'Keep crafting stunning visuals with RenderLab.';
+    }
+    return 'Make your changes and generate new variations.';
+  };
+
   // Collection and template state
   const { collections } = useCollections();
   const [templates, setTemplates] = useState<any[]>([]);
@@ -913,7 +934,10 @@ export function PromptBuilderPanel({
             transition={{ duration: 0.3 }}
             className="space-y-4"
           >
-            <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Edit Image</h2>
+            <div>
+              <h2 className="text-2xl font-bold text-neutral-900 dark:text-white">{getPageTitle()}</h2>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{getPageSubtitle()}</p>
+            </div>
 
             {/* Context Indicator */}
             <div className="mb-6">

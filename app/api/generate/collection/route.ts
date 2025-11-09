@@ -200,6 +200,7 @@ export async function POST(req: Request) {
                     .insert([{
                       user_id: user.id,
                       name: imageName,
+                      prompt: normalized.prompt, // ✅ Save the actual prompt text
                       url: result.url,
                       reference_url: normalized.imageUrl || baseImage || null,
                       collection_id: collectionId,

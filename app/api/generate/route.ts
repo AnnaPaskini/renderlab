@@ -69,11 +69,12 @@ export async function POST(req: Request) {
 
     console.log("🔵 [DB INSERT] referenceImageUrl =", referenceImageUrl);
 
-    // ✅ Save to DB with reference_url
+    // ✅ Save to DB with reference_url and prompt
     const { error: dbError } = await supabase.from("images").insert([
       {
         user_id: user.id,
         name: imageName,
+        prompt: prompt, // ✅ Save the actual prompt text
         url: imageUrl,
         reference_url: referenceImageUrl || null,
         created_at: timestamp,

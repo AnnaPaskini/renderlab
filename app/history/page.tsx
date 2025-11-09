@@ -5,6 +5,7 @@ import { useWorkspace } from '@/lib/context/WorkspaceContext';
 import { useRouter } from 'next/navigation';
 import { ImageIcon, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 export default function HistoryPage() {
   const { groups, loading, hasMore, loadMore } = useHistory();
@@ -12,7 +13,34 @@ export default function HistoryPage() {
   const router = useRouter();
 
   const handleOpenInBuilder = (image: any) => {
-    loadTemporary(image.prompt, image.reference_url);
+    // Load the RESULT image (not reference) into builder
+    loadTemporary(image.prompt, image.image_url);
+    
+    // Show toast feedback
+    toast.success('Image and prompt loaded from History', {
+      style: {
+        background: '#7C3AED',
+        color: 'white',
+        border: 'none'
+      }
+    });
+    
+    router.push('/workspace');
+  };
+
+  const handleUsePrompt = (image: any) => {
+    // Load ONLY the prompt (no image)
+    loadTemporary(image.prompt, null);
+    
+    // Show different toast
+    toast.info('Prompt loaded from History', {
+      style: {
+        background: '#7C3AED',
+        color: 'white',
+        border: 'none'
+      }
+    });
+    
     router.push('/workspace');
   };
 
@@ -53,21 +81,24 @@ export default function HistoryPage() {
                   >
                     {/* Image */}
                     <div className="relative aspect-video bg-gray-100">
+                      {/* Result image - always shown */}
                       <img
                         src={img.image_url}
                         alt="Generated"
                         className="w-full h-full object-cover"
                       />
 
-                      {/* Reference indicator */}
+                      {/* VAR tag if this was based on reference */}
                       {img.reference_url && (
-                        <div
-                          className="absolute top-2 right-2 bg-white rounded-full p-2 shadow-md"
-                          title="Has reference image"
-                        >
-                          <ImageIcon size={16} className="text-purple-600" />
+                        <div className="absolute top-2 right-2 bg-purple-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+                          VAR
                         </div>
                       )}
+
+                      {/* Date label - bottom left */}
+                      <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
+                        {format(new Date(img.created_at), 'MMM d, HH:mm')}
+                      </div>
                     </div>
 
                     {/* Info */}
@@ -76,12 +107,23 @@ export default function HistoryPage() {
                         {img.prompt}
                       </p>
 
-                      <button
-                        onClick={() => handleOpenInBuilder(img)}
-                        className="w-full py-2 px-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                      >
-                        Open in Builder
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleOpenInBuilder(img)}
+                          className="flex-1 py-2 px-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                          title="Edit this result further"
+                        >
+                          Open in Builder
+                        </button>
+                        
+                        <button
+                          onClick={() => handleUsePrompt(img)}
+                          className="flex-1 py-2 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                          title="Start fresh with this prompt"
+                        >
+                          Use Prompt
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

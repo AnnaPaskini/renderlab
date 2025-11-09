@@ -38,7 +38,7 @@ export function ContextIndicator() {
       case 'collection':
         return `Collection: ${activeItem.data.name} (${activeItem.data.template_count} templates)`;
       case 'temporary':
-        return 'Temporary (not saved)';
+        return 'Loaded from History (not saved)';
     }
   };
 

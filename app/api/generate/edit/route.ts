@@ -96,6 +96,7 @@ export async function POST(req: Request) {
         .insert([{
           user_id: user.id,
           name: imageName,
+          prompt: prompt || "restore and blend seamlessly", // ✅ Save the actual prompt text
           url: outputUrl,
           reference_url: referenceUrl,
         }]);
