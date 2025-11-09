@@ -29,6 +29,8 @@ import { useCollections } from "@/lib/useCollections";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
 import { cn } from "@/lib/utils";
 import { IconDotsVertical, IconChevronDown } from "@tabler/icons-react";
+import { ContextIndicator } from './ContextIndicator';
+import { useWorkspace } from '@/lib/context/WorkspaceContext';
 
 export interface PromptBuilderPanelProps {
   onPromptChange?: (prompt: string) => void;
@@ -73,6 +75,9 @@ export function PromptBuilderPanel({
       setInternalIsGenerating(value);
     }
   };
+
+  // WorkspaceContext integration
+  const { activeItem, loadTemplate, loadCollection, clear } = useWorkspace();
 
   // Collection and template state
   const { collections } = useCollections();
@@ -278,6 +283,9 @@ export function PromptBuilderPanel({
 
   const handleModeChange = (value: string) => {
     if (value === "template" || value === "collection") {
+      // Clear WorkspaceContext when switching tabs
+      clear();
+      
       setActiveMode(value);
       if (value === "template") {
         setActiveCollectionId(null);
@@ -297,6 +305,23 @@ export function PromptBuilderPanel({
     setActiveCollectionId(id);
     const collection = collections.find((item) => item.id === id) ?? null;
     setSelectedCollection(collection);
+    
+    // Update WorkspaceContext
+    if (collection) {
+      // Transform localStorage Collection to match DB CollectionWithTemplates format
+      const collectionWithCount = {
+        id: collection.id,
+        user_id: '', // localStorage collections don't have user_id
+        name: collection.title || 'Unnamed Collection', // title -> name
+        created_at: collection.createdAt || new Date().toISOString(), // createdAt -> created_at
+        updated_at: collection.createdAt || new Date().toISOString(),
+        templates: collection.templates || [],
+        template_count: (collection.templates || []).length
+      };
+      
+      loadCollection(collectionWithCount as any);
+    }
+    
     collectionPreviewSetRef.current.clear();
     setCollectionProgress(getInitialProgressState());
   };
@@ -309,6 +334,9 @@ export function PromptBuilderPanel({
     }
 
     const templateData = record.template ?? {};
+
+    // Update WorkspaceContext
+    loadTemplate(templateData);
 
     const resolvedAiModel =
       resolveString(templateData.aiModel, templateData.formData?.aiModel) ||
@@ -868,6 +896,11 @@ export function PromptBuilderPanel({
             className="space-y-4"
           >
             <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Edit Image</h2>
+
+            {/* Context Indicator */}
+            <div className="mb-6">
+              <ContextIndicator />
+            </div>
 
             <motion.div
               layout

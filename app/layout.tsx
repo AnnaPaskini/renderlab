@@ -5,6 +5,7 @@ import { ViewTransitions } from "next-view-transitions";
 import { headers } from "next/headers";
 
 import { SupabaseAuthProvider } from "@/components/providers/SupabaseAuthProvider";
+import { WorkspaceProvider } from "@/lib/context/WorkspaceContext";  // ← Добавили
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { NavBar } from "@/components/navbar";
@@ -41,26 +42,26 @@ export default async function RootLayout({
   return (
     <ViewTransitions>
       <html lang="en" suppressHydrationWarning>
-
         <body
-  className={cn(
-    GeistSans.className,
-    "bg-neutral-50 text-neutral-900 antialiased"
-  )}
->
+          className={cn(
+            GeistSans.className,
+            "bg-neutral-50 text-neutral-900 antialiased"
+          )}
+        >
           <ThemeProvider
             attribute="class"
-      
             disableTransitionOnChange
             defaultTheme="light"
           >
             <SupabaseAuthProvider>
-              {showNavbar && <NavBar />}
-              {children}
-              <Toaster 
-                position="bottom-right"
-                toastOptions={toastConfig}
-              />
+              <WorkspaceProvider>  {/* ← Добавили обёртку */}
+                {showNavbar && <NavBar />}
+                {children}
+                <Toaster 
+                  position="bottom-right"
+                  toastOptions={toastConfig}
+                />
+              </WorkspaceProvider>  {/* ← Закрыли */}
             </SupabaseAuthProvider>
           </ThemeProvider>
         </body>

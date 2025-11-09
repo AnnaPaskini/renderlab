@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import { IconMenu2, IconX } from "@tabler/icons-react";
 import { Z } from "@/lib/z-layer-guide"
 
+
 type ActionsPanelProps = {
   onDuplicate: () => void;
   onRename: () => void;

@@ -2,6 +2,7 @@ import { createBrowserClient, createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+
 // ---------- CLIENT SIDE ----------
 export function createClient(): SupabaseClient {
   return createBrowserClient(
