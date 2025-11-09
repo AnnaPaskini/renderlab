@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavBar } from "@/components/navbar";
 import { WorkspaceLayout } from "@/components/workspace/WorkspaceLayout";
 import { ImageUploadPanel } from "@/components/workspace/ImageUploadPanel";
@@ -8,12 +8,22 @@ import { PromptBuilderPanel } from "@/components/workspace/PromptBuilderPanelNew
 import { PreviewStrip } from "@/components/workspace/PreviewStrip";
 import { toast } from "sonner";
 import { defaultToastStyle } from "@/lib/toast-config";
+import { useWorkspace } from "@/lib/context/WorkspaceContext";
 
 export default function WorkspacePage() {
+  const { activeItem } = useWorkspace();
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("");
   const [previews, setPreviews] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Sync reference image with WorkspaceContext when temporary item is loaded
+  useEffect(() => {
+    if (activeItem.type === 'temporary' && activeItem.data?.reference_url) {
+      setUploadedImage(activeItem.data.reference_url);
+      console.log('✅ [Workspace] Loaded temporary reference image:', activeItem.data.reference_url);
+    }
+  }, [activeItem]);
 
   const handleGenerate = async (model: string) => {
     if (!prompt) {

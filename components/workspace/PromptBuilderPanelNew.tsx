@@ -408,6 +408,24 @@ export function PromptBuilderPanel({
     }
   }, [details, onPromptChange]);
 
+  // Sync form with WorkspaceContext when temporary item is loaded
+  useEffect(() => {
+    if (activeItem.type === 'temporary' && activeItem.data) {
+      // Update prompt field
+      if (activeItem.data.prompt) {
+        setDetails(activeItem.data.prompt);
+        console.log('✅ [PromptBuilder] Loaded temporary prompt:', activeItem.data.prompt);
+      }
+      
+      // Note: Reference image (uploadedImage) is managed by parent component (workspace/page.tsx)
+      // The parent needs to handle activeItem.data.reference_url
+      if (activeItem.data.reference_url) {
+        console.log('📸 [PromptBuilder] Reference image URL available:', activeItem.data.reference_url);
+        console.log('⚠️ [PromptBuilder] Parent component should update uploadedImage prop');
+      }
+    }
+  }, [activeItem]);
+
   const handleSaveTemplate = () => {
     const finalTemplateName = templateName?.trim() || "Untitled Template";
 
