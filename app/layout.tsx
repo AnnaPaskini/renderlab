@@ -9,6 +9,7 @@ import { WorkspaceProvider } from "@/lib/context/WorkspaceContext";  // ← До
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { NavBar } from "@/components/navbar";
+import { MainNavbar } from '@/components/layout/MainNavbar';
 import { toastConfig } from "@/lib/toast-config";
 
 export function ThemeProvider({
@@ -39,6 +40,17 @@ export default async function RootLayout({
     pathname.startsWith("/blog") ||
     pathname.startsWith("/contact");
 
+  const showMainNavbar = 
+    pathname.startsWith("/workspace") ||
+    pathname.startsWith("/custom") ||
+    pathname.startsWith("/prompts") ||
+    pathname.startsWith("/history") ||
+    pathname.startsWith("/account");
+
+  console.log('🔍 [Layout Debug] Current pathname:', pathname);
+  console.log('🔍 [Layout Debug] showMainNavbar:', showMainNavbar);
+  console.log('🔍 [Layout Debug] showNavbar:', showNavbar);
+
   return (
     <ViewTransitions>
       <html lang="en" suppressHydrationWarning>
@@ -56,6 +68,7 @@ export default async function RootLayout({
             <SupabaseAuthProvider>
               <WorkspaceProvider>  {/* ← Добавили обёртку */}
                 {showNavbar && <NavBar />}
+                {showMainNavbar && <MainNavbar />}
                 {children}
                 <Toaster 
                   position="bottom-right"

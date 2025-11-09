@@ -6,6 +6,9 @@ export async function middleware(req: NextRequest) {
   // Копируем запрос, чтобы можно было модифицировать заголовки
   const res = NextResponse.next();
 
+  // Set pathname header for layout conditional rendering
+  res.headers.set('x-pathname', req.nextUrl.pathname);
+
   // Инициализация Supabase SSR клиента
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -42,5 +45,15 @@ export async function middleware(req: NextRequest) {
 
 // Настройки middleware
 export const config = {
-  matcher: ["/workspace/:path*"],
+  matcher: [
+    "/workspace/:path*",
+    "/custom/:path*",
+    "/prompts/:path*",
+    "/history/:path*",
+    "/account/:path*",
+    "/",
+    "/pricing/:path*",
+    "/blog/:path*",
+    "/contact/:path*"
+  ],
 };
