@@ -10,10 +10,12 @@ import { ImagePreviewModal } from "@/components/common/ImagePreviewModal";
 import { toast } from "sonner";
 import { defaultToastStyle } from "@/lib/toast-config";
 import { useWorkspace } from "@/lib/context/WorkspaceContext";
+import { useHistory } from "@/lib/hooks/useHistory";
 import { Link as LinkIcon } from "lucide-react";
 
 export default function WorkspacePage() {
   const { activeItem, loadTemporary } = useWorkspace();
+  const { refresh: refreshHistory } = useHistory();
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("");
   const [previews, setPreviews] = useState<string[]>([]);
@@ -153,6 +155,9 @@ export default function WorkspacePage() {
         const nextImage = data.output.imageUrl;
         setPreviews((prev) => [...prev, nextImage]);
         
+        // ✅ Refresh history to show new generation
+        await refreshHistory();
+        
         // Show different toast based on mode
         if (uploadedImage) {
           toast.success("✨ Generated from reference image", { style: defaultToastStyle });
@@ -241,6 +246,7 @@ export default function WorkspacePage() {
             isGenerating={isGenerating}
             onPreviewAdd={(url) => setPreviews((prev) => [...prev, url])}
             uploadedImage={uploadedImage}
+            onHistoryRefresh={refreshHistory}
           />
         }
         uploadedImage={uploadedImage}

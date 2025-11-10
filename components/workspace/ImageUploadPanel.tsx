@@ -25,8 +25,8 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
 
   const processFile = useCallback(
     (file: File) => {
-      if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
-        toast.error("Please upload a JPG or PNG image", { style: defaultToastStyle });
+      if (!["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(file.type)) {
+        toast.error("Please upload a JPG, PNG, or WebP image", { style: defaultToastStyle });
         return;
       }
       if (file.size > 50 * 1024 * 1024) {
@@ -124,11 +124,11 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
               or click to browse
             </p>
             <p className="mt-2 text-xs font-medium text-neutral-500 dark:text-neutral-400">
-              JPG, PNG • Max 50 MB
+              JPG, PNG, WebP • Max 50 MB
             </p>
             <input
               type="file"
-              accept="image/jpeg,image/png,image/jpg"
+              accept="image/jpeg,image/png,image/jpg,image/webp"
               onChange={handleFileInput}
               className="hidden"
               disabled={isLoading}
