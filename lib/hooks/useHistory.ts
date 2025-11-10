@@ -1,21 +1,19 @@
-// lib/hooks/useHistory.ts
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import type { HistoryGroup, DatabaseError } from '@/lib/types/database';
+import type { DatabaseError } from '@/lib/types/database';
 import { toast } from 'sonner';
 
-const PAGE_SIZE = 20; // Загружаем по 20 групп за раз
+const GROUPS_PER_PAGE = 1; // Show 5 days of history per page
 
 export function useHistory() {
-  const [groups, setGroups] = useState<HistoryGroup[]>([]);
+  const [groups, setGroups] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
   const [error, setError] = useState<DatabaseError | null>(null);
 
-  // Load history with pagination
   const loadHistory = useCallback(async (pageNum: number = 0) => {
     try {
       setLoading(true);
@@ -26,30 +24,55 @@ export function useHistory() {
         throw new Error('Not authenticated');
       }
 
-      // ✅ RPC с группировкой по датам
-      const { data, error: rpcError } = await supabase.rpc(
-        'get_user_history_grouped',
-        {
-          user_uuid: user.id,
-          limit_count: PAGE_SIZE,
-          offset_count: pageNum * PAGE_SIZE
+      // ✅ Load 100 images from DB (lazy loading prevents downloading all at once)
+      const { data: images, error: fetchError } = await supabase
+        .from('images')
+        .select('id, name, url, reference_url, collection_id, prompt, created_at, user_id')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (fetchError) throw fetchError;
+
+      // Group images by date on the client
+      const grouped = (images || []).reduce((acc: any, img: any) => {
+        const date = new Date(img.created_at).toISOString().split('T')[0];
+        if (!acc[date]) {
+          acc[date] = {
+            date_group: date,
+            images_count: 0,
+            images: []
+          };
         }
+        acc[date].images_count++;
+        acc[date].images.push({
+          ...img,
+          image_url: img.url // map url → image_url
+        });
+        return acc;
+      }, {});
+
+      const allGroups = Object.values(grouped).sort((a: any, b: any) => 
+        new Date(b.date_group).getTime() - new Date(a.date_group).getTime()
       );
 
-      if (rpcError) throw rpcError;
+      // ✅ Paginate GROUPS (show 5 days at a time)
+      const startIdx = pageNum * GROUPS_PER_PAGE;
+      const endIdx = startIdx + GROUPS_PER_PAGE;
+      const paginatedData = allGroups.slice(startIdx, endIdx);
 
       if (pageNum === 0) {
-        // First load - replace
-        setGroups(data || []);
+        setGroups(paginatedData);
       } else {
-        // Load more - append
-        setGroups(prev => [...prev, ...(data || [])]);
+        setGroups(prev => [...prev, ...paginatedData]);
       }
 
-      // Check if there's more data
-      setHasMore((data || []).length === PAGE_SIZE);
+      // ✅ Check if there are more groups to load
+      setHasMore(endIdx < allGroups.length);
       setPage(pageNum);
+
     } catch (err) {
+      console.error('History load error:', err);
       const dbError: DatabaseError = {
         message: err instanceof Error ? err.message : 'Failed to load history',
       };
@@ -60,14 +83,12 @@ export function useHistory() {
     }
   }, []);
 
-  // Load more (for infinite scroll)
   const loadMore = useCallback(() => {
     if (!loading && hasMore) {
       loadHistory(page + 1);
     }
   }, [loading, hasMore, page, loadHistory]);
 
-  // Load on mount
   useEffect(() => {
     loadHistory(0);
   }, [loadHistory]);

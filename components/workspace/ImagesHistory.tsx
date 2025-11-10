@@ -22,7 +22,7 @@ export default function ImagesHistory() {
         if (!response.ok) throw new Error('Failed to fetch images')
         
         const data = await response.json()
-        console.log('📸 Loaded images:', data.images)
+        console.log('Loaded images:', data.images)
         setImages(data.images || [])
       } catch (error) {
         console.error('Error loading images:', error)
@@ -69,6 +69,7 @@ export default function ImagesHistory() {
               src={img.url}
               alt={img.name}
               fill
+              loading="lazy"
               className="object-cover"
               sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
             />

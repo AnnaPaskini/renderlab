@@ -77,7 +77,7 @@ export default function HistoryPage() {
 
               {/* Images Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {group.images.map((img) => (
+                {group.images.map((img: any) => (
                   <div
                     key={img.id}
                     className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow bg-white"
@@ -88,6 +88,7 @@ export default function HistoryPage() {
                       <img
                         src={img.image_url}
                         alt="Generated"
+                        loading="lazy"
                         className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                         onClick={() => setPreviewImageUrl(img.image_url)}
                       />

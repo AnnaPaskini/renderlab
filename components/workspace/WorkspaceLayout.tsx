@@ -247,6 +247,7 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
                                   <img
                                     src={img.image_url}
                                     alt={`Generation ${idx + 1}`}
+                                    loading="lazy"
                                     className="h-full w-full rounded-lg object-cover"
                                   />
                                   <div className="absolute top-2 right-2 rounded-md bg-black/70 backdrop-blur-sm px-2 py-1 text-xs font-medium text-white">

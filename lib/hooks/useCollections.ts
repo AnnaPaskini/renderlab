@@ -1,18 +1,38 @@
-// lib/hooks/useCollections.ts
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import type { Collection, CollectionWithTemplates, DatabaseError } from '@/lib/types/database';
+import type { DatabaseError } from '@/lib/types/database';
 import { toast } from 'sonner';
 
-export function useCollections() {
-  const [collections, setCollections] = useState<CollectionWithTemplates[]>([]);
+const PAGE_SIZE = 20;
+
+interface ImageData {
+  id: string;
+  name: string;
+  url: string;
+  image_url?: string;
+  reference_url?: string | null;
+  collection_id?: string | null;
+  prompt: string;
+  created_at: string;
+  user_id: string;
+}
+
+interface GroupedData {
+  date_group: string;
+  images_count: number;
+  images: ImageData[];
+}
+
+export function useHistory() {
+  const [groups, setGroups] = useState<GroupedData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(0);
   const [error, setError] = useState<DatabaseError | null>(null);
 
-  // Load collections with templates (ONE RPC call instead of N+1)
-  const loadCollections = useCallback(async () => {
+  const loadHistory = useCallback(async (pageNum: number = 0) => {
     try {
       setLoading(true);
       setError(null);
@@ -22,20 +42,56 @@ export function useCollections() {
         throw new Error('Not authenticated');
       }
 
-      // ✅ ОДИН RPC запрос вместо множества
-      const { data, error: rpcError } = await supabase
-        .rpc('get_user_collections_with_templates', {
-          user_uuid: user.id
-        });
+      // ПРЯМОЙ ЗАПРОС - без RPC!
+      const { data: images, error: fetchError } = await supabase
+        .from('images')
+        .select('id, name, url, reference_url, collection_id, prompt, created_at, user_id')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(100);
 
-      if (rpcError) throw rpcError;
-      
-      setCollections(data || []);
+      if (fetchError) throw fetchError;
+
+      // Группируем на клиенте по датам
+      const grouped = (images || []).reduce((acc: Record<string, GroupedData>, img: ImageData) => {
+        const date = new Date(img.created_at).toISOString().split('T')[0];
+        if (!acc[date]) {
+          acc[date] = {
+            date_group: date,
+            images_count: 0,
+            images: []
+          };
+        }
+        acc[date].images_count++;
+        acc[date].images.push({
+          ...img,
+          image_url: img.url // маппим url → image_url
+        });
+        return acc;
+      }, {});
+
+      const allGroups = Object.values(grouped).sort((a: GroupedData, b: GroupedData) => 
+        new Date(b.date_group).getTime() - new Date(a.date_group).getTime()
+      );
+
+      // Пагинация
+      const startIdx = pageNum * PAGE_SIZE;
+      const endIdx = startIdx + PAGE_SIZE;
+      const paginatedData = allGroups.slice(startIdx, endIdx);
+
+      if (pageNum === 0) {
+        setGroups(paginatedData);
+      } else {
+        setGroups(prev => [...prev, ...paginatedData]);
+      }
+
+      setHasMore(endIdx < allGroups.length);
+      setPage(pageNum);
+
     } catch (err) {
+      console.error('History load error:', err);
       const dbError: DatabaseError = {
-        message: err instanceof Error ? err.message : 'Failed to load collections',
-        code: (err as any)?.code,
-        details: (err as any)?.details
+        message: err instanceof Error ? err.message : 'Failed to load history',
       };
       setError(dbError);
       toast.error(dbError.message);
@@ -44,208 +100,22 @@ export function useCollections() {
     }
   }, []);
 
-  // Create new collection
-  const createCollection = useCallback(async (name: string): Promise<Collection | null> => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('Not authenticated');
-      }
-
-      const { data, error: insertError } = await supabase
-        .from('collections')
-        .insert({
-          user_id: user.id,
-          name: name.trim()
-        })
-        .select()
-        .single();
-
-      if (insertError) throw insertError;
-      
-      // Optimistic update - добавляем пустую коллекцию
-      const newCollection: CollectionWithTemplates = {
-        ...data,
-        templates: [],
-        template_count: 0
-      };
-      setCollections(prev => [newCollection, ...prev]);
-      
-      toast.success('Collection created', {
-        style: {
-          background: '#7C3AED',
-          color: 'white',
-          border: 'none'
-        }
-      });
-      
-      return data;
-    } catch (err) {
-      toast.error('Failed to create collection');
-      return null;
+  const loadMore = useCallback(() => {
+    if (!loading && hasMore) {
+      loadHistory(page + 1);
     }
-  }, []);
+  }, [loading, hasMore, page, loadHistory]);
 
-  // Update collection name
-  const updateCollection = useCallback(async (
-    id: string,
-    name: string
-  ): Promise<boolean> => {
-    try {
-      const { error: updateError } = await supabase
-        .from('collections')
-        .update({ name: name.trim() })
-        .eq('id', id);
-
-      if (updateError) throw updateError;
-      
-      // Optimistic update
-      setCollections(prev =>
-        prev.map(c => c.id === id ? { ...c, name: name.trim(), updated_at: new Date().toISOString() } : c)
-      );
-      
-      toast.success('Collection updated', {
-        style: {
-          background: '#7C3AED',
-          color: 'white',
-          border: 'none'
-        }
-      });
-      
-      return true;
-    } catch (err) {
-      toast.error('Failed to update collection');
-      return false;
-    }
-  }, []);
-
-  // Add template to collection
-  const addTemplateToCollection = useCallback(async (
-    collectionId: string, 
-    templateId: string
-  ): Promise<boolean> => {
-    try {
-      // Get current max order_index
-      const { data: existing } = await supabase
-        .from('collection_templates')
-        .select('order_index')
-        .eq('collection_id', collectionId)
-        .order('order_index', { ascending: false })
-        .limit(1);
-
-      const nextOrder = existing && existing.length > 0 
-        ? existing[0].order_index + 1 
-        : 0;
-
-      const { error: insertError } = await supabase
-        .from('collection_templates')
-        .insert({
-          collection_id: collectionId,
-          template_id: templateId,
-          order_index: nextOrder
-        });
-
-      if (insertError) {
-        // Check for duplicate (PostgreSQL error code 23505)
-        if (insertError.code === '23505') {
-          toast.error('Template already in this collection');
-          return false;
-        }
-        throw insertError;
-      }
-      
-      // Refresh to get updated data
-      await loadCollections();
-      
-      toast.success('Template added to collection', {
-        style: {
-          background: '#7C3AED',
-          color: 'white',
-          border: 'none'
-        }
-      });
-      
-      return true;
-    } catch (err) {
-      toast.error('Failed to add template');
-      return false;
-    }
-  }, [loadCollections]);
-
-  // Remove template from collection
-  const removeTemplateFromCollection = useCallback(async (
-    collectionId: string,
-    templateId: string
-  ): Promise<boolean> => {
-    try {
-      const { error: deleteError } = await supabase
-        .from('collection_templates')
-        .delete()
-        .eq('collection_id', collectionId)
-        .eq('template_id', templateId);
-
-      if (deleteError) throw deleteError;
-      
-      // Refresh to get updated data
-      await loadCollections();
-      
-      toast.success('Template removed from collection', {
-        style: {
-          background: '#7C3AED',
-          color: 'white',
-          border: 'none'
-        }
-      });
-      
-      return true;
-    } catch (err) {
-      toast.error('Failed to remove template');
-      return false;
-    }
-  }, [loadCollections]);
-
-  // Delete collection (cascade deletes collection_templates automatically)
-  const deleteCollection = useCallback(async (id: string): Promise<boolean> => {
-    try {
-      const { error: deleteError } = await supabase
-        .from('collections')
-        .delete()
-        .eq('id', id);
-
-      if (deleteError) throw deleteError;
-      
-      // Optimistic update
-      setCollections(prev => prev.filter(c => c.id !== id));
-      
-      toast.success('Collection deleted', {
-        style: {
-          background: '#7C3AED',
-          color: 'white',
-          border: 'none'
-        }
-      });
-      
-      return true;
-    } catch (err) {
-      toast.error('Failed to delete collection');
-      return false;
-    }
-  }, []);
-
-  // Load on mount
   useEffect(() => {
-    loadCollections();
-  }, [loadCollections]);
+    loadHistory(0);
+  }, [loadHistory]);
 
   return {
-    collections,
+    groups,
     loading,
+    hasMore,
     error,
-    createCollection,
-    updateCollection,
-    addTemplateToCollection,
-    removeTemplateFromCollection,
-    deleteCollection,
-    refresh: loadCollections
+    loadMore,
+    refresh: () => loadHistory(0)
   };
 }
