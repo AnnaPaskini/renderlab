@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Input } from "../ui/input";
 import { IconDotsVertical } from "@tabler/icons-react";
 import { defaultToastStyle } from "@/lib/toast-config";
+import { useWorkspace } from "@/lib/context/WorkspaceContext";
+import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +29,9 @@ type PromptTemplatesProps = {
 };
 
 export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProps) {
+  const { loadTemplate } = useWorkspace();
+  const router = useRouter();
+  
   const [templates, setTemplates] = useState<any[]>([]);
   const [previewTemplate, setPreviewTemplate] = useState<any | null>(null);
   
@@ -63,25 +68,23 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
   const handleLoadTemplate = (template: any) => {
     if (!template) return;
 
-    // Save template to localStorage
-    localStorage.setItem("RenderAI_activeTemplate", JSON.stringify(template));
-
-    // Trigger storage event so Builder can detect it
-    window.dispatchEvent(new Event("storage"));
+    // Load template into Workspace Context
+    loadTemplate(template);
 
     // Show success message
     toast.success("Template loaded into Builder", {
-      duration: 1500,
-      style: defaultToastStyle,
+      style: {
+        background: '#7C3AED',
+        color: 'white',
+        border: 'none'
+      }
     });
 
     // Close modal
     setPreviewTemplate(null);
 
-    // Visually switch tab to Builder
-    setTimeout(() => {
-      if (setActiveTab) setActiveTab("builder");
-    }, 400);
+    // Navigate to workspace
+    router.push('/workspace');
   };
 
   // === HANDLE CANCEL ===
@@ -270,9 +273,16 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                   <div className="font-semibold text-gray-900 dark:text-gray-100 truncate">
                     {t.name || t.title || "Untitled Template"}
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
-                    {t.style || t.scenario || t.details || "No details yet."}
-                  </p>
+                  <div className="relative group mt-1">
+                    <pre className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 whitespace-pre-wrap font-sans">
+                      {t.prompt || t.style || t.scenario || t.details || "No details yet."}
+                    </pre>
+                    
+                    {/* Tooltip on hover */}
+                    <div className="invisible group-hover:visible absolute z-10 bottom-full left-0 mb-2 p-3 bg-black/90 text-white text-xs rounded-lg max-w-md shadow-xl whitespace-pre-wrap">
+                      {t.prompt || t.style || t.scenario || t.details || "No details yet."}
+                    </div>
+                  </div>
                 </div>
 
                 <DropdownMenu>
@@ -327,7 +337,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
       {/* Modal */}
       <Dialog open={!!previewTemplate} onOpenChange={() => setPreviewTemplate(null)}>
-        <DialogContent className="max-w-lg backdrop-blur-sm bg-white/90 dark:bg-neutral-900/90 border border-gray-300 dark:border-neutral-700 shadow-2xl rounded-2xl">
+        <DialogContent className="max-w-lg bg-white/10 dark:bg-[#1a1a1a]/10 backdrop-blur-md border border-white/10 shadow-[0_0_20px_rgba(200,140,255,0.3)] rounded-2xl">
           {previewTemplate && (
             <>
               <DialogHeader>
@@ -377,22 +387,24 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
               </div>
 
               <DialogFooter className="mt-6 flex justify-end gap-3">
-                <Button
-                  variant="outline"
-                  className="border-red-500 text-red-600 hover:bg-red-50 dark:border-red-500 dark:text-red-400 dark:hover:bg-red-500/10"
+                <button
+                  className="button-danger px-4 py-2 text-white rounded-2xl font-medium"
                   onClick={() => {
                     setPreviewTemplate(null); // закрываем preview modal
                     openDeleteDialog(previewTemplate); // открываем delete dialog
                   }}
                 >
                   Delete
-                </Button>
+                </button>
                 <Button variant="outline" onClick={handleCancel}>
                   Cancel
                 </Button>
-                <Button onClick={() => handleLoadTemplate(previewTemplate)}>
+                <button
+                  className="button-accent px-4 py-2 text-white rounded-2xl font-medium"
+                  onClick={() => handleLoadTemplate(previewTemplate)}
+                >
                   Load Template
-                </Button>
+                </button>
               </DialogFooter>
             </>
           )}
@@ -401,7 +413,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
       {/* Rename Template Dialog */}
       <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
-        <DialogContent className="max-w-md backdrop-blur-sm bg-white/90 dark:bg-neutral-900/90 border border-gray-300 dark:border-neutral-700 shadow-2xl rounded-2xl">
+        <DialogContent className="max-w-md bg-white/10 dark:bg-[#1a1a1a]/10 backdrop-blur-md border border-white/10 shadow-[0_0_20px_rgba(200,140,255,0.3)] rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               Rename Template
@@ -451,7 +463,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
       {/* Delete Template Dialog */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <DialogContent className="max-w-md backdrop-blur-sm bg-white/90 dark:bg-neutral-900/90 border border-gray-300 dark:border-neutral-700 shadow-2xl rounded-2xl">
+        <DialogContent className="max-w-md bg-white/10 dark:bg-[#1a1a1a]/10 backdrop-blur-md border border-white/10 shadow-[0_0_20px_rgba(200,140,255,0.3)] rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               Delete Template?
@@ -484,7 +496,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
       {/* Create New Template Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-md backdrop-blur-sm bg-white/90 dark:bg-neutral-900/90 border border-gray-300 dark:border-neutral-700 shadow-2xl rounded-2xl">
+        <DialogContent className="max-w-md bg-white/10 dark:bg-[#1a1a1a]/10 backdrop-blur-md border border-white/10 shadow-[0_0_20px_rgba(200,140,255,0.3)] rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               Create New Template

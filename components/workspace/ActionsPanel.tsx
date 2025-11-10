@@ -121,69 +121,68 @@ useEffect(() => {
                   </button>
                 </div>
 
-                <div className="flex flex-col items-center space-y-3 mt-4">
-  <Button
-    variant="ghost"
-    onClick={() => {
-      onDuplicate();
-      closePanel();
-    }}
-    className="min-w-[260px] bg-gray-100 text-gray-900 text-base font-semibold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
-  >
-    Duplicate
-  </Button>
-  <Button
-    variant="ghost"
-    onClick={() => {
-      onRename();
-      closePanel();
-    }}
-    className="min-w-[260px] bg-gray-100 text-gray-900 text-base font-semibold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
-  >
-    Rename
-  </Button>
-  <Button
-    variant="ghost"
-    onClick={() => {
-      onSave();
-      closePanel();
-    }}
-    className="min-w-[260px] bg-gray-100 text-gray-900 text-base font-semibold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
-  >
-    Save
-  </Button>
-  <Button
-    variant="ghost"
+                <div className="flex flex-col items-center space-y-3 mt-4 px-4">
+  <button
     onClick={() => {
       onAddTemplate();
       closePanel();
     }}
-    className="min-w-[260px] bg-gray-100 text-gray-900 text-base font-semibold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
+    className="button-accent w-full px-4 py-2 text-white rounded-2xl font-medium"
   >
     + Add Template
-  </Button>
+  </button>
+  
+  <button
+    onClick={() => {
+      onSave();
+      closePanel();
+    }}
+    className="button-success w-full px-4 py-2 text-white rounded-2xl font-medium"
+  >
+    Save Collection
+  </button>
+  
+  <button
+    onClick={() => {
+      onDuplicate();
+      closePanel();
+    }}
+    className="button-cancel w-full px-4 py-2 rounded-2xl font-medium"
+  >
+    Duplicate
+  </button>
+  
+  <button
+    onClick={() => {
+      onRename();
+      closePanel();
+    }}
+    className="button-cancel w-full px-4 py-2 rounded-2xl font-medium"
+  >
+    Rename
+  </button>
+  
   {onDelete && (
-    <Button
-      variant="ghost"
+    <button
       onClick={() => {
         onDelete();
         closePanel();
       }}
-      className="min-w-[260px] bg-red-50 text-red-600 text-base font-semibold py-2 px-6 rounded-lg hover:bg-red-100 hover:text-red-700 transition"
+      className="button-danger w-full px-4 py-2 text-white rounded-2xl font-medium"
     >
-      Delete
-    </Button>
+      Delete Collection
+    </button>
   )}
-  <Button
-    variant="ghost"
+  
+  <button
     onClick={() => {
       onBack();
       closePanel();
     }}
-    className="min-w-[260px] bg-gray-100 text-gray-900 text-base font-semibold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
+    className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl font-medium hover:scale-[1.02] transition-transform"
   >
-    Back
-  </Button>
+    ← Back to Collections
+  </button>
 </div>
 
 

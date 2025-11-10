@@ -91,9 +91,9 @@ function LeonardoDialog({
 				onClick={onClose}
 			/>
 
-			{/* Dialog */}
-			<div className="relative w-full max-w-md mx-auto rounded-xl bg-white dark:bg-gray-900 p-6 shadow-2xl animate-in zoom-in-95 duration-200">
-				<h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{title}</h3>
+			{/* Dialog - Leonardo Glass Style */}
+			<div className="glass-panel relative w-full max-w-md mx-auto rounded-2xl p-6 animate-in zoom-in-95 duration-200">
+				<h3 className="text-primary text-lg font-semibold mb-4">{title}</h3>
 				<div className="space-y-4">{children}</div>
 				{footer && <div className="mt-6 flex justify-end gap-3">{footer}</div>}
 			</div>

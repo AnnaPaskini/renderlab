@@ -15,6 +15,28 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+
+  /* Leonardo Design System — Soft Violet-Amber Palette */
+  /* Accent (Soft Violet–Amber glow) */
+  --color-accent-start: #9b7bff;    /* мягкий фиолетовый */
+  --color-accent-mid: #b387ff;      /* светлая середина */
+  --color-accent-end: #ffc98b;      /* тёплый янтарный акцент */
+  --color-glow: rgba(180, 140, 255, 0.25); /* нежный рассеянный свет */
+
+  /* Neutral tones */
+  --color-bg: #0e0c12;
+  --color-panel: rgba(255, 255, 255, 0.04);
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-text-primary: #f5f5f6;
+  --color-text-secondary: #a5a5b0;
+
+  /* Danger — строго, без карнавала */
+  --color-danger-start: #ff4d4d;
+  --color-danger-end: #c43c77;
+
+  /* Success — современный холодный бирюзовый */
+  --color-success-start: #4dd4c0;
+  --color-success-end: #78f3d2;
 }
 
 /* Dark mode auto-switching disabled for light theme enforcement */
@@ -142,6 +164,74 @@ body {
   .btn-gradient {
     background-image: linear-gradient(to right, var(--tw-gradient-stops));
     box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 4px 15px rgba(150, 100, 255, 0.4);
+  }
+
+  /* =========================
+     Leonardo Design System
+     ========================= */
+  
+  /* Glass Panel — unified glassmorphism for dialogs/modals */
+  .glass-panel {
+    background: var(--color-panel);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 0 20px var(--color-glow);
+  }
+
+  /* Button Variants */
+  .button-accent {
+    background: linear-gradient(135deg, var(--color-accent-start), var(--color-accent-mid), var(--color-accent-end));
+    box-shadow: 0 0 12px var(--color-glow);
+    transition: all 0.25s ease;
+  }
+
+  .button-accent:hover {
+    box-shadow: 0 0 18px var(--color-glow);
+    transform: scale(1.02);
+  }
+
+  .button-danger {
+    background: linear-gradient(135deg, var(--color-danger-start), var(--color-danger-end));
+    box-shadow: 0 0 10px rgba(255, 77, 77, 0.3);
+    transition: all 0.25s ease;
+  }
+
+  .button-danger:hover {
+    box-shadow: 0 0 16px rgba(255, 77, 77, 0.5);
+    transform: scale(1.02);
+  }
+
+  .button-success {
+    background: linear-gradient(135deg, var(--color-success-start), var(--color-success-end));
+    box-shadow: 0 0 10px rgba(77, 212, 192, 0.3);
+    transition: all 0.25s ease;
+  }
+
+  .button-success:hover {
+    box-shadow: 0 0 16px rgba(77, 212, 192, 0.5);
+    transform: scale(1.02);
+  }
+
+  .button-cancel {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    transition: all 0.25s ease;
+  }
+
+  .button-cancel:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--color-text-primary);
+  }
+
+  /* Text Utilities */
+  .text-primary {
+    color: var(--color-text-primary);
+  }
+
+  .text-secondary {
+    color: var(--color-text-secondary);
   }
 }
 .dark .panel-dimmer {
@@ -288,33 +378,33 @@ body.actions-open nav {
 }
 
 /* =========================
-   RenderLab Aura Glow System
+   RenderLab Aura Glow System (Leonardo-integrated)
    ========================= */
 .aura {
   position: relative;
   transition: box-shadow 0.35s ease, transform 0.25s ease;
   box-shadow:
-    inset 0 0 0 0 rgba(200,140,255,0.12),
-    0 0 0 0 rgba(200,140,255,0.12);
+    inset 0 0 0 0 var(--color-glow),
+    0 0 0 0 var(--color-glow);
 }
 
 .aura:hover {
   box-shadow:
-    inset 0 0 10px rgba(200,140,255,0.25),
-    0 0 15px rgba(200,140,255,0.18);
+    inset 0 0 10px var(--color-glow),
+    0 0 15px var(--color-glow);
   transform: translateY(-1px);
 }
 
 .dark .aura {
   box-shadow:
-    inset 0 0 0 0 rgba(200,140,255,0.08),
-    0 0 0 0 rgba(200,140,255,0.08);
+    inset 0 0 0 0 var(--color-glow),
+    0 0 0 0 var(--color-glow);
 }
 
 .dark .aura:hover {
   box-shadow:
-    inset 0 0 10px rgba(200,140,255,0.25),
-    0 0 18px rgba(200,140,255,0.22);
+    inset 0 0 10px var(--color-glow),
+    0 0 18px var(--color-glow);
 }
 
 /* Optionally, a soft glow pulse for premium UI elements */
