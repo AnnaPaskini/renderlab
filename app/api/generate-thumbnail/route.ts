@@ -2,6 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import sharp from 'sharp';
 import { createClient } from '@supabase/supabase-js';
 
+// Retry helper with exponential backoff
+async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    if (retries === 0) throw err;
+    console.warn(`Retrying thumbnail upload (${3 - retries + 1}/3)...`);
+    await new Promise(r => setTimeout(r, delay));
+    return retry(fn, retries - 1, delay * 2); // Exponential backoff
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { imageUrl, imageId } = await request.json();
@@ -12,6 +24,17 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Create Supabase client
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    // Get authenticated user or fallback to 'public'
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id ?? 'public';
+    const path = `thumbs/${userId}/${imageId}.webp`;
 
     // Fetch оригинальное изображение
     const imageResponse = await fetch(imageUrl);
@@ -27,27 +50,21 @@ export async function POST(request: NextRequest) {
       .webp({ quality: 70 })
       .toBuffer();
 
-    // Upload в Supabase Storage
-    const supabase = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
-    const thumbnailPath = `thumbs/${imageId}.webp`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('renderlab-images')
-      .upload(thumbnailPath, thumbnailBuffer, {
-        contentType: 'image/webp',
-        upsert: true
-      });
-
-    if (uploadError) throw uploadError;
+    // Upload with retry logic (3 attempts)
+    await retry(async () => {
+      const { error: uploadError } = await supabase.storage
+        .from('renderlab-images')
+        .upload(path, thumbnailBuffer, {
+          contentType: 'image/webp',
+          upsert: true
+        });
+      if (uploadError) throw uploadError;
+    });
 
     // Получаем публичный URL
     const { data: { publicUrl } } = supabase.storage
       .from('renderlab-images')
-      .getPublicUrl(thumbnailPath);
+      .getPublicUrl(path);
 
     // Обновляем запись в БД
     const { error: updateError } = await supabase

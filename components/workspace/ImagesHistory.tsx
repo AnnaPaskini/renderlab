@@ -1,8 +1,8 @@
 'use client'
 
 import Image from 'next/image'
-import { Loader2 } from 'lucide-react'
 import { useHistory } from '@/lib/context/HistoryContext'
+import { SkeletonGrid } from '@/components/ui/SkeletonGrid'
 
 export default function ImagesHistory() {
   const { groups, loading } = useHistory();
@@ -13,11 +13,7 @@ export default function ImagesHistory() {
     .slice(0, 10); // Show only 10 most recent in widget
 
   if (loading && recentImages.length === 0) {
-    return (
-      <div className="p-4 text-center text-gray-500">
-        <Loader2 className="w-6 h-6 animate-spin mx-auto" />
-      </div>
-    );
+    return <SkeletonGrid count={10} />;
   }
 
   if (recentImages.length === 0) {

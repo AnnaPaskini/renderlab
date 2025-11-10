@@ -7,6 +7,7 @@ import { headers } from "next/headers";
 import { SupabaseAuthProvider } from "@/components/providers/SupabaseAuthProvider";
 import { WorkspaceProvider } from "@/lib/context/WorkspaceContext";
 import { HistoryProvider } from "@/lib/context/HistoryContext";
+import { HistoryErrorBoundary } from "@/app/providers/HistoryErrorBoundary";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { NavBar } from "@/components/navbar";
@@ -67,17 +68,19 @@ export default async function RootLayout({
             defaultTheme="light"
           >
             <SupabaseAuthProvider>
-              <HistoryProvider>
-                <WorkspaceProvider>
-                  {showNavbar && <NavBar />}
-                  {showMainNavbar && <MainNavbar />}
-                  {children}
-                  <Toaster 
-                    position="bottom-right"
-                    toastOptions={toastConfig}
-                  />
-                </WorkspaceProvider>
-              </HistoryProvider>
+              <HistoryErrorBoundary>
+                <HistoryProvider>
+                  <WorkspaceProvider>
+                    {showNavbar && <NavBar />}
+                    {showMainNavbar && <MainNavbar />}
+                    {children}
+                    <Toaster 
+                      position="bottom-right"
+                      toastOptions={toastConfig}
+                    />
+                  </WorkspaceProvider>
+                </HistoryProvider>
+              </HistoryErrorBoundary>
             </SupabaseAuthProvider>
           </ThemeProvider>
         </body>
