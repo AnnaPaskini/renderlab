@@ -50,6 +50,7 @@ export interface GeneratedImage {
   user_id: string;
   prompt: string;
   image_url: string;
+  thumb_url?: string | null;
   reference_url: string | null;
   created_at: string;
 }

@@ -22,7 +22,7 @@ import { useAuth } from "@/components/providers/SupabaseAuthProvider";
 import UserMenu from "@/components/navbar/UserMenu";
 import { Z } from "@/lib/z-layer-guide";
 import ImagesHistory from "./ImagesHistory";
-import { useHistory } from "@/lib/hooks/useHistory";
+import { useHistory } from "@/lib/context/HistoryContext";
 
 
 interface WorkspaceLayoutProps {
@@ -242,10 +242,10 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
                                   exit={{ opacity: 0, scale: 0.9 }}
                                   transition={{ duration: 0.3 }}
                                   className="group relative flex h-full w-32 cursor-pointer flex-shrink-0 overflow-hidden rounded-lg transition-transform hover:scale-105"
-                                  onClick={() => setSelectedImage(img.image_url)}
+                                  onClick={() => setSelectedImage(img.image_url || null)}
                                 >
                                   <img
-                                    src={img.image_url}
+                                    src={img.image_url || ''}
                                     alt={`Generation ${idx + 1}`}
                                     loading="lazy"
                                     className="h-full w-full rounded-lg object-cover"

@@ -111,7 +111,7 @@ export async function POST(req: Request) {
       const imageName = `edited_${Date.now()}_${prompt?.slice(0, 30).replace(/\s+/g, '_') || 'inpaint'}`;
       const referenceUrl = baseImageUrl || imageUrl;
 
-      const { error: dbError } = await supabase
+      const { data: newImage, error: dbError } = await supabase
         .from("images")
         .insert([{
           user_id: user.id,
@@ -119,12 +119,26 @@ export async function POST(req: Request) {
           prompt: prompt || "restore and blend seamlessly", // ✅ Save the actual prompt text
           url: permanentUrl, // ✅ Use permanent Supabase Storage URL
           reference_url: referenceUrl,
-        }]);
+        }])
+        .select()
+        .single();
 
       if (dbError) {
         console.error("[EDIT] DB Error:", dbError);
       } else {
         console.log("[EDIT] Successfully saved to DB with reference_url:", referenceUrl);
+        
+        // ✅ Generate thumbnail asynchronously (don't wait)
+        if (newImage) {
+          fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/generate-thumbnail`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              imageUrl: permanentUrl,
+              imageId: newImage.id
+            })
+          }).catch(err => console.error('❌ Thumbnail generation failed:', err));
+        }
       }
     }
 

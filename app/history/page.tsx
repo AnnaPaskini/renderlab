@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useHistory } from '@/lib/hooks/useHistory';
+import { useHistory } from '@/lib/context/HistoryContext';
 import { useWorkspace } from '@/lib/context/WorkspaceContext';
 import { useRouter } from 'next/navigation';
 import { ImageIcon, Loader2 } from 'lucide-react';
@@ -86,7 +86,7 @@ export default function HistoryPage() {
                     <div className="relative aspect-video bg-gray-100">
                       {/* Result image - always shown */}
                       <img
-                        src={img.image_url}
+                        src={img.thumb_url || img.image_url}
                         alt="Generated"
                         loading="lazy"
                         className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"

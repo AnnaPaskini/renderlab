@@ -10,7 +10,7 @@ import { ImagePreviewModal } from "@/components/common/ImagePreviewModal";
 import { toast } from "sonner";
 import { defaultToastStyle } from "@/lib/toast-config";
 import { useWorkspace } from "@/lib/context/WorkspaceContext";
-import { useHistory } from "@/lib/hooks/useHistory";
+import { useHistory } from "@/lib/context/HistoryContext";
 import { Link as LinkIcon } from "lucide-react";
 
 export default function WorkspacePage() {

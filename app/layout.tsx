@@ -5,7 +5,8 @@ import { ViewTransitions } from "next-view-transitions";
 import { headers } from "next/headers";
 
 import { SupabaseAuthProvider } from "@/components/providers/SupabaseAuthProvider";
-import { WorkspaceProvider } from "@/lib/context/WorkspaceContext";  // ← Добавили
+import { WorkspaceProvider } from "@/lib/context/WorkspaceContext";
+import { HistoryProvider } from "@/lib/context/HistoryContext";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { NavBar } from "@/components/navbar";
@@ -66,15 +67,17 @@ export default async function RootLayout({
             defaultTheme="light"
           >
             <SupabaseAuthProvider>
-              <WorkspaceProvider>  {/* ← Добавили обёртку */}
-                {showNavbar && <NavBar />}
-                {showMainNavbar && <MainNavbar />}
-                {children}
-                <Toaster 
-                  position="bottom-right"
-                  toastOptions={toastConfig}
-                />
-              </WorkspaceProvider>  {/* ← Закрыли */}
+              <HistoryProvider>
+                <WorkspaceProvider>
+                  {showNavbar && <NavBar />}
+                  {showMainNavbar && <MainNavbar />}
+                  {children}
+                  <Toaster 
+                    position="bottom-right"
+                    toastOptions={toastConfig}
+                  />
+                </WorkspaceProvider>
+              </HistoryProvider>
             </SupabaseAuthProvider>
           </ThemeProvider>
         </body>

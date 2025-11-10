@@ -88,21 +88,37 @@ export async function POST(req: Request) {
     console.log("🔵 [DB INSERT] referenceImageUrl =", referenceImageUrl);
 
     // ✅ Save to DB with reference_url and prompt
-    const { error: dbError } = await supabase.from("images").insert([
-      {
-        user_id: user.id,
-        name: imageName,
-        prompt: prompt, // ✅ Save the actual prompt text
-        url: permanentUrl, // ✅ Use permanent Supabase Storage URL
-        reference_url: referenceImageUrl || null,
-        created_at: timestamp,
-      },
-    ]);
+    const { data: newImage, error: dbError } = await supabase
+      .from("images")
+      .insert([
+        {
+          user_id: user.id,
+          name: imageName,
+          prompt: prompt, // ✅ Save the actual prompt text
+          url: permanentUrl, // ✅ Use permanent Supabase Storage URL
+          reference_url: referenceImageUrl || null,
+          created_at: timestamp,
+        },
+      ])
+      .select()
+      .single();
 
     if (dbError) {
       console.error("❌ [DB ERROR]", dbError);
     } else {
       console.log("✅ [DB SAVED] Image + Reference URL inserted");
+      
+      // ✅ Generate thumbnail asynchronously (don't wait)
+      if (newImage) {
+        fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/generate-thumbnail`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            imageUrl: permanentUrl,
+            imageId: newImage.id
+          })
+        }).catch(err => console.error('❌ Thumbnail generation failed:', err));
+      }
     }
 
     return NextResponse.json({
