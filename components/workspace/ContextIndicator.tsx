@@ -4,7 +4,11 @@
 import { useWorkspace } from '@/lib/context/WorkspaceContext';
 import { X, FileText, FolderOpen, Clock } from 'lucide-react';
 
-export function ContextIndicator() {
+interface ContextIndicatorProps {
+  uploadedImage?: string | null;
+}
+
+export function ContextIndicator({ uploadedImage }: ContextIndicatorProps = {}) {
   const { activeItem, clear } = useWorkspace();
 
   // Если ничего не загружено
@@ -32,24 +36,45 @@ export function ContextIndicator() {
   };
 
   const getLabel = () => {
+    // Check if we have prompt but no reference (prompt-only mode)
+    if (activeItem.type === 'temporary') {
+      const hasPrompt = activeItem.data?.prompt;
+      const hasReference = uploadedImage || activeItem.data?.reference_url;
+      
+      if (hasPrompt && !hasReference) {
+        return 'Prompt active (no reference)';
+      }
+      return 'Loaded from History (not saved)';
+    }
+    
+    // Existing cases
     switch (activeItem.type) {
       case 'template':
         return `Template: ${activeItem.data.name}`;
       case 'collection':
         return `Collection: ${activeItem.data.name} (${activeItem.data.template_count} templates)`;
-      case 'temporary':
-        return 'Loaded from History (not saved)';
     }
   };
 
   const getBadgeColor = () => {
+    // Check if we have prompt but no reference (prompt-only mode)
+    if (activeItem.type === 'temporary') {
+      const hasPrompt = activeItem.data?.prompt;
+      const hasReference = uploadedImage || activeItem.data?.reference_url;
+      
+      // Prompt-only mode: blue
+      if (hasPrompt && !hasReference) {
+        return 'bg-blue-50 text-blue-700 border-blue-200';
+      }
+      return 'bg-amber-100 text-amber-700 border-amber-200';
+    }
+    
+    // Existing colors
     switch (activeItem.type) {
       case 'template':
         return 'bg-blue-100 text-blue-700 border-blue-200';
       case 'collection':
         return 'bg-purple-100 text-purple-700 border-purple-200';
-      case 'temporary':
-        return 'bg-amber-100 text-amber-700 border-amber-200';
     }
   };
 

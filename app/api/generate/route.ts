@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabaseServer";
 import { generateSingle } from "@/lib/generateSingle";
+import { uploadImageToStorage } from '@/lib/utils/uploadToStorage';
 
 /**
  * CREATE endpoint with optional reference image support.
@@ -61,12 +62,29 @@ export async function POST(req: Request) {
       );
     }
 
-    const imageUrl = result.url;
+    const replicateUrl = result.url;
     const timestamp = new Date().toISOString();
     const imageName = `generated_${Date.now()}_${prompt
       .slice(0, 30)
       .replace(/\s+/g, "_")}`;
 
+    // Upload to permanent storage
+    console.log("🔵 [STORAGE] Uploading to Supabase Storage:", replicateUrl);
+    const permanentUrl = await uploadImageToStorage(
+      replicateUrl,
+      user.id,
+      `generated_${Date.now()}.png`
+    );
+
+    if (!permanentUrl) {
+      console.error("❌ [STORAGE] Failed to upload image to storage");
+      return NextResponse.json(
+        { error: "Failed to upload image to storage" },
+        { status: 500 }
+      );
+    }
+
+    console.log("✅ [STORAGE] Uploaded successfully:", permanentUrl);
     console.log("🔵 [DB INSERT] referenceImageUrl =", referenceImageUrl);
 
     // ✅ Save to DB with reference_url and prompt
@@ -75,7 +93,7 @@ export async function POST(req: Request) {
         user_id: user.id,
         name: imageName,
         prompt: prompt, // ✅ Save the actual prompt text
-        url: imageUrl,
+        url: permanentUrl, // ✅ Use permanent Supabase Storage URL
         reference_url: referenceImageUrl || null,
         created_at: timestamp,
       },
@@ -90,7 +108,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       id: `gen-${Date.now()}`,
       status: "succeeded",
-      output: { imageUrl },
+      output: { imageUrl: permanentUrl },
       meta: {
         model: model || "google/nano-banana",
         promptLength: prompt.length,

@@ -1,16 +1,19 @@
 'use client';
 
+import { useState } from 'react';
 import { useHistory } from '@/lib/hooks/useHistory';
 import { useWorkspace } from '@/lib/context/WorkspaceContext';
 import { useRouter } from 'next/navigation';
 import { ImageIcon, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { ImagePreviewModal } from '@/components/common/ImagePreviewModal';
 
 export default function HistoryPage() {
   const { groups, loading, hasMore, loadMore } = useHistory();
   const { loadTemporary } = useWorkspace();
   const router = useRouter();
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
   const handleOpenInBuilder = (image: any) => {
     // Load the RESULT image (not reference) into builder
@@ -85,7 +88,8 @@ export default function HistoryPage() {
                       <img
                         src={img.image_url}
                         alt="Generated"
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => setPreviewImageUrl(img.image_url)}
                       />
 
                       {/* VAR tag if this was based on reference */}
@@ -152,6 +156,12 @@ export default function HistoryPage() {
           )}
         </div>
       )}
+      
+      {/* Fullscreen Image Preview Modal */}
+      <ImagePreviewModal
+        imageUrl={previewImageUrl}
+        onClose={() => setPreviewImageUrl(null)}
+      />
     </div>
   );
 }

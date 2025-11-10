@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import pLimit from "p-limit";
 import { generateSingle } from "@/lib/generateSingle";
 import { createClient } from "@/lib/supabaseServer";
+import { uploadImageToStorage } from '@/lib/utils/uploadToStorage';
 
 export const runtime = "nodejs";
 
@@ -189,11 +190,28 @@ export async function POST(req: Request) {
                 url: result.url,
               });
 
-              if (result.status === "ok") {
+              if (result.status === "ok" && result.url) {
                 succeeded += 1;
                 
-                // Save to database
+                // Upload to storage and save to database
                 try {
+                  const replicateUrl = result.url;
+                  
+                  // Upload to permanent storage
+                  console.log(`🔵 [STORAGE] Uploading image #${index} to Supabase Storage:`, replicateUrl);
+                  const permanentUrl = await uploadImageToStorage(
+                    replicateUrl,
+                    user.id,
+                    `collection_${collectionId || 'temp'}_${Date.now()}_${index}.png`
+                  );
+
+                  if (!permanentUrl) {
+                    console.error(`❌ [STORAGE] Failed to upload image #${index}`);
+                    throw new Error('Failed to upload to storage');
+                  }
+
+                  console.log(`✅ [STORAGE] Uploaded image #${index} successfully:`, permanentUrl);
+
                   const imageName = `${collectionName || "Collection"} - ${index + 1}`;
                   const { error: dbError } = await supabase
                     .from("images")
@@ -201,7 +219,7 @@ export async function POST(req: Request) {
                       user_id: user.id,
                       name: imageName,
                       prompt: normalized.prompt, // ✅ Save the actual prompt text
-                      url: result.url,
+                      url: permanentUrl, // ✅ Use permanent Supabase Storage URL
                       reference_url: normalized.imageUrl || baseImage || null,
                       collection_id: collectionId,
                     }]);
@@ -211,20 +229,31 @@ export async function POST(req: Request) {
                   } else {
                     console.log(`✅ [COLLECTION] Saved to DB with reference_url:`, normalized.imageUrl || baseImage || null);
                   }
-                } catch (dbErr) {
-                  console.error(`❌ [COLLECTION] DB Exception:`, dbErr);
-                }
 
-                const progressPayload: ProgressPayload = {
-                  type: "progress",
-                  index,
-                  collectionId,
-                  templateId: normalized.id,
-                  status: "ok",
-                  url: result.url ?? null,
-                };
-                console.log(`🔵 [COLLECTION] Enqueuing progress #${index}:`, progressPayload);
-                enqueue(controller, progressPayload);
+                  const progressPayload: ProgressPayload = {
+                    type: "progress",
+                    index,
+                    collectionId,
+                    templateId: normalized.id,
+                    status: "ok",
+                    url: permanentUrl ?? null, // ✅ Send permanent URL to client
+                  };
+                  console.log(`🔵 [COLLECTION] Enqueuing progress #${index}:`, progressPayload);
+                  enqueue(controller, progressPayload);
+                } catch (dbErr) {
+                  console.error(`❌ [COLLECTION] Error processing image #${index}:`, dbErr);
+                  failed += 1;
+                  
+                  const errorPayload: ProgressPayload = {
+                    type: "progress",
+                    index,
+                    collectionId,
+                    templateId: normalized.id,
+                    status: "error",
+                    error: dbErr instanceof Error ? dbErr.message : 'Storage upload failed',
+                  };
+                  enqueue(controller, errorPayload);
+                }
               } else {
                 failed += 1;
                 enqueue(

@@ -10,9 +10,10 @@ import { defaultToastStyle } from "@/lib/toast-config";
 interface ImageUploadPanelProps {
   onImageChange: (image: string | null) => void;
   image: string | null;
+  onClearImage?: () => void;
 }
 
-export function ImageUploadPanel({ image, onImageChange }: ImageUploadPanelProps) {
+export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUploadPanelProps) {
   const [isDragActive, setIsDragActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -77,8 +78,14 @@ export function ImageUploadPanel({ image, onImageChange }: ImageUploadPanelProps
             animate={{ opacity: 1.2, y: 0 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => onImageChange(null)}
-            className="flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/85 px-3 py-1.5 text-sm font-semibold text-neutral-900 shadow-[inset_0_1px_1px_rgба(255,255,255,0.32),0_6px_18px_-8px_rgба(12,12,24,0.3)] transition-colors hover:bg-white/90 dark:border-white/20 dark:bg-[#181818]/80 dark:text-white"
+            onClick={() => {
+              if (onClearImage) {
+                onClearImage();
+              } else {
+                onImageChange(null);
+              }
+            }}
+            className="flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/85 px-3 py-1.5 text-sm font-semibold text-neutral-900 shadow-[inset_0_1px_1px_rgва(255,255,255,0.32),0_6px_18px_-8px_rgва(12,12,24,0.3)] transition-colors hover:bg-white/90 dark:border-white/20 dark:bg-[#181818]/80 dark:text-white"
           >
             <X size={8} strokeWidth={2} />
             Clear

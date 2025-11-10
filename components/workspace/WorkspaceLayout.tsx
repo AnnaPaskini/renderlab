@@ -13,6 +13,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { format } from "date-fns";
 import { Toaster } from "react-hot-toast";
+import Link from "next/link";
 
 import { CollectionsPanel } from "./CollectionPanel";
 import { PromptTemplates } from "./PromptTemplates";
@@ -21,6 +22,7 @@ import { useAuth } from "@/components/providers/SupabaseAuthProvider";
 import UserMenu from "@/components/navbar/UserMenu";
 import { Z } from "@/lib/z-layer-guide";
 import ImagesHistory from "./ImagesHistory";
+import { useHistory } from "@/lib/hooks/useHistory";
 
 
 interface WorkspaceLayoutProps {
@@ -43,6 +45,12 @@ export function WorkspaceLayout({
   const previewTimestampsRef = useRef<Map<string, string>>(new Map());
 
   const { user } = useAuth();
+  const { groups, loading: historyLoading } = useHistory();
+  
+  // Get last 5 generations from user history
+  const recentGenerations = useMemo(() => {
+    return groups.flatMap(group => group.images).slice(0, 5);
+  }, [groups]);
 
 const displayName = user?.user_metadata?.full_name?.trim() || user?.email || "Creator";
 const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
@@ -205,67 +213,53 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
                   </div>
 
                   <div className="rounded-3xl border border-white/40 bg-white/65 p-6 text-neutral-900 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-shadow dark:border-white/24 dark:bg-[#111111]/70 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)] md:p-8">
-                    <h3 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-white">Images History</h3>
+                    <div className="mb-4 flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Images History</h3>
+                      <Link 
+                        href="/history"
+                        className="text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium transition-colors hover:underline"
+                      >
+                        View all →
+                      </Link>
+                    </div>
                     <div className="h-[20vh] overflow-hidden rounded-xl border border-white/40 bg-white/65 p-4 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] dark:border-white/24 dark:bg-[#111111]/70 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
-                      {uploadedImage || previews.length > 0 ? (
+                      {historyLoading ? (
+                        <div className="flex h-full items-center justify-center text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                          Loading history...
+                        </div>
+                      ) : recentGenerations.length > 0 ? (
                         <div className="flex h-full gap-4 overflow-x-auto">
                           <AnimatePresence initial={false}>
-                            {reversedPreviews.map((preview, idx) => {
-                              const timestampIso = previewTimestampsRef.current.get(preview ?? "");
-                              const formattedTimestamp = timestampIso
-                                ? format(new Date(timestampIso), "MMM d, yy")
-                                : null;
+                            {recentGenerations.map((img, idx) => {
+                              const formattedTimestamp = format(new Date(img.created_at), "MMM d, yy");
 
                               return (
                                 <motion.div
-                                  key={`${preview}-${idx}`}
+                                  key={`${img.id}-${idx}`}
                                   layout
                                   initial={{ opacity: 0, scale: 0.95 }}
                                   animate={{ opacity: 1, scale: 1 }}
                                   exit={{ opacity: 0, scale: 0.9 }}
                                   transition={{ duration: 0.3 }}
                                   className="group relative flex h-full w-32 cursor-pointer flex-shrink-0 overflow-hidden rounded-lg transition-transform hover:scale-105"
-                                  onClick={() => setSelectedImage(preview)}
+                                  onClick={() => setSelectedImage(img.image_url)}
                                 >
                                   <img
-                                    src={preview}
-                                    alt={`Preview ${previews.length - idx}`}
+                                    src={img.image_url}
+                                    alt={`Generation ${idx + 1}`}
                                     className="h-full w-full rounded-lg object-cover"
                                   />
-                                  {formattedTimestamp && (
-                                    <div className="absolute top-2 right-2 rounded-md bg-black/70 backdrop-blur-sm px-2 py-1 text-xs font-medium text-white">
-                                      {formattedTimestamp}
-                                    </div>
-                                  )}
+                                  <div className="absolute top-2 right-2 rounded-md bg-black/70 backdrop-blur-sm px-2 py-1 text-xs font-medium text-white">
+                                    {formattedTimestamp}
+                                  </div>
                                 </motion.div>
                               );
                             })}
-                            {uploadedImage && (
-                              <motion.div
-                                key="uploaded-image"
-                                layout
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
-                                transition={{ duration: 0.3 }}
-                                className="group relative flex h-full w-32 cursor-pointer flex-shrink-0 overflow-hidden rounded-lg transition-transform hover:scale-105"
-                                onClick={() => setSelectedImage(uploadedImage)}
-                              >
-                                <img
-                                  src={uploadedImage}
-                                  alt="Uploaded"
-                                  className="h-full w-full rounded-lg object-cover"
-                                />
-                                <div className="absolute top-2 right-2 rounded bg-blue-500 px-2 py-1 text-xs font-semibold text-white">
-                                  Original
-                                </div>
-                              </motion.div>
-                            )}
                           </AnimatePresence>
                         </div>
                       ) : (
-                        <div className="flex h-full items-center justify-center text-sm font-medium text-neutral-600 dark:text-white">
-                          No images yet. Upload an image to start!
+                        <div className="flex h-full items-center justify-center text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                          No generations yet.
                         </div>
                       )}
                     </div>

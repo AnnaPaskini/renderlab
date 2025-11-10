@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabaseServer";
+import { uploadImageToStorage } from '@/lib/utils/uploadToStorage';
 
 export async function POST(req: Request) {
   try {
@@ -84,10 +85,29 @@ export async function POST(req: Request) {
 
     console.log("[EDIT] Replicate generation succeeded");
 
-    const outputUrl = result.output?.[0] || null;
+    const replicateUrl = result.output?.[0] || null;
+    let permanentUrl: string | null = null;
 
-    // 3. Сохраняем в базу
-    if (outputUrl) {
+    // 3. Upload to storage and save to DB
+    if (replicateUrl) {
+      // Upload to permanent storage
+      console.log("🔵 [STORAGE] Uploading to Supabase Storage:", replicateUrl);
+      permanentUrl = await uploadImageToStorage(
+        replicateUrl,
+        user.id,
+        `edited_${Date.now()}.png`
+      );
+
+      if (!permanentUrl) {
+        console.error("❌ [STORAGE] Failed to upload image to storage");
+        return NextResponse.json(
+          { error: "Failed to upload image to storage" },
+          { status: 500 }
+        );
+      }
+
+      console.log("✅ [STORAGE] Uploaded successfully:", permanentUrl);
+
       const imageName = `edited_${Date.now()}_${prompt?.slice(0, 30).replace(/\s+/g, '_') || 'inpaint'}`;
       const referenceUrl = baseImageUrl || imageUrl;
 
@@ -97,7 +117,7 @@ export async function POST(req: Request) {
           user_id: user.id,
           name: imageName,
           prompt: prompt || "restore and blend seamlessly", // ✅ Save the actual prompt text
-          url: outputUrl,
+          url: permanentUrl, // ✅ Use permanent Supabase Storage URL
           reference_url: referenceUrl,
         }]);
 
@@ -111,7 +131,7 @@ export async function POST(req: Request) {
     // 4. Возвращаем финальный результат
     return NextResponse.json({
       success: true,
-      output: outputUrl,
+      output: permanentUrl,
       status: result.status,
     });
   } catch (error: any) {

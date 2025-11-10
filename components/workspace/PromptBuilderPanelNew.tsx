@@ -941,7 +941,7 @@ export function PromptBuilderPanel({
 
             {/* Context Indicator */}
             <div className="mb-6">
-              <ContextIndicator />
+              <ContextIndicator uploadedImage={uploadedImage} />
             </div>
 
             <motion.div
