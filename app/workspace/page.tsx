@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { NavBar } from "@/components/navbar";
 import { WorkspaceLayout } from "@/components/workspace/WorkspaceLayout";
 import { ImageUploadPanel } from "@/components/workspace/ImageUploadPanel";
@@ -14,6 +15,7 @@ import { useHistory } from "@/lib/context/HistoryContext";
 import { Link as LinkIcon } from "lucide-react";
 
 export default function WorkspacePage() {
+  const searchParams = useSearchParams();
   const { activeItem, loadTemporary } = useWorkspace();
   const { refresh: refreshHistory } = useHistory();
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -23,6 +25,51 @@ export default function WorkspacePage() {
   const [imageUrl, setImageUrl] = useState("");
   const [isValidatingUrl, setIsValidatingUrl] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  const [additionalDetailsFromUrl, setAdditionalDetailsFromUrl] = useState<string | null>(null);
+  const hasLoadedFromUrlRef = useRef(false);
+
+  // Load prompt from URL query parameter (from Prompts Library)
+  useEffect(() => {
+    // Prevent running multiple times (React Strict Mode runs effects twice)
+    if (hasLoadedFromUrlRef.current) return;
+    
+    const promptFromUrl = searchParams.get('prompt');
+    const additionalPromptFromUrl = searchParams.get('additionalPrompt');
+    
+    if (promptFromUrl) {
+      const decodedPrompt = decodeURIComponent(promptFromUrl);
+      setPrompt(decodedPrompt);
+      toast.info('Prompt loaded from library', {
+        style: {
+          background: '#6366f1',
+          color: 'white',
+          border: 'none'
+        }
+      });
+      hasLoadedFromUrlRef.current = true;
+    }
+    
+    if (additionalPromptFromUrl) {
+      const decodedAdditionalPrompt = decodeURIComponent(additionalPromptFromUrl);
+      setAdditionalDetailsFromUrl(decodedAdditionalPrompt);
+      toast.success('Prompt added to Additional Details', {
+        style: {
+          background: '#10b981',
+          color: 'white',
+          border: 'none'
+        },
+        duration: 3000
+      });
+      
+      hasLoadedFromUrlRef.current = true;
+      
+      // Clear the URL parameter after loading (optional - keeps URL clean)
+      // You can remove this if you want the parameter to persist in URL
+      setTimeout(() => {
+        window.history.replaceState({}, '', '/workspace');
+      }, 100);
+    }
+  }, [searchParams]);
 
   // Sync reference image with WorkspaceContext when temporary item is loaded
   useEffect(() => {
@@ -247,6 +294,7 @@ export default function WorkspacePage() {
             onPreviewAdd={(url) => setPreviews((prev) => [...prev, url])}
             uploadedImage={uploadedImage}
             onHistoryRefresh={refreshHistory}
+            initialAdditionalDetails={additionalDetailsFromUrl}
           />
         }
         uploadedImage={uploadedImage}

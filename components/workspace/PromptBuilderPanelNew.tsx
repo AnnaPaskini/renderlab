@@ -41,6 +41,7 @@ export interface PromptBuilderPanelProps {
   onPreviewAdd?: (url: string) => void;
   uploadedImage?: string | null;
   onHistoryRefresh?: () => Promise<void>;
+  initialAdditionalDetails?: string | null;
 }
 
 type TemplateRecord = {
@@ -58,6 +59,7 @@ export function PromptBuilderPanel({
   onPreviewAdd,
   uploadedImage,
   onHistoryRefresh,
+  initialAdditionalDetails,
 }: PromptBuilderPanelProps) {
   const [internalIsGenerating, setInternalIsGenerating] = useState(false);
   const [internalActiveTab, setInternalActiveTab] = useState<"builder" | "custom">(
@@ -71,6 +73,13 @@ export function PromptBuilderPanel({
 
   const shouldUseInternalGenerating = controlledIsGenerating === undefined;
   const isGenerating = controlledIsGenerating ?? internalIsGenerating;
+
+  // Load additional details from URL parameter (from Prompts Library)
+  useEffect(() => {
+    if (initialAdditionalDetails) {
+      setDetails(initialAdditionalDetails);
+    }
+  }, [initialAdditionalDetails]);
 
   const setGeneratingState = (value: boolean) => {
     if (shouldUseInternalGenerating) {

@@ -112,6 +112,13 @@ export default function HistoryPage() {
       setPage(pageNum);
 
     } catch (err) {
+      // Better error logging with type checking
+      if (err === null || err === undefined || err === 0) {
+        console.warn('History load: received null/undefined/0 error, skipping');
+        setLoading(false);
+        return;
+      }
+      
       console.error('History load error:', err);
       toast.error('Failed to load history');
     } finally {

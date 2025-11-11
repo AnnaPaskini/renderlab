@@ -48,9 +48,14 @@ export function WorkspaceLayout({
   const { user } = useAuth();
   const { groups, loading: historyLoading, refresh } = useHistory();
   
-  // Get last 5 generations from user history
+  // Get last 5 generations from user history with deduplication
   const recentGenerations = useMemo(() => {
-    return groups.flatMap(group => group.images).slice(0, 5);
+    return groups
+      .flatMap(group => group.images)
+      .filter((img, index, self) => 
+        index === self.findIndex(i => i.id === img.id)
+      ) // Deduplicate by id
+      .slice(0, 5);
   }, [groups]);
 
 const displayName = user?.user_metadata?.full_name?.trim() || user?.email || "Creator";
@@ -281,7 +286,7 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
 
                               return (
                                 <motion.div
-                                  key={`${img.id}-${idx}`}
+                                  key={`history-${img.id}-${img.created_at}-${idx}`}
                                   layout
                                   initial={{ opacity: 0, scale: 0.95 }}
                                   animate={{ opacity: 1, scale: 1 }}
@@ -291,10 +296,11 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
                                   onClick={() => setSelectedImage(img.image_url || null)}
                                 >
                                   <img
-                                    src={img.image_url || ''}
+                                    src={img.thumb_url || img.image_url || ''}
                                     alt={`Generation ${idx + 1}`}
                                     loading="lazy"
-                                    className="h-full w-full rounded-lg object-cover"
+                                    decoding="async"
+                                    className="h-full w-full rounded-lg object-cover transition-opacity duration-300"
                                   />
                                   
                                   {/* Hover overlay */}

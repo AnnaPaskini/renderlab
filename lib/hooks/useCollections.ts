@@ -89,9 +89,16 @@ export function useHistory() {
       setPage(pageNum);
 
     } catch (err) {
+      // Better error logging with type checking
+      if (err === null || err === undefined || err === 0) {
+        console.warn('History load: received null/undefined/0 error, skipping');
+        setLoading(false);
+        return;
+      }
+      
       console.error('History load error:', err);
       const dbError: DatabaseError = {
-        message: err instanceof Error ? err.message : 'Failed to load history',
+        message: err instanceof Error ? err.message : typeof err === 'string' ? err : 'Failed to load history',
       };
       setError(dbError);
       toast.error(dbError.message);

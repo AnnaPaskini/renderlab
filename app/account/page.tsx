@@ -340,8 +340,8 @@ export default function AccountPage() {
                           {/* Tags */}
                           {prompt.tags && prompt.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1 mb-3">
-                              {prompt.tags.map(tag => (
-                                <span key={tag} className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded">
+                              {prompt.tags.map((tag, tagIndex) => (
+                                <span key={`${prompt.id}-tag-${tagIndex}`} className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded">
                                   #{tag}
                                 </span>
                               ))}

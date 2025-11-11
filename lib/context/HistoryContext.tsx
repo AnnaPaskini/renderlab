@@ -134,8 +134,15 @@ export function HistoryProvider({ children }: { children: ReactNode }) {
       setPage(pageNum);
 
     } catch (err) {
+      // Better error logging with type checking
+      if (err === null || err === undefined || err === 0) {
+        console.warn('History load: received null/undefined/0 error, skipping');
+        setLoading(false);
+        return;
+      }
+      
       console.error('History load error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load history';
+      const errorMessage = err instanceof Error ? err.message : typeof err === 'string' ? err : 'Failed to load history';
       
       // Don't show toast for authentication errors (handled by redirect)
       const isAuthError = errorMessage.includes('authenticated') || errorMessage.includes('auth');

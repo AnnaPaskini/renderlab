@@ -41,13 +41,17 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await imageResponse.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Resize до 400x400 WebP
+    // Resize до 400x400 WebP with optimizations
     const thumbnailBuffer = await sharp(buffer)
       .resize(400, 400, {
         fit: 'cover',
-        position: 'center'
+        position: 'center',
+        kernel: sharp.kernel.lanczos3 // Better quality scaling
       })
-      .webp({ quality: 70 })
+      .webp({ 
+        quality: 75, // Slightly higher quality
+        effort: 4    // Balance between size and encoding speed
+      })
       .toBuffer();
 
     // Upload with retry logic (3 attempts)

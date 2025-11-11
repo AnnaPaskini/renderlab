@@ -7,9 +7,12 @@ import { SkeletonGrid } from '@/components/ui/SkeletonGrid'
 export default function ImagesHistory() {
   const { groups, loading } = useHistory();
   
-  // Flatten groups into images array for this widget
+  // Flatten groups into images array for this widget with deduplication
   const recentImages = groups
     .flatMap(group => group.images)
+    .filter((img, index, self) => 
+      index === self.findIndex(i => i.id === img.id)
+    ) // Deduplicate by id
     .slice(0, 10); // Show only 10 most recent in widget
 
   if (loading && recentImages.length === 0) {
@@ -44,8 +47,10 @@ export default function ImagesHistory() {
               alt={img.name || 'Generated image'}
               fill
               loading="lazy"
-              className="object-cover"
+              className="object-cover transition-opacity duration-300"
               sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+              placeholder="blur"
+              blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2VlZSIvPjwvc3ZnPg=="
             />
             
             {/* Date overlay - always visible */}
