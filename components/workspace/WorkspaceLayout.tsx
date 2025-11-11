@@ -14,6 +14,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { format } from "date-fns";
 import { Toaster } from "react-hot-toast";
 import Link from "next/link";
+import { toast } from "sonner";
 
 import { CollectionsPanel } from "./CollectionPanel";
 import { PromptTemplates } from "./PromptTemplates";
@@ -45,7 +46,7 @@ export function WorkspaceLayout({
   const previewTimestampsRef = useRef<Map<string, string>>(new Map());
 
   const { user } = useAuth();
-  const { groups, loading: historyLoading } = useHistory();
+  const { groups, loading: historyLoading, refresh } = useHistory();
   
   // Get last 5 generations from user history
   const recentGenerations = useMemo(() => {
@@ -233,6 +234,51 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
                             {recentGenerations.map((img, idx) => {
                               const formattedTimestamp = format(new Date(img.created_at), "MMM d, yy");
 
+                              const handleDownload = async (e: React.MouseEvent) => {
+                                e.stopPropagation();
+                                if (!img.image_url) return;
+                                try {
+                                  const response = await fetch(img.image_url);
+                                  const blob = await response.blob();
+                                  const url = window.URL.createObjectURL(blob);
+                                  const a = document.createElement('a');
+                                  a.href = url;
+                                  a.download = `renderlab-${img.id}.jpg`;
+                                  document.body.appendChild(a);
+                                  a.click();
+                                  document.body.removeChild(a);
+                                  window.URL.revokeObjectURL(url);
+                                } catch (error) {
+                                  console.error('Download failed:', error);
+                                }
+                              };
+
+                              const handleRemoveFromView = async (e: React.MouseEvent) => {
+                                e.stopPropagation();
+                                try {
+                                  const response = await fetch(`/api/images/${img.id}/hide`, {
+                                    method: 'PATCH',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ hidden: true })
+                                  });
+                                  
+                                  const result = await response.json();
+                                  if (!result.success) throw new Error(result.error);
+                                  
+                                  // Show success toast
+                                  toast.success('Removed from preview strip', {
+                                    description: 'Image is still available in History',
+                                    duration: 3000,
+                                  });
+                                  
+                                  // Smooth refresh - AnimatePresence will handle the exit animation
+                                  await refresh();
+                                } catch (error: any) {
+                                  console.error('Remove failed:', error);
+                                  toast.error('Failed to remove image');
+                                }
+                              };
+
                               return (
                                 <motion.div
                                   key={`${img.id}-${idx}`}
@@ -250,7 +296,34 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
                                     loading="lazy"
                                     className="h-full w-full rounded-lg object-cover"
                                   />
-                                  <div className="absolute top-2 right-2 rounded-md bg-black/70 backdrop-blur-sm px-2 py-1 text-xs font-medium text-white">
+                                  
+                                  {/* Hover overlay */}
+                                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors opacity-0 group-hover:opacity-100">
+                                    {/* X button - Top-right (hover only) */}
+                                    <button
+                                      onClick={handleRemoveFromView}
+                                      className="absolute top-2 right-2 p-2 bg-black/80 hover:bg-black rounded-full shadow-lg transition-colors backdrop-blur-sm"
+                                      title="Remove from preview strip"
+                                    >
+                                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                      </svg>
+                                    </button>
+                                    
+                                    {/* Download button - Bottom-right (hover only) */}
+                                    <button
+                                      onClick={handleDownload}
+                                      className="absolute bottom-2 right-2 p-2 bg-black/80 hover:bg-black rounded-full shadow-lg transition-colors backdrop-blur-sm"
+                                      title="Download"
+                                    >
+                                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                  
+                                  {/* Date label - Bottom-left (always visible) */}
+                                  <div className="absolute bottom-2 left-2 rounded-md bg-black/70 backdrop-blur-sm px-2 py-1 text-xs font-medium text-white pointer-events-none">
                                     {formattedTimestamp}
                                   </div>
                                 </motion.div>

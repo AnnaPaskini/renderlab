@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ZoomIn, ZoomOut } from "lucide-react";
 
@@ -14,17 +14,32 @@ export function ImagePreviewModal({ imageUrl, onClose }: ImagePreviewModalProps)
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [isClosing, setIsClosing] = useState(false);
   const imageRef = useRef<HTMLDivElement>(null);
+
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+      // Reset closing state after animation completes
+      setIsClosing(false);
+    }, 200); // Match animation duration
+  }, [onClose]);
 
   useEffect(() => {
     if (!imageUrl) return;
+
+    // Reset states when modal opens
+    setIsClosing(false);
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
 
     // Lock body scroll when modal is open
     document.body.style.overflow = "hidden";
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose();
+        handleClose();
       }
     };
 
@@ -33,13 +48,7 @@ export function ImagePreviewModal({ imageUrl, onClose }: ImagePreviewModalProps)
       document.body.style.overflow = "";
       window.removeEventListener("keydown", handleEscape);
     };
-  }, [imageUrl, onClose]);
-
-  useEffect(() => {
-    // Reset scale and position when image changes
-    setScale(1);
-    setPosition({ x: 0, y: 0 });
-  }, [imageUrl]);
+  }, [imageUrl, handleClose]);
 
   // Mouse wheel zoom
   useEffect(() => {
@@ -101,7 +110,7 @@ export function ImagePreviewModal({ imageUrl, onClose }: ImagePreviewModalProps)
       {imageUrl && (
         <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          animate={{ opacity: isClosing ? 0 : 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           className="fixed inset-0 flex items-center justify-center"
@@ -111,19 +120,11 @@ export function ImagePreviewModal({ imageUrl, onClose }: ImagePreviewModalProps)
           <div
             className="absolute inset-0 bg-black/90 backdrop-blur-sm"
             style={{ zIndex: 1 }}
-            onClick={onClose}
+            onClick={handleClose}
           />
 
           {/* Controls layer */}
           <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 3 }}>
-            {/* Close button - top right */}
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors pointer-events-auto"
-            >
-              <X className="w-6 h-6 text-white" />
-            </button>
-
             {/* Zoom controls - top left */}
             <div className="absolute top-4 left-4 flex gap-2 pointer-events-auto">
               <button
@@ -161,7 +162,7 @@ export function ImagePreviewModal({ imageUrl, onClose }: ImagePreviewModalProps)
           <motion.div
             ref={imageRef}
             initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
+            animate={{ scale: isClosing ? 0.95 : 1, opacity: isClosing ? 0 : 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="relative flex items-center justify-center"
@@ -184,6 +185,42 @@ export function ImagePreviewModal({ imageUrl, onClose }: ImagePreviewModalProps)
               }}
               draggable={false}
             />
+            
+            {/* Close button - top right, offset outside image */}
+            <button
+              onClick={handleClose}
+              className="absolute top-2 -right-16 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors pointer-events-auto"
+              title="Close"
+            >
+              <X className="w-6 h-6 text-white" />
+            </button>
+
+            {/* Download button - bottom right, offset outside image */}
+            <button
+              onClick={async (e) => {
+                e.stopPropagation();
+                try {
+                  const response = await fetch(imageUrl);
+                  const blob = await response.blob();
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `renderlab-image-${Date.now()}.jpg`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  window.URL.revokeObjectURL(url);
+                } catch (error) {
+                  console.error('Download failed:', error);
+                }
+              }}
+              className="absolute bottom-2 -right-16 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors pointer-events-auto"
+              title="Download"
+            >
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+            </button>
           </motion.div>
         </motion.div>
       )}

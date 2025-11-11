@@ -30,7 +30,7 @@ interface HistoryContextType {
   hasMore: boolean;
   error: DatabaseError | null;
   loadMore: () => void;
-  refresh: () => Promise<void>;
+  refresh: (includeHidden?: boolean) => Promise<void>;
 }
 
 const HistoryContext = createContext<HistoryContextType | undefined>(undefined);
@@ -42,9 +42,11 @@ export function HistoryProvider({ children }: { children: ReactNode }) {
   const [page, setPage] = useState(0);
   const [error, setError] = useState<DatabaseError | null>(null);
 
-  const loadHistory = useCallback(async (pageNum: number = 0) => {
+  const loadHistory = useCallback(async (pageNum: number = 0, includeHidden: boolean = false, silent: boolean = false) => {
     try {
-      setLoading(true);
+      if (!silent) {
+        setLoading(true);
+      }
       setError(null);
 
       const { data: { user } } = await supabase.auth.getUser();
@@ -62,10 +64,17 @@ export function HistoryProvider({ children }: { children: ReactNode }) {
       const start = pageNum * PAGE_SIZE;
       const end = start + PAGE_SIZE - 1;
 
-      const { data: images, error: fetchError } = await supabase
+      let query = supabase
         .from('images')
         .select('id, name, url, thumb_url, reference_url, collection_id, prompt, created_at, user_id')
-        .eq('user_id', user.id)
+        .eq('user_id', user.id);
+      
+      // Only filter out hidden images if includeHidden is false
+      if (!includeHidden) {
+        query = query.or('hidden_from_preview.is.null,hidden_from_preview.eq.false');
+      }
+      
+      const { data: images, error: fetchError } = await query
         .order('created_at', { ascending: false })
         .range(start, end);
 
@@ -146,12 +155,13 @@ export function HistoryProvider({ children }: { children: ReactNode }) {
 
   const loadMore = useCallback(() => {
     if (!loading && hasMore) {
-      loadHistory(page + 1);
+      loadHistory(page + 1, false); // Preview strip never shows hidden
     }
   }, [loading, hasMore, page, loadHistory]);
 
-  const refresh = useCallback(async () => {
-    await loadHistory(0);
+  const refresh = useCallback(async (includeHidden: boolean = false) => {
+    // Silent refresh to prevent "Loading history..." from showing
+    await loadHistory(0, includeHidden, true);
   }, [loadHistory]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps

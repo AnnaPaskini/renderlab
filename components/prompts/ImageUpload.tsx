@@ -22,9 +22,9 @@ export function ImageUpload({ onUploadComplete, currentImage }: ImageUploadProps
       return false;
     }
 
-    // Validate file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be less than 5MB');
+    // Validate file size (50MB max)
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error('Image must be less than 50MB');
       return false;
     }
 

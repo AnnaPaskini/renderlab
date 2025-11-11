@@ -14,18 +14,38 @@ function ImagePreviewModal({ src, onClose }: ImagePreviewModalProps) {
   const [start, setStart] = useState({ x: 0, y: 0 });
   const [message, setMessage] = useState<string | null>(null);
   const [isMessageVisible, setIsMessageVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const messageFadeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const maxZoomCooldownRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasPendingMaxZoomRef = useRef(false);
   const imageRef = useRef<HTMLImageElement>(null);
 
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+      // Reset closing state after animation completes
+      setIsClosing(false);
+    }, 200); // Match animation duration
+  }, [onClose]);
+
+  // Reset states when modal opens
+  useEffect(() => {
+    setIsClosing(false);
+    setScale(1);
+    setOffset({ x: 0, y: 0 });
+    setIsDragging(false);
+  }, [src]);
+
   // Закрытие по Esc
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handleClose();
+    };
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
-  }, [onClose]);
+  }, [handleClose]);
 
   // Scroll-zoom (через addEventListener, чтобы обойти passive:true)
   const showMessage = useCallback((text: string) => {
@@ -136,39 +156,66 @@ function ImagePreviewModal({ src, onClose }: ImagePreviewModalProps) {
     resetView();
   };
 
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    try {
+      const response = await fetch(src);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `renderlab-image-${Date.now()}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
+  };
+
   return (
     <div
-      onClick={onClose}
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+      onClick={handleClose}
+      className={`
+        fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm
+        transition-opacity duration-200
+        ${isClosing ? 'opacity-0' : 'opacity-100'}
+      `}
     >
       <button
         type="button"
         aria-label="Close"
         onClick={(e) => {
           e.stopPropagation();
-          onClose();
+          handleClose();
         }}
         className="fixed top-6 right-6 z-[10000] backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-full p-2.5 shadow-md shadow-black/40 transition-all duration-200 ease-out active:scale-95"
       >
         <X className="h-5 w-5" />
       </button>
 
-      <a
-        href={src}
-        download
+      <button
+        type="button"
         aria-label="Download image"
-        onClick={(e) => e.stopPropagation()}
+        onClick={handleDownload}
         className="fixed bottom-6 right-6 z-[10000] backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-full p-2.5 shadow-md shadow-black/40 transition-all duration-200 ease-out active:scale-95"
       >
         <Download className="h-5 w-5" />
-      </a>
+      </button>
 
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative inline-block"
+        className={`
+          relative inline-block
+          transition-transform duration-200
+          ${isClosing ? 'scale-95' : 'scale-100'}
+        `}
         style={{
           transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
-          transition: isDragging ? "none" : "transform 0.15s ease-out",
+          transition: isDragging ? "none" : isClosing ? "transform 0.2s ease-out, opacity 0.2s ease-out" : "transform 0.15s ease-out",
           cursor: scale > 1 ? (isDragging ? "grabbing" : "grab") : "zoom-in",
         }}
         onMouseDown={handleMouseDown}
