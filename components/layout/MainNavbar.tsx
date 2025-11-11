@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 const tabs = [
   { name: 'Workspace', href: '/workspace' },
   { name: 'Custom', href: '/custom' },
-  { name: 'Prompts', href: '/prompts' },
+  { name: 'Prompts Library', href: '/prompts' },
   { name: 'History', href: '/history' },
   { name: 'Account', href: '/account' }
 ];

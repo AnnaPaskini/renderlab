@@ -48,8 +48,14 @@ export function HistoryProvider({ children }: { children: ReactNode }) {
       setError(null);
 
       const { data: { user } } = await supabase.auth.getUser();
+      
+      // Gracefully handle unauthenticated state
       if (!user) {
-        throw new Error('Not authenticated');
+        console.log('User not authenticated, skipping history load');
+        setLoading(false);
+        setGroups([]);
+        setHasMore(false);
+        return;
       }
 
       const PAGE_SIZE = 20;
@@ -120,11 +126,19 @@ export function HistoryProvider({ children }: { children: ReactNode }) {
 
     } catch (err) {
       console.error('History load error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load history';
+      
+      // Don't show toast for authentication errors (handled by redirect)
+      const isAuthError = errorMessage.includes('authenticated') || errorMessage.includes('auth');
+      
       const dbError: DatabaseError = {
-        message: err instanceof Error ? err.message : 'Failed to load history',
+        message: errorMessage,
       };
       setError(dbError);
-      toast.error(dbError.message);
+      
+      if (!isAuthError) {
+        toast.error(dbError.message);
+      }
     } finally {
       setLoading(false);
     }

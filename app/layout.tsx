@@ -61,6 +61,7 @@ export default async function RootLayout({
             GeistSans.className,
             "bg-neutral-50 text-neutral-900 antialiased"
           )}
+          suppressHydrationWarning
         >
           <ThemeProvider
             attribute="class"
