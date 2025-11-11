@@ -60,16 +60,47 @@ export default function UserMenu() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="panel-dimmer panel-soft absolute right-0 z-50 mt-3 w-52 overflow-hidden rounded-2xl"
+            className="panel-dimmer panel-soft absolute right-0 top-full z-50 mt-3 w-52 overflow-hidden rounded-2xl"
           >
             <button
-              onClick={() => router.push("/profile")}
+              onClick={() => {
+                router.push("/account");
+                setOpen(false);
+              }}
               className="w-full text-left px-4 py-2.5 text-sm text-neutral-900 dark:text-white text-shadow-soft
                          hover:bg-gradient-to-r hover:from-purple-500/20 hover:via-fuchsia-500/15 hover:to-indigo-500/20
                          transition-all"
             >
-              My Profile
+              Account Settings
             </button>
+            
+            <button
+              onClick={() => {
+                router.push("/account?tab=prompts");
+                setOpen(false);
+              }}
+              className="w-full text-left px-4 py-2.5 text-sm text-neutral-900 dark:text-white text-shadow-soft
+                         hover:bg-gradient-to-r hover:from-purple-500/20 hover:via-fuchsia-500/15 hover:to-indigo-500/20
+                         transition-all"
+            >
+              My Prompts
+            </button>
+            
+            <button
+              onClick={() => {
+                router.push("/prompts/submit");
+                setOpen(false);
+              }}
+              className="w-full text-left px-4 py-2.5 text-sm text-neutral-900 dark:text-white text-shadow-soft
+                         hover:bg-gradient-to-r hover:from-purple-500/20 hover:via-fuchsia-500/15 hover:to-indigo-500/20
+                         transition-all"
+            >
+              Submit Prompt
+            </button>
+            
+            {/* Divider */}
+            <div className="my-1 border-t border-neutral-200/50 dark:border-white/10"></div>
+            
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-2 text-left px-4 py-2.5 text-sm 

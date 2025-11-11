@@ -85,16 +85,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate and sanitize tags
+    // Validate and sanitize tags (optional but recommended)
     let tags: string[] = [];
-    if (body.tags) {
-      if (!Array.isArray(body.tags)) {
-        return NextResponse.json(
-          { success: false, error: 'Tags must be an array' },
-          { status: 400 }
-        );
-      }
-
+    if (body.tags && Array.isArray(body.tags) && body.tags.length > 0) {
       if (body.tags.length > 10) {
         return NextResponse.json(
           { success: false, error: 'Maximum 10 tags allowed' },
@@ -108,19 +101,8 @@ export async function POST(request: NextRequest) {
         .filter(tag => tag.length > 0 && tag.length <= 30)
         .filter(tag => /^[a-z0-9-]+$/.test(tag))
         .slice(0, 10);
-
-      if (tags.length === 0) {
-        return NextResponse.json(
-          { success: false, error: 'At least one valid tag is required' },
-          { status: 400 }
-        );
-      }
-    } else {
-      return NextResponse.json(
-        { success: false, error: 'Tags are required' },
-        { status: 400 }
-      );
     }
+    // Tags are optional - if none provided or all invalid, use empty array
 
     // Create prompt with validated data
     const promptData: CreatePromptInput = {

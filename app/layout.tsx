@@ -54,38 +54,32 @@ export default async function RootLayout({
   console.log('🔍 [Layout Debug] showNavbar:', showNavbar);
 
   return (
-    <ViewTransitions>
-      <html lang="en" suppressHydrationWarning>
-        <body
-          className={cn(
-            GeistSans.className,
-            "bg-neutral-50 text-neutral-900 antialiased"
-          )}
-          suppressHydrationWarning
-        >
-          <ThemeProvider
-            attribute="class"
-            disableTransitionOnChange
-            defaultTheme="light"
-          >
-            <SupabaseAuthProvider>
-              <HistoryErrorBoundary>
-                <HistoryProvider>
-                  <WorkspaceProvider>
-                    {showNavbar && <NavBar />}
-                    {showMainNavbar && <MainNavbar />}
-                    {children}
-                    <Toaster 
-                      position="bottom-right"
-                      toastOptions={toastConfig}
-                    />
-                  </WorkspaceProvider>
-                </HistoryProvider>
-              </HistoryErrorBoundary>
-            </SupabaseAuthProvider>
-          </ThemeProvider>
-        </body>
-      </html>
-    </ViewTransitions>
+    <html lang="en" suppressHydrationWarning className="light">
+      <body
+        className={cn(
+          GeistSans.className,
+          "bg-neutral-50 text-neutral-900 antialiased"
+        )}
+        suppressHydrationWarning
+      >
+        <ViewTransitions>
+          <SupabaseAuthProvider>
+            <HistoryErrorBoundary>
+              <HistoryProvider>
+                <WorkspaceProvider>
+                  {showNavbar && <NavBar />}
+                  {showMainNavbar && <MainNavbar />}
+                  {children}
+                  <Toaster 
+                    position="bottom-right"
+                    toastOptions={toastConfig}
+                  />
+                </WorkspaceProvider>
+              </HistoryProvider>
+            </HistoryErrorBoundary>
+          </SupabaseAuthProvider>
+        </ViewTransitions>
+      </body>
+    </html>
   );
 }
