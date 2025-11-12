@@ -29,7 +29,7 @@ export function MainNavbar() {
                   className={cn(
                     "py-4 px-1 border-b-2 font-medium text-sm transition-colors",
                     isActive
-                      ? "border-purple-500 text-purple-600"
+                      ? "border-[#ff6b35] text-[#ff6b35]"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   )}
                 >

@@ -97,7 +97,7 @@ export function SubmitPromptForm({ onSuccess, onCancel }: SubmitPromptFormProps)
           minLength={10}
           maxLength={100}
           required
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-[#ff6b35]"
         />
         <p className="text-xs text-gray-400 mt-1">
           {formData.title.length}/100 characters
@@ -117,7 +117,7 @@ export function SubmitPromptForm({ onSuccess, onCancel }: SubmitPromptFormProps)
           maxLength={2000}
           required
           rows={6}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-[#ff6b35] resize-none"
         />
         <p className="text-xs text-gray-400 mt-1">
           {formData.prompt.length}/2000 characters
@@ -133,7 +133,7 @@ export function SubmitPromptForm({ onSuccess, onCancel }: SubmitPromptFormProps)
           value={formData.category}
           onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as PromptCategory }))}
           required
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-[#ff6b35]"
         >
           <option value="">Select category</option>
           <option value="exterior">Exterior</option>
@@ -154,7 +154,7 @@ export function SubmitPromptForm({ onSuccess, onCancel }: SubmitPromptFormProps)
           value={formData.tags}
           onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
           placeholder="modern, glass, evening, landscape"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-[#ff6b35]"
         />
         <p className="text-xs text-gray-400 mt-1">
           Separate tags with commas. Only lowercase letters, numbers, and hyphens allowed.
@@ -166,7 +166,7 @@ export function SubmitPromptForm({ onSuccess, onCancel }: SubmitPromptFormProps)
         <button
           type="submit"
           disabled={submitting || !formData.image_url}
-          className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+          className="flex-1 px-6 py-3 bg-[#ff6b35] text-white rounded-lg hover:bg-[#ff8555] disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200"
         >
           {submitting ? 'Submitting...' : 'Submit for Review'}
         </button>

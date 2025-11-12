@@ -147,7 +147,7 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
           }}
         />
 
-        <div className={`relative z-[${Z.LOW}] flex min-h-full flex-col gap-6 px-6 pb-10 pt-16 md:px-8 md:pt-20`}>
+        <div className={`relative z-[${Z.LOW}] flex min-h-full flex-col gap-rl-lg px-rl-lg pb-10 pt-16 md:px-rl-xl md:pt-20`}>
                     <div className="relative z-10 flex w-full items-center justify-between rounded-2xl bg-rl-panel px-6 py-3 text-sm font-semibold tracking-tight backdrop-blur-md border border-rl-glass-border shadow-[0_2px_10px_rgba(0,0,0,0.05)] md:px-8 md:text-base">
             <h1 className="font-semibold text-rl-text">
               Hey, {greetingName} — keep crafting!
@@ -164,24 +164,16 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-rl-sm">
             <button
               onClick={() => setActiveTab("builder")}
-              className={`rounded-2xl px-4 py-2 text-sm font-semibold tracking-tight transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 ${
-                activeTab === "builder"
-                  ? "bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400"
-                  : "border border-rl-glass-border bg-rl-panel text-rl-text shadow-[0_2px_10px_rgba(0,0,0,0.05)] hover:bg-rl-panel-hover"
-              }`}
+              className={`rl-btn-${activeTab === "builder" ? "primary" : "secondary"} text-sm`}
             >
               🧩 Builder
             </button>
             <button
               onClick={() => setActiveTab("custom")}
-              className={`rounded-2xl px-4 py-2 text-sm font-semibold tracking-tight transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 ${
-                activeTab === "custom"
-                  ? "bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400"
-                  : "border border-rl-glass-border bg-rl-panel text-rl-text shadow-[0_2px_10px_rgba(0,0,0,0.05)] hover:bg-rl-panel-hover"
-              }`}
+              className={`rl-btn-${activeTab === "custom" ? "primary" : "secondary"} text-sm`}
             >
               📁 Custom
             </button>
@@ -194,8 +186,8 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
             className="flex-1 w-full max-w-7xl mx-auto"
           >
             {activeTab === "builder" ? (
-              <div className="flex flex-col lg:flex-row gap-6 w-full">
-                <div className="flex flex-col gap-6 lg:flex-[1.4]">
+              <div className="flex flex-col lg:flex-row gap-10 w-full">
+                <div className="flex flex-col gap-8 lg:flex-[1.4]">
                   <PanelWrapper>
                     {leftPanel}
                     <div className={`pointer-events-none absolute inset-0 z-[${Z.TOASTER}]`}>
@@ -229,7 +221,7 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
                         View all →
                       </Link>
                     </div>
-                    <div className="h-[20vh] overflow-hidden rounded-xl bg-rl-surface p-4 border border-rl-border">
+                    <div className="h-[20vh] overflow-hidden rounded-xl bg-rl-surface p-4">
                       {historyLoading ? (
                         <div className="flex h-full items-center justify-center text-sm font-medium text-rl-text-secondary">
                           Loading history...
@@ -354,7 +346,7 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col md:flex-row gap-6 w-full">
+              <div className="flex flex-col md:flex-row gap-10 w-full">
                 <div className="md:flex-1">
                   <PanelWrapper>
                     <PromptTemplates activeTab={activeTab} setActiveTab={setActiveTab} />

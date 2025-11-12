@@ -40,7 +40,7 @@ export default function ImagesHistory() {
         return (
           <div 
             key={img.id} 
-            className="relative w-full aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-purple-500 dark:hover:border-purple-400 transition-colors cursor-pointer group"
+            className="relative w-full aspect-square rounded-xl overflow-hidden shadow-md shadow-black/60 hover:shadow-xl hover:shadow-black/80 hover:scale-105 transition-all duration-200 cursor-pointer group"
           >
             <Image
               src={img.thumb_url || img.image_url}

@@ -67,7 +67,7 @@ const supabase = createClient();
             placeholder="Email address"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="h-11 rounded-xl border-white/20 bg-white/10 text-white placeholder:text-neutral-400 focus-visible:ring-purple-400"
+            className="h-11 rounded-xl border-white/20 bg-white/10 text-white placeholder:text-neutral-400 focus-visible:ring-[#ff6b35] focus:border-[#ff6b35]"
             required
           />
           <div className="relative">
@@ -77,7 +77,7 @@ const supabase = createClient();
               placeholder="Password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="h-11 rounded-xl border-white/20 bg-white/10 text-white placeholder:text-neutral-400 focus-visible:ring-purple-400 pr-10"
+              className="h-11 rounded-xl border-white/20 bg-white/10 text-white placeholder:text-neutral-400 focus-visible:ring-[#ff6b35] focus:border-[#ff6b35] pr-10"
               required
             />
             <button
@@ -94,29 +94,29 @@ const supabase = createClient();
           <label className="flex items-center gap-2 cursor-pointer group">
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-white/20 bg-white/10 text-purple-500 focus:ring-2 focus:ring-purple-400 focus:ring-offset-0 transition-colors"
+              className="h-4 w-4 rounded border-white/20 bg-white/10 text-[#ff6b35] focus:ring-2 focus:ring-[#ff6b35] focus:ring-offset-0 transition-colors"
             />
             <span className="text-neutral-300 group-hover:text-white transition-colors">Remember me</span>
           </label>
-          <Link
-            href="/forgot-password"
-            className="text-purple-300 hover:text-purple-200 transition-colors font-medium"
-          >
-            Forgot password?
-          </Link>
+            <Link
+              href="/forgot-password"
+              className="text-[#ff6b35] hover:text-[#ff8555] transition-colors font-medium"
+            >
+              Forgot password?
+            </Link>
         </div>
 
         <Button
           type="submit"
           disabled={loading}
-          className="h-11 rounded-xl bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 text-sm font-medium text-white transition hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400 focus-visible:ring-fuchsia-300"
+          className="h-11 rounded-xl bg-[#ff6b35] hover:bg-[#ff8555] text-sm font-medium text-white transition-all duration-200 focus-visible:ring-[#ff6b35] focus:border-[#ff6b35]"
         >
           {loading ? "Signing in..." : "Sign in"}
         </Button>
 
         <p className="text-center text-sm text-neutral-300">
           Don’t have an account?{" "}
-          <Link href="/signup" className="font-medium text-white hover:text-fuchsia-200">
+          <Link href="/signup" className="font-medium text-[#ff6b35] hover:text-[#ff8555]">
             Create one
           </Link>
         </p>

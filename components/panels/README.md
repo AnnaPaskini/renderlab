@@ -67,7 +67,7 @@ import { Folder } from "lucide-react";
 ```tsx
 <RenderLabPanel 
   title="Custom Panel"
-  className="bg-gradient-to-br from-purple-50 to-blue-50"
+  className="bg-gradient-to-br from-[#ff6b35]/10 to-[#ff8555]/10"
 >
   <p>Panel with custom background</p>
 </RenderLabPanel>

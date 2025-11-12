@@ -122,67 +122,67 @@ useEffect(() => {
                 </div>
 
                 <div className="flex flex-col items-center space-y-3 mt-4 px-4">
-  <button
-    onClick={() => {
-      onAddTemplate();
-      closePanel();
-    }}
-    className="button-accent w-full px-4 py-2 text-white rounded-2xl font-medium"
-  >
-    + Add Template
-  </button>
-  
-  <button
-    onClick={() => {
-      onSave();
-      closePanel();
-    }}
-    className="button-success w-full px-4 py-2 text-white rounded-2xl font-medium"
-  >
-    Save Collection
-  </button>
-  
-  <button
-    onClick={() => {
-      onDuplicate();
-      closePanel();
-    }}
-    className="button-cancel w-full px-4 py-2 rounded-2xl font-medium"
-  >
-    Duplicate
-  </button>
-  
-  <button
-    onClick={() => {
-      onRename();
-      closePanel();
-    }}
-    className="button-cancel w-full px-4 py-2 rounded-2xl font-medium"
-  >
-    Rename
-  </button>
-  
-  {onDelete && (
     <button
       onClick={() => {
-        onDelete();
+        onAddTemplate();
         closePanel();
       }}
-      className="button-danger w-full px-4 py-2 text-white rounded-2xl font-medium"
+      className="w-full text-left px-4 py-3 text-white font-medium rounded-lg bg-transparent hover:bg-[#ff6b35]/10 hover:text-[#ff6b35] transition-all duration-200 border-0"
     >
-      Delete Collection
+      + Add Template
     </button>
-  )}
-  
-  <button
-    onClick={() => {
-      onBack();
-      closePanel();
-    }}
-    className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl font-medium hover:scale-[1.02] transition-transform"
-  >
-    ← Back to Collections
-  </button>
+
+    <button
+      onClick={() => {
+        onSave();
+        closePanel();
+      }}
+      className="w-full text-left px-4 py-3 text-white font-medium rounded-lg bg-transparent hover:bg-[#ff6b35]/10 hover:text-[#ff6b35] transition-all duration-200 border-0"
+    >
+      Save Collection
+    </button>
+
+    <button
+      onClick={() => {
+        onDuplicate();
+        closePanel();
+      }}
+      className="w-full text-left px-4 py-3 text-white font-medium rounded-lg bg-transparent hover:bg-[#ff6b35]/10 hover:text-[#ff6b35] transition-all duration-200 border-0"
+    >
+      Duplicate
+    </button>
+
+    <button
+      onClick={() => {
+        onRename();
+        closePanel();
+      }}
+      className="w-full text-left px-4 py-3 text-white font-medium rounded-lg bg-transparent hover:bg-[#ff6b35]/10 hover:text-[#ff6b35] transition-all duration-200 border-0"
+    >
+      Rename
+    </button>
+
+    {onDelete && (
+      <button
+        onClick={() => {
+          onDelete();
+          closePanel();
+        }}
+        className="w-full text-left px-4 py-3 text-white font-medium rounded-lg bg-transparent hover:bg-[#ff6b35]/10 hover:text-[#ff6b35] transition-all duration-200 border-0"
+      >
+        Delete Collection
+      </button>
+    )}
+
+    <button
+      onClick={() => {
+        onBack();
+        closePanel();
+      }}
+      className="w-full px-4 py-3 bg-[#1a1a1a] hover:bg-[#202020] text-white font-medium rounded-lg transition-all duration-200 border-0"
+    >
+      ← Back to Collections
+    </button>
 </div>
 
 

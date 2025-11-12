@@ -104,16 +104,11 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
           onDragOver={handleDrag}
           onDrop={handleDrop}
           className={clsx(
-            "relative mx-auto flex min-h-[360px] max-h-[60vh] w-full max-w-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-rl-glass-border bg-rl-panel p-6 backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-200 sm:max-h-[65vh] lg:max-h-[70vh]",
-            isDragActive && "ring-2 ring-fuchsia-300/60"
+            "relative mx-auto flex min-h-[360px] max-h-[60vh] w-full max-w-full flex-col items-center justify-center overflow-hidden rounded-2xl transition-all duration-300 p-16 sm:max-h-[65vh] lg:max-h-[70vh] cursor-pointer",
+            isDragActive ? "bg-[#181818] shadow-lg shadow-[#ff6b35]/10" : "bg-[#141414] hover:bg-[#181818] hover:shadow-lg hover:shadow-[#ff6b35]/10"
           )}
         >
-          <div
-            className={`pointer-events-none absolute inset-4 rounded-[20px] border-2 border-dashed transition-colors ${
-              isDragActive ? "border-blue-400/80" : "border-white/55 dark:border-white/25"
-            }`}
-          />
-          <label className="relative z-20 flex flex-col items-center justify-center cursor-pointer text-center">
+          <label className="relative z-20 flex flex-col items-center justify-center cursor-pointer text-center w-full">
             <div className="mb-3 w-14 h-14 flex items-center justify-center rounded-full bg-rl-surface">
               <Upload size={26} className="text-rl-text-secondary" />
             </div>
@@ -146,15 +141,10 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
           onDragOver={handleDrag}
           onDrop={handleDrop}
           className={clsx(
-            "relative mx-auto flex min-h-[360px] max-h-[60vh] w-full max-w-full items-center justify-center overflow-hidden rounded-2xl border border-rl-glass-border bg-rl-panel p-6 backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-200 sm:max-h-[65vh] lg:max-h-[70vh]",
-            isDragActive && "ring-2 ring-fuchsia-300/60"
+            "relative mx-auto flex min-h-[360px] max-h-[60vh] w-full max-w-full items-center justify-center overflow-hidden rounded-2xl transition-all duration-300 p-6 sm:max-h-[65vh] lg:max-h-[70vh] cursor-pointer",
+            isDragActive ? "bg-[#181818] shadow-lg shadow-[#ff6b35]/10" : "bg-[#141414] hover:bg-[#181818] hover:shadow-lg hover:shadow-[#ff6b35]/10"
           )}
         >
-          <div
-            className={`pointer-events-none absolute inset-4 rounded-[20px] border-2 border-dashed transition-colors ${
-              isDragActive ? "border-blue-400/80" : "border-white/55 dark:border-white/25"
-            }`}
-          />
           <div className="relative z-10 flex items-center justify-center w-full h-full">
             <div className="relative w-full max-h-[60vh] sm:max-h-[65vh] lg:max-h-[70vh] flex items-center justify-center">
               <img
@@ -193,9 +183,9 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
           animate={{ opacity: 1 }}
           className="mt-2 flex items-center justify-center gap-2 text-sm font-medium text-rl-text-secondary"
         >
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse delay-100" />
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse delay-200" />
+          <div className="w-2 h-2 bg-[#ff6b35] rounded-full animate-pulse" />
+          <div className="w-2 h-2 bg-[#ff6b35] rounded-full animate-pulse delay-100" />
+          <div className="w-2 h-2 bg-[#ff6b35] rounded-full animate-pulse delay-200" />
           <span className="text-sm">Loading image...</span>
         </motion.div>
       )}

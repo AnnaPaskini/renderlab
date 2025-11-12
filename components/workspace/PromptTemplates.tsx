@@ -74,7 +74,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     // Show success message
     toast.success("Template loaded into Builder", {
       style: {
-        background: '#7C3AED',
+        background: '#ff6b35',
         color: 'white',
         border: 'none'
       }
@@ -242,7 +242,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
         <h2 className="text-lg font-semibold leading-none text-gray-900 dark:text-gray-100">My Templates</h2>
         <Button
           onClick={() => setIsCreateOpen(true)}
-          className="h-9 bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-lg shadow-purple-500/30"
+          className="bg-[#ff6b35] hover:bg-[#ff8555] text-white px-6 py-2.5 rounded-lg font-semibold shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 transition-all duration-200 border-0 h-9"
         >
           + New Template
         </Button>
@@ -262,7 +262,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                 e.dataTransfer.setData("template", templateData);
                 e.dataTransfer.effectAllowed = "copy";
               }}
-              className="cursor-move rounded-xl border border-gray-200 dark:border-neutral-700 p-4 transition-all hover:shadow-md hover:border-gray-400 dark:hover:border-neutral-500 hover:-translate-y-0.5 active:cursor-grabbing"
+              className="cursor-move rounded-xl border border-transparent p-4 transition-all duration-200 hover:border-[#ff6b35] hover:shadow-lg hover:shadow-orange-500/20 cursor-pointer"
               title="Drag to add to collection"
             >
               <div className="flex items-start justify-between gap-3">
@@ -298,7 +298,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                       <IconDotsVertical size={16} stroke={1.5} />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-40">
+                  <DropdownMenuContent>
                     <DropdownMenuItem
                       onSelect={(event) => {
                         event.preventDefault();
@@ -352,7 +352,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                 </p>
               </DialogHeader>
 
-              <div className="mt-5 bg-neutral-50 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-xl p-5">
+              <div className="mt-5 bg-[var(--rl-surface)] border border-[var(--rl-border)] rounded-xl p-5">
                 <div className="grid grid-cols-2 gap-y-2 text-sm">
                   <div className="text-gray-500 dark:text-gray-400">AI Model:</div>
                   <div className="text-gray-900 dark:text-gray-100">
@@ -374,7 +374,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                   </div>
                 </div>
 
-                <div className="mt-4 border-t border-gray-200 dark:border-neutral-700 pt-3">
+                <div className="mt-4 border-t border-[var(--rl-border)] pt-3">
                   <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
                     Final Prompt:
                   </div>
@@ -425,7 +425,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
               value={renameDraft}
               onChange={(e) => setRenameDraft(e.target.value)}
               placeholder="Enter new name..."
-              className="w-full px-4 py-2 text-gray-900 dark:text-gray-100 bg-white dark:bg-neutral-800 border-2 border-purple-300 dark:border-purple-600 rounded-lg focus:border-purple-500 dark:focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 placeholder:text-gray-400 dark:placeholder:text-gray-500"
+              className="w-full px-4 py-3 bg-[#1a1a1a] border border-white/10 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:ring-opacity-50 focus:border-[#ff6b35] transition-all duration-200 placeholder:text-gray-500"
               autoFocus
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
@@ -446,14 +446,14 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                 setIsRenameOpen(false);
                 setRenameDraft("");
               }}
-              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800 transition rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
+              className="px-4 py-2 text-sm font-medium text-[var(--rl-muted)] hover:text-[var(--rl-foreground)] hover:bg-[var(--rl-surface-hover)] transition rounded-lg border border-transparent hover:border-[var(--rl-border-hover)]"
             >
               Cancel
             </Button>
             <Button
               onClick={handleRenameSubmit}
               disabled={!renameDraft.trim()}
-              className="px-6 py-2 text-sm font-medium bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg shadow-purple-500/30"
+              className="rl-btn-primary"
             >
               Rename
             </Button>
@@ -486,7 +486,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
             </Button>
             <Button
               onClick={handleDeleteConfirm}
-              className="px-6 py-2 text-sm font-medium bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition shadow-lg shadow-red-500/30"
+              className="px-6 py-2 text-sm font-medium bg-[var(--rl-accent)] text-white rounded-lg transition shadow-lg shadow-[var(--rl-accent)]/30"
             >
               Delete
             </Button>
@@ -508,7 +508,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
               value={newTemplateName}
               onChange={(e) => setNewTemplateName(e.target.value)}
               placeholder="Enter template name..."
-              className="w-full px-4 py-2 text-gray-900 dark:text-gray-100 bg-white dark:bg-neutral-800 border-2 border-purple-300 dark:border-purple-600 rounded-lg focus:border-purple-500 dark:focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 placeholder:text-gray-400 dark:placeholder:text-gray-500"
+              className="w-full px-4 py-3 bg-[#1a1a1a] border border-white/10 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:ring-opacity-50 focus:border-[#ff6b35] transition-all duration-200 placeholder:text-gray-500"
               autoFocus
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
@@ -536,7 +536,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
             <Button
               onClick={handleCreateTemplate}
               disabled={!newTemplateName.trim()}
-              className="px-6 py-2 text-sm font-medium bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg shadow-purple-500/30"
+              className="rl-btn-primary"
             >
               Create
             </Button>

@@ -133,9 +133,9 @@ export function PromptBuilderPanel({
   const [isTemplateDropdownOpen, setIsTemplateDropdownOpen] = useState(false);
 
   const selectTriggerClass =
-    "h-12 w-full rounded-xl border border-rl-glass-border bg-rl-panel px-3 text-left text-sm font-medium text-rl-text backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300";
+  "h-12 w-full rounded-xl border border-rl-glass-border bg-rl-panel px-3 text-left text-sm font-medium text-rl-text backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6b35]";
   const inputSurfaceClass =
-    "w-full rounded-xl border border-rl-glass-border bg-rl-panel px-3 py-2 text-sm font-medium text-rl-text backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 placeholder:text-rl-text-secondary";
+  "w-full rounded-xl border border-rl-glass-border bg-rl-panel px-3 py-2 text-sm font-medium text-rl-text backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6b35] placeholder:text-rl-text-secondary";
 
   const resolveString = (...values: unknown[]) => {
     for (const value of values) {
@@ -1017,7 +1017,7 @@ export function PromptBuilderPanel({
                             </button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent 
-                            className="w-[400px] max-h-[400px] overflow-y-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg"
+                            className="w-[400px] max-h-[400px] overflow-y-auto bg-[var(--rl-surface)] border border-[var(--rl-border)] rounded-lg shadow-lg"
                             align="start"
                           >
                             {templateOptions.map((option) => {
@@ -1025,7 +1025,7 @@ export function PromptBuilderPanel({
                               return (
                                 <div
                                   key={option.id}
-                                  className="flex items-center justify-between w-full group hover:bg-gray-50 dark:hover:bg-gray-800 px-3 py-2 cursor-pointer"
+                                  className="flex items-center justify-between w-full group hover:bg-[var(--rl-surface-hover)] px-3 py-2 cursor-pointer"
                                 >
                                   <div 
                                     className="flex-1 min-w-0"
@@ -1049,7 +1049,7 @@ export function PromptBuilderPanel({
                                       <button
                                         type="button"
                                         aria-label="Template options"
-                                        className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-opacity rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 ml-2"
+                                        className="opacity-0 group-hover:opacity-100 p-1.5 text-[var(--rl-muted)] hover:text-[var(--rl-foreground)] transition-opacity rounded-full hover:bg-[var(--rl-surface-hover)] ml-2"
                                         onClick={(e) => e.stopPropagation()}
                                       >
                                         <IconDotsVertical size={16} stroke={1.5} />
@@ -1092,7 +1092,7 @@ export function PromptBuilderPanel({
                           </DropdownMenuContent>
                         </DropdownMenu>
                       ) : (
-                        <div className="rounded-xl border border-dashed border-rl-glass-border bg-rl-panel p-4 text-sm font-medium text-rl-text-secondary backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
+                        <div className="rounded-xl border border-white/8 bg-rl-panel p-4 text-sm font-medium text-rl-text-secondary backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
                           No saved templates found.
                         </div>
                       )}
@@ -1123,7 +1123,7 @@ export function PromptBuilderPanel({
                           </SelectContent>
                         </Select>
                       ) : (
-                        <div className="rounded-xl border border-dashed border-rl-glass-border bg-rl-panel p-4 text-sm font-medium text-rl-text-secondary backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
+                        <div className="rounded-xl border border-white/8 bg-rl-panel p-4 text-sm font-medium text-rl-text-secondary backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
                           No saved collections yet.
                         </div>
                       )}
@@ -1180,7 +1180,7 @@ export function PromptBuilderPanel({
                 <div className="flex w-full gap-3">
                   <Button
                     variant="ghost"
-                    className="flex-1 rounded-2xl bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 font-semibold tracking-tight text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] transition-all duration-300 hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400 focus-visible:ring-fuchsia-300 focus-visible:ring-offset-0"
+                    className="rl-btn-primary flex-1"
                     onClick={() => setIsDialogOpen(true)}
                   >
                     Save as Template
@@ -1206,7 +1206,7 @@ export function PromptBuilderPanel({
                       transition={{ duration: 0.25 }}
                       className="flex items-center gap-2 text-sm font-medium text-neutral-600 dark:text-white"
                     >
-                      <span className="inline-flex h-2 w-2 flex-shrink-0 rounded-full bg-gradient-to-r from-violet-500 to-neutral-900 animate-pulse" />
+                      <span className="inline-flex h-2 w-2 flex-shrink-0 rounded-full bg-[var(--rl-accent)] animate-pulse" />
                       <span>{progressMessage}</span>
                     </motion.div>
                   )}
@@ -1223,9 +1223,8 @@ export function PromptBuilderPanel({
                     <Button
                       variant="ghost"
                       className={cn(
-                        "w-full rounded-2xl bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 font-semibold tracking-tight text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] transition-all duration-300 hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400 focus-visible:ring-fuchsia-300 focus-visible:ring-offset-0",
-                        (isGenerating || isCollectionRun) &&
-                          "from-purple-300 via-fuchsia-300 to-indigo-300 text-white opacity-80 hover:from-purple-300 hover:via-fuchsia-300 hover:to-indigo-300",
+                        "rl-btn-primary w-full",
+                        (isGenerating || isCollectionRun) && "opacity-60 cursor-not-allowed",
                       )}
                       onClick={hasCollectionSelection ? handleGenerateCollection : handleGenerateTemplate}
                       disabled={isGenerating || isCollectionRun}
@@ -1279,14 +1278,14 @@ export function PromptBuilderPanel({
           <DialogFooter className="mt-6 flex justify-end gap-3">
             <Button
               variant="ghost"
-              className="rounded-2xl border border-rl-glass-border bg-rl-panel px-4 py-2 text-sm font-semibold text-rl-text backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]"
+              className="rl-btn-ghost"
               onClick={() => setIsDialogOpen(false)}
             >
               Cancel
             </Button>
             <Button
               variant="ghost"
-              className="rounded-2xl bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 px-4 py-2 font-semibold tracking-tight text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] transition-all duration-300 hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400 focus-visible:ring-fuchsia-300 focus-visible:ring-offset-0"
+              className="rl-btn-primary"
               onClick={() => {
                 handleSaveTemplate();
                 setTemplateName("");
@@ -1319,14 +1318,14 @@ export function PromptBuilderPanel({
           <DialogFooter className="mt-6 flex justify-end gap-3">
             <Button
               variant="ghost"
-              className="rounded-2xl border border-rl-glass-border bg-rl-panel px-4 py-2 text-sm font-semibold text-rl-text backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]"
+              className="rl-btn-ghost"
               onClick={() => setIsRenameTemplateOpen(false)}
             >
               Cancel
             </Button>
             <Button
               variant="ghost"
-              className="rounded-2xl bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 px-4 py-2 font-semibold tracking-tight text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] transition-all duration-300 hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400 focus-visible:ring-fuchsia-300 focus-visible:ring-offset-0"
+              className="rl-btn-primary"
               onClick={handleRenameTemplateSubmit}
               disabled={!renameTemplateName.trim()}
             >
@@ -1352,14 +1351,14 @@ export function PromptBuilderPanel({
           <DialogFooter className="mt-6 flex justify-end gap-3">
             <Button
               variant="ghost"
-              className="rounded-2xl border border-rl-glass-border bg-rl-panel px-4 py-2 text-sm font-semibold text-rl-text backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]"
+              className="rl-btn-ghost"
               onClick={() => setIsDeleteTemplateOpen(false)}
             >
               Cancel
             </Button>
             <Button
               variant="ghost"
-              className="rounded-2xl bg-gradient-to-r from-red-600 to-red-700 px-4 py-2 font-semibold text-white shadow-lg shadow-red-500/30 transition-all duration-300 hover:from-red-700 hover:to-red-800 focus-visible:ring-red-300 focus-visible:ring-offset-0"
+              className="bg-rl-error text-white px-6 py-3 rounded-rl-md font-medium hover:opacity-90 transition-all"
               onClick={handleDeleteTemplateConfirm}
             >
               Delete

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -107,7 +108,7 @@ export default function PromptsLibraryPage() {
             {isAuthenticated === true && !filters.category && !filters.badge && !filters.search && (
               <button
                 onClick={() => router.push('/prompts/submit')}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+                className="px-6 py-3 bg-[#ff6b35] text-white rounded-lg hover:bg-[#ff8555] font-medium"
               >
                 Submit First Prompt
               </button>
@@ -130,7 +131,7 @@ export default function PromptsLibraryPage() {
           <div className="mt-16 text-center py-12 border-t border-gray-200">
             <div className="max-w-2xl mx-auto">
               <div className="mb-4">
-                <svg className="w-16 h-16 mx-auto text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-16 h-16 mx-auto text-[#ff6b35]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
               </div>
@@ -142,7 +143,7 @@ export default function PromptsLibraryPage() {
               </p>
               <Link
                 href="/prompts/submit"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[#ff6b35] text-white rounded-lg hover:bg-[#ff8555] font-medium transition-colors"
               >
                 Submit Your Prompt
               </Link>

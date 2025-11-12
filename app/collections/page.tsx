@@ -1,3 +1,4 @@
+
 'use client';
 
 import { RenderLabLayout } from "@/components/layout/RenderLabLayout";
@@ -22,7 +23,7 @@ export default function CollectionsPage() {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
+              <h1 className="text-4xl font-bold text-white mb-2">
               Collections
             </h1>
             <p className="text-[var(--rl-text-secondary)]">
@@ -603,7 +604,7 @@ export default function CollectionsPage() {
         {/* Custom styled panel */}
         <RenderLabPanel 
           title="Custom Styled Panel"
-          className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20"
+            className="bg-[#1a1a1a]"
         >
           <p>This panel has custom styling applied via className prop.</p>
         </RenderLabPanel>

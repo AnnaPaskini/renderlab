@@ -15,7 +15,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white shadow-[0_4px_14px_0_rgba(118,92,255,0.39)] hover:shadow-[0_6px_20px_rgba(118,92,255,0.45)] hover:brightness-110",
+          "bg-[#ff6b35] hover:bg-[#ff8555] text-white shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 transition-all duration-200 border-0",
         secondary:
           "bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700",
         ghost:

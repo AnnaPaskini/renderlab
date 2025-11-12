@@ -13,7 +13,7 @@ export default function CustomPage() {
     <>
       <NavBar />
       
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-[#0a0a0a] dark:via-[#111111] dark:to-[#0a0a0a]">
+  <div className="min-h-screen bg-[var(--rl-bg)]">
         <div className="max-w-7xl mx-auto px-8 py-6">
           {/* Header */}
           <div className="mb-8">
@@ -27,16 +27,16 @@ export default function CustomPage() {
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="mb-6 bg-white/80 dark:bg-[#1a1a1a]/80 backdrop-blur-sm border border-white/40 dark:border-white/10">
+            <TabsList className="mb-6 bg-white/80 dark:bg-[#1a1a1a]/80 backdrop-blur-sm border border-white/10">
               <TabsTrigger 
                 value="templates" 
-                className="px-6 py-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white transition-colors"
+                className="px-6 py-3 data-[state=active]:bg-[#ff6b35] data-[state=active]:text-white transition-colors"
               >
                 Templates
               </TabsTrigger>
               <TabsTrigger 
                 value="collections" 
-                className="px-6 py-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white transition-colors"
+                className="px-6 py-3 data-[state=active]:bg-[#ff6b35] data-[state=active]:text-white transition-colors"
               >
                 Collections
               </TabsTrigger>

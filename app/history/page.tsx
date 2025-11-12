@@ -148,7 +148,7 @@ export default function HistoryPage() {
     // Show toast feedback
     toast.success('Image and prompt loaded from History', {
       style: {
-        background: '#7C3AED',
+        background: '#ff6b35',
         color: 'white',
         border: 'none'
       }
@@ -164,7 +164,7 @@ export default function HistoryPage() {
     // Show different toast
     toast.info('Prompt loaded from History', {
       style: {
-        background: '#7C3AED',
+        background: '#ff6b35',
         color: 'white',
         border: 'none'
       }
@@ -225,7 +225,7 @@ export default function HistoryPage() {
     return (
       <RenderLabLayout showHeader={false}>
         <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+          <Loader2 className="w-8 h-8 animate-spin text-[#ff6b35]" />
         </div>
       </RenderLabLayout>
     );
@@ -236,14 +236,14 @@ export default function HistoryPage() {
       <div className="py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
+          <h1 className="text-4xl font-bold text-[var(--rl-accent)] mb-2">
             Generation History
           </h1>
           <p className="text-[var(--rl-text-secondary)]">Your creative journey, all in one place</p>
         </div>
 
         {groups.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
+          <div className="text-center py-20 bg-[var(--rl-surface)] rounded-2xl shadow-sm border border-[var(--rl-border)]">
             <div className="mb-4">
               <svg className="w-20 h-20 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -260,11 +260,11 @@ export default function HistoryPage() {
               <div key={group.date_group}>
                 {/* Date Header - Improved */}
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
-                  <h2 className="text-lg font-semibold text-gray-700 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-100">
+                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[var(--rl-border)] to-transparent"></div>
+                  <h2 className="text-lg font-semibold text-[var(--rl-foreground)] px-4 py-2 bg-[var(--rl-surface)] rounded-full shadow-sm border border-[var(--rl-border)]">
                     {format(new Date(group.date_group), 'MMMM d, yyyy')}
                   </h2>
-                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[var(--rl-border)] to-transparent"></div>
                 </div>
 
                 {/* Images Grid - Improved */}
@@ -272,11 +272,11 @@ export default function HistoryPage() {
                   {group.images.map((img: any) => (
                     <div
                       key={img.id}
-                      className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-purple-200"
+                      className="group bg-[var(--rl-surface)] rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-[var(--rl-border)] hover:border-[var(--rl-accent)]"
                     >
                       {/* Image */}
                       <div 
-                        className="relative aspect-video bg-gradient-to-br from-gray-100 to-gray-50 overflow-hidden cursor-pointer"
+                        className="relative aspect-video bg-gradient-to-br from-[var(--rl-surface-hover)] to-[var(--rl-surface)] overflow-hidden cursor-pointer"
                         onClick={() => setPreviewImageUrl(img.image_url)}
                       >
                         {/* Result image - always shown */}
@@ -314,7 +314,7 @@ export default function HistoryPage() {
 
                         {/* VAR tag if this was based on reference */}
                         {img.reference_url && (
-                          <div className="absolute top-2 left-2 bg-blue-500/90 text-white text-xs font-semibold px-2.5 py-1 rounded-md shadow-md pointer-events-none">
+                          <div className="absolute top-2 left-2 bg-[#ff6b35]/90 text-white text-xs font-semibold px-2.5 py-1 rounded-md shadow-md pointer-events-none">
                             VAR
                           </div>
                         )}
@@ -334,7 +334,7 @@ export default function HistoryPage() {
                         <div className="grid grid-cols-2 gap-2">
                           <button
                             onClick={() => handleOpenInBuilder(img)}
-                            className="py-2 px-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all text-xs font-semibold shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+                            className="py-2 px-3 bg-[var(--rl-accent)] text-white rounded-lg transition-all text-xs font-semibold shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
                             title="Edit this result further"
                           >
                             Open in Builder
@@ -342,7 +342,7 @@ export default function HistoryPage() {
                           
                           <button
                             onClick={() => handleUsePrompt(img)}
-                            className="py-2 px-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all text-xs font-semibold border border-gray-200 hover:border-gray-300 transform hover:-translate-y-0.5"
+                            className="py-2 px-3 bg-[var(--rl-surface-hover)] text-[var(--rl-foreground)] rounded-lg hover:bg-[var(--rl-surface)] transition-all text-xs font-semibold border border-[var(--rl-border)] hover:border-[var(--rl-border-hover)] transform hover:-translate-y-0.5"
                             title="Start fresh with this prompt"
                           >
                             Use Prompt
@@ -361,7 +361,7 @@ export default function HistoryPage() {
               <button
                 onClick={loadMore}
                 disabled={loading}
-                className="group px-8 py-3.5 bg-white text-gray-700 rounded-xl hover:bg-gradient-to-r hover:from-purple-600 hover:to-blue-600 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 shadow-md hover:shadow-xl border border-gray-200 hover:border-transparent font-medium"
+                className="group px-8 py-3.5 bg-[var(--rl-surface)] text-[var(--rl-foreground)] rounded-xl hover:bg-[var(--rl-accent)] hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 shadow-md hover:shadow-xl border border-[var(--rl-border)] hover:border-transparent font-medium"
               >
                 {loading ? (
                   <>

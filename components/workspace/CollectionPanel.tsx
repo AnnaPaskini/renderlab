@@ -352,22 +352,21 @@ export function CollectionsPanel() {
 				<button
 					type="button"
 					aria-label="Collection options"
-					className="inline-flex items-center justify-center rounded-full p-1.5 text-gray-400 transition hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+					   className="p-2 rounded text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200"
 					onClick={(event) => event.stopPropagation()}
 				>
 					<IconDotsVertical size={16} stroke={1.5} />
 				</button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end" className="w-40">
-				<DropdownMenuItem
-					onSelect={(event) => {
-						event.preventDefault();
-						event.stopPropagation();
-						openDuplicateDialog(collection);
-					}}
-				>
-					Duplicate
-				</DropdownMenuItem>
+			<DropdownMenuContent>
+				   <DropdownMenuItem
+					   onSelect={(event) => {
+						   event.preventDefault();
+						   openDuplicateDialog(collection);
+					   }}
+				   >
+					   Duplicate
+				   </DropdownMenuItem>
 				<DropdownMenuItem
 					onSelect={(event) => {
 						event.preventDefault();
@@ -396,7 +395,7 @@ export function CollectionsPanel() {
 			{activeCollection ? (
 				<div
 					className={`flex h-full flex-col gap-4 overflow-auto transition-colors ${
-						isDropActive ? "bg-purple-50 dark:bg-purple-950/20" : ""
+						isDropActive ? "bg-[#ff6b35]/5" : ""
 					}`}
 					onDrop={handleTemplateDrop}
 					onDragOver={handleDragOver}
@@ -465,7 +464,7 @@ export function CollectionsPanel() {
 												<button
 													type="button"
 													aria-label="Template options"
-													className="inline-flex items-center justify-center rounded-full p-1.5 text-gray-400 transition hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+													   className="p-2 rounded text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200"
 												>
 													<IconDotsVertical size={16} stroke={1.5} />
 												</button>
@@ -495,7 +494,7 @@ export function CollectionsPanel() {
 						<h2 className="text-lg font-semibold leading-none text-gray-900 dark:text-gray-100">My Collections</h2>
 						<Button
 							onClick={() => setIsCreateOpen(true)}
-							className="h-9 bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-lg shadow-purple-500/30"
+							className="bg-[#ff6b35] hover:bg-[#ff8555] text-white px-6 py-2.5 rounded-lg font-semibold shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 transition-all duration-200 border-0 h-9"
 						>
 							+ New Collection
 						</Button>
@@ -512,10 +511,10 @@ export function CollectionsPanel() {
 									key={collection.id}
 									role="button"
 									tabIndex={0}
-									className={`flex cursor-pointer items-start justify-between gap-2 rounded-lg border p-4 transition hover:border-gray-400 hover:shadow ${
+									className={`flex cursor-pointer items-start justify-between gap-2 rounded-lg border p-4 transition hover:border-[#ff6b35]/50 hover:shadow ${
 										selectedCollectionId === collection.id
-											? "border-purple-500 bg-purple-50 dark:bg-purple-900/20"
-											: "border-gray-200 dark:border-gray-700"
+											? "border-[#ff6b35] bg-[#ff6b35]/5"
+											: "border-[var(--rl-border)]"
 									}`}
 									onClick={() => setSelectedCollectionId(collection.id)}
 									onKeyDown={(event) => {
@@ -550,14 +549,14 @@ export function CollectionsPanel() {
 					<>
 						<button
 							onClick={() => setIsCreateOpen(false)}
-							className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800 transition rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
+							className="px-4 py-2 text-sm font-medium text-[var(--rl-muted)] hover:text-[var(--rl-foreground)] hover:bg-[var(--rl-surface-hover)] transition rounded-lg border border-transparent hover:border-[var(--rl-border-hover)]"
 						>
 							Cancel
 						</button>
 						<button
 							onClick={handleCreateCollection}
 							disabled={!newCollectionTitle.trim()}
-							className="px-6 py-2 text-sm font-medium bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg shadow-purple-500/30"
+							className="rl-btn-primary"
 						>
 							Create
 						</button>
@@ -568,7 +567,7 @@ export function CollectionsPanel() {
 					value={newCollectionTitle}
 					onChange={(event) => setNewCollectionTitle(event.target.value)}
 					placeholder="Collection name"
-					className="w-full px-4 py-2 text-gray-900 bg-white border-2 border-purple-300 rounded-lg focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200 placeholder:text-gray-400"
+					className="w-full px-4 py-3 bg-[#1a1a1a] border border-white/10 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:ring-opacity-50 focus:border-[#ff6b35] transition-all duration-200 placeholder:text-gray-500"
 					autoFocus
 					onKeyDown={(event) => {
 						if (event.key === "Enter") {
@@ -597,7 +596,7 @@ export function CollectionsPanel() {
 						<button
 							onClick={handleDuplicateSubmit}
 							disabled={!duplicateDraft.trim()}
-							className="px-6 py-2 text-sm font-medium bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg shadow-purple-500/30"
+							className="rl-btn-primary"
 						>
 							Save
 						</button>
@@ -608,7 +607,7 @@ export function CollectionsPanel() {
 					value={duplicateDraft}
 					onChange={(event) => setDuplicateDraft(event.target.value)}
 					placeholder="New collection name"
-					className="w-full px-4 py-2 text-gray-900 bg-white border-2 border-purple-300 rounded-lg focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200 placeholder:text-gray-400"
+					className="w-full px-4 py-3 bg-[#1a1a1a] border border-white/10 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:ring-opacity-50 focus:border-[#ff6b35] transition-all duration-200 placeholder:text-gray-500"
 					autoFocus
 					onKeyDown={(event) => {
 						if (event.key === "Enter") {
@@ -637,7 +636,7 @@ export function CollectionsPanel() {
 						<button
 							onClick={handleRenameSubmit}
 							disabled={!renameDraft.trim() || isCollectionNameExists(renameDraft.trim(), renameTargetId || undefined)}
-							className="px-6 py-2 text-sm font-medium bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg shadow-purple-500/30"
+							className="rl-btn-primary"
 						>
 							Rename
 						</button>
@@ -648,10 +647,10 @@ export function CollectionsPanel() {
 					value={renameDraft}
 					onChange={(event) => setRenameDraft(event.target.value)}
 					placeholder="New name"
-					className={`w-full px-4 py-2 bg-white rounded-lg focus:outline-none focus:ring-2 placeholder:text-gray-400 ${
+					className={`w-full px-4 py-3 bg-[#1a1a1a] rounded-lg focus:outline-none focus:ring-2 transition-all duration-200 placeholder:text-gray-500 ${
 						renameDraft.trim() && isCollectionNameExists(renameDraft.trim(), renameTargetId || undefined)
-							? "text-red-600 border-2 border-red-300 focus:border-red-500 focus:ring-red-200"
-							: "text-gray-900 border-2 border-purple-300 focus:border-purple-500 focus:ring-purple-200"
+							? "text-red-400 border border-red-500/50 focus:border-red-500 focus:ring-red-500 focus:ring-opacity-50"
+							: "text-white border border-white/10 focus:border-[#ff6b35] focus:ring-[#ff6b35] focus:ring-opacity-50"
 					}`}
 					autoFocus
 					onKeyDown={(event) => {
@@ -677,7 +676,7 @@ export function CollectionsPanel() {
 						</button>
 						<button
 							onClick={handleDeleteCollection}
-							className="px-6 py-2 text-sm font-medium bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition shadow-lg shadow-red-500/30"
+							className="px-6 py-2 text-sm font-medium bg-[var(--rl-accent)] text-white rounded-lg transition shadow-lg shadow-[var(--rl-accent)]/30"
 						>
 							Delete
 						</button>
@@ -759,7 +758,7 @@ export function CollectionsPanel() {
 						<button
 							onClick={handleAddTemplateToCollection}
 							disabled={!templateSelection}
-							className="px-6 py-2 text-sm font-medium bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg shadow-purple-500/30"
+							className="rl-btn-primary"
 						>
 							Add template
 						</button>
@@ -781,8 +780,8 @@ export function CollectionsPanel() {
 									onClick={() => setTemplateSelection(template)}
 									className={`w-full rounded-lg border p-4 text-left transition ${
 										isActive
-											? "border-purple-500 bg-purple-50"
-											: "border-gray-300 hover:border-gray-400 bg-gray-50"
+											? "border-[#ff6b35] bg-[#ff6b35]/5"
+											: "border-gray-300 dark:border-gray-700 hover:border-[#ff6b35]/50 bg-gray-50 dark:bg-[#1a1a1a]"
 									}`}
 								>
 									<div className="font-medium text-gray-900">

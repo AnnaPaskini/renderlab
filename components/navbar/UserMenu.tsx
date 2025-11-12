@@ -68,7 +68,7 @@ export default function UserMenu() {
                 setOpen(false);
               }}
               className="w-full text-left px-4 py-2.5 text-sm text-neutral-900 dark:text-white text-shadow-soft
-                         hover:bg-gradient-to-r hover:from-purple-500/20 hover:via-fuchsia-500/15 hover:to-indigo-500/20
+                         hover:bg-gradient-to-r hover:from-[#ff6b35]/20 hover:via-[#ffb385]/15 hover:to-[#ff6b35]/20
                          transition-all"
             >
               Account Settings
@@ -80,7 +80,7 @@ export default function UserMenu() {
                 setOpen(false);
               }}
               className="w-full text-left px-4 py-2.5 text-sm text-neutral-900 dark:text-white text-shadow-soft
-                         hover:bg-gradient-to-r hover:from-purple-500/20 hover:via-fuchsia-500/15 hover:to-indigo-500/20
+                         hover:bg-gradient-to-r hover:from-[#ff6b35]/20 hover:via-[#ffb385]/15 hover:to-[#ff6b35]/20
                          transition-all"
             >
               My Prompts
@@ -92,7 +92,7 @@ export default function UserMenu() {
                 setOpen(false);
               }}
               className="w-full text-left px-4 py-2.5 text-sm text-neutral-900 dark:text-white text-shadow-soft
-                         hover:bg-gradient-to-r hover:from-purple-500/20 hover:via-fuchsia-500/15 hover:to-indigo-500/20
+                         hover:bg-gradient-to-r hover:from-[#ff6b35]/20 hover:via-[#ffb385]/15 hover:to-[#ff6b35]/20
                          transition-all"
             >
               Submit Prompt
@@ -105,7 +105,7 @@ export default function UserMenu() {
               onClick={handleLogout}
               className="w-full flex items-center gap-2 text-left px-4 py-2.5 text-sm 
                          text-neutral-900 dark:text-white text-shadow-soft transition-all hover:bg-gradient-to-r
-                         hover:from-purple-500/20 hover:via-fuchsia-500/15 hover:to-indigo-500/20"
+                         hover:from-[#ff6b35]/20 hover:via-[#ffb385]/15 hover:to-[#ff6b35]/20"
             >
               <LogOut size={14} /> Logout
             </button>

@@ -107,7 +107,7 @@ const AIMessage = ({ children }: { children: React.ReactNode }) => {
       variants={variantsSecond}
       className="flex flex-row rounded-2xl   p-2 items-center justify-start space-x-2  bg-white dark:bg-neutral-900 "
     >
-      <div className="h-4 w-4 md:h-10 md:w-10 rounded-full bg-gradient-to-r from-pink-500 to-violet-500 flex-shrink-0" />
+  <div className="h-4 w-4 md:h-10 md:w-10 rounded-full bg-gradient-to-r from-[#ff6b35] to-[#ff8555] flex-shrink-0" />
       <p className="text-[10px] sm:text-sm text-neutral-500">{children}</p>
     </motion.div>
   );

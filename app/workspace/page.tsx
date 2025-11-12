@@ -41,7 +41,7 @@ export default function WorkspacePage() {
       setPrompt(decodedPrompt);
       toast.info('Prompt loaded from library', {
         style: {
-          background: '#6366f1',
+          background: '#ff6b35',
           color: 'white',
           border: 'none'
         }
@@ -87,7 +87,7 @@ export default function WorkspacePage() {
     // Positive feedback toast
     toast.info('Reference cleared — prompt preserved', {
       style: {
-        background: '#6366f1',
+        background: '#ff6b35',
         color: 'white',
         border: 'none'
       }
@@ -260,14 +260,14 @@ export default function WorkspacePage() {
                     }
                   }}
                   placeholder="https://example.com/image.jpg"
-                  className="flex-1 px-3 py-2 text-sm border border-white/40 rounded-lg bg-white/50 backdrop-blur-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all dark:border-white/20 dark:bg-[#111111]/50 dark:text-white placeholder:text-neutral-500"
+                  className="flex-1 px-3 py-2 text-sm border border-white/8 rounded-lg bg-[#141414] focus:ring-2 focus:ring-[#ff6b35] focus:ring-opacity-50 focus:border-[#ff6b35] outline-none transition-all text-white placeholder:text-gray-500"
                   disabled={isValidatingUrl}
                 />
                 
                 <button
                   onClick={() => validateAndLoadImageUrl(imageUrl)}
                   disabled={!imageUrl.trim() || isValidatingUrl}
-                  className="px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-5 py-2.5 bg-[#202020] text-white text-sm font-medium rounded-lg hover:bg-[#282828] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                 >
                   {isValidatingUrl ? (
                     <span className="flex items-center gap-2">

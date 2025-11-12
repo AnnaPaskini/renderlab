@@ -14,12 +14,7 @@ import { NavBar } from "@/components/navbar";
 import { MainNavbar } from '@/components/layout/MainNavbar';
 import { toastConfig } from "@/lib/toast-config";
 
-export function ThemeProvider({
-  children,
-  ...props
-}: React.ComponentProps<typeof NextThemesProvider>) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
-}
+
 
 export const metadata = {
   title: "Everything AI",
@@ -43,7 +38,6 @@ export default async function RootLayout({
     pathname.startsWith("/contact");
 
   const showMainNavbar = 
-    pathname.startsWith("/workspace") ||
     pathname.startsWith("/custom") ||
     pathname.startsWith("/prompts") ||
     pathname.startsWith("/history") ||
@@ -63,9 +57,9 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         <ViewTransitions>
-          <ThemeProvider
+          <NextThemesProvider
             attribute="class"
-            defaultTheme="light"
+            defaultTheme="dark"
             enableSystem={false}
             disableTransitionOnChange
           >
@@ -84,7 +78,7 @@ export default async function RootLayout({
                 </HistoryProvider>
               </HistoryErrorBoundary>
             </SupabaseAuthProvider>
-          </ThemeProvider>
+          </NextThemesProvider>
         </ViewTransitions>
       </body>
     </html>

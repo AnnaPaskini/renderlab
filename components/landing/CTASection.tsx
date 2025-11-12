@@ -97,11 +97,11 @@ export function CTASection() {
             <span>No credit card required</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+            <div className="w-2 h-2 bg-[#ff6b35] rounded-full animate-pulse" />
             <span>Free tier available</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
+            <div className="w-2 h-2 bg-[#ff6b35] rounded-full animate-pulse" />
             <span>Cancel anytime</span>
           </div>
         </motion.div>

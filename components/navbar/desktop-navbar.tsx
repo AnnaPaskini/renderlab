@@ -71,14 +71,14 @@ export const DesktopNavbar = ({ navItems }: Props) => {
           variant="simple"
           as={Link}
           href="/login"
-          className="aura bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 font-semibold tracking-tight text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] transition-colors hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400 focus-visible:ring-2 focus-visible:ring-fuchsia-300 focus-visible:ring-offset-0"
+          className="aura bg-[#ff6b35] hover:bg-[#ff8555] font-semibold tracking-tight text-white shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 transition-all duration-200 border-0 focus-visible:ring-[#ff6b35] focus:border-[#ff6b35]"
         >
           Login
         </Button>
         <Button
           as={Link}
           href="/signup"
-          className="aura bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 font-semibold tracking-tight text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] transition-colors hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400 focus-visible:ring-2 focus-visible:ring-fuchsia-300 focus-visible:ring-offset-0"
+          className="aura bg-[#ff6b35] hover:bg-[#ff8555] font-semibold tracking-tight text-white shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 transition-all duration-200 border-0 focus-visible:ring-[#ff6b35] focus:border-[#ff6b35]"
         >
           Sign Up
         </Button>

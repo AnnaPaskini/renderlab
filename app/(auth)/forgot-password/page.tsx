@@ -10,9 +10,9 @@ export default function ForgotPasswordPage() {
         </p>
         <a 
           href="/login"
-          className="inline-block text-sm text-purple-600 hover:text-purple-700"
+          className="inline-block text-sm text-[#ff6b35] hover:text-[#ff8555]"
         >
-          ← Back to Login
+           Back to Login
         </a>
       </div>
     </div>

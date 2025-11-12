@@ -13,7 +13,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <span className="inline-block mt-10 text-sm font-medium text-blue-500 mb-8">
+          <span className="inline-block mt-10 text-sm font-medium text-[#ff6b35] mb-8">
             Used by 500+ architects worldwide
           </span>
 
@@ -29,7 +29,7 @@ export function Hero() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-gray-900 text-white hover:bg-blue-700">
+            <Button size="lg" className="bg-gray-900 text-white hover:bg-[#ff8555]">
               Try Free – Edit Your First Image
             </Button>
 

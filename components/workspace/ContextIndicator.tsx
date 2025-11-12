@@ -62,9 +62,9 @@ export function ContextIndicator({ uploadedImage }: ContextIndicatorProps = {}) 
       const hasPrompt = activeItem.data?.prompt;
       const hasReference = uploadedImage || activeItem.data?.reference_url;
       
-      // Prompt-only mode: blue
+      // Prompt-only mode: orange
       if (hasPrompt && !hasReference) {
-        return 'bg-blue-50 text-blue-700 border-blue-200';
+        return 'bg-[#ff6b35]/10 text-[#ff6b35] border-[#ff6b35]/20';
       }
       return 'bg-amber-100 text-amber-700 border-amber-200';
     }
@@ -72,9 +72,9 @@ export function ContextIndicator({ uploadedImage }: ContextIndicatorProps = {}) 
     // Existing colors
     switch (activeItem.type) {
       case 'template':
-        return 'bg-blue-100 text-blue-700 border-blue-200';
+        return 'bg-[#ff6b35]/10 text-[#ff6b35] border-[#ff6b35]/20';
       case 'collection':
-        return 'bg-purple-100 text-purple-700 border-purple-200';
+        return 'bg-[#ff6b35]/10 text-[#ff6b35] border-[#ff6b35]/20';
     }
   };
 

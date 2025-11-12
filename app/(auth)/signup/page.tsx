@@ -67,7 +67,7 @@ export default function SignupPage() {
             placeholder="Email address"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="h-11 rounded-xl border-white/20 bg-white/10 text-white placeholder:text-neutral-400 focus-visible:ring-fuchsia-400"
+            className="h-11 rounded-xl border-white/20 bg-white/10 text-white placeholder:text-neutral-400 focus-visible:ring-[#ff6b35] focus:border-[#ff6b35]"
             required
           />
           <div className="relative">
@@ -77,7 +77,7 @@ export default function SignupPage() {
               placeholder="Password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="h-11 rounded-xl border-white/20 bg-white/10 text-white placeholder:text-neutral-400 focus-visible:ring-fuchsia-400 pr-10"
+              className="h-11 rounded-xl border-white/20 bg-white/10 text-white placeholder:text-neutral-400 focus-visible:ring-[#ff6b35] focus:border-[#ff6b35] pr-10"
               required
             />
             <button
@@ -93,14 +93,14 @@ export default function SignupPage() {
         <Button
           type="submit"
           disabled={loading}
-          className="h-11 rounded-xl bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 text-sm font-medium text-white transition hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400 focus-visible:ring-fuchsia-300"
+          className="h-11 rounded-xl bg-[#ff6b35] hover:bg-[#ff8555] text-sm font-medium text-white transition-all duration-200 focus-visible:ring-[#ff6b35] focus:border-[#ff6b35]"
         >
           {loading ? "Creating account..." : "Create account"}
         </Button>
 
         <p className="text-center text-sm text-neutral-300">
           Already have an account?{" "}
-          <Link href="/login" className="font-medium text-white hover:text-fuchsia-200">
+          <Link href="/login" className="font-medium text-[#ff6b35] hover:text-[#ff8555]">
             Sign in
           </Link>
         </p>

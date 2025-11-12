@@ -17,7 +17,7 @@ export const Button: React.FC<{
 }) => {
   const variantClass =
     variant === "simple"
-      ? `bg-black relative z-[${Z.LOW}] bg-transparent hover:bg-gray-100  border border-transparent text-black text-sm md:text-sm transition font-medium duration-200  rounded-full px-4 py-2  flex items-center justify-center dark:text-white dark:hover:bg-neutral-800 dark:hover:shadow-xl`
+  ? `bg-black relative z-[${Z.LOW}] bg-transparent hover:bg-[var(--rl-surface-hover)]  border border-transparent text-black text-sm md:text-sm transition font-medium duration-200  rounded-full px-4 py-2  flex items-center justify-center dark:text-white dark:hover:bg-neutral-800 dark:hover:shadow-xl`
       : variant === "outline"
       ? `bg-white relative z-[${Z.LOW}] hover:bg-black/90 hover:shadow-xl  text-black border border-black hover:text-white text-sm md:text-sm transition font-medium duration-200  rounded-full px-4 py-2  flex items-center justify-center`
       : variant === "primary"

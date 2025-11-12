@@ -157,7 +157,7 @@ export function PromptCard({ prompt, onLikeToggle, initialLiked = false }: Promp
                 {prompt.tags.map((tag, index) => (
                   <span
                     key={`${prompt.id}-tag-${index}`}
-                    className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
+                    className="px-2 py-1 bg-[var(--rl-surface-hover)] text-[var(--rl-muted)] text-xs rounded-full"
                   >
                     #{tag}
                   </span>
@@ -170,13 +170,13 @@ export function PromptCard({ prompt, onLikeToggle, initialLiked = false }: Promp
           <div className="flex gap-2 mt-4 pt-4 border-t">
             <button
               onClick={handleCopy}
-              className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors"
+              className="flex-1 px-4 py-2.5 bg-[#ff6b35] text-white rounded-lg hover:bg-[#ff8555] text-sm font-medium transition-all duration-200"
             >
               Copy
             </button>
             <button
               onClick={handleAddToTemplate}
-              className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium transition-colors"
+              className="flex-1 px-4 py-2.5 border border-[var(--rl-border)] rounded-lg hover:bg-[var(--rl-surface-hover)] text-sm font-medium transition-colors"
             >
               Add to Template
             </button>
