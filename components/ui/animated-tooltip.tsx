@@ -67,11 +67,11 @@ export const AnimatedTooltip = ({
                   rotate: rotate,
                   whiteSpace: "nowrap",
                 }}
-                className={`absolute -top-16 -left-1/2 translate-x-1/2 flex text-xs  flex-col items-center justify-center rounded-md bg-black z-[${Z.TOAST}] shadow-xl px-4 py-2`}
+                className={`absolute -top-16 -left-1/2 translate-x-1/2 flex text-xs  flex-col items-center justify-center rounded-md bg-black z-[${Z.TOASTER}] shadow-xl px-4 py-2`}
               >
-                <div className={`absolute inset-x-10 z-[${Z.TOAST}] w-[20%] -bottom-px bg-gradient-to-r from-transparent via-emerald-500 to-transparent h-px`} />
-                <div className={`absolute left-10 w-[40%] z-[${Z.TOAST}] -bottom-px bg-gradient-to-r from-transparent via-sky-500 to-transparent h-px`} />
-                <div className={`font-bold text-white relative z-[${Z.TOAST}] text-base`}>
+                <div className={`absolute inset-x-10 z-[${Z.TOASTER}] w-[20%] -bottom-px bg-gradient-to-r from-transparent via-emerald-500 to-transparent h-px`} />
+                <div className={`absolute left-10 w-[40%] z-[${Z.TOASTER}] -bottom-px bg-gradient-to-r from-transparent via-sky-500 to-transparent h-px`} />
+                <div className={`font-bold text-white relative z-[${Z.TOASTER}] text-base`}>
                   {item.name}
                 </div>
                 <div className="text-white text-xs">{item.designation}</div>

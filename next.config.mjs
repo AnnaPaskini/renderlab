@@ -33,8 +33,6 @@ const nextConfig = {
   },
   // Enable compression
   compress: true,
-  // Optimize production builds
-  swcMinify: true,
 };
 
 const withMDX = nextMDX({

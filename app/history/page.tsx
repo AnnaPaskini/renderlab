@@ -7,6 +7,7 @@ import { ImageIcon, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { ImagePreviewModal } from '@/components/common/ImagePreviewModal';
+import { RenderLabLayout } from '@/components/layout/RenderLabLayout';
 import { supabase } from '@/lib/supabase';
 
 interface ImageData {
@@ -222,21 +223,23 @@ export default function HistoryPage() {
 
   if (loading && groups.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
-      </div>
+      <RenderLabLayout showHeader={false}>
+        <div className="flex items-center justify-center min-h-screen">
+          <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+        </div>
+      </RenderLabLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-blue-50/20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <RenderLabLayout showHeader={false} maxWidth="1400px">
+      <div className="py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
             Generation History
           </h1>
-          <p className="text-gray-600">Your creative journey, all in one place</p>
+          <p className="text-[var(--rl-text-secondary)]">Your creative journey, all in one place</p>
         </div>
 
         {groups.length === 0 ? (
@@ -419,6 +422,6 @@ export default function HistoryPage() {
           </div>
         )}
       </div>
-    </div>
+    </RenderLabLayout>
   );
 }

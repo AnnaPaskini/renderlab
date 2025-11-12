@@ -4,9 +4,10 @@ import { togglePromptLike } from '@/lib/db/prompts';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createClient();
     
     const { data: { user } } = await supabase.auth.getUser();
@@ -22,7 +23,7 @@ export async function POST(
     const { data: prompt, error: promptError } = await supabase
       .from('prompts')
       .select('id, status')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (promptError || !prompt) {
@@ -39,7 +40,7 @@ export async function POST(
       );
     }
 
-    const result = await togglePromptLike(params.id, user.id);
+    const result = await togglePromptLike(id, user.id);
 
     return NextResponse.json({ 
       success: true, 

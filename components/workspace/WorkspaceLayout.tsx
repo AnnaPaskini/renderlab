@@ -24,6 +24,7 @@ import UserMenu from "@/components/navbar/UserMenu";
 import { Z } from "@/lib/z-layer-guide";
 import ImagesHistory from "./ImagesHistory";
 import { useHistory } from "@/lib/context/HistoryContext";
+import { PanelWrapper } from "./PanelWrapper";
 
 
 interface WorkspaceLayoutProps {
@@ -132,7 +133,7 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
     : rightPanel;
 
   return (
-  <main className="relative z-0 flex min-h-screen w-full flex-col overflow-hidden bg-[radial-gradient(circle_at_12%_20%,rgba(244,114,182,0.06),transparent_45%),radial-gradient(circle_at_85%_30%,rgba(250,204,21,0.05),transparent_45%),radial-gradient(circle_at_50%_88%,rgba(129,140,248,0.06),transparent_50%)] bg-white/40 text-neutral-900 dark:bg-neutral-950 dark:text-white">
+  <main className="flex flex-col min-h-screen w-full bg-[var(--rl-bg)] transition-colors duration-300">
       <div className="relative flex-1">
         <div className="dot-grid absolute inset-0" aria-hidden="true" />
         <div
@@ -146,9 +147,9 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
           }}
         />
 
-        <div className={`relative z-[${Z.LOW}] flex min-h-full flex-col gap-6 px-4 pb-10 pt-16 md:px-8 md:pt-20`}>
-          <div className="relative z-10 flex w-full items-center justify-between rounded-2xl border border-white/40 bg-white/85 px-4 py-3 text-sm font-semibold tracking-tight backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_40px_-10px_rgba(0,0,0,0.25)] dark:border-white/24 dark:bg-[#0c0c12]/78 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_18px_48px_-18px_rgba(0,0,0,0.6)] md:px-8 md:text-base">
-            <h1 className="font-semibold text-neutral-900 dark:text-white">
+        <div className={`relative z-[${Z.LOW}] flex min-h-full flex-col gap-6 px-6 pb-10 pt-16 md:px-8 md:pt-20`}>
+                    <div className="relative z-10 flex w-full items-center justify-between rounded-2xl bg-[var(--rl-panel)] px-6 py-3 text-sm font-semibold tracking-tight backdrop-blur-md border border-[var(--rl-glass-border)] shadow-[0_2px_10px_rgba(0,0,0,0.05)] md:px-8 md:text-base">
+            <h1 className="font-semibold text-[var(--rl-text)]">
               Hey, {greetingName} — keep crafting!
             </h1>
             <div className="flex items-center gap-2">
@@ -158,8 +159,8 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
 
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-white md:text-3xl">Welcome back</h2>
-              <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Keep crafting stunning visuals with RenderLab.</p>
+              <h2 className="text-2xl font-semibold tracking-tight text-[var(--rl-text)] md:text-3xl">Welcome back</h2>
+              <p className="text-sm font-medium text-[var(--rl-text-secondary)]">Keep crafting stunning visuals with RenderLab.</p>
             </div>
           </div>
 
@@ -169,7 +170,7 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
               className={`rounded-2xl px-4 py-2 text-sm font-semibold tracking-tight transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 ${
                 activeTab === "builder"
                   ? "bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400"
-                  : "border border-white/20 bg-white/15 text-neutral-900 shadow-[inset_0_0_8px_rgba(0,0,0,0.04)] hover:bg-white/20 dark:border-white/15 dark:bg-[#141414]/60 dark:text-white"
+                  : "border border-[var(--rl-glass-border)] bg-[var(--rl-panel)] text-[var(--rl-text)] shadow-[0_2px_10px_rgba(0,0,0,0.05)] hover:bg-[var(--rl-panel-hover)]"
               }`}
             >
               🧩 Builder
@@ -179,7 +180,7 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
               className={`rounded-2xl px-4 py-2 text-sm font-semibold tracking-tight transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 ${
                 activeTab === "custom"
                   ? "bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400"
-                  : "border border-white/20 bg-white/15 text-neutral-900 shadow-[inset_0_0_8px_rgba(0,0,0,0.04)] hover:bg-white/20 dark:border-white/15 dark:bg-[#141414]/60 dark:text-white"
+                  : "border border-[var(--rl-glass-border)] bg-[var(--rl-panel)] text-[var(--rl-text)] shadow-[0_2px_10px_rgba(0,0,0,0.05)] hover:bg-[var(--rl-panel-hover)]"
               }`}
             >
               📁 Custom
@@ -193,9 +194,9 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
             className="flex-1 w-full max-w-7xl mx-auto"
           >
             {activeTab === "builder" ? (
-              <div className="grid w-full max-w-[1400px] mx-auto grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[1.4fr_1fr] lg:px-8">
-                <div className="flex flex-col gap-6">
-                  <div className="relative overflow-hidden rounded-3xl border border-white/40 bg-white/65 p-6 text-neutral-900 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-shadow dark:border-white/24 dark:bg-[#111111]/70 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)] md:p-8">
+              <div className="flex flex-col lg:flex-row gap-6 w-full">
+                <div className="flex flex-col gap-6 lg:flex-[1.4]">
+                  <PanelWrapper>
                     {leftPanel}
                     <div className={`pointer-events-none absolute inset-0 z-[${Z.TOASTER}]`}>
                       <Toaster
@@ -216,21 +217,21 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
                         }}
                       />
                     </div>
-                  </div>
+                  </PanelWrapper>
 
-                  <div className="rounded-3xl border border-white/40 bg-white/65 p-6 text-neutral-900 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-shadow dark:border-white/24 dark:bg-[#111111]/70 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)] md:p-8">
+                  <PanelWrapper>
                     <div className="mb-4 flex items-center justify-between">
-                      <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Images History</h3>
+                      <h3 className="text-lg font-semibold text-[var(--rl-text)]">Images History</h3>
                       <Link 
                         href="/history"
-                        className="text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium transition-colors hover:underline"
+                        className="text-sm text-[var(--rl-accent)] hover:text-[var(--rl-accent-hover)] font-medium transition-colors hover:underline"
                       >
                         View all →
                       </Link>
                     </div>
-                    <div className="h-[20vh] overflow-hidden rounded-xl border border-white/40 bg-white/65 p-4 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] dark:border-white/24 dark:bg-[#111111]/70 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
+                    <div className="h-[20vh] overflow-hidden rounded-xl bg-[var(--rl-surface)] p-4 border border-[var(--rl-border)]">
                       {historyLoading ? (
-                        <div className="flex h-full items-center justify-center text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                        <div className="flex h-full items-center justify-center text-sm font-medium text-[var(--rl-text-secondary)]">
                           Loading history...
                         </div>
                       ) : recentGenerations.length > 0 ? (
@@ -338,25 +339,31 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
                           </AnimatePresence>
                         </div>
                       ) : (
-                        <div className="flex h-full items-center justify-center text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                        <div className="flex h-full items-center justify-center text-sm font-medium text-[var(--rl-text-secondary)]">
                           No generations yet.
                         </div>
                       )}
                     </div>
-                  </div>
+                  </PanelWrapper>
                 </div>
 
-                <div className="flex h-full flex-col rounded-3xl border border-white/40 bg-white/85 p-6 backdrop-blur-[24px] shadow-[inset_-2px_0_4px_rgba(0,0,0,0.05),inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_40px_-10px_rgba(0,0,0,0.25)] dark:border-white/24 dark:bg-[#0c0c12]/78 dark:shadow-[inset_-2px_0_4px_rgba(0,0,0,0.35),inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_18px_48px_-18px_rgba(0,0,0,0.6)] lg:p-8">
-                  {enhancedRightPanel}
+                <div className="lg:flex-1">
+                  <PanelWrapper>
+                    {enhancedRightPanel}
+                  </PanelWrapper>
                 </div>
               </div>
             ) : (
-              <div className="grid w-full max-w-[1400px] mx-auto grid-cols-1 gap-6 px-4 py-6 sm:px-6 md:grid-cols-2 lg:px-8">
-                <div className="rounded-3xl border border-white/40 bg-white/65 p-6 text-neutral-900 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-shadow dark:border-white/24 dark:bg-[#111111]/70 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
-                  <PromptTemplates activeTab={activeTab} setActiveTab={setActiveTab} />
+              <div className="flex flex-col md:flex-row gap-6 w-full">
+                <div className="md:flex-1">
+                  <PanelWrapper>
+                    <PromptTemplates activeTab={activeTab} setActiveTab={setActiveTab} />
+                  </PanelWrapper>
                 </div>
-                <div className="rounded-3xl border border-white/40 bg-white/65 p-6 text-neutral-900 backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-shadow dark:border-white/24 dark:bg-[#111111]/70 dark:text-white dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)] md:p-8">
-                  <CollectionsPanel />
+                <div className="md:flex-1">
+                  <PanelWrapper>
+                    <CollectionsPanel />
+                  </PanelWrapper>
                 </div>
               </div>
             )}
