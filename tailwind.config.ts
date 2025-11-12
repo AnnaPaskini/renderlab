@@ -24,6 +24,19 @@ const config: Config = {
         primary: "#020022",
         muted: "var(--neutral-600)",
         "muted-dark": "var(--neutral-300)",
+        // RenderLab Theme Tokens
+        rl: {
+          bg: "var(--rl-bg)",
+          surface: "var(--rl-surface)",
+          border: "var(--rl-border)",
+          text: "var(--rl-text)",
+          "text-secondary": "var(--rl-text-secondary)",
+          accent: "var(--rl-accent)",
+          "accent-hover": "var(--rl-accent-hover)",
+          success: "var(--rl-success)",
+          error: "var(--rl-error)",
+          warning: "var(--rl-warning)",
+        },
       },
       animation: {
         scroll:

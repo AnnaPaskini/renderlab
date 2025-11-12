@@ -337,7 +337,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
       {/* Modal */}
       <Dialog open={!!previewTemplate} onOpenChange={() => setPreviewTemplate(null)}>
-        <DialogContent className="max-w-lg bg-white/10 dark:bg-[#1a1a1a]/10 backdrop-blur-md border border-white/10 shadow-[0_0_20px_rgba(200,140,255,0.3)] rounded-2xl">
+        <DialogContent className="max-w-lg bg-[var(--rl-panel)] backdrop-blur-md border border-[var(--rl-glass-border)] shadow-[0_0_20px_rgba(200,140,255,0.3)] rounded-2xl">
           {previewTemplate && (
             <>
               <DialogHeader>
@@ -413,7 +413,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
       {/* Rename Template Dialog */}
       <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
-        <DialogContent className="max-w-md bg-white/10 dark:bg-[#1a1a1a]/10 backdrop-blur-md border border-white/10 shadow-[0_0_20px_rgba(200,140,255,0.3)] rounded-2xl">
+        <DialogContent className="max-w-md bg-[var(--rl-panel)] backdrop-blur-md border border-[var(--rl-glass-border)] shadow-[0_0_20px_rgba(200,140,255,0.3)] rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               Rename Template
@@ -463,7 +463,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
       {/* Delete Template Dialog */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <DialogContent className="max-w-md bg-white/10 dark:bg-[#1a1a1a]/10 backdrop-blur-md border border-white/10 shadow-[0_0_20px_rgba(200,140,255,0.3)] rounded-2xl">
+        <DialogContent className="max-w-md bg-[var(--rl-panel)] backdrop-blur-md border border-[var(--rl-glass-border)] shadow-[0_0_20px_rgba(200,140,255,0.3)] rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               Delete Template?
@@ -496,7 +496,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
       {/* Create New Template Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-md bg-white/10 dark:bg-[#1a1a1a]/10 backdrop-blur-md border border-white/10 shadow-[0_0_20px_rgba(200,140,255,0.3)] rounded-2xl">
+        <DialogContent className="max-w-md bg-[var(--rl-panel)] backdrop-blur-md border border-[var(--rl-glass-border)] shadow-[0_0_20px_rgba(200,140,255,0.3)] rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               Create New Template

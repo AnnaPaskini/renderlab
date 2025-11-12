@@ -6,13 +6,13 @@ import { useRouter } from "next/navigation";
 import { IconCheck, IconCircleCheckFilled } from "@tabler/icons-react";
 import { tiers } from "@/constants/tier";
 
-export function PricingTable({ pricing }: any) {
-  const CheckIcon = () => {
-    return (
-      <IconCheck className="mx-auto h-4 w-4 flex-shrink-0 text-black dark:text-white" />
-    );
-  };
+const CheckIcon = () => {
+  return (
+    <IconCheck className="mx-auto h-4 w-4 flex-shrink-0 text-black dark:text-white" />
+  );
+};
 
+export function PricingTable({ pricing }: any) {
   const tableFeatures = [
     {
       title: "Create APIs",

@@ -9,10 +9,7 @@ The theme tokens are now available as CSS variables in `/app/renderlab-theme.css
 **Light Mode (default):**
 - `--rl-bg`: #fafafa
 - `--rl-surface`: #ffffff
-- `--rl-panel`: rgba(255, 255, 255, 0.85)
-- `--rl-panel-hover`: rgba(255, 255, 255, 0.9)
 - `--rl-border`: #e4e4e7
-- `--rl-glass-border`: rgba(255, 255, 255, 0.4)
 - `--rl-text`: #1a1a1a
 - `--rl-text-secondary`: #6b6b6b
 - `--rl-accent`: #7c3aed
@@ -24,10 +21,7 @@ The theme tokens are now available as CSS variables in `/app/renderlab-theme.css
 **Dark Mode (`[data-theme="dark"]`):**
 - `--rl-bg`: #0f0f11
 - `--rl-surface`: #18181b
-- `--rl-panel`: rgba(12, 12, 18, 0.78)
-- `--rl-panel-hover`: rgba(17, 17, 17, 0.8)
 - `--rl-border`: #27272a
-- `--rl-glass-border`: rgba(255, 255, 255, 0.24)
 - `--rl-text`: #f5f5f5
 - `--rl-text-secondary`: #a1a1aa
 - `--rl-accent`: #8b5cf6
