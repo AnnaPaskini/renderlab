@@ -80,7 +80,7 @@ useEffect(() => {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-md p-2 text-[var(--rl-text-secondary)] transition-all hover:bg-[var(--rl-surface)]"
+        className="rounded-md p-2 text-rl-text-secondary transition-all hover:bg-rl-surface"
         aria-label="Open collection actions"
       >
         <IconMenu2 size={20} stroke={1.5} />
@@ -104,17 +104,17 @@ useEffect(() => {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: "100%", opacity: 0 }}
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              className={`fixed top-0 right-0 h-full w-80 max-w-full rounded-l-2xl border-l border-[var(--rl-border)] bg-[var(--rl-surface)] shadow-xl`}
+              className={`fixed top-0 right-0 h-full w-80 max-w-full rounded-l-2xl border-l border-rl-border bg-rl-surface shadow-xl`}
               style={{ zIndex: Z.SIDEBAR }}
             >
               <div className="relative flex h-full flex-col overflow-hidden">
                 <div className="pointer-events-none absolute left-0 right-0 top-0 h-24 bg-gradient-to-b from-white/60 to-transparent dark:from-neutral-900/60" />
-                <div className="flex items-center justify-between border-b border-[var(--rl-border)] px-5 py-4">
-                  <h3 className="text-base font-bold tracking-tight text-[var(--rl-text)]">Collection Actions</h3>
+                <div className="flex items-center justify-between border-b border-rl-border px-5 py-4">
+                  <h3 className="text-base font-bold tracking-tight text-rl-text">Collection Actions</h3>
                   <button
                     type="button"
                     onClick={closePanel}
-                    className="rounded-full p-2 transition-all hover:bg-[var(--rl-surface)]"
+                    className="rounded-full p-2 transition-all hover:bg-rl-surface"
                     aria-label="Close collection actions"
                   >
                     <IconX size={18} stroke={1.5} />

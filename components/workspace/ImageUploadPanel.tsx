@@ -69,7 +69,7 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
     <div className="flex w-full max-w-full flex-col gap-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-  <h2 className="text-lg font-semibold tracking-tight text-[var(--rl-text)]">
+  <h2 className="text-lg font-semibold tracking-tight text-rl-text">
           Upload Image
         </h2>
         {image && (
@@ -85,7 +85,7 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
                 onImageChange(null);
               }
             }}
-            className="flex items-center gap-1.5 rounded-xl border border-[var(--rl-glass-border)] bg-[var(--rl-panel)] px-3 py-1.5 text-sm font-semibold text-[var(--rl-text)] shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-colors hover:bg-[var(--rl-panel-hover)]"
+            className="flex items-center gap-1.5 rounded-xl border border-rl-glass-border bg-rl-panel px-3 py-1.5 text-sm font-semibold text-rl-text shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-colors hover:bg-rl-panel-hover"
           >
             <X size={8} strokeWidth={2} />
             Clear
@@ -104,7 +104,7 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
           onDragOver={handleDrag}
           onDrop={handleDrop}
           className={clsx(
-            "relative mx-auto flex min-h-[360px] max-h-[60vh] w-full max-w-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-[var(--rl-glass-border)] bg-[var(--rl-panel)] p-6 backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-200 sm:max-h-[65vh] lg:max-h-[70vh]",
+            "relative mx-auto flex min-h-[360px] max-h-[60vh] w-full max-w-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-rl-glass-border bg-rl-panel p-6 backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-200 sm:max-h-[65vh] lg:max-h-[70vh]",
             isDragActive && "ring-2 ring-fuchsia-300/60"
           )}
         >
@@ -114,16 +114,16 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
             }`}
           />
           <label className="relative z-20 flex flex-col items-center justify-center cursor-pointer text-center">
-            <div className="mb-3 w-14 h-14 flex items-center justify-center rounded-full bg-[var(--rl-surface)]">
-              <Upload size={26} className="text-[var(--rl-text-secondary)]" />
+            <div className="mb-3 w-14 h-14 flex items-center justify-center rounded-full bg-rl-surface">
+              <Upload size={26} className="text-rl-text-secondary" />
             </div>
-            <p className="text-base font-semibold text-[var(--rl-text)]">
+            <p className="text-base font-semibold text-rl-text">
               Drag and drop your image here
             </p>
-            <p className="text-sm font-medium text-[var(--rl-text-secondary)]">
+            <p className="text-sm font-medium text-rl-text-secondary">
               or click to browse
             </p>
-            <p className="mt-2 text-xs font-medium text-[var(--rl-text-secondary)]">
+            <p className="mt-2 text-xs font-medium text-rl-text-secondary">
               JPG, PNG, WebP • Max 50 MB
             </p>
             <input
@@ -146,7 +146,7 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
           onDragOver={handleDrag}
           onDrop={handleDrop}
           className={clsx(
-            "relative mx-auto flex min-h-[360px] max-h-[60vh] w-full max-w-full items-center justify-center overflow-hidden rounded-2xl border border-[var(--rl-glass-border)] bg-[var(--rl-panel)] p-6 backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-200 sm:max-h-[65vh] lg:max-h-[70vh]",
+            "relative mx-auto flex min-h-[360px] max-h-[60vh] w-full max-w-full items-center justify-center overflow-hidden rounded-2xl border border-rl-glass-border bg-rl-panel p-6 backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-200 sm:max-h-[65vh] lg:max-h-[70vh]",
             isDragActive && "ring-2 ring-fuchsia-300/60"
           )}
         >
@@ -171,7 +171,7 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
             <div
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
                 opacity-0 group-hover:opacity-100 transition-opacity 
-                bg-[var(--rl-surface)] px-4 py-2 text-sm font-medium text-[var(--rl-text)] shadow-lg ring-1 ring-white/40 backdrop-blur-sm rounded-lg pointer-events-none dark:bg-[var(--rl-surface)] text-[var(--rl-text)]"
+                bg-rl-surface px-4 py-2 text-sm font-medium text-rl-text shadow-lg ring-1 ring-white/40 backdrop-blur-sm rounded-lg pointer-events-none dark:bg-rl-surface text-rl-text"
             >
               Click to replace
             </div>
@@ -191,7 +191,7 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="mt-2 flex items-center justify-center gap-2 text-sm font-medium text-[var(--rl-text-secondary)]"
+          className="mt-2 flex items-center justify-center gap-2 text-sm font-medium text-rl-text-secondary"
         >
           <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
           <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse delay-100" />

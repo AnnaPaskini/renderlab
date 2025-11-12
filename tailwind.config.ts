@@ -28,7 +28,10 @@ const config: Config = {
         rl: {
           bg: "var(--rl-bg)",
           surface: "var(--rl-surface)",
+          panel: "var(--rl-panel)",
+          "panel-hover": "var(--rl-panel-hover)",
           border: "var(--rl-border)",
+          "glass-border": "var(--rl-glass-border)",
           text: "var(--rl-text)",
           "text-secondary": "var(--rl-text-secondary)",
           accent: "var(--rl-accent)",

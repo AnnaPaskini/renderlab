@@ -17,7 +17,7 @@
   --rl-warning: #f59e0b;
 }
 
-[data-theme="dark"] {
+.dark {
   --rl-bg: #0f0f11;
   --rl-surface: #18181b;
   --rl-panel: rgba(12, 12, 18, 0.78);

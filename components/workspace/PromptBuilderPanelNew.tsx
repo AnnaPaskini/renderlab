@@ -133,9 +133,9 @@ export function PromptBuilderPanel({
   const [isTemplateDropdownOpen, setIsTemplateDropdownOpen] = useState(false);
 
   const selectTriggerClass =
-    "h-12 w-full rounded-xl border border-[var(--rl-glass-border)] bg-[var(--rl-panel)] px-3 text-left text-sm font-medium text-[var(--rl-text)] backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300";
+    "h-12 w-full rounded-xl border border-rl-glass-border bg-rl-panel px-3 text-left text-sm font-medium text-rl-text backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300";
   const inputSurfaceClass =
-    "w-full rounded-xl border border-[var(--rl-glass-border)] bg-[var(--rl-panel)] px-3 py-2 text-sm font-medium text-[var(--rl-text)] backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 placeholder:text-[var(--rl-text-secondary)]";
+    "w-full rounded-xl border border-rl-glass-border bg-rl-panel px-3 py-2 text-sm font-medium text-rl-text backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 placeholder:text-rl-text-secondary";
 
   const resolveString = (...values: unknown[]) => {
     for (const value of values) {
@@ -939,7 +939,7 @@ export function PromptBuilderPanel({
   };
 
   return (
-  <section className="flex h-full flex-col gap-4 overflow-hidden rounded-3xl border border-[var(--rl-glass-border)] bg-[var(--rl-panel)] p-6 text-[var(--rl-text)] backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+  <section className="flex h-full flex-col gap-4 overflow-hidden rounded-3xl border border-rl-glass-border bg-rl-panel p-6 text-rl-text backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
       <div className="flex-1 overflow-y-auto">
   {currentTab === "builder" && (
           <motion.div
@@ -951,7 +951,7 @@ export function PromptBuilderPanel({
             className="space-y-4"
           >
             <div>
-              <h2 className="text-2xl font-bold text-[var(--rl-text)]">{getPageTitle()}</h2>
+              <h2 className="text-2xl font-bold text-rl-text">{getPageTitle()}</h2>
               <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{getPageSubtitle()}</p>
             </div>
 
@@ -962,21 +962,21 @@ export function PromptBuilderPanel({
 
             <motion.div
               layout
-              className="rounded-2xl border border-[var(--rl-glass-border)] bg-[var(--rl-panel)] p-4 text-[var(--rl-text)] backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]"
+              className="rounded-2xl border border-rl-glass-border bg-rl-panel p-4 text-rl-text backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]"
             >
               <div className="flex flex-col gap-4">
                 <ToggleGroup.Root
                   type="single"
                   value={activeMode}
                   onValueChange={handleModeChange}
-                  className="grid w-full grid-cols-2 gap-2 rounded-xl bg-[var(--rl-surface)] p-1 shadow-inner transition-all duration-300/60"
+                  className="grid w-full grid-cols-2 gap-2 rounded-xl bg-rl-surface p-1 shadow-inner transition-all duration-300/60"
                 >
                   <ToggleGroup.Item
                     value="template"
                     className={cn(
                       "rounded-lg px-4 py-2 text-sm font-medium text-neutral-500 transition-all duration-300",
                       "hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200",
-                      "data-[state=on]:bg-[var(--rl-panel)] data-[state=on]:text-[var(--rl-text)] data-[state=on]:shadow-sm",
+                      "data-[state=on]:bg-rl-panel data-[state=on]:text-rl-text data-[state=on]:shadow-sm",
                     )}
                   >
                     Load Template
@@ -986,7 +986,7 @@ export function PromptBuilderPanel({
                     className={cn(
                       "rounded-lg px-4 py-2 text-sm font-medium text-neutral-500 transition-all duration-300",
                       "hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200",
-                      "data-[state=on]:bg-[var(--rl-panel)] data-[state=on]:text-[var(--rl-text)] data-[state=on]:shadow-sm",
+                      "data-[state=on]:bg-rl-panel data-[state=on]:text-rl-text data-[state=on]:shadow-sm",
                     )}
                   >
                     Load Collection
@@ -1092,7 +1092,7 @@ export function PromptBuilderPanel({
                           </DropdownMenuContent>
                         </DropdownMenu>
                       ) : (
-                        <div className="rounded-xl border border-dashed border-[var(--rl-glass-border)] bg-[var(--rl-panel)] p-4 text-sm font-medium text-[var(--rl-text-secondary)] backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
+                        <div className="rounded-xl border border-dashed border-rl-glass-border bg-rl-panel p-4 text-sm font-medium text-rl-text-secondary backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
                           No saved templates found.
                         </div>
                       )}
@@ -1123,7 +1123,7 @@ export function PromptBuilderPanel({
                           </SelectContent>
                         </Select>
                       ) : (
-                        <div className="rounded-xl border border-dashed border-[var(--rl-glass-border)] bg-[var(--rl-panel)] p-4 text-sm font-medium text-[var(--rl-text-secondary)] backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
+                        <div className="rounded-xl border border-dashed border-rl-glass-border bg-rl-panel p-4 text-sm font-medium text-rl-text-secondary backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
                           No saved collections yet.
                         </div>
                       )}
@@ -1135,7 +1135,7 @@ export function PromptBuilderPanel({
 
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-medium text-[var(--rl-text)]">
+                <label className="text-sm font-medium text-rl-text">
                   AI Model
                 </label>
                 <select
@@ -1148,7 +1148,7 @@ export function PromptBuilderPanel({
               </div>
 
               <div>
-                <label className="text-sm font-medium text-[var(--rl-text)]">
+                <label className="text-sm font-medium text-rl-text">
                   Style
                 </label>
                 <select
@@ -1164,7 +1164,7 @@ export function PromptBuilderPanel({
               </div>
 
               <div>
-                <label className="text-sm font-medium text-[var(--rl-text)]">
+                <label className="text-sm font-medium text-rl-text">
                   Additional Details
                 </label>
                 <textarea
@@ -1262,9 +1262,9 @@ export function PromptBuilderPanel({
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-  <DialogContent className="rounded-3xl border border-[var(--rl-glass-border)] bg-[var(--rl-panel)] text-[var(--rl-text)] backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+  <DialogContent className="rounded-3xl border border-rl-glass-border bg-rl-panel text-rl-text backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-[var(--rl-text)]">
+            <DialogTitle className="text-lg font-semibold text-rl-text">
               Save Template
             </DialogTitle>
           </DialogHeader>
@@ -1279,7 +1279,7 @@ export function PromptBuilderPanel({
           <DialogFooter className="mt-6 flex justify-end gap-3">
             <Button
               variant="ghost"
-              className="rounded-2xl border border-[var(--rl-glass-border)] bg-[var(--rl-panel)] px-4 py-2 text-sm font-semibold text-[var(--rl-text)] backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]"
+              className="rounded-2xl border border-rl-glass-border bg-rl-panel px-4 py-2 text-sm font-semibold text-rl-text backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]"
               onClick={() => setIsDialogOpen(false)}
             >
               Cancel
@@ -1301,9 +1301,9 @@ export function PromptBuilderPanel({
 
       {/* Rename Template Dialog */}
       <Dialog open={isRenameTemplateOpen} onOpenChange={setIsRenameTemplateOpen}>
-        <DialogContent className="rounded-3xl border border-[var(--rl-glass-border)] bg-[var(--rl-panel)] text-[var(--rl-text)] backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+        <DialogContent className="rounded-3xl border border-rl-glass-border bg-rl-panel text-rl-text backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-[var(--rl-text)]">
+            <DialogTitle className="text-lg font-semibold text-rl-text">
               Rename Template
             </DialogTitle>
           </DialogHeader>
@@ -1319,7 +1319,7 @@ export function PromptBuilderPanel({
           <DialogFooter className="mt-6 flex justify-end gap-3">
             <Button
               variant="ghost"
-              className="rounded-2xl border border-[var(--rl-glass-border)] bg-[var(--rl-panel)] px-4 py-2 text-sm font-semibold text-[var(--rl-text)] backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]"
+              className="rounded-2xl border border-rl-glass-border bg-rl-panel px-4 py-2 text-sm font-semibold text-rl-text backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]"
               onClick={() => setIsRenameTemplateOpen(false)}
             >
               Cancel
@@ -1338,9 +1338,9 @@ export function PromptBuilderPanel({
 
       {/* Delete Template Dialog */}
       <Dialog open={isDeleteTemplateOpen} onOpenChange={setIsDeleteTemplateOpen}>
-        <DialogContent className="rounded-3xl border border-[var(--rl-glass-border)] bg-[var(--rl-panel)] text-[var(--rl-text)] backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+        <DialogContent className="rounded-3xl border border-rl-glass-border bg-rl-panel text-rl-text backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-[var(--rl-text)]">
+            <DialogTitle className="text-lg font-semibold text-rl-text">
               Delete Template?
             </DialogTitle>
           </DialogHeader>
@@ -1352,7 +1352,7 @@ export function PromptBuilderPanel({
           <DialogFooter className="mt-6 flex justify-end gap-3">
             <Button
               variant="ghost"
-              className="rounded-2xl border border-[var(--rl-glass-border)] bg-[var(--rl-panel)] px-4 py-2 text-sm font-semibold text-[var(--rl-text)] backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]"
+              className="rounded-2xl border border-rl-glass-border bg-rl-panel px-4 py-2 text-sm font-semibold text-rl-text backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]"
               onClick={() => setIsDeleteTemplateOpen(false)}
             >
               Cancel

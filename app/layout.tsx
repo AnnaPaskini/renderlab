@@ -54,30 +54,37 @@ export default async function RootLayout({
   console.log('🔍 [Layout Debug] showNavbar:', showNavbar);
 
   return (
-    <html lang="en" suppressHydrationWarning className="light">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
           GeistSans.className,
-          "bg-neutral-50 text-neutral-900 antialiased"
+          "antialiased"
         )}
         suppressHydrationWarning
       >
         <ViewTransitions>
-          <SupabaseAuthProvider>
-            <HistoryErrorBoundary>
-              <HistoryProvider>
-                <WorkspaceProvider>
-                  {showNavbar && <NavBar />}
-                  {showMainNavbar && <MainNavbar />}
-                  {children}
-                  <Toaster 
-                    position="bottom-right"
-                    toastOptions={toastConfig}
-                  />
-                </WorkspaceProvider>
-              </HistoryProvider>
-            </HistoryErrorBoundary>
-          </SupabaseAuthProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem={false}
+            disableTransitionOnChange
+          >
+            <SupabaseAuthProvider>
+              <HistoryErrorBoundary>
+                <HistoryProvider>
+                  <WorkspaceProvider>
+                    {showNavbar && <NavBar />}
+                    {showMainNavbar && <MainNavbar />}
+                    {children}
+                    <Toaster 
+                      position="bottom-right"
+                      toastOptions={toastConfig}
+                    />
+                  </WorkspaceProvider>
+                </HistoryProvider>
+              </HistoryErrorBoundary>
+            </SupabaseAuthProvider>
+          </ThemeProvider>
         </ViewTransitions>
       </body>
     </html>

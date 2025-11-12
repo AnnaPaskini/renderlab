@@ -133,7 +133,7 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
     : rightPanel;
 
   return (
-  <main className="flex flex-col min-h-screen w-full bg-[var(--rl-bg)] transition-colors duration-300">
+  <main className="flex flex-col min-h-screen w-full bg-rl-bg transition-colors duration-300">
       <div className="relative flex-1">
         <div className="dot-grid absolute inset-0" aria-hidden="true" />
         <div
@@ -148,8 +148,8 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
         />
 
         <div className={`relative z-[${Z.LOW}] flex min-h-full flex-col gap-6 px-6 pb-10 pt-16 md:px-8 md:pt-20`}>
-                    <div className="relative z-10 flex w-full items-center justify-between rounded-2xl bg-[var(--rl-panel)] px-6 py-3 text-sm font-semibold tracking-tight backdrop-blur-md border border-[var(--rl-glass-border)] shadow-[0_2px_10px_rgba(0,0,0,0.05)] md:px-8 md:text-base">
-            <h1 className="font-semibold text-[var(--rl-text)]">
+                    <div className="relative z-10 flex w-full items-center justify-between rounded-2xl bg-rl-panel px-6 py-3 text-sm font-semibold tracking-tight backdrop-blur-md border border-rl-glass-border shadow-[0_2px_10px_rgba(0,0,0,0.05)] md:px-8 md:text-base">
+            <h1 className="font-semibold text-rl-text">
               Hey, {greetingName} — keep crafting!
             </h1>
             <div className="flex items-center gap-2">
@@ -159,8 +159,8 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
 
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-[var(--rl-text)] md:text-3xl">Welcome back</h2>
-              <p className="text-sm font-medium text-[var(--rl-text-secondary)]">Keep crafting stunning visuals with RenderLab.</p>
+              <h2 className="text-2xl font-semibold tracking-tight text-rl-text md:text-3xl">Welcome back</h2>
+              <p className="text-sm font-medium text-rl-text-secondary">Keep crafting stunning visuals with RenderLab.</p>
             </div>
           </div>
 
@@ -170,7 +170,7 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
               className={`rounded-2xl px-4 py-2 text-sm font-semibold tracking-tight transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 ${
                 activeTab === "builder"
                   ? "bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400"
-                  : "border border-[var(--rl-glass-border)] bg-[var(--rl-panel)] text-[var(--rl-text)] shadow-[0_2px_10px_rgba(0,0,0,0.05)] hover:bg-[var(--rl-panel-hover)]"
+                  : "border border-rl-glass-border bg-rl-panel text-rl-text shadow-[0_2px_10px_rgba(0,0,0,0.05)] hover:bg-rl-panel-hover"
               }`}
             >
               🧩 Builder
@@ -180,7 +180,7 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
               className={`rounded-2xl px-4 py-2 text-sm font-semibold tracking-tight transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 ${
                 activeTab === "custom"
                   ? "bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(150,100,255,0.4)] hover:from-purple-400 hover:via-fuchsia-400 hover:to-indigo-400"
-                  : "border border-[var(--rl-glass-border)] bg-[var(--rl-panel)] text-[var(--rl-text)] shadow-[0_2px_10px_rgba(0,0,0,0.05)] hover:bg-[var(--rl-panel-hover)]"
+                  : "border border-rl-glass-border bg-rl-panel text-rl-text shadow-[0_2px_10px_rgba(0,0,0,0.05)] hover:bg-rl-panel-hover"
               }`}
             >
               📁 Custom
@@ -221,17 +221,17 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
 
                   <PanelWrapper>
                     <div className="mb-4 flex items-center justify-between">
-                      <h3 className="text-lg font-semibold text-[var(--rl-text)]">Images History</h3>
+                      <h3 className="text-lg font-semibold text-rl-text">Images History</h3>
                       <Link 
                         href="/history"
-                        className="text-sm text-[var(--rl-accent)] hover:text-[var(--rl-accent-hover)] font-medium transition-colors hover:underline"
+                        className="text-sm text-rl-accent hover:text-rl-accent-hover font-medium transition-colors hover:underline"
                       >
                         View all →
                       </Link>
                     </div>
-                    <div className="h-[20vh] overflow-hidden rounded-xl bg-[var(--rl-surface)] p-4 border border-[var(--rl-border)]">
+                    <div className="h-[20vh] overflow-hidden rounded-xl bg-rl-surface p-4 border border-rl-border">
                       {historyLoading ? (
-                        <div className="flex h-full items-center justify-center text-sm font-medium text-[var(--rl-text-secondary)]">
+                        <div className="flex h-full items-center justify-center text-sm font-medium text-rl-text-secondary">
                           Loading history...
                         </div>
                       ) : recentGenerations.length > 0 ? (
@@ -339,7 +339,7 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
                           </AnimatePresence>
                         </div>
                       ) : (
-                        <div className="flex h-full items-center justify-center text-sm font-medium text-[var(--rl-text-secondary)]">
+                        <div className="flex h-full items-center justify-center text-sm font-medium text-rl-text-secondary">
                           No generations yet.
                         </div>
                       )}

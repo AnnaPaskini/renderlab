@@ -1,3 +1,4 @@
+npm run dev
 # RenderLab Theme Usage
 
 ## CSS Variables
