@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useWorkspace } from '@/lib/context/WorkspaceContext';
-import { useRouter } from 'next/navigation';
-import { ImageIcon, Loader2 } from 'lucide-react';
-import { format } from 'date-fns';
-import { toast } from 'sonner';
 import { ImagePreviewModal } from '@/components/common/ImagePreviewModal';
 import { RenderLabLayout } from '@/components/layout/RenderLabLayout';
+import { useWorkspace } from '@/lib/context/WorkspaceContext';
 import { supabase } from '@/lib/supabase';
+import { format } from 'date-fns';
+import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 interface ImageData {
   id: string;
@@ -46,7 +46,7 @@ export default function HistoryPage() {
       setLoading(true);
 
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         setLoading(false);
         setGroups([]);
@@ -85,7 +85,7 @@ export default function HistoryPage() {
         return acc;
       }, {});
 
-      const groupsArray = Object.values(grouped).sort((a, b) => 
+      const groupsArray = Object.values(grouped).sort((a, b) =>
         new Date(b.date_group).getTime() - new Date(a.date_group).getTime()
       );
 
@@ -103,7 +103,7 @@ export default function HistoryPage() {
               merged.push(newGroup);
             }
           });
-          return merged.sort((a, b) => 
+          return merged.sort((a, b) =>
             new Date(b.date_group).getTime() - new Date(a.date_group).getTime()
           );
         });
@@ -119,7 +119,7 @@ export default function HistoryPage() {
         setLoading(false);
         return;
       }
-      
+
       console.error('History load error:', err);
       toast.error('Failed to load history');
     } finally {
@@ -144,7 +144,7 @@ export default function HistoryPage() {
   const handleOpenInBuilder = (image: any) => {
     // Load the RESULT image (not reference) into builder
     loadTemporary(image.prompt, image.image_url);
-    
+
     // Show toast feedback
     toast.success('Image and prompt loaded from History', {
       style: {
@@ -153,14 +153,14 @@ export default function HistoryPage() {
         border: 'none'
       }
     });
-    
+
     router.push('/workspace');
   };
 
   const handleUsePrompt = (image: any) => {
     // Load ONLY the prompt (no image)
     loadTemporary(image.prompt, null);
-    
+
     // Show different toast
     toast.info('Prompt loaded from History', {
       style: {
@@ -169,13 +169,13 @@ export default function HistoryPage() {
         border: 'none'
       }
     });
-    
+
     router.push('/workspace');
   };
 
   const handleDownload = async (e: React.MouseEvent, imageUrl: string, imageId: string) => {
     e.stopPropagation();
-    
+
     try {
       const response = await fetch(imageUrl);
       const blob = await response.blob();
@@ -201,15 +201,15 @@ export default function HistoryPage() {
 
   const confirmDelete = async () => {
     if (!imageToDelete) return;
-    
+
     try {
       const response = await fetch(`/api/images/${imageToDelete}`, {
         method: 'DELETE',
       });
-      
+
       const result = await response.json();
       if (!result.success) throw new Error(result.error);
-      
+
       toast.success('Image deleted');
       // Refresh history list
       await refresh();
@@ -275,7 +275,7 @@ export default function HistoryPage() {
                       className="group bg-[var(--rl-surface)] rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-[var(--rl-border)] hover:border-[var(--rl-accent)]"
                     >
                       {/* Image */}
-                      <div 
+                      <div
                         className="relative aspect-video bg-gradient-to-br from-[var(--rl-surface-hover)] to-[var(--rl-surface)] overflow-hidden cursor-pointer"
                         onClick={() => setPreviewImageUrl(img.image_url)}
                       >
@@ -292,18 +292,18 @@ export default function HistoryPage() {
                           {/* Delete button - Top-right (hover only) */}
                           <button
                             onClick={(e) => handleDeleteClick(e, img.id)}
-                            className="absolute top-2 right-2 p-2 bg-black/80 hover:bg-black rounded-full shadow-lg transition-colors backdrop-blur-sm"
+                            className="absolute top-2 right-2 p-2 bg-black/90 hover:bg-black rounded-full shadow-lg transition-colors"
                             title="Delete"
                           >
                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                           </button>
-                          
+
                           {/* Download button - Bottom-right (hover only) */}
                           <button
                             onClick={(e) => handleDownload(e, img.image_url, img.id)}
-                            className="absolute bottom-2 right-2 p-2 bg-black/80 hover:bg-black rounded-full shadow-lg transition-colors backdrop-blur-sm"
+                            className="absolute bottom-2 right-2 p-2 bg-black/90 hover:bg-black rounded-full shadow-lg transition-colors"
                             title="Download"
                           >
                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -320,7 +320,7 @@ export default function HistoryPage() {
                         )}
 
                         {/* Date label - bottom left (always visible) */}
-                        <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs font-medium px-2 py-1 rounded-md backdrop-blur-sm pointer-events-none">
+                        <div className="absolute bottom-2 left-2 bg-black/80 text-white text-xs font-medium px-2 py-1 rounded-md pointer-events-none">
                           {format(new Date(img.created_at), 'MMM d, HH:mm')}
                         </div>
                       </div>
@@ -339,7 +339,7 @@ export default function HistoryPage() {
                           >
                             Open in Builder
                           </button>
-                          
+
                           <button
                             onClick={() => handleUsePrompt(img)}
                             className="py-2 px-3 bg-[var(--rl-surface-hover)] text-[var(--rl-foreground)] rounded-lg hover:bg-[var(--rl-surface)] transition-all text-xs font-semibold border border-[var(--rl-border)] hover:border-[var(--rl-border-hover)] transform hover:-translate-y-0.5"
@@ -349,49 +349,49 @@ export default function HistoryPage() {
                           </button>
                         </div>
                       </div>
-                  </div>
-                ))}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
 
-          {/* Load More Button - Improved */}
-          {hasMore && (
-            <div className="flex justify-center pt-12">
-              <button
-                onClick={loadMore}
-                disabled={loading}
-                className="group px-8 py-3.5 bg-[var(--rl-surface)] text-[var(--rl-foreground)] rounded-xl hover:bg-[var(--rl-accent)] hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 shadow-md hover:shadow-xl border border-[var(--rl-border)] hover:border-transparent font-medium"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Loading more...
-                  </>
-                ) : (
-                  <>
-                    <span>Load More</span>
-                    <svg className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </>
-                )}
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-      
-      {/* Fullscreen Image Preview Modal */}
-      <ImagePreviewModal
-        imageUrl={previewImageUrl}
-        onClose={() => setPreviewImageUrl(null)}
-      />
-      
-        {/* Delete confirmation dialog - Improved */}
+            {/* Load More Button - Improved */}
+            {hasMore && (
+              <div className="flex justify-center pt-12">
+                <button
+                  onClick={loadMore}
+                  disabled={loading}
+                  className="group px-8 py-3.5 bg-[var(--rl-surface)] text-[var(--rl-foreground)] rounded-xl hover:bg-[var(--rl-accent)] hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 shadow-md hover:shadow-xl border border-[var(--rl-border)] hover:border-transparent font-medium"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Loading more...
+                    </>
+                  ) : (
+                    <>
+                      <span>Load More</span>
+                      <svg className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Fullscreen Image Preview Modal */}
+        <ImagePreviewModal
+          imageUrl={previewImageUrl}
+          onClose={() => setPreviewImageUrl(null)}
+        />
+
+        {/* Delete confirmation dialog - Clean design */}
         {showDeleteConfirm && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl p-8 max-w-md mx-4 shadow-2xl border border-gray-100 transform animate-in zoom-in duration-200">
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl p-8 max-w-md mx-4 shadow-[0_8px_32px_rgba(0,0,0,0.8)] border border-gray-100 transform animate-in zoom-in duration-200">
               <div className="text-center mb-6">
                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

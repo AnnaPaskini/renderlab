@@ -65,9 +65,9 @@ export default function PromptsLibraryPage() {
   }, [filters]);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="rl-ambient-bg min-h-screen bg-[#0a0a0a]">
       {/* Header */}
-      <div className="bg-[#0a0a0a] border-b border-white/8">
+      <div className="relative z-10 bg-[#0a0a0a] border-b border-white/8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div>
             <h1 className="text-3xl font-bold text-white">Prompts Library</h1>
@@ -79,15 +79,15 @@ export default function PromptsLibraryPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Filters */}
-        <div className="bg-[#161616] rounded-xl shadow-lg shadow-black/60 p-6 mb-8 border border-white/8">
+        <div className="rl-card p-8 mb-10">
           <FilterBar onFilterChange={setFilters} />
         </div>
 
         {/* Prompts Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {[...Array(8)].map((_, i) => (
               <div key={i} className="aspect-[3/4] bg-[#1a1a1a] rounded-xl animate-pulse border border-white/5" />
             ))}
@@ -108,14 +108,14 @@ export default function PromptsLibraryPage() {
             {isAuthenticated === true && !filters.category && !filters.badge && !filters.search && (
               <button
                 onClick={() => router.push('/prompts/submit')}
-                className="px-6 py-3 bg-[#ff6b35] text-white rounded-lg hover:bg-[#ff8555] font-medium shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 transition-all duration-200"
+                className="rl-btn-primary"
               >
                 Submit First Prompt
               </button>
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {prompts.map((prompt) => (
               <PromptCard
                 key={prompt.id}
@@ -143,7 +143,7 @@ export default function PromptsLibraryPage() {
               </p>
               <Link
                 href="/prompts/submit"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#ff6b35] text-white rounded-lg hover:bg-[#ff8555] font-medium shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 transition-all duration-200"
+                className="rl-btn-primary inline-flex items-center gap-2"
               >
                 Submit Your Prompt
               </Link>

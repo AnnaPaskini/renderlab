@@ -3,7 +3,10 @@ import { GeistSans } from "geist/font/sans";
 import { ThemeProvider } from "next-themes";
 import { ViewTransitions } from "next-view-transitions";
 import { headers } from "next/headers";
-import "./globals.css";
+import "./components-primitives.css"; // 2. Base components
+import "./design-tokens.css"; // 1. Tokens FIRST
+import "./globals.css"; // 3. Global styles
+import "./renderlab-theme.css"; // 4. Custom overrides
 
 import { HistoryErrorBoundary } from "@/app/providers/HistoryErrorBoundary";
 import { MainNavbar } from '@/components/layout/MainNavbar';

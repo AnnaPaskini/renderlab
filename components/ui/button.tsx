@@ -1,13 +1,14 @@
 "use client";
 
-import * as React from "react";
+import { cn } from "@/lib/utils";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/lib/utils";
+import * as React from "react";
 
 /**
  * RenderLab Button — hybrid of ShadCN logic + Aceternity visuals.
  * Compatible with Radix Slot for polymorphic composition.
+ * LUXURY: Default variant uses gradient background with shimmer effect.
  */
 const buttonVariants = cva(
   "inline-flex items-center justify-center rounded-xl font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--rl-accent)] focus-visible:ring-offset-0 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]",
@@ -15,7 +16,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-[var(--rl-accent)] hover:bg-[var(--rl-accent-light)] text-white shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 transition-all duration-200 border-0",
+          "rl-btn-primary",
         secondary:
           "bg-[var(--rl-panel)] text-[var(--rl-text)] hover:bg-[var(--rl-surface-elevated)] border border-[var(--rl-border)]",
         ghost:
@@ -40,7 +41,7 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 

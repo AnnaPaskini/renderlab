@@ -4,6 +4,52 @@
 @tailwind components;
 @tailwind utilities;
 
+/* === GLOBAL OVERRIDES === */
+
+* {
+  /* NO blur anywhere */
+}
+
+/* Remove any default backdrop filters */
+.backdrop-blur-xl,
+.backdrop-blur-lg,
+.backdrop-blur-md,
+.backdrop-blur-sm,
+.backdrop-blur {
+  backdrop-filter: none !important;
+}
+
+/* Remove blur filters */
+.blur-3xl,
+.blur-2xl,
+.blur-xl,
+.blur-lg,
+.blur-md {
+  filter: none !important;
+}
+
+/* High contrast text */
+body {
+  color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Improve readability */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+p {
+  color: #d4d4d4;
+}
+
 /* ====================================================================
    FORCE DARK MODE GLOBALLY - No light mode support
    ==================================================================== */
@@ -108,10 +154,7 @@ select option:checked:before {
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
   }
 
-  .glass-blur-24 {
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-  }
+  /* REMOVED: glass-blur-24 - no blur effects */
 
   .panel-dimmer {
     --panel-surface: rgba(255, 255, 255, 0.65);
@@ -135,8 +178,7 @@ select option:checked:before {
     inset: 0;
     border-radius: inherit;
     background: var(--panel-surface);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    /* REMOVED: backdrop-filter blur */
     z-index: -1;
   }
 
@@ -166,8 +208,7 @@ select option:checked:before {
     border-radius: inherit;
     z-index: -1;
     background: rgba(18, 18, 30, 0.28);
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
+    /* REMOVED: backdrop-filter blur */
   }
 
   .nav-surface::after {
@@ -202,7 +243,7 @@ select option:checked:before {
   /* ====================================================================
      CUSTOM SCROLLBAR - RenderLab Theme
      ==================================================================== */
-  
+
   /* Webkit browsers (Chrome, Safari, Edge) */
   ::-webkit-scrollbar {
     width: 8px;

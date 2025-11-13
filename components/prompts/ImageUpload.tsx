@@ -153,7 +153,7 @@ export function ImageUpload({ onUploadComplete, currentImage }: ImageUploadProps
             <button
               type="button"
               onClick={handleRemove}
-              className="p-2 bg-black/80 hover:bg-black rounded-full shadow-lg transition-colors backdrop-blur-sm"
+              className="p-2 bg-black/80 hover:bg-black rounded-full shadow-lg transition-colors "
               title="Remove image"
             >
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,8 +1,8 @@
 "use client";
-import { motion, AnimatePresence } from "framer-motion";
-import { ReactNode, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
+import { ReactNode, useEffect } from "react";
 
 interface RenderLabModalProps {
   isOpen: boolean;
@@ -44,14 +44,14 @@ export function RenderLabModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="rl-modal-overlay">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0"
             onClick={onClose}
             aria-hidden="true"
           />
@@ -61,16 +61,13 @@ export function RenderLabModal({
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            transition={{ 
+            transition={{
               duration: 0.25,
-              ease: [0.4, 0, 0.2, 1] // Custom easing for smooth motion
+              ease: [0.4, 0, 0.2, 1]
             }}
             onClick={(e) => e.stopPropagation()}
             className={cn(
-              "relative rounded-2xl border border-[var(--rl-border)] bg-[var(--rl-surface)] text-[var(--rl-text)]",
-              "shadow-xl p-6 w-full max-w-md mx-4",
-              "transition-colors duration-300",
-              "max-h-[90vh] overflow-y-auto",
+              "rl-modal relative mx-4 max-h-[90vh] overflow-y-auto",
               className
             )}
             role="dialog"
@@ -79,12 +76,9 @@ export function RenderLabModal({
           >
             {/* Header with Close Button */}
             {(title || showCloseButton) && (
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-6">
                 {title && (
-                  <h2 
-                    id="modal-title" 
-                    className="text-lg font-semibold text-[var(--rl-text)]"
-                  >
+                  <h2 id="modal-title" className="rl-heading-2">
                     {title}
                   </h2>
                 )}
@@ -93,8 +87,8 @@ export function RenderLabModal({
                     onClick={onClose}
                     className={cn(
                       "p-1.5 rounded-lg transition-colors",
-                      "text-[var(--rl-text-secondary)] hover:text-[var(--rl-text)]",
-                      "hover:bg-[var(--rl-bg)]",
+                      "text-[var(--rl-text-tertiary)] hover:text-[var(--rl-text-primary)]",
+                      "hover:bg-[var(--rl-bg-surface)]",
                       !title && "ml-auto"
                     )}
                     aria-label="Close modal"

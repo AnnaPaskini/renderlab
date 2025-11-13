@@ -1,5 +1,5 @@
-import colors from "tailwindcss/colors";
 import type { Config } from "tailwindcss";
+import colors from "tailwindcss/colors";
 const {
   default: flattenColorPalette,
 } = require("tailwindcss/lib/util/flattenColorPalette");
@@ -18,6 +18,8 @@ const config: Config = {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+        "rl-gradient-primary": "var(--rl-gradient-primary)",
+        "rl-gradient-soft": "var(--rl-gradient-soft)",
       },
       colors: {
         zinc: colors.zinc,
@@ -28,6 +30,7 @@ const config: Config = {
         rl: {
           bg: "var(--rl-bg)",
           surface: "var(--rl-surface)",
+          "surface-elevated": "var(--rl-surface-elevated)",
           panel: "var(--rl-panel)",
           "panel-hover": "var(--rl-panel-hover)",
           border: "var(--rl-border)",
@@ -42,6 +45,13 @@ const config: Config = {
           success: "var(--rl-success)",
           error: "var(--rl-error)",
           warning: "var(--rl-warning)",
+          // LUXURY: Gradient tokens
+          "gradient-start": "var(--rl-gradient-start)",
+          "gradient-mid": "var(--rl-gradient-mid)",
+          "gradient-end": "var(--rl-gradient-end)",
+          // LUXURY: Glow tokens
+          "glow-orange": "var(--rl-glow-orange)",
+          "glow-pink": "var(--rl-glow-pink)",
         },
       },
       spacing: {
@@ -72,6 +82,10 @@ const config: Config = {
         0px 12px 12px -6px rgb(0 0 0 / 0.06),
         0px 24px 24px -12px rgb(0 0 0 / 0.06)`,
         aceternity: `0px 2px 3px -1px rgba(0,0,0,0.1), 0px 1px 0px 0px rgba(25,28,33,0.02), 0px 0px 0px 1px rgba(25,28,33,0.08)`,
+        // LUXURY: Glow shadows
+        'rl-glow-sm': 'var(--rl-shadow-glow-sm)',
+        'rl-glow-md': 'var(--rl-shadow-glow-md)',
+        'rl-glow-lg': 'var(--rl-shadow-glow-lg)',
       },
       keyframes: {
         scroll: {

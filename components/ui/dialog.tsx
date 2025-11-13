@@ -1,16 +1,16 @@
 "use client";
 
-import * as React from "react";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { cn } from "@/lib/utils";
 import { Z } from "@/lib/z-layer-guide";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import * as React from "react";
 
 const Dialog = DialogPrimitive.Root;
 const DialogTrigger = DialogPrimitive.Trigger;
 const DialogPortal = DialogPrimitive.Portal;
 const DialogClose = DialogPrimitive.Close;
 
-// --- Размытие и мягкий фон за окном ---
+// --- Clean overlay with NO blur ---
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
@@ -18,7 +18,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      `fixed inset-0 z-[${Z.OVERLAY}] bg-black/30 backdrop-blur-md transition-all duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out`,
+      `fixed inset-0 z-[${Z.OVERLAY}] bg-black/70 transition-all duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out`,
       className
     )}
     {...props}
@@ -84,12 +84,6 @@ const DialogDescription = React.forwardRef<
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
 export {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
-  DialogClose,
+  Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger
 };
+

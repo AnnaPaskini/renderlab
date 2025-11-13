@@ -1,30 +1,29 @@
 "use client";
 
+import { format } from "date-fns";
+import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
 import {
-  ReactNode,
   ReactElement,
-  isValidElement,
+  ReactNode,
   cloneElement,
-  useState,
+  isValidElement,
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { format } from "date-fns";
 import { Toaster } from "react-hot-toast";
-import Link from "next/link";
 import { toast } from "sonner";
 
-import { CollectionsPanel } from "./CollectionPanel";
-import { PromptTemplates } from "./PromptTemplates";
-import ImagePreviewModal from "./ImagePreviewModal";
-import { useAuth } from "@/components/providers/SupabaseAuthProvider";
 import UserMenu from "@/components/navbar/UserMenu";
-import { Z } from "@/lib/z-layer-guide";
-import ImagesHistory from "./ImagesHistory";
+import { useAuth } from "@/components/providers/SupabaseAuthProvider";
 import { useHistory } from "@/lib/context/HistoryContext";
+import { Z } from "@/lib/z-layer-guide";
+import { CollectionsPanel } from "./CollectionPanel";
+import ImagePreviewModal from "./ImagePreviewModal";
 import { PanelWrapper } from "./PanelWrapper";
+import { PromptTemplates } from "./PromptTemplates";
 
 
 interface WorkspaceLayoutProps {
@@ -48,19 +47,19 @@ export function WorkspaceLayout({
 
   const { user } = useAuth();
   const { groups, loading: historyLoading, refresh } = useHistory();
-  
+
   // Get last 5 generations from user history with deduplication
   const recentGenerations = useMemo(() => {
     return groups
       .flatMap(group => group.images)
-      .filter((img, index, self) => 
+      .filter((img, index, self) =>
         index === self.findIndex(i => i.id === img.id)
       ) // Deduplicate by id
       .slice(0, 5);
   }, [groups]);
 
-const displayName = user?.user_metadata?.full_name?.trim() || user?.email || "Creator";
-const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
+  const displayName = user?.user_metadata?.full_name?.trim() || user?.email || "Creator";
+  const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
 
 
   const greetingName = useMemo(() => {
@@ -127,13 +126,13 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
 
   const enhancedRightPanel = isValidElement(rightPanel)
     ? cloneElement(rightPanel as ReactElement<any>, {
-        activeTab,
-        onTabChange: setActiveTab,
-      })
+      activeTab,
+      onTabChange: setActiveTab,
+    })
     : rightPanel;
 
   return (
-  <main className="flex flex-col min-h-screen w-full bg-rl-bg transition-colors duration-300">
+    <main className="rl-ambient-bg flex flex-col min-h-screen w-full bg-rl-bg transition-colors duration-300">
       <div className="relative flex-1">
         <div className="dot-grid absolute inset-0" aria-hidden="true" />
         <div
@@ -147,24 +146,20 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
           }}
         />
 
-        <div className={`relative z-[${Z.LOW}] flex min-h-full flex-col gap-rl-lg px-rl-lg pb-10 pt-16 md:px-rl-xl md:pt-20`}>
-                    <div className="relative z-10 flex w-full items-center justify-between rounded-2xl bg-rl-panel px-6 py-3 text-sm font-semibold tracking-tight backdrop-blur-md border border-rl-glass-border shadow-[0_2px_10px_rgba(0,0,0,0.05)] md:px-8 md:text-base">
-            <h1 className="font-semibold text-rl-text">
-              Hey, {greetingName} — keep crafting!
-            </h1>
+        <div className={`relative z-[${Z.LOW}] flex min-h-full flex-col gap-rl-xl px-rl-lg pb-10 pt-16 md:px-rl-xl md:pt-20`}>
+          <div className="relative z-10 flex w-full items-center justify-between rounded-2xl bg-rl-panel px-8 py-4 text-sm font-semibold tracking-tight border border-rl-glass-border shadow-[0_2px_10px_rgba(0,0,0,0.05)] md:px-10 md:text-base">
+            <div>
+              <h1 className="text-2xl font-semibold text-rl-text md:text-3xl">
+                Hey, {greetingName} — keep crafting!
+              </h1>
+              <p className="text-sm font-medium text-rl-text-secondary mt-1">Create stunning architectural visualizations with AI</p>
+            </div>
             <div className="flex items-center gap-2">
               <UserMenu />
             </div>
           </div>
 
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-rl-text md:text-3xl">Welcome back</h2>
-              <p className="text-sm font-medium text-rl-text-secondary">Keep crafting stunning visuals with RenderLab.</p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-rl-sm">
+          <div className="flex flex-wrap items-center gap-rl-md">
             <button
               onClick={() => setActiveTab("builder")}
               className={`rl-btn-${activeTab === "builder" ? "primary" : "secondary"} text-sm`}
@@ -186,8 +181,8 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
             className="flex-1 w-full max-w-7xl mx-auto"
           >
             {activeTab === "builder" ? (
-              <div className="flex flex-col lg:flex-row gap-10 w-full">
-                <div className="flex flex-col gap-8 lg:flex-[1.4]">
+              <div className="flex flex-col lg:flex-row gap-12 w-full">
+                <div className="flex flex-col gap-10 lg:flex-[1.4]">
                   <PanelWrapper>
                     {leftPanel}
                     <div className={`pointer-events-none absolute inset-0 z-[${Z.TOASTER}]`}>
@@ -214,7 +209,7 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
                   <PanelWrapper>
                     <div className="mb-4 flex items-center justify-between">
                       <h3 className="text-lg font-semibold text-rl-text">Images History</h3>
-                      <Link 
+                      <Link
                         href="/history"
                         className="text-sm text-rl-accent hover:text-rl-accent-hover font-medium transition-colors hover:underline"
                       >
@@ -259,16 +254,16 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({ hidden: true })
                                   });
-                                  
+
                                   const result = await response.json();
                                   if (!result.success) throw new Error(result.error);
-                                  
+
                                   // Show success toast
                                   toast.success('Removed from preview strip', {
                                     description: 'Image is still available in History',
                                     duration: 3000,
                                   });
-                                  
+
                                   // Smooth refresh - AnimatePresence will handle the exit animation
                                   await refresh();
                                 } catch (error: any) {
@@ -295,24 +290,24 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
                                     decoding="async"
                                     className="h-full w-full rounded-lg object-cover transition-opacity duration-300"
                                   />
-                                  
+
                                   {/* Hover overlay */}
                                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors opacity-0 group-hover:opacity-100">
                                     {/* X button - Top-right (hover only) */}
                                     <button
                                       onClick={handleRemoveFromView}
-                                      className="absolute top-2 right-2 p-2 bg-black/80 hover:bg-black rounded-full shadow-lg transition-colors backdrop-blur-sm"
+                                      className="absolute top-2 right-2 p-2 bg-black/80 hover:bg-black rounded-full shadow-lg transition-colors"
                                       title="Remove from preview strip"
                                     >
                                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                       </svg>
                                     </button>
-                                    
+
                                     {/* Download button - Bottom-right (hover only) */}
                                     <button
                                       onClick={handleDownload}
-                                      className="absolute bottom-2 right-2 p-2 bg-black/80 hover:bg-black rounded-full shadow-lg transition-colors backdrop-blur-sm"
+                                      className="absolute bottom-2 right-2 p-2 bg-black/80 hover:bg-black rounded-full shadow-lg transition-colors"
                                       title="Download"
                                     >
                                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -320,9 +315,9 @@ const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
                                       </svg>
                                     </button>
                                   </div>
-                                  
+
                                   {/* Date label - Bottom-left (always visible) */}
-                                  <div className="absolute bottom-2 left-2 rounded-md bg-black/70 backdrop-blur-sm px-2 py-1 text-xs font-medium text-white pointer-events-none">
+                                  <div className="absolute bottom-2 left-2 rounded-md bg-black/80 px-2 py-1 text-xs font-medium text-white pointer-events-none">
                                     {formattedTimestamp}
                                   </div>
                                 </motion.div>

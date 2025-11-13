@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "../ui/button";
+import { Z } from "@/lib/z-layer-guide";
 import { IconMenu2, IconX } from "@tabler/icons-react";
-import { Z } from "@/lib/z-layer-guide"
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 
 type ActionsPanelProps = {
@@ -18,10 +17,10 @@ type ActionsPanelProps = {
 
 export function ActionsPanel({ onDuplicate, onRename, onSave, onAddTemplate, onDelete, onBack }: ActionsPanelProps) {
   const [open, setOpen] = useState(false);
-useEffect(() => {
-  document.body.classList.toggle("actions-open", open);
-  return () => document.body.classList.remove("actions-open");
-}, [open]);
+  useEffect(() => {
+    document.body.classList.toggle("actions-open", open);
+    return () => document.body.classList.remove("actions-open");
+  }, [open]);
 
   useEffect(() => {
     if (open) {
@@ -90,14 +89,14 @@ useEffect(() => {
         {open && (
           <>
             <motion.div
-  initial={{ opacity: 0 }}
-  animate={{ opacity: 1 }}
-  exit={{ opacity: 0 }}
-  transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-  onClick={closePanel}
-  className="fixed inset-0 bg-black/20 backdrop-blur-sm"
-  style={{ zIndex: Z.OVERLAY }}
-/>
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              onClick={closePanel}
+              className="fixed inset-0 bg-black/30"
+              style={{ zIndex: Z.OVERLAY }}
+            />
 
             <motion.div
               initial={{ x: "100%", opacity: 0 }}
@@ -122,68 +121,68 @@ useEffect(() => {
                 </div>
 
                 <div className="flex flex-col items-center space-y-3 mt-4 px-4">
-    <button
-      onClick={() => {
-        onAddTemplate();
-        closePanel();
-      }}
-      className="w-full text-left px-4 py-3 text-white font-medium rounded-lg bg-transparent hover:bg-[#ff6b35]/10 hover:text-[#ff6b35] transition-all duration-200 border-0"
-    >
-      + Add Template
-    </button>
+                  <button
+                    onClick={() => {
+                      onAddTemplate();
+                      closePanel();
+                    }}
+                    className="w-full text-left px-4 py-3 text-white font-medium rounded-lg bg-transparent hover:bg-[#ff6b35]/10 hover:text-[#ff6b35] transition-all duration-200 border-0"
+                  >
+                    + Add Template
+                  </button>
 
-    <button
-      onClick={() => {
-        onSave();
-        closePanel();
-      }}
-      className="w-full text-left px-4 py-3 text-white font-medium rounded-lg bg-transparent hover:bg-[#ff6b35]/10 hover:text-[#ff6b35] transition-all duration-200 border-0"
-    >
-      Save Collection
-    </button>
+                  <button
+                    onClick={() => {
+                      onSave();
+                      closePanel();
+                    }}
+                    className="w-full text-left px-4 py-3 text-white font-medium rounded-lg bg-transparent hover:bg-[#ff6b35]/10 hover:text-[#ff6b35] transition-all duration-200 border-0"
+                  >
+                    Save Collection
+                  </button>
 
-    <button
-      onClick={() => {
-        onDuplicate();
-        closePanel();
-      }}
-      className="w-full text-left px-4 py-3 text-white font-medium rounded-lg bg-transparent hover:bg-[#ff6b35]/10 hover:text-[#ff6b35] transition-all duration-200 border-0"
-    >
-      Duplicate
-    </button>
+                  <button
+                    onClick={() => {
+                      onDuplicate();
+                      closePanel();
+                    }}
+                    className="w-full text-left px-4 py-3 text-white font-medium rounded-lg bg-transparent hover:bg-[#ff6b35]/10 hover:text-[#ff6b35] transition-all duration-200 border-0"
+                  >
+                    Duplicate
+                  </button>
 
-    <button
-      onClick={() => {
-        onRename();
-        closePanel();
-      }}
-      className="w-full text-left px-4 py-3 text-white font-medium rounded-lg bg-transparent hover:bg-[#ff6b35]/10 hover:text-[#ff6b35] transition-all duration-200 border-0"
-    >
-      Rename
-    </button>
+                  <button
+                    onClick={() => {
+                      onRename();
+                      closePanel();
+                    }}
+                    className="w-full text-left px-4 py-3 text-white font-medium rounded-lg bg-transparent hover:bg-[#ff6b35]/10 hover:text-[#ff6b35] transition-all duration-200 border-0"
+                  >
+                    Rename
+                  </button>
 
-    {onDelete && (
-      <button
-        onClick={() => {
-          onDelete();
-          closePanel();
-        }}
-        className="w-full text-left px-4 py-3 text-white font-medium rounded-lg bg-transparent hover:bg-[#ff6b35]/10 hover:text-[#ff6b35] transition-all duration-200 border-0"
-      >
-        Delete Collection
-      </button>
-    )}
+                  {onDelete && (
+                    <button
+                      onClick={() => {
+                        onDelete();
+                        closePanel();
+                      }}
+                      className="w-full text-left px-4 py-3 text-white font-medium rounded-lg bg-transparent hover:bg-[#ff6b35]/10 hover:text-[#ff6b35] transition-all duration-200 border-0"
+                    >
+                      Delete Collection
+                    </button>
+                  )}
 
-    <button
-      onClick={() => {
-        onBack();
-        closePanel();
-      }}
-      className="w-full px-4 py-3 bg-[#1a1a1a] hover:bg-[#202020] text-white font-medium rounded-lg transition-all duration-200 border-0"
-    >
-      ← Back to Collections
-    </button>
-</div>
+                  <button
+                    onClick={() => {
+                      onBack();
+                      closePanel();
+                    }}
+                    className="w-full px-4 py-3 bg-[#1a1a1a] hover:bg-[#202020] text-white font-medium rounded-lg transition-all duration-200 border-0"
+                  >
+                    ← Back to Collections
+                  </button>
+                </div>
 
 
 

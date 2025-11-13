@@ -20,7 +20,7 @@ export function RenderLabPanel({
   return (
     <section
       className={cn(
-        "rounded-2xl border border-[var(--rl-border)] bg-[var(--rl-surface)] shadow-md backdrop-blur-md transition-all duration-300",
+        "rounded-2xl border border-[var(--rl-border)] bg-[var(--rl-surface)] shadow-md  transition-all duration-300",
         variant === "floating" && "p-6 shadow-lg",
         variant !== "floating" && "p-4",
         className

@@ -22,7 +22,7 @@ const defaultToastOptions: ToasterProps["toastOptions"] = {
   duration: 1800,
   classNames: {
     toast:
-      "rounded-2xl backdrop-blur-md bg-white/10 dark:bg-neutral-900/60 text-white text-sm shadow-md border border-white/10",
+      "rounded-2xl bg-[#1a1a1a] text-white text-sm shadow-lg shadow-black/40 border border-white/10",
   },
 };
 

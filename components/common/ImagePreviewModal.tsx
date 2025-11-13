@@ -118,7 +118,7 @@ export function ImagePreviewModal({ imageUrl, onClose }: ImagePreviewModalProps)
         >
           {/* Fixed overlay backdrop - prevents flickering */}
           <div
-            className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/90 "
             style={{ zIndex: 1 }}
             onClick={handleClose}
           />

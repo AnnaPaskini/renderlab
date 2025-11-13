@@ -20,7 +20,7 @@ export default function UserCredits() {
   if (balance === null) return null;
 
   return (
-    <div className="ml-3 flex items-center gap-1 rounded-lg bg-white/15 px-2 py-1 text-sm font-medium text-white shadow-inner ring-1 ring-white/20 backdrop-blur-md">
+    <div className="ml-3 flex items-center gap-1 rounded-lg bg-white/15 px-2 py-1 text-sm font-medium text-white shadow-inner ring-1 ring-white/20">
       <span> {balance}</span>
     </div>
   );

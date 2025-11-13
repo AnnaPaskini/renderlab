@@ -53,7 +53,7 @@ export default function SignupPage() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_22%,rgba(251,191,36,0.18),transparent_44%),radial-gradient(circle_at_82%_18%,rgba(255,107,53,0.22),transparent_40%),radial-gradient(circle_at_50%_86%,rgba(255,138,85,0.15),transparent_45%)]" />
       <form
         onSubmit={handleSignup}
-        className="relative z-10 flex w-full max-w-md flex-col gap-5 rounded-3xl border border-white/10 bg-white/5 p-10 shadow-[0_30px_75px_-20px_rgba(0,0,0,0.55)] backdrop-blur-2xl"
+        className="relative z-10 flex w-full max-w-md flex-col gap-5 rounded-3xl border border-white/10 bg-[#1a1a1a] p-10 shadow-[0_8px_32px_rgba(0,0,0,0.8)]"
       >
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-semibold tracking-tight text-white">Create your account</h1>
@@ -93,7 +93,7 @@ export default function SignupPage() {
         <Button
           type="submit"
           disabled={loading}
-          className="h-11 rounded-xl bg-[#ff6b35] hover:bg-[#ff8555] text-sm font-medium text-white transition-all duration-200 focus-visible:ring-[#ff6b35] focus:border-[#ff6b35]"
+          className="rl-btn-primary h-11 text-sm"
         >
           {loading ? "Creating account..." : "Create account"}
         </Button>

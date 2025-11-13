@@ -23,7 +23,7 @@ export default function CustomPage() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="mb-6 bg-white/80 dark:bg-[#1a1a1a]/80 backdrop-blur-sm border border-white/10">
+          <TabsList className="mb-6 bg-[#1a1a1a] border border-white/10 shadow-lg shadow-black/40">
             <TabsTrigger
               value="templates"
               className="px-6 py-3 data-[state=active]:bg-[#ff6b35] data-[state=active]:text-white transition-colors"
@@ -39,13 +39,13 @@ export default function CustomPage() {
           </TabsList>
 
           <TabsContent value="templates" className="mt-0">
-            <div className="bg-white/80 dark:bg-[#1a1a1a]/80 backdrop-blur-sm rounded-lg border border-white/40 dark:border-white/10 p-6 shadow-lg">
+            <div className="bg-[#1a1a1a] rounded-lg border border-white/10 p-6 shadow-lg shadow-black/40">
               <PromptTemplates />
             </div>
           </TabsContent>
 
           <TabsContent value="collections" className="mt-0">
-            <div className="bg-white/80 dark:bg-[#1a1a1a]/80 backdrop-blur-sm rounded-lg border border-white/40 dark:border-white/10 p-6 shadow-lg">
+            <div className="bg-[#1a1a1a] rounded-lg border border-white/10 p-6 shadow-lg shadow-black/40">
               <CollectionsPanel />
             </div>
           </TabsContent>

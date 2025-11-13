@@ -1,0 +1,96 @@
+/**
+ * RenderLab Design System - Freepik Style
+ * Single source of truth for all visual values
+ */
+
+:root {
+    /* ===== COLORS ===== */
+
+    /* Backgrounds */
+    --rl-bg-app: #0a0a0a;
+    --rl-bg-surface: #141414;
+    --rl-bg-elevated: #161616;
+    --rl-bg-panel: #1a1a1a;
+    --rl-bg-card: #1f1f1f;
+    --rl-bg-card-elevated: #262626;
+    /* For floating cards that need more contrast */
+
+    /* Text */
+    --rl-text-primary: #ffffff;
+    --rl-text-secondary: #d4d4d4;
+    --rl-text-tertiary: #a3a3a3;
+    --rl-text-muted: #737373;
+
+    /* Accent */
+    --rl-accent-solid: #ff6b35;
+    --rl-accent-gradient: linear-gradient(135deg, #ff6b35 0%, #ff7849 100%);
+
+    /* Borders - CRITICAL for Freepik look */
+    --rl-border-subtle: rgba(255, 255, 255, 0.06);
+    --rl-border-soft: rgba(255, 255, 255, 0.08);
+    --rl-border-visible: rgba(255, 255, 255, 0.10);
+    --rl-border-hover: rgba(255, 255, 255, 0.12);
+
+    /* ===== SHADOWS - Freepik Elevation ===== */
+
+    /* Level 0: Flat */
+    --rl-shadow-none: none;
+
+    /* Level 1: Surface */
+    --rl-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+
+    /* Level 2: Card */
+    --rl-shadow-md:
+        0 0 0 1px rgba(255, 255, 255, 0.06),
+        0 4px 12px rgba(0, 0, 0, 0.5),
+        0 2px 6px rgba(0, 0, 0, 0.4);
+
+    /* Level 3: Elevated Card (hover) */
+    --rl-shadow-lg:
+        0 0 0 1px rgba(255, 255, 255, 0.08),
+        0 8px 20px rgba(0, 0, 0, 0.6),
+        0 4px 10px rgba(0, 0, 0, 0.5);
+
+    /* Level 4: Modal */
+    --rl-shadow-xl:
+        0 0 0 1px rgba(255, 255, 255, 0.08),
+        0 20px 50px rgba(0, 0, 0, 0.8),
+        0 10px 25px rgba(0, 0, 0, 0.6);
+
+    /* ===== SPACING ===== */
+    --rl-space-1: 0.25rem;
+    /* 4px */
+    --rl-space-2: 0.5rem;
+    /* 8px */
+    --rl-space-3: 0.75rem;
+    /* 12px */
+    --rl-space-4: 1rem;
+    /* 16px */
+    --rl-space-5: 1.25rem;
+    /* 20px */
+    --rl-space-6: 1.5rem;
+    /* 24px */
+    --rl-space-8: 2rem;
+    /* 32px */
+    --rl-space-10: 2.5rem;
+    /* 40px */
+    --rl-space-12: 3rem;
+    /* 48px */
+    --rl-space-16: 4rem;
+    /* 64px */
+
+    /* ===== RADIUS ===== */
+    --rl-radius-sm: 0.5rem;
+    /* 8px */
+    --rl-radius-md: 0.75rem;
+    /* 12px */
+    --rl-radius-lg: 1rem;
+    /* 16px */
+    --rl-radius-xl: 1.5rem;
+    /* 24px */
+
+    /* ===== TRANSITIONS ===== */
+    --rl-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --rl-transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    --rl-transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}

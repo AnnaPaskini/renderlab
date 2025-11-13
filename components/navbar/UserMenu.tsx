@@ -1,10 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabaseBrowser";
+import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, LogOut, User as UserIcon } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import UserCredits from "./UseCredits";
 
 
@@ -38,18 +38,18 @@ export default function UserMenu() {
         onClick={() => setOpen(!open)}
         className="group nav-surface nav-overlay flex cursor-pointer items-center gap-2 rounded-2xl border border-white/20 px-3.5 py-1.5 text-white text-shadow-soft shadow-[inset_0_0_10px_rgba(0,0,0,0.06),0_12px_32px_-12px_rgba(12,12,24,0.55)] transition-all duration-300 dark:border-white/20"
       >
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.35),0_0_0_1px_rgba(255,255,255,0.22)] ring-1 ring-white/30 backdrop-blur-md">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.35),0_0_0_1px_rgba(255,255,255,0.22)] ring-1 ring-white/30">
           <UserIcon size={15} className="text-white" />
         </div>
         <span className="text-shadow-soft text-sm font-medium tracking-tight text-white max-w-[140px] truncate">
-  {email || "Loading..."}
-</span>
-<UserCredits />
+          {email || "Loading..."}
+        </span>
+        <UserCredits />
 
-<ChevronDown
-  size={14}
-  className={`text-white transition-transform ${open ? "rotate-180" : ""}`}
-/>
+        <ChevronDown
+          size={14}
+          className={`text-white transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </div>
 
       {/* Dropdown */}
@@ -73,7 +73,7 @@ export default function UserMenu() {
             >
               Account Settings
             </button>
-            
+
             <button
               onClick={() => {
                 router.push("/account?tab=prompts");
@@ -85,7 +85,7 @@ export default function UserMenu() {
             >
               My Prompts
             </button>
-            
+
             <button
               onClick={() => {
                 router.push("/prompts/submit");
@@ -97,10 +97,10 @@ export default function UserMenu() {
             >
               Submit Prompt
             </button>
-            
+
             {/* Divider */}
             <div className="my-1 border-t border-neutral-200/50 dark:border-white/10"></div>
-            
+
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-2 text-left px-4 py-2.5 text-sm 

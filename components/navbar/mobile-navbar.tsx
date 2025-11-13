@@ -39,7 +39,7 @@ export const MobileNavbar = ({ navItems }: any) => {
       />
       {open && (
         <div
-          className={`fixed inset-0 z-[${Z.MODAL}] flex flex-col items-start justify-start space-y-10 bg-[radial-gradient(circle_at_12%_20%,rgba(255,107,53,0.2),transparent_45%),radial-gradient(circle_at_88%_25%,rgba(250,204,21,0.14),transparent_40%),radial-gradient(circle_at_50%_88%,rgba(255,138,85,0.15),transparent_50%)] bg-white/20 text-white text-shadow-soft transition duration-200 dark:bg-[#050505]/75 glass-blur-24`}
+          className={`fixed inset-0 z-[${Z.MODAL}] flex flex-col items-start justify-start space-y-10 bg-[radial-gradient(circle_at_12%_20%,rgba(255,107,53,0.2),transparent_45%),radial-gradient(circle_at_88%_25%,rgba(250,204,21,0.14),transparent_40%),radial-gradient(circle_at_50%_88%,rgba(255,138,85,0.15),transparent_50%)] dark:bg-[#050505] text-white text-shadow-soft transition duration-200 shadow-2xl shadow-black/40`}
         >
           <div className="flex items-center justify-between w-full px-5">
             <Logo />

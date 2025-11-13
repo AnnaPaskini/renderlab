@@ -1,20 +1,20 @@
 "use client";
 
-import { useState, useEffect, type DragEvent } from "react";
-import { createPortal } from "react-dom";
 import { IconDotsVertical } from "@tabler/icons-react";
+import { useEffect, useState, type DragEvent } from "react";
+import { createPortal } from "react-dom";
+import { toast } from "sonner";
+import { useCollections, type Collection } from "../../lib/useCollections";
 import { Button } from "../ui/button";
-import { ActionsPanel } from "./ActionsPanel";
 import { Card } from "../ui/card";
-import { Input } from "../ui/input";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { useCollections, type Collection } from "../../lib/useCollections";
-import { toast } from "sonner";
+import { Input } from "../ui/input";
+import { ActionsPanel } from "./ActionsPanel";
 
 type TemplateLike = {
 	id?: string;
@@ -84,16 +84,16 @@ function LeonardoDialog({
 	if (!open || !mounted) return null;
 
 	const dialog = (
-		<div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 lg:p-8 animate-in fade-in duration-200">
+		<div className="rl-modal-overlay animate-in fade-in duration-200">
 			{/* Backdrop */}
 			<div
-				className="absolute inset-0 bg-black/50 backdrop-blur-md"
+				className="absolute inset-0"
 				onClick={onClose}
 			/>
 
-			{/* Dialog - Leonardo Glass Style */}
-			<div className="glass-panel relative w-full max-w-md mx-auto rounded-2xl p-6 animate-in zoom-in-95 duration-200">
-				<h3 className="text-primary text-lg font-semibold mb-4">{title}</h3>
+			{/* Dialog - Design System Style */}
+			<div className="rl-modal animate-in zoom-in-95 duration-200">
+				<h3 className="rl-heading-2 mb-4">{title}</h3>
 				<div className="space-y-4">{children}</div>
 				{footer && <div className="mt-6 flex justify-end gap-3">{footer}</div>}
 			</div>
@@ -132,8 +132,8 @@ export function CollectionsPanel() {
 	// Validation helpers
 	const isCollectionNameExists = (name: string, excludeId?: string): boolean => {
 		const trimmedName = name.trim().toLowerCase();
-		return collections.some(collection => 
-			collection.title.toLowerCase() === trimmedName && 
+		return collections.some(collection =>
+			collection.title.toLowerCase() === trimmedName &&
 			collection.id !== excludeId
 		);
 	};
@@ -141,12 +141,12 @@ export function CollectionsPanel() {
 	const generateUniqueCollectionName = (baseName: string): string => {
 		let name = baseName.trim();
 		let counter = 1;
-		
+
 		while (isCollectionNameExists(name)) {
 			counter++;
 			name = `${baseName.trim()} ${counter}`;
 		}
-		
+
 		return name;
 	};
 
@@ -204,12 +204,12 @@ export function CollectionsPanel() {
 
 		// Generate unique name if duplicate exists
 		const uniqueName = generateUniqueCollectionName(trimmed);
-		
+
 		const newId = duplicateCollection(duplicateTargetId, uniqueName);
 		setDuplicateTargetId(null);
 		setDuplicateDraft("");
 
-		const message = uniqueName !== trimmed 
+		const message = uniqueName !== trimmed
 			? `Created "${uniqueName}" (name was adjusted to avoid duplicate)`
 			: `Created "${uniqueName}"`;
 
@@ -255,7 +255,7 @@ export function CollectionsPanel() {
 
 	const handleAddTemplateToCollection = () => {
 		if (!selectedCollectionId || !templateSelection) return;
-		
+
 		// Check template limit
 		const currentCollection = collections.find(c => c.id === selectedCollectionId);
 		if (currentCollection && (currentCollection.templates?.length ?? 0) >= 5) {
@@ -267,11 +267,11 @@ export function CollectionsPanel() {
 
 		addTemplate(selectedCollectionId, prepareTemplateForCollection(templateSelection));
 		setIsTemplatePickerOpen(false);
-		
+
 		toast.success("Template added!", {
 			description: templateSelection.name || templateSelection.title || "Template added to collection",
 		});
-		
+
 		setTemplateSelection(null);
 	};
 
@@ -285,7 +285,7 @@ export function CollectionsPanel() {
 
 		try {
 			const parsed = JSON.parse(payload) as TemplateLike;
-			
+
 			// Check template limit
 			const currentCollection = collections.find(c => c.id === selectedCollectionId);
 			if (currentCollection && (currentCollection.templates?.length ?? 0) >= 5) {
@@ -296,7 +296,7 @@ export function CollectionsPanel() {
 			}
 
 			addTemplate(selectedCollectionId, prepareTemplateForCollection(parsed));
-			
+
 			toast.success("Template added!", {
 				description: "Dropped into collection",
 			});
@@ -324,7 +324,7 @@ export function CollectionsPanel() {
 		if (!selectedCollectionId || !removeTemplateId) return;
 		removeTemplate(selectedCollectionId, removeTemplateId);
 		setRemoveTemplateId(null);
-		
+
 		toast.success("Template removed from collection");
 	};
 
@@ -334,7 +334,7 @@ export function CollectionsPanel() {
 		deleteCollection(deleteTargetId);
 		if (selectedCollectionId === deleteTargetId) setSelectedCollectionId(null);
 		setDeleteTargetId(null);
-		
+
 		toast.success("Collection deleted", {
 			description: collection?.title || "Collection has been removed",
 		});
@@ -352,21 +352,21 @@ export function CollectionsPanel() {
 				<button
 					type="button"
 					aria-label="Collection options"
-					   className="p-2 rounded text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200"
+					className="p-2 rounded text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200"
 					onClick={(event) => event.stopPropagation()}
 				>
 					<IconDotsVertical size={16} stroke={1.5} />
 				</button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent>
-				   <DropdownMenuItem
-					   onSelect={(event) => {
-						   event.preventDefault();
-						   openDuplicateDialog(collection);
-					   }}
-				   >
-					   Duplicate
-				   </DropdownMenuItem>
+				<DropdownMenuItem
+					onSelect={(event) => {
+						event.preventDefault();
+						openDuplicateDialog(collection);
+					}}
+				>
+					Duplicate
+				</DropdownMenuItem>
 				<DropdownMenuItem
 					onSelect={(event) => {
 						event.preventDefault();
@@ -394,9 +394,8 @@ export function CollectionsPanel() {
 		<>
 			{activeCollection ? (
 				<div
-					className={`flex h-full flex-col gap-4 overflow-auto transition-colors ${
-						isDropActive ? "bg-[#ff6b35]/5" : ""
-					}`}
+					className={`flex h-full flex-col gap-4 overflow-auto transition-colors ${isDropActive ? "rl-drop-active" : ""
+						}`}
 					onDrop={handleTemplateDrop}
 					onDragOver={handleDragOver}
 					onDragLeave={handleDragLeave}
@@ -454,8 +453,8 @@ export function CollectionsPanel() {
 												{template.addedAt
 													? `Added ${new Date(template.addedAt).toLocaleDateString()}`
 													: template.createdAt
-													? `Created ${new Date(template.createdAt).toLocaleDateString()}`
-													: "No timestamp"}
+														? `Created ${new Date(template.createdAt).toLocaleDateString()}`
+														: "No timestamp"}
 											</div>
 										</div>
 
@@ -464,7 +463,7 @@ export function CollectionsPanel() {
 												<button
 													type="button"
 													aria-label="Template options"
-													   className="p-2 rounded text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200"
+													className="p-2 rounded text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200"
 												>
 													<IconDotsVertical size={16} stroke={1.5} />
 												</button>
@@ -494,7 +493,7 @@ export function CollectionsPanel() {
 						<h2 className="text-lg font-semibold leading-none text-gray-900 dark:text-gray-100">My Collections</h2>
 						<Button
 							onClick={() => setIsCreateOpen(true)}
-							className="bg-[#ff6b35] hover:bg-[#ff8555] text-white px-6 py-2.5 rounded-lg font-semibold shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 transition-all duration-200 border-0 h-9"
+							className="rl-btn rl-btn-primary h-9"
 						>
 							+ New Collection
 						</Button>
@@ -511,11 +510,8 @@ export function CollectionsPanel() {
 									key={collection.id}
 									role="button"
 									tabIndex={0}
-									className={`flex cursor-pointer items-start justify-between gap-2 rounded-lg border p-4 transition hover:border-[#ff6b35]/50 hover:shadow ${
-										selectedCollectionId === collection.id
-											? "border-[#ff6b35] bg-[#ff6b35]/5"
-											: "border-[var(--rl-border)]"
-									}`}
+									className={`rl-item-selectable flex items-start justify-between gap-2 ${selectedCollectionId === collection.id ? "selected" : ""
+										}`}
 									onClick={() => setSelectedCollectionId(collection.id)}
 									onKeyDown={(event) => {
 										if (event.key === "Enter" || event.key === " ") {
@@ -549,14 +545,14 @@ export function CollectionsPanel() {
 					<>
 						<button
 							onClick={() => setIsCreateOpen(false)}
-							className="px-4 py-2 text-sm font-medium text-[var(--rl-muted)] hover:text-[var(--rl-foreground)] hover:bg-[var(--rl-surface-hover)] transition rounded-lg border border-transparent hover:border-[var(--rl-border-hover)]"
+							className="rl-btn rl-btn-secondary"
 						>
 							Cancel
 						</button>
 						<button
 							onClick={handleCreateCollection}
 							disabled={!newCollectionTitle.trim()}
-							className="rl-btn-primary"
+							className="rl-btn rl-btn-primary"
 						>
 							Create
 						</button>
@@ -567,7 +563,7 @@ export function CollectionsPanel() {
 					value={newCollectionTitle}
 					onChange={(event) => setNewCollectionTitle(event.target.value)}
 					placeholder="Collection name"
-					className="w-full px-4 py-3 bg-[#1a1a1a] border border-white/10 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:ring-opacity-50 focus:border-[#ff6b35] transition-all duration-200 placeholder:text-gray-500"
+					className="rl-input"
 					autoFocus
 					onKeyDown={(event) => {
 						if (event.key === "Enter") {
@@ -589,14 +585,14 @@ export function CollectionsPanel() {
 								setDuplicateTargetId(null);
 								setDuplicateDraft("");
 							}}
-							className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800 transition rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
+							className="rl-btn rl-btn-secondary"
 						>
 							Cancel
 						</button>
 						<button
 							onClick={handleDuplicateSubmit}
 							disabled={!duplicateDraft.trim()}
-							className="rl-btn-primary"
+							className="rl-btn rl-btn-primary"
 						>
 							Save
 						</button>
@@ -607,7 +603,7 @@ export function CollectionsPanel() {
 					value={duplicateDraft}
 					onChange={(event) => setDuplicateDraft(event.target.value)}
 					placeholder="New collection name"
-					className="w-full px-4 py-3 bg-[#1a1a1a] border border-white/10 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:ring-opacity-50 focus:border-[#ff6b35] transition-all duration-200 placeholder:text-gray-500"
+					className="rl-input"
 					autoFocus
 					onKeyDown={(event) => {
 						if (event.key === "Enter") {
@@ -647,11 +643,10 @@ export function CollectionsPanel() {
 					value={renameDraft}
 					onChange={(event) => setRenameDraft(event.target.value)}
 					placeholder="New name"
-					className={`w-full px-4 py-3 bg-[#1a1a1a] rounded-lg focus:outline-none focus:ring-2 transition-all duration-200 placeholder:text-gray-500 ${
-						renameDraft.trim() && isCollectionNameExists(renameDraft.trim(), renameTargetId || undefined)
-							? "text-red-400 border border-red-500/50 focus:border-red-500 focus:ring-red-500 focus:ring-opacity-50"
-							: "text-white border border-white/10 focus:border-[#ff6b35] focus:ring-[#ff6b35] focus:ring-opacity-50"
-					}`}
+					className={`rl-input ${renameDraft.trim() && isCollectionNameExists(renameDraft.trim(), renameTargetId || undefined)
+							? "text-red-400 border-red-500/50 focus:border-red-500"
+							: ""
+						}`}
 					autoFocus
 					onKeyDown={(event) => {
 						if (event.key === "Enter") {
@@ -778,11 +773,8 @@ export function CollectionsPanel() {
 									key={template.id}
 									type="button"
 									onClick={() => setTemplateSelection(template)}
-									className={`w-full rounded-lg border p-4 text-left transition ${
-										isActive
-											? "border-[#ff6b35] bg-[#ff6b35]/5"
-											: "border-gray-300 dark:border-gray-700 hover:border-[#ff6b35]/50 bg-gray-50 dark:bg-[#1a1a1a]"
-									}`}
+									className={`rl-item-selectable w-full text-left ${isActive ? "selected" : ""
+										}`}
 								>
 									<div className="font-medium text-gray-900">
 										{template.name || template.title || "Untitled template"}

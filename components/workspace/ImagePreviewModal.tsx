@@ -1,6 +1,6 @@
 "use client";
-import { useState, useEffect, useRef, useCallback } from "react";
 import { Download, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface ImagePreviewModalProps {
   src: string;
@@ -159,7 +159,7 @@ function ImagePreviewModal({ src, onClose }: ImagePreviewModalProps) {
   const handleDownload = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     try {
       const response = await fetch(src);
       const blob = await response.blob();
@@ -180,7 +180,7 @@ function ImagePreviewModal({ src, onClose }: ImagePreviewModalProps) {
     <div
       onClick={handleClose}
       className={`
-        fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm
+        fixed inset-0 z-[9999] flex items-center justify-center bg-black/90
         transition-opacity duration-200
         ${isClosing ? 'opacity-0' : 'opacity-100'}
       `}
@@ -192,7 +192,7 @@ function ImagePreviewModal({ src, onClose }: ImagePreviewModalProps) {
           e.stopPropagation();
           handleClose();
         }}
-        className="fixed top-6 right-6 z-[10000] backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-full p-2.5 shadow-md shadow-black/40 transition-all duration-200 ease-out active:scale-95"
+        className="fixed top-6 right-6 z-[10000] bg-black/80 hover:bg-black border border-white/20 text-white rounded-full p-2.5 shadow-md shadow-black/40 transition-all duration-200 ease-out active:scale-95"
       >
         <X className="h-5 w-5" />
       </button>
@@ -201,7 +201,7 @@ function ImagePreviewModal({ src, onClose }: ImagePreviewModalProps) {
         type="button"
         aria-label="Download image"
         onClick={handleDownload}
-        className="fixed bottom-6 right-6 z-[10000] backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-full p-2.5 shadow-md shadow-black/40 transition-all duration-200 ease-out active:scale-95"
+        className="fixed bottom-6 right-6 z-[10000] bg-black/80 hover:bg-black border border-white/20 text-white rounded-full p-2.5 shadow-md shadow-black/40 transition-all duration-200 ease-out active:scale-95"
       >
         <Download className="h-5 w-5" />
       </button>
@@ -240,7 +240,7 @@ function ImagePreviewModal({ src, onClose }: ImagePreviewModalProps) {
       </div>
       {message && (
         <div
-          className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[10000] text-white text-sm bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm transition-opacity duration-300 pointer-events-none ${isMessageVisible ? "opacity-100" : "opacity-0"}`}
+          className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[10000] text-white text-sm bg-black/80 px-3 py-1.5 rounded-full shadow-sm transition-opacity duration-300 pointer-events-none ${isMessageVisible ? "opacity-100" : "opacity-0"}`}
         >
           {message}
         </div>

@@ -161,7 +161,7 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
             <div
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
                 opacity-0 group-hover:opacity-100 transition-opacity 
-                bg-rl-surface px-4 py-2 text-sm font-medium text-rl-text shadow-lg ring-1 ring-white/40 backdrop-blur-sm rounded-lg pointer-events-none dark:bg-rl-surface text-rl-text"
+                bg-rl-surface px-4 py-2 text-sm font-medium text-rl-text shadow-lg ring-1 ring-white/40  rounded-lg pointer-events-none dark:bg-rl-surface text-rl-text"
             >
               Click to replace
             </div>

@@ -1,15 +1,15 @@
 "use client";
+import { RenderLabButton } from "@/components/ui/RenderLabButton";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { RenderLabButton } from "@/components/ui/RenderLabButton";
 
 export function HeroParallax() {
   const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ 
-    target: ref, 
-    offset: ["start start", "end start"] 
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"]
   });
-  
+
   // Multi-layer parallax speeds
   const yBg = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]);
   const yMid = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
@@ -17,8 +17,8 @@ export function HeroParallax() {
   const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0]);
 
   return (
-    <section 
-      ref={ref} 
+    <section
+      ref={ref}
       className="relative h-[100vh] overflow-hidden bg-[var(--rl-bg)]"
     >
       {/* Background gradient layer */}
@@ -26,13 +26,13 @@ export function HeroParallax() {
         style={{ y: yBg }}
         className="absolute inset-0 bg-gradient-to-b from-[var(--rl-surface)] to-[var(--rl-bg)]"
       />
-      
+
       {/* Mid layer - dot pattern */}
       <motion.div
         style={{ y: yMid }}
         className="absolute inset-0 opacity-40"
       >
-        <div 
+        <div
           className="w-full h-full bg-center bg-repeat"
           style={{
             backgroundImage: `radial-gradient(circle, var(--rl-border) 1px, transparent 1px)`,
@@ -40,21 +40,13 @@ export function HeroParallax() {
           }}
         />
       </motion.div>
-      
-      {/* Light flare effect */}
-      <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full opacity-20 blur-3xl pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle, var(--rl-accent) 0%, transparent 70%)',
-        }}
-      />
-      
+
       {/* Foreground content */}
       <motion.div
         style={{ y: yFg, opacity }}
         className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 text-[var(--rl-text)]"
       >
-        <motion.h1 
+        <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
@@ -62,8 +54,8 @@ export function HeroParallax() {
         >
           Craft Your Visuals
         </motion.h1>
-        
-        <motion.p 
+
+        <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
@@ -71,7 +63,7 @@ export function HeroParallax() {
         >
           Unite your workflow with a universal creative engine built for illustrators and architects.
         </motion.p>
-        
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -81,7 +73,7 @@ export function HeroParallax() {
             Get Started
           </RenderLabButton>
         </motion.div>
-        
+
         {/* Scroll indicator */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -91,14 +83,14 @@ export function HeroParallax() {
         >
           <motion.div
             animate={{ y: [0, 8, 0] }}
-            transition={{ 
-              duration: 2, 
-              repeat: Infinity, 
-              ease: "easeInOut" 
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
             }}
             className="w-6 h-10 border-2 border-[var(--rl-border)] rounded-full flex justify-center p-2"
           >
-            <motion.div 
+            <motion.div
               className="w-1.5 h-1.5 bg-[var(--rl-accent)] rounded-full"
             />
           </motion.div>

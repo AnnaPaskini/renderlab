@@ -93,10 +93,7 @@ export function FilterBar({ onFilterChange }: FilterBarProps) {
             <button
               key={value}
               onClick={() => handleCategoryChange(value)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeCategory === value
-                  ? 'bg-[#ff6b35] text-white shadow-md shadow-orange-500/25'
-                  : 'bg-transparent text-gray-400 hover:text-white hover:bg-white/5 border border-white/8 hover:border-white/12'
-                }`}
+              className={`rl-filter-btn ${activeCategory === value ? 'active' : ''}`}
             >
               {label}
             </button>
@@ -112,10 +109,7 @@ export function FilterBar({ onFilterChange }: FilterBarProps) {
             <button
               key={value}
               onClick={() => handleBadgeChange(value)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeBadge === value
-                  ? 'bg-[#ff6b35] text-white shadow-md shadow-orange-500/25'
-                  : 'bg-transparent text-gray-400 hover:text-white hover:bg-white/5 border border-white/8 hover:border-white/12'
-                }`}
+              className={`rl-filter-btn ${activeBadge === value ? 'active' : ''}`}
             >
               {label}
             </button>

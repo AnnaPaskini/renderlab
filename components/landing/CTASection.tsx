@@ -1,25 +1,11 @@
 "use client";
-import { motion } from "framer-motion";
 import { RenderLabButton } from "@/components/ui/RenderLabButton";
+import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
 export function CTASection() {
   return (
     <section className="relative py-32 bg-[var(--rl-bg)] text-center overflow-hidden">
-      {/* Gradient orbs for visual interest */}
-      <div 
-        className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full opacity-20 blur-3xl pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle, var(--rl-accent) 0%, transparent 70%)',
-        }}
-      />
-      <div 
-        className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full opacity-15 blur-3xl pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle, var(--rl-accent) 0%, transparent 70%)',
-        }}
-      />
-      
       {/* Motion divider line */}
       <motion.div
         initial={{ scaleX: 0 }}
@@ -28,7 +14,7 @@ export function CTASection() {
         viewport={{ once: true }}
         className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-transparent via-[var(--rl-accent)] to-transparent"
       />
-      
+
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -45,8 +31,8 @@ export function CTASection() {
         >
           Start Creating Today
         </motion.div>
-        
-        <motion.h2 
+
+        <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
@@ -55,8 +41,8 @@ export function CTASection() {
         >
           Ready to Craft Your Visuals?
         </motion.h2>
-        
-        <motion.p 
+
+        <motion.p
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
@@ -66,7 +52,7 @@ export function CTASection() {
           Start building your creative workflow in RenderLab today. Join thousands of creators
           bringing their visions to life.
         </motion.p>
-        
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -78,12 +64,12 @@ export function CTASection() {
             Start Now
             <ArrowRight className="w-5 h-5 ml-1" />
           </RenderLabButton>
-          
+
           <RenderLabButton variant="outline" size="lg">
             View Examples
           </RenderLabButton>
         </motion.div>
-        
+
         {/* Trust indicators */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -106,7 +92,7 @@ export function CTASection() {
           </div>
         </motion.div>
       </motion.div>
-      
+
       {/* Bottom divider */}
       <motion.div
         initial={{ scaleX: 0 }}

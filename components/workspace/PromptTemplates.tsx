@@ -1,27 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useWorkspace } from "@/lib/context/WorkspaceContext";
+import { defaultToastStyle } from "@/lib/toast-config";
+import { IconDotsVertical } from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
-import { Input } from "../ui/input";
-import { IconDotsVertical } from "@tabler/icons-react";
-import { defaultToastStyle } from "@/lib/toast-config";
-import { useWorkspace } from "@/lib/context/WorkspaceContext";
-import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "../ui/dialog";
+import { Input } from "../ui/input";
 
 type PromptTemplatesProps = {
   activeTab?: "builder" | "custom";
@@ -31,21 +31,21 @@ type PromptTemplatesProps = {
 export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProps) {
   const { loadTemplate } = useWorkspace();
   const router = useRouter();
-  
+
   const [templates, setTemplates] = useState<any[]>([]);
   const [previewTemplate, setPreviewTemplate] = useState<any | null>(null);
-  
+
   // Three-dot menu state
   const [renameTarget, setRenameTarget] = useState<any | null>(null);
   const [renameDraft, setRenameDraft] = useState("");
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  
+
   // Create template state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newTemplateName, setNewTemplateName] = useState("");
-  
+
   // === LOAD ALL ON MOUNT ===
   useEffect(() => {
     const savedTemplates =
@@ -73,11 +73,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
     // Show success message
     toast.success("Template loaded into Builder", {
-      style: {
-        background: '#ff6b35',
-        color: 'white',
-        border: 'none'
-      }
+      style: defaultToastStyle,
     });
 
     // Close modal
@@ -100,8 +96,8 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
   // === HELPER: CHECK FOR DUPLICATE NAMES ===
   const isTemplateNameExists = (name: string, excludeCreatedAt?: string): boolean => {
     const stored = JSON.parse(localStorage.getItem("RenderAI_customTemplates") || "[]");
-    return stored.some((t: any) => 
-      t.createdAt !== excludeCreatedAt && 
+    return stored.some((t: any) =>
+      t.createdAt !== excludeCreatedAt &&
       (t.name || t.title || '').toLowerCase() === name.toLowerCase()
     );
   };
@@ -109,7 +105,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
   // === THREE-DOT MENU HANDLERS ===
   const handleDuplicateTemplate = (template: any) => {
     const proposedName = `${template.name || template.title || 'Template'} - Copy`;
-    
+
     // Check for duplicate names (case-insensitive)
     if (isTemplateNameExists(proposedName)) {
       toast.error(`A template named '${proposedName}' already exists. Please choose a different name.`, {
@@ -118,18 +114,18 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
       });
       return;
     }
-    
+
     const duplicated = {
       ...template,
       name: proposedName,
       createdAt: new Date().toISOString(),
     };
-    
+
     const stored = JSON.parse(localStorage.getItem("RenderAI_customTemplates") || "[]");
     const updated = [...stored, duplicated];
     localStorage.setItem("RenderAI_customTemplates", JSON.stringify(updated));
     setTemplates(updated);
-    
+
     toast.success(`Template duplicated: ${duplicated.name}`, {
       duration: 1500,
       style: defaultToastStyle,
@@ -146,7 +142,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     if (!renameTarget || !renameDraft.trim()) return;
 
     const newName = renameDraft.trim();
-    
+
     // Check for duplicate names (excluding current template)
     if (isTemplateNameExists(newName, renameTarget.createdAt)) {
       toast.error(`A template named '${newName}' already exists. Please choose a different name.`, {
@@ -162,15 +158,15 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
         ? { ...t, name: newName }
         : t
     );
-    
+
     localStorage.setItem("RenderAI_customTemplates", JSON.stringify(updated));
     setTemplates(updated);
-    
+
     toast.success(`Template renamed to: ${newName}`, {
       duration: 1500,
       style: defaultToastStyle,
     });
-    
+
     setIsRenameOpen(false);
     setRenameTarget(null);
     setRenameDraft('');
@@ -186,15 +182,15 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
     const stored = JSON.parse(localStorage.getItem("RenderAI_customTemplates") || "[]");
     const updated = stored.filter((t: any) => t.createdAt !== deleteTarget.createdAt);
-    
+
     localStorage.setItem("RenderAI_customTemplates", JSON.stringify(updated));
     setTemplates(updated);
-    
+
     toast.success("Template deleted", {
       duration: 1200,
       style: defaultToastStyle,
     });
-    
+
     setIsDeleteOpen(false);
     setDeleteTarget(null);
   };
@@ -204,7 +200,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     if (!newTemplateName.trim()) return;
 
     const templateName = newTemplateName.trim();
-    
+
     // Check for duplicate names
     if (isTemplateNameExists(templateName)) {
       toast.error(`A template named '${templateName}' already exists. Please choose a different name.`, {
@@ -221,17 +217,17 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
       details: "",
       createdAt: new Date().toISOString(),
     };
-    
+
     const stored = JSON.parse(localStorage.getItem("RenderAI_customTemplates") || "[]");
     const updated = [...stored, newTemplate];
     localStorage.setItem("RenderAI_customTemplates", JSON.stringify(updated));
     setTemplates(updated);
-    
+
     toast.success(`Template created: ${templateName}`, {
       duration: 1500,
       style: defaultToastStyle,
     });
-    
+
     setIsCreateOpen(false);
     setNewTemplateName('');
   };
@@ -240,10 +236,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     <div className="h-full overflow-auto">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold leading-none text-gray-900 dark:text-gray-100">My Templates</h2>
-        <Button
-          onClick={() => setIsCreateOpen(true)}
-          className="bg-[#ff6b35] hover:bg-[#ff8555] text-white px-6 py-2.5 rounded-lg font-semibold shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 transition-all duration-200 border-0 h-9"
-        >
+        <Button onClick={() => setIsCreateOpen(true)} size="lg">
           + New Template
         </Button>
       </div>
@@ -262,24 +255,24 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                 e.dataTransfer.setData("template", templateData);
                 e.dataTransfer.effectAllowed = "copy";
               }}
-              className="cursor-move rounded-xl border border-transparent p-4 transition-all duration-200 hover:border-[#ff6b35] hover:shadow-lg hover:shadow-orange-500/20 cursor-pointer"
+              className="rl-card cursor-grab select-none transition-transform duration-200 hover:-translate-y-1"
               title="Drag to add to collection"
             >
               <div className="flex items-start justify-between gap-3">
-                <div 
+                <div
                   className="min-w-0 flex-1 cursor-pointer"
                   onClick={() => setPreviewTemplate(t)}
                 >
-                  <div className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                  <div className="font-semibold text-[var(--rl-text)] truncate">
                     {t.name || t.title || "Untitled Template"}
                   </div>
                   <div className="relative group mt-1">
-                    <pre className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 whitespace-pre-wrap font-sans">
+                    <pre className="text-sm text-[var(--rl-text-secondary)] line-clamp-3 whitespace-pre-wrap font-sans">
                       {t.prompt || t.style || t.scenario || t.details || "No details yet."}
                     </pre>
-                    
+
                     {/* Tooltip on hover */}
-                    <div className="invisible group-hover:visible absolute z-10 bottom-full left-0 mb-2 p-3 bg-black/90 text-white text-xs rounded-lg max-w-md shadow-xl whitespace-pre-wrap">
+                    <div className="invisible group-hover:visible absolute z-10 bottom-full left-0 mb-2 p-3 bg-black text-white text-xs rounded-lg max-w-md shadow-xl whitespace-pre-wrap">
                       {t.prompt || t.style || t.scenario || t.details || "No details yet."}
                     </div>
                   </div>
@@ -290,7 +283,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                     <button
                       type="button"
                       aria-label="Template options"
-                      className="inline-flex items-center justify-center rounded-full p-1.5 text-gray-400 transition hover:text-gray-600 dark:hover:text-gray-300 focus-visible:outline-none"
+                      className="inline-flex items-center justify-center rounded-full p-1.5 text-[var(--rl-text-muted)] transition hover:text-[var(--rl-text)] focus-visible:outline-none"
                       onClick={(e) => {
                         e.stopPropagation();
                       }}
@@ -337,14 +330,14 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
       {/* Modal */}
       <Dialog open={!!previewTemplate} onOpenChange={() => setPreviewTemplate(null)}>
-        <DialogContent className="max-w-lg bg-rl-panel backdrop-blur-md border border-rl-glass-border shadow-[0_0_20px_rgba(200,140,255,0.3)] rounded-2xl">
+        <DialogContent className="modal-content max-w-xl">
           {previewTemplate && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                <DialogTitle className="text-2xl font-semibold text-[var(--rl-text)]">
                   {previewTemplate.name || previewTemplate.title || "Template"}
                 </DialogTitle>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-sm text-[var(--rl-text-secondary)] mt-1">
                   {previewTemplate.description ||
                     previewTemplate.style ||
                     previewTemplate.scenario ||
@@ -352,33 +345,33 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                 </p>
               </DialogHeader>
 
-              <div className="mt-5 bg-[var(--rl-surface)] border border-[var(--rl-border)] rounded-xl p-5">
-                <div className="grid grid-cols-2 gap-y-2 text-sm">
-                  <div className="text-gray-500 dark:text-gray-400">AI Model:</div>
-                  <div className="text-gray-900 dark:text-gray-100">
+              <div className="mt-5 rounded-xl border border-[var(--rl-border)] bg-[var(--rl-surface)] p-5">
+                <div className="grid grid-cols-2 gap-y-2 text-sm text-[var(--rl-text-secondary)]">
+                  <div>AI Model:</div>
+                  <div className="text-[var(--rl-text)]">
                     {previewTemplate.formData?.aiModel ||
                       previewTemplate.aiModel ||
                       "—"}
                   </div>
 
-                  <div className="text-gray-500 dark:text-gray-400">Style:</div>
-                  <div className="text-gray-900 dark:text-gray-100">
+                  <div>Style:</div>
+                  <div className="text-[var(--rl-text)]">
                     {previewTemplate.formData?.style ||
                       previewTemplate.style ||
                       "—"}
                   </div>
 
-                  <div className="text-gray-500 dark:text-gray-400">Scenario:</div>
-                  <div className="text-gray-900 dark:text-gray-100">
+                  <div>Scenario:</div>
+                  <div className="text-[var(--rl-text)]">
                     {previewTemplate.scenario || "—"}
                   </div>
                 </div>
 
                 <div className="mt-4 border-t border-[var(--rl-border)] pt-3">
-                  <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                  <div className="mb-1 text-sm text-[var(--rl-text-secondary)]">
                     Final Prompt:
                   </div>
-                  <p className="text-gray-800 dark:text-gray-200 leading-relaxed italic whitespace-pre-line">
+                  <p className="leading-relaxed whitespace-pre-line text-[var(--rl-text)]/90">
                     {previewTemplate.finalPrompt ||
                       previewTemplate.details ||
                       "No final prompt generated yet."}
@@ -387,20 +380,25 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
               </div>
 
               <DialogFooter className="mt-6 flex justify-end gap-3">
-                <button
-                  className="button-danger px-4 py-2 text-white rounded-2xl font-medium"
+                <Button
+                  variant="destructive"
                   onClick={() => {
-                    setPreviewTemplate(null); // закрываем preview modal
-                    openDeleteDialog(previewTemplate); // открываем delete dialog
+                    setPreviewTemplate(null);
+                    openDeleteDialog(previewTemplate);
                   }}
                 >
                   Delete
-                </button>
-                <Button variant="outline" onClick={handleCancel}>
-                  Cancel
                 </Button>
                 <button
-                  className="button-accent px-4 py-2 text-white rounded-2xl font-medium"
+                  type="button"
+                  className="rl-btn-secondary text-sm"
+                  onClick={handleCancel}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="rl-btn-primary text-sm"
                   onClick={() => handleLoadTemplate(previewTemplate)}
                 >
                   Load Template
@@ -413,9 +411,9 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
       {/* Rename Template Dialog */}
       <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
-        <DialogContent className="max-w-md bg-rl-panel backdrop-blur-md border border-rl-glass-border shadow-[0_0_20px_rgba(200,140,255,0.3)] rounded-2xl">
+        <DialogContent className="modal-content">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            <DialogTitle className="text-xl font-semibold text-[var(--rl-text)]">
               Rename Template
             </DialogTitle>
           </DialogHeader>
@@ -425,7 +423,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
               value={renameDraft}
               onChange={(e) => setRenameDraft(e.target.value)}
               placeholder="Enter new name..."
-              className="w-full px-4 py-3 bg-[#1a1a1a] border border-white/10 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:ring-opacity-50 focus:border-[#ff6b35] transition-all duration-200 placeholder:text-gray-500"
+              className="rl-input w-full"
               autoFocus
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
@@ -440,54 +438,52 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
           </div>
 
           <DialogFooter className="mt-6 flex justify-end gap-3">
-            <Button
-              variant="outline"
+            <button
+              type="button"
+              className="rl-btn-secondary text-sm"
               onClick={() => {
                 setIsRenameOpen(false);
                 setRenameDraft("");
               }}
-              className="px-4 py-2 text-sm font-medium text-[var(--rl-muted)] hover:text-[var(--rl-foreground)] hover:bg-[var(--rl-surface-hover)] transition rounded-lg border border-transparent hover:border-[var(--rl-border-hover)]"
             >
               Cancel
-            </Button>
-            <Button
+            </button>
+            <button
+              type="button"
+              className="rl-btn-primary text-sm"
               onClick={handleRenameSubmit}
               disabled={!renameDraft.trim()}
-              className="rl-btn-primary"
             >
               Rename
-            </Button>
+            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Delete Template Dialog */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <DialogContent className="max-w-md bg-rl-panel backdrop-blur-md border border-rl-glass-border shadow-[0_0_20px_rgba(200,140,255,0.3)] rounded-2xl">
+        <DialogContent className="modal-content">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            <DialogTitle className="text-xl font-semibold text-[var(--rl-text)]">
               Delete Template?
             </DialogTitle>
           </DialogHeader>
 
           <div className="mt-4">
-            <p className="text-sm text-gray-600 dark:text-gray-300">
+            <p className="text-sm text-[var(--rl-text-secondary)]">
               Are you sure you want to delete "<strong>{deleteTarget?.name || deleteTarget?.title || 'this template'}</strong>"? This action cannot be undone.
             </p>
           </div>
 
           <DialogFooter className="mt-6 flex justify-end gap-3">
-            <Button
-              variant="outline"
+            <button
+              type="button"
+              className="rl-btn-secondary text-sm"
               onClick={() => setIsDeleteOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800 transition rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
             >
               Cancel
-            </Button>
-            <Button
-              onClick={handleDeleteConfirm}
-              className="px-6 py-2 text-sm font-medium bg-[var(--rl-accent)] text-white rounded-lg transition shadow-lg shadow-[var(--rl-accent)]/30"
-            >
+            </button>
+            <Button variant="destructive" onClick={handleDeleteConfirm}>
               Delete
             </Button>
           </DialogFooter>
@@ -496,9 +492,9 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
       {/* Create New Template Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-md bg-rl-panel backdrop-blur-md border border-rl-glass-border shadow-[0_0_20px_rgba(200,140,255,0.3)] rounded-2xl">
+        <DialogContent className="modal-content">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            <DialogTitle className="text-xl font-semibold text-[var(--rl-text)]">
               Create New Template
             </DialogTitle>
           </DialogHeader>
@@ -508,7 +504,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
               value={newTemplateName}
               onChange={(e) => setNewTemplateName(e.target.value)}
               placeholder="Enter template name..."
-              className="w-full px-4 py-3 bg-[#1a1a1a] border border-white/10 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:ring-opacity-50 focus:border-[#ff6b35] transition-all duration-200 placeholder:text-gray-500"
+              className="rl-input w-full"
               autoFocus
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
@@ -523,23 +519,24 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
           </div>
 
           <DialogFooter className="mt-6 flex justify-end gap-3">
-            <Button
-              variant="outline"
+            <button
+              type="button"
+              className="rl-btn-secondary text-sm"
               onClick={() => {
                 setIsCreateOpen(false);
                 setNewTemplateName("");
               }}
-              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800 transition rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
             >
               Cancel
-            </Button>
-            <Button
+            </button>
+            <button
+              type="button"
+              className="rl-btn-primary text-sm"
               onClick={handleCreateTemplate}
               disabled={!newTemplateName.trim()}
-              className="rl-btn-primary"
             >
               Create
-            </Button>
+            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

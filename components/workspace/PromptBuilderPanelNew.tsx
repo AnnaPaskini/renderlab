@@ -133,9 +133,9 @@ export function PromptBuilderPanel({
   const [isTemplateDropdownOpen, setIsTemplateDropdownOpen] = useState(false);
 
   const selectTriggerClass =
-  "h-12 w-full rounded-xl border border-rl-glass-border bg-rl-panel px-3 text-left text-sm font-medium text-rl-text backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6b35]";
+  "h-12 w-full rounded-xl border border-rl-glass-border bg-rl-panel px-3 text-left text-sm font-medium text-rl-text  shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6b35]";
   const inputSurfaceClass =
-  "w-full rounded-xl border border-rl-glass-border bg-rl-panel px-3 py-2 text-sm font-medium text-rl-text backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6b35] placeholder:text-rl-text-secondary";
+  "w-full rounded-xl border border-rl-glass-border bg-rl-panel px-3 py-2 text-sm font-medium text-rl-text  shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6b35] placeholder:text-rl-text-secondary";
 
   const resolveString = (...values: unknown[]) => {
     for (const value of values) {
@@ -939,7 +939,7 @@ export function PromptBuilderPanel({
   };
 
   return (
-  <section className="flex h-full flex-col gap-4 overflow-hidden rounded-3xl border border-rl-glass-border bg-rl-panel p-6 text-rl-text backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+  <section className="flex h-full flex-col gap-4 overflow-hidden rounded-3xl border border-rl-glass-border bg-rl-panel p-6 text-rl-text  shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
       <div className="flex-1 overflow-y-auto">
   {currentTab === "builder" && (
           <motion.div
@@ -962,7 +962,7 @@ export function PromptBuilderPanel({
 
             <motion.div
               layout
-              className="rounded-2xl border border-rl-glass-border bg-rl-panel p-4 text-rl-text backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]"
+              className="rounded-2xl border border-rl-glass-border bg-rl-panel p-4 text-rl-text  shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]"
             >
               <div className="flex flex-col gap-4">
                 <ToggleGroup.Root
@@ -1092,7 +1092,7 @@ export function PromptBuilderPanel({
                           </DropdownMenuContent>
                         </DropdownMenu>
                       ) : (
-                        <div className="rounded-xl border border-white/8 bg-rl-panel p-4 text-sm font-medium text-rl-text-secondary backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
+                        <div className="rounded-xl border border-white/8 bg-rl-panel p-4 text-sm font-medium text-rl-text-secondary  shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
                           No saved templates found.
                         </div>
                       )}
@@ -1123,7 +1123,7 @@ export function PromptBuilderPanel({
                           </SelectContent>
                         </Select>
                       ) : (
-                        <div className="rounded-xl border border-white/8 bg-rl-panel p-4 text-sm font-medium text-rl-text-secondary backdrop-blur-[24px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
+                        <div className="rounded-xl border border-white/8 bg-rl-panel p-4 text-sm font-medium text-rl-text-secondary  shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
                           No saved collections yet.
                         </div>
                       )}
@@ -1261,7 +1261,7 @@ export function PromptBuilderPanel({
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-  <DialogContent className="rounded-3xl border border-rl-glass-border bg-rl-panel text-rl-text backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+  <DialogContent className="rounded-3xl border border-rl-glass-border bg-rl-panel text-rl-text  shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold text-rl-text">
               Save Template
@@ -1300,7 +1300,7 @@ export function PromptBuilderPanel({
 
       {/* Rename Template Dialog */}
       <Dialog open={isRenameTemplateOpen} onOpenChange={setIsRenameTemplateOpen}>
-        <DialogContent className="rounded-3xl border border-rl-glass-border bg-rl-panel text-rl-text backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+        <DialogContent className="rounded-3xl border border-rl-glass-border bg-rl-panel text-rl-text  shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold text-rl-text">
               Rename Template
@@ -1337,7 +1337,7 @@ export function PromptBuilderPanel({
 
       {/* Delete Template Dialog */}
       <Dialog open={isDeleteTemplateOpen} onOpenChange={setIsDeleteTemplateOpen}>
-        <DialogContent className="rounded-3xl border border-rl-glass-border bg-rl-panel text-rl-text backdrop-blur-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+        <DialogContent className="rounded-3xl border border-rl-glass-border bg-rl-panel text-rl-text  shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold text-rl-text">
               Delete Template?
