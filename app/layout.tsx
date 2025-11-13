@@ -1,17 +1,17 @@
-import "./globals.css";
-import { GeistSans } from "geist/font/sans";
 import { cn } from "@/lib/utils";
+import { GeistSans } from "geist/font/sans";
+import { ThemeProvider } from "next-themes";
 import { ViewTransitions } from "next-view-transitions";
 import { headers } from "next/headers";
+import "./globals.css";
 
-import { SupabaseAuthProvider } from "@/components/providers/SupabaseAuthProvider";
-import { WorkspaceProvider } from "@/lib/context/WorkspaceContext";
-import { HistoryProvider } from "@/lib/context/HistoryContext";
 import { HistoryErrorBoundary } from "@/app/providers/HistoryErrorBoundary";
-import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider as NextThemesProvider } from "next-themes";
-import { NavBar } from "@/components/navbar";
 import { MainNavbar } from '@/components/layout/MainNavbar';
+import { NavBar } from "@/components/navbar";
+import { SupabaseAuthProvider } from "@/components/providers/SupabaseAuthProvider";
+import { Toaster } from "@/components/ui/sonner";
+import { HistoryProvider } from "@/lib/context/HistoryContext";
+import { WorkspaceProvider } from "@/lib/context/WorkspaceContext";
 import { toastConfig } from "@/lib/toast-config";
 
 
@@ -37,7 +37,8 @@ export default async function RootLayout({
     pathname.startsWith("/blog") ||
     pathname.startsWith("/contact");
 
-  const showMainNavbar = 
+  const showMainNavbar =
+    pathname.startsWith("/workspace") ||
     pathname.startsWith("/custom") ||
     pathname.startsWith("/prompts") ||
     pathname.startsWith("/history") ||
@@ -48,21 +49,22 @@ export default async function RootLayout({
   console.log('🔍 [Layout Debug] showNavbar:', showNavbar);
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body
         className={cn(
           GeistSans.className,
-          "antialiased"
+          "dark antialiased"
         )}
         suppressHydrationWarning
       >
-        <ViewTransitions>
-          <NextThemesProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem={false}
-            disableTransitionOnChange
-          >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={false}
+          disableTransitionOnChange
+          forcedTheme="dark"
+        >
+          <ViewTransitions>
             <SupabaseAuthProvider>
               <HistoryErrorBoundary>
                 <HistoryProvider>
@@ -70,7 +72,7 @@ export default async function RootLayout({
                     {showNavbar && <NavBar />}
                     {showMainNavbar && <MainNavbar />}
                     {children}
-                    <Toaster 
+                    <Toaster
                       position="bottom-right"
                       toastOptions={toastConfig}
                     />
@@ -78,8 +80,8 @@ export default async function RootLayout({
                 </HistoryProvider>
               </HistoryErrorBoundary>
             </SupabaseAuthProvider>
-          </NextThemesProvider>
-        </ViewTransitions>
+          </ViewTransitions>
+        </ThemeProvider>
       </body>
     </html>
   );

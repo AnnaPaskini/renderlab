@@ -4,6 +4,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ====================================================================
+   FORCE DARK MODE GLOBALLY - No light mode support
+   ==================================================================== */
+html,
+body {
+  color-scheme: dark;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  color-scheme: dark;
+}
 
 *,
 *::before,
@@ -13,48 +28,75 @@
 }
 
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-
-  /* ====================================================================
-     LEGACY Leonardo Design System — DEACTIVATED (Phase 3.1)
-     All theme tokens now managed by renderlab-theme.css (--rl-* tokens)
-     Kept for reference only. DO NOT REACTIVATE.
-     ==================================================================== */
-  /* --color-accent-start: #9b7bff; */
-  /* --color-accent-mid: #b387ff; */
-  /* --color-accent-end: #ffc98b; */
-  /* --color-glow: rgba(180, 140, 255, 0.25); */
-  /* --color-bg: #0e0c12; */
-  /* --color-panel: rgba(255, 255, 255, 0.04); */
-  /* --color-border: rgba(255, 255, 255, 0.08); */
-  /* --color-text-primary: #f5f5f6; */
-  /* --color-text-secondary: #a5a5b0; */
-  /* --color-danger-start: #ff4d4d; */
-  /* --color-danger-end: #c43c77; */
-  /* --color-success-start: #4dd4c0; */
-  /* --color-success-end: #78f3d2; */
-}
-
-/* Dark mode auto-switching disabled for light theme enforcement */
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-} */
+/* ====================================================================
+   DARK MODE ONLY - All legacy variables removed
+   All theme tokens managed by renderlab-theme.css (--rl-* tokens)
+   ==================================================================== */
 
 html {
-  scroll-padding-top: 80px; /* Adjust this value based on your navbar height */
+  scroll-padding-top: 80px;
   scroll-behavior: smooth;
 }
 
 body {
   background: var(--rl-bg);
   color: var(--rl-text);
+}
+
+/* ====================================================================
+   REMOVE BROWSER DEFAULT VALIDATION STYLES
+   ==================================================================== */
+input:invalid,
+textarea:invalid,
+select:invalid,
+input:user-invalid,
+textarea:user-invalid,
+select:user-invalid {
+  box-shadow: none !important;
+  outline: none !important;
+  border-color: inherit !important;
+}
+
+/* Remove pink/red browser default validation highlights */
+input:required:invalid,
+textarea:required:invalid,
+select:required:invalid {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Remove default validation popups */
+input::-webkit-validation-bubble-message,
+textarea::-webkit-validation-bubble-message,
+select::-webkit-validation-bubble-message {
+  display: none !important;
+}
+
+/* ====================================================================
+   REMOVE BROWSER DEFAULT SELECT/OPTION PINK HIGHLIGHTING
+   ==================================================================== */
+select option {
+  background-color: #1a1a1a !important;
+  color: white !important;
+}
+
+select option:checked,
+select option:hover,
+select option:focus {
+  background-color: #ff6b35 !important;
+  background: linear-gradient(0deg, #ff6b35 0%, #ff6b35 100%) !important;
+  color: white !important;
+}
+
+/* Firefox */
+select option:checked {
+  background-color: #ff6b35 !important;
+  color: white !important;
+}
+
+/* Webkit browsers */
+select option:checked:before {
+  background-color: #ff6b35 !important;
 }
 
 @layer utilities {
@@ -78,13 +120,13 @@ body {
     --panel-shadow-bottom: inset 0 -1px 2px rgba(0, 0, 0, 0.05);
     --panel-shadow-glow: inset 0 0 8px rgba(0, 0, 0, 0.04);
     --panel-shadow-outer: 0 8px 30px -12px rgba(0, 0, 0, 0.08);
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  border-radius: 16px;
-  border: 1px solid var(--panel-border);
-  box-shadow: var(--panel-shadow-top), var(--panel-shadow-bottom), var(--panel-shadow-glow), var(--panel-shadow-outer);
-  background: transparent;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: 16px;
+    border: 1px solid var(--panel-border);
+    box-shadow: var(--panel-shadow-top), var(--panel-shadow-bottom), var(--panel-shadow-glow), var(--panel-shadow-outer);
+    background: transparent;
   }
 
   .panel-dimmer::before {
@@ -93,8 +135,8 @@ body {
     inset: 0;
     border-radius: inherit;
     background: var(--panel-surface);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
     z-index: -1;
   }
 
@@ -134,9 +176,9 @@ body {
     inset: 0;
     border-radius: inherit;
     z-index: -2;
-    background: radial-gradient(circle at 12% 20%, rgba(244, 114, 182, 0.18), transparent 45%),
+    background: radial-gradient(circle at 12% 20%, rgba(255, 107, 53, 0.18), transparent 45%),
       radial-gradient(circle at 82% 25%, rgba(250, 204, 21, 0.14), transparent 45%),
-      radial-gradient(circle at 50% 90%, rgba(129, 140, 248, 0.18), transparent 45%);
+      radial-gradient(circle at 50% 90%, rgba(255, 138, 85, 0.15), transparent 45%);
   }
 
   .nav-overlay {
@@ -152,9 +194,39 @@ body {
     background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.25), transparent);
   }
 
-  .nav-overlay > * {
+  .nav-overlay>* {
     position: relative;
     z-index: 1;
+  }
+
+  /* ====================================================================
+     CUSTOM SCROLLBAR - RenderLab Theme
+     ==================================================================== */
+  
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    transition: background 0.2s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
   }
 
   .btn-gradient {
@@ -167,7 +239,7 @@ body {
      All utilities now use --rl-* tokens from renderlab-theme.css
      Kept for reference. DO NOT REACTIVATE.
      ========================= */
-  
+
   /* .glass-panel {
     background: var(--color-panel);
     backdrop-filter: blur(24px);
@@ -229,6 +301,7 @@ body {
     color: var(--color-text-secondary);
   } */
 }
+
 .dark .panel-dimmer {
   --panel-surface: rgba(17, 17, 17, 0.7);
   --panel-border: rgba(255, 255, 255, 0.24);
@@ -237,6 +310,7 @@ body {
   --panel-shadow-glow: inset 0 0 10px rgba(0, 0, 0, 0.26);
   --panel-shadow-outer: 0 12px 36px -14px rgba(0, 0, 0, 0.55);
 }
+
 .dark .panel-strong {
   --panel-surface: rgba(12, 12, 18, 0.78);
   --panel-shadow-outer: 0 18px 48px -18px rgba(0, 0, 0, 0.6);
@@ -251,28 +325,31 @@ body {
 }
 
 .dark .nav-surface::after {
-  background: radial-gradient(circle at 12% 20%, rgba(244, 114, 182, 0.18), transparent 45%),
+  background: radial-gradient(circle at 12% 20%, rgba(255, 107, 53, 0.18), transparent 45%),
     radial-gradient(circle at 82% 25%, rgba(250, 204, 21, 0.12), transparent 45%),
-    radial-gradient(circle at 50% 90%, rgba(129, 140, 248, 0.2), transparent 45%);
+    radial-gradient(circle at 50% 90%, rgba(255, 138, 85, 0.15), transparent 45%);
 }
+
 body.actions-open nav {
   filter: blur(2px);
   opacity: 0.85;
   pointer-events: none !important;
   transition: filter 0.3s ease-in-out, opacity 0.3s ease-in-out;
 }
+
 /* Designer Grid (dot pattern) — с управляемой плотностью и контрастом */
 .dot-grid {
   /* Базовые значения — можно переопределять инлайном или модификаторами */
-  --dot-size: 18px;        /* шаг между точками (меньше = плотнее) */
-  --dot-radius: 1.4px;     /* радиус точки (больше = жирнее) */
-  --dot-alpha: 0.14;       /* прозрачность точки (больше = контрастнее) */
+  --dot-size: 18px;
+  /* шаг между точками (меньше = плотнее) */
+  --dot-radius: 1.4px;
+  /* радиус точки (больше = жирнее) */
+  --dot-alpha: 0.14;
+  /* прозрачность точки (больше = контрастнее) */
 
-  background-image: radial-gradient(
-    circle,
-    rgba(0, 0, 0, var(--dot-alpha)) var(--dot-radius),
-    transparent var(--dot-radius)
-  );
+  background-image: radial-gradient(circle,
+      rgba(0, 0, 0, var(--dot-alpha)) var(--dot-radius),
+      transparent var(--dot-radius));
   background-size: var(--dot-size) var(--dot-size);
   background-position: 0 0;
   transition: background-color 200ms ease, background-image 200ms ease, background-size 200ms ease;
@@ -281,86 +358,122 @@ body.actions-open nav {
 .dark .dot-grid {
   /* в тёмной теме делаем точки светлее и чуть контрастнее */
   --dot-alpha: 0.15;
-  background-image: radial-gradient(
-    circle,
-    rgba(255, 255, 255, var(--dot-alpha)) var(--dot-radius),
-    transparent var(--dot-radius)
-  );
+  background-image: radial-gradient(circle,
+      rgba(255, 255, 255, var(--dot-alpha)) var(--dot-radius),
+      transparent var(--dot-radius));
 }
 
 /* Модификаторы на классы — чтобы не лезть в инлайн каждый раз */
 .dot-grid {
-  --dot-size: 14px;     /* шаг между точками: меньше = плотнее */
-  --dot-radius: 1.6px;  /* радиус точки: больше = жирнее */
-  --dot-alpha: 0.15;    /* контраст: больше = сильнее видно */
+  --dot-size: 14px;
+  /* шаг между точками: меньше = плотнее */
+  --dot-radius: 1.6px;
+  /* радиус точки: больше = жирнее */
+  --dot-alpha: 0.15;
+  /* контраст: больше = сильнее видно */
 
-  background-image: radial-gradient(
-    circle,
-    rgba(0, 0, 0, var(--dot-alpha)) var(--dot-radius),
-    transparent var(--dot-radius)
-  );
+  background-image: radial-gradient(circle,
+      rgba(0, 0, 0, var(--dot-alpha)) var(--dot-radius),
+      transparent var(--dot-radius));
   background-size: var(--dot-size) var(--dot-size);
   background-position: 0 0;
   transition: background-color 200ms ease, background-image 200ms ease, background-size 200ms ease;
 }
 
 .dark .dot-grid {
-  --dot-alpha: 0.15;  /* в тёмной теме чуть мягче */
-  background-image: radial-gradient(
-    circle,
-    rgba(255, 255, 255, var(--dot-alpha)) var(--dot-radius),
-    transparent var(--dot-radius)
-  );
+  --dot-alpha: 0.15;
+  /* в тёмной теме чуть мягче */
+  background-image: radial-gradient(circle,
+      rgba(255, 255, 255, var(--dot-alpha)) var(--dot-radius),
+      transparent var(--dot-radius));
 }
+
 /* =========================
    Designer Dot Grid Presets
    ========================= */
 .dot-grid {
-  --dot-size: 18px;     /* шаг: меньше = плотнее */
-  --dot-radius: 1.4px;  /* радиус точки: больше = жирнее */
-  --dot-alpha: 0.15;    /* контраст: больше = заметнее */
+  --dot-size: 18px;
+  /* шаг: меньше = плотнее */
+  --dot-radius: 1.4px;
+  /* радиус точки: больше = жирнее */
+  --dot-alpha: 0.15;
+  /* контраст: больше = заметнее */
 
-  background-image: radial-gradient(
-    circle,
-    rgba(0,0,0,var(--dot-alpha)) var(--dot-radius),
-    transparent var(--dot-radius)
-  );
+  background-image: radial-gradient(circle,
+      rgba(0, 0, 0, var(--dot-alpha)) var(--dot-radius),
+      transparent var(--dot-radius));
   background-size: var(--dot-size) var(--dot-size);
   background-position: 0 0;
   transition: background-color .2s, background-image .2s, background-size .2s;
 }
 
 .dark .dot-grid {
-  background-image: radial-gradient(
-    circle,
-    rgba(255,255,255,var(--dot-alpha)) var(--dot-radius),
-    transparent var(--dot-radius)
-  );
+  background-image: radial-gradient(circle,
+      rgba(255, 255, 255, var(--dot-alpha)) var(--dot-radius),
+      transparent var(--dot-radius));
 }
 
 /* Шаг сетки */
-.dots-xl { --dot-size: 28px; }
-.dots-lg { --dot-size: 24px; }
-.dots-md { --dot-size: 18px; }
-.dots-sm { --dot-size: 14px; }
-.dots-xs { --dot-size: 10px; }
+.dots-xl {
+  --dot-size: 28px;
+}
+
+.dots-lg {
+  --dot-size: 24px;
+}
+
+.dots-md {
+  --dot-size: 18px;
+}
+
+.dots-sm {
+  --dot-size: 14px;
+}
+
+.dots-xs {
+  --dot-size: 10px;
+}
 
 /* Контраст */
-.dots-faint { --dot-alpha: 0.15; }
-.dots-soft  { --dot-alpha: 0.22; }
-.dots-mid   { --dot-alpha: 0.32; }
-.dots-bold  { --dot-alpha: 0.45; }
-.dots-heavy { --dot-alpha: 0.55; }
+.dots-faint {
+  --dot-alpha: 0.15;
+}
+
+.dots-soft {
+  --dot-alpha: 0.22;
+}
+
+.dots-mid {
+  --dot-alpha: 0.32;
+}
+
+.dots-bold {
+  --dot-alpha: 0.45;
+}
+
+.dots-heavy {
+  --dot-alpha: 0.55;
+}
 
 /* Жирность точки */
-.dots-thin { --dot-radius: 1px; }
-.dots-reg  { --dot-radius: 1.4px; }
-.dots-fat  { --dot-radius: 1.8px; }
+.dots-thin {
+  --dot-radius: 1px;
+}
+
+.dots-reg {
+  --dot-radius: 1.4px;
+}
+
+.dots-fat {
+  --dot-radius: 1.8px;
+}
 
 /* Classic Designer Grid */
 .designer-grid {
-  --grid-size: 24px;         /* шаг сетки */
-  --grid-line: rgba(0, 0, 0, 0.06);  /* цвет линий (для светлой темы) */
+  --grid-size: 24px;
+  /* шаг сетки */
+  --grid-line: rgba(0, 0, 0, 0.06);
+  /* цвет линий (для светлой темы) */
   background-image:
     linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
     linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
@@ -369,7 +482,8 @@ body.actions-open nav {
 }
 
 .dark .designer-grid {
-  --grid-line: rgba(255, 255, 255, 0.08); /* более мягкие линии в тёмной теме */
+  --grid-line: rgba(255, 255, 255, 0.08);
+  /* более мягкие линии в тёмной теме */
 }
 
 /* =========================
@@ -405,13 +519,17 @@ body.actions-open nav {
 
 /* Optionally, a soft glow pulse for premium UI elements */
 @keyframes auraPulse {
-  0%, 100% {
-    box-shadow: 0 0 12px rgba(255,255,255,0.15);
+
+  0%,
+  100% {
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
   }
+
   50% {
-    box-shadow: 0 0 20px rgba(255,255,255,0.25);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.25);
   }
 }
+
 .aura-glow {
   animation: auraPulse 4s ease-in-out infinite;
 }

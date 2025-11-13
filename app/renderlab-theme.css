@@ -4,6 +4,7 @@
   /* Backgrounds - Softer blacks with clear steps */
   --rl-bg: #0a0a0a;              /* Main canvas */
   --rl-surface: #161616;         /* Floating containers */
+  --rl-surface-elevated: #1a1a1a; /* Elevated surface (between surface and panel) */
   --rl-panel: #202020;           /* Interactive panels */
   --rl-panel-hover: #282828;     /* Hover state */
   
@@ -63,6 +64,7 @@
   /* Dark mode reinforcement - same values as root */
   --rl-bg: #0a0a0a;
   --rl-surface: #161616;
+  --rl-surface-elevated: #1a1a1a;
   --rl-panel: #202020;
   --rl-panel-hover: #282828;
   --rl-glass: transparent;

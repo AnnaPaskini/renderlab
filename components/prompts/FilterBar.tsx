@@ -1,7 +1,7 @@
 'use client';
 
+import type { PromptBadge, PromptCategory } from '@/lib/types/prompts';
 import { useState } from 'react';
-import type { PromptCategory, PromptBadge } from '@/lib/types/prompts';
 
 interface FilterBarProps {
   onFilterChange: (filters: {
@@ -68,10 +68,10 @@ export function FilterBar({ onFilterChange }: FilterBarProps) {
           value={search}
           onChange={(e) => handleSearchChange(e.target.value)}
           placeholder="Search prompts by title, text, or tags..."
-          className="w-full px-4 py-3 pl-12 border border-[var(--rl-border)] rounded-lg focus:ring-2 focus:ring-[var(--rl-accent)] focus:border-transparent"
+          className="w-full px-4 py-3 pl-12 bg-[#1a1a1a] border border-white/8 text-white rounded-lg focus:outline-none focus:border-[#ff6b35] focus:ring-2 focus:ring-[#ff6b35]/20 transition-all duration-200 placeholder:text-gray-500"
         />
         <svg
-          className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -87,17 +87,16 @@ export function FilterBar({ onFilterChange }: FilterBarProps) {
 
       {/* Category Filters */}
       <div>
-        <h3 className="text-sm font-medium text-gray-700 mb-3">Category</h3>
+        <h3 className="text-sm font-medium text-gray-400 mb-3">Category</h3>
         <div className="flex flex-wrap gap-2">
           {categories.map(({ value, label }) => (
             <button
               key={value}
               onClick={() => handleCategoryChange(value)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                activeCategory === value
-                  ? 'bg-[#ff6b35] text-white'
-                  : 'bg-[var(--rl-surface-hover)] text-[var(--rl-foreground)] hover:bg-[var(--rl-surface)]'
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeCategory === value
+                  ? 'bg-[#ff6b35] text-white shadow-md shadow-orange-500/25'
+                  : 'bg-transparent text-gray-400 hover:text-white hover:bg-white/5 border border-white/8 hover:border-white/12'
+                }`}
             >
               {label}
             </button>
@@ -107,17 +106,16 @@ export function FilterBar({ onFilterChange }: FilterBarProps) {
 
       {/* Badge Filters */}
       <div>
-        <h3 className="text-sm font-medium text-gray-700 mb-3">Collections</h3>
+        <h3 className="text-sm font-medium text-gray-400 mb-3">Collections</h3>
         <div className="flex flex-wrap gap-2">
           {badges.map(({ value, label }) => (
             <button
               key={value}
               onClick={() => handleBadgeChange(value)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                activeBadge === value
-                  ? 'bg-[#ff6b35] text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeBadge === value
+                  ? 'bg-[#ff6b35] text-white shadow-md shadow-orange-500/25'
+                  : 'bg-transparent text-gray-400 hover:text-white hover:bg-white/5 border border-white/8 hover:border-white/12'
+                }`}
             >
               {label}
             </button>

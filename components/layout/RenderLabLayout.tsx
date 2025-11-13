@@ -1,6 +1,5 @@
 "use client";
 import { motion } from "framer-motion";
-import { ThemeSwitch } from "@/components/ui/ThemeSwitch";
 
 interface RenderLabLayoutProps {
   children: React.ReactNode;
@@ -8,10 +7,10 @@ interface RenderLabLayoutProps {
   maxWidth?: string;
 }
 
-export function RenderLabLayout({ 
-  children, 
+export function RenderLabLayout({
+  children,
   showHeader = true,
-  maxWidth = "1600px" 
+  maxWidth = "1600px"
 }: RenderLabLayoutProps) {
   return (
     <div className="min-h-screen bg-[var(--rl-bg)] text-[var(--rl-text)] transition-colors duration-300">
@@ -19,7 +18,6 @@ export function RenderLabLayout({
         {showHeader && (
           <header className="flex items-center justify-between pb-4">
             <h1 className="text-xl font-semibold">Hey, Anna – Keep Crafting ✨</h1>
-            <ThemeSwitch />
           </header>
         )}
         <motion.div

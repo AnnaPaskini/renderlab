@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, DragEvent } from 'react';
 import { createClient } from '@/lib/supabaseBrowser';
+import { DragEvent, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 interface ImageUploadProps {
@@ -138,7 +138,7 @@ export function ImageUpload({ onUploadComplete, currentImage }: ImageUploadProps
   return (
     <div className="space-y-4">
       {preview ? (
-        <div className="relative w-full rounded-lg border-2 border-gray-300 overflow-hidden bg-gray-100">
+        <div className="relative w-full rounded-lg border-2 border-white/8 overflow-hidden bg-[#1a1a1a]">
           {/* Image with proper aspect ratio */}
           <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
             <img
@@ -172,9 +172,9 @@ export function ImageUpload({ onUploadComplete, currentImage }: ImageUploadProps
             flex flex-col items-center justify-center
             w-full rounded-lg border-2 border-dashed
             cursor-pointer transition-colors
-            ${isDragging 
-              ? 'border-[#ff6b35] bg-[#ff6b35]/10' 
-              : 'border-gray-300 hover:border-[#ff6b35] bg-white'
+            ${isDragging
+              ? 'border-[#ff6b35] bg-[#ff6b35]/10'
+              : 'border-white/8 hover:border-[#ff6b35] bg-[#1a1a1a]'
             }
             ${uploading ? 'opacity-50 cursor-not-allowed' : ''}
           `}
@@ -193,15 +193,15 @@ export function ImageUpload({ onUploadComplete, currentImage }: ImageUploadProps
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
                 ) : (
-                  <svg className="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-12 h-12 mx-auto text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 )}
               </div>
-              <p className="text-base font-medium text-gray-700 mb-1">
+              <p className="text-base font-medium text-white mb-1">
                 {uploading ? 'Uploading...' : isDragging ? 'Drop image here' : 'Click or drag image to upload'}
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-400">
                 PNG, JPG, WEBP up to 5MB
               </p>
             </div>

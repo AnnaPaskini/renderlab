@@ -1,9 +1,8 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
-import { useTheme } from "next-themes";
-import React, { useId } from "react";
 import { Z } from "@/lib/z-layer-guide";
+import { motion } from "framer-motion";
+import { useId } from "react";
 
 export const Background = () => {
   return (

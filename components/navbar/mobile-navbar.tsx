@@ -1,14 +1,12 @@
 "use client";
 import { cn } from "@/lib/utils";
+import { Z } from "@/lib/z-layer-guide";
+import { useMotionValueEvent, useScroll } from "framer-motion";
 import { Link } from "next-view-transitions";
 import { useState } from "react";
-import { IoIosMenu } from "react-icons/io";
-import { IoIosClose } from "react-icons/io";
+import { IoIosClose, IoIosMenu } from "react-icons/io";
 import { Button } from "../button";
 import { Logo } from "../Logo";
-import { useMotionValueEvent, useScroll } from "framer-motion";
-import { ModeToggle } from "../mode-toggle";
-import { Z } from "@/lib/z-layer-guide";
 
 export const MobileNavbar = ({ navItems }: any) => {
   const [open, setOpen] = useState(false);
@@ -31,7 +29,7 @@ export const MobileNavbar = ({ navItems }: any) => {
         "nav-surface nav-overlay flex w-full items-center justify-between rounded-full border border-white/20 px-2.5 py-1.5 text-white text-shadow-soft transition duration-200 dark:border-white/20",
         "shadow-[0_24px_48px_-20px_rgba(12,12,24,0.55)]",
         showBackground &&
-          "shadow-[0_30px_60px_-20px_rgba(12,12,24,0.65)]"
+        "shadow-[0_30px_60px_-20px_rgba(12,12,24,0.65)]"
       )}
     >
       <Logo />
@@ -41,12 +39,11 @@ export const MobileNavbar = ({ navItems }: any) => {
       />
       {open && (
         <div
-          className={`fixed inset-0 z-[${Z.MODAL}] flex flex-col items-start justify-start space-y-10 bg-[radial-gradient(circle_at_12%_20%,rgba(244,114,182,0.2),transparent_45%),radial-gradient(circle_at_88%_25%,rgba(250,204,21,0.14),transparent_40%),radial-gradient(circle_at_50%_88%,rgba(129,140,248,0.2),transparent_50%)] bg-white/20 text-white text-shadow-soft transition duration-200 dark:bg-[#050505]/75 glass-blur-24`}
+          className={`fixed inset-0 z-[${Z.MODAL}] flex flex-col items-start justify-start space-y-10 bg-[radial-gradient(circle_at_12%_20%,rgba(255,107,53,0.2),transparent_45%),radial-gradient(circle_at_88%_25%,rgba(250,204,21,0.14),transparent_40%),radial-gradient(circle_at_50%_88%,rgba(255,138,85,0.15),transparent_50%)] bg-white/20 text-white text-shadow-soft transition duration-200 dark:bg-[#050505]/75 glass-blur-24`}
         >
           <div className="flex items-center justify-between w-full px-5">
             <Logo />
             <div className="flex items-center space-x-2">
-              <ModeToggle />
               <IoIosClose
                 className="h-8 w-8 text-white drop-shadow"
                 onClick={() => setOpen(!open)}

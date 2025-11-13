@@ -1,14 +1,14 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { createClient } from "@/lib/supabaseBrowser";
+import type { Session } from "@supabase/supabase-js";
+import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { createClient } from "@/lib/supabaseBrowser";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import type { Session } from "@supabase/supabase-js";
-import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -29,7 +29,7 @@ export default function LoginPage() {
       document.cookie = `renderlab-refresh-token=${session.refresh_token}; Path=/; Max-Age=${refreshTokenMaxAge}; SameSite=Lax${secure}`;
     }
   };
-const supabase = createClient();
+  const supabase = createClient();
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -50,7 +50,7 @@ const supabase = createClient();
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-neutral-950 text-neutral-100">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_20%,rgba(244,114,182,0.18),transparent_42%),radial-gradient(circle_at_88%_25%,rgba(250,204,21,0.16),transparent_40%),radial-gradient(circle_at_50%_88%,rgba(129,140,248,0.2),transparent_45%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_20%,rgba(255,107,53,0.18),transparent_42%),radial-gradient(circle_at_88%_25%,rgba(250,204,21,0.16),transparent_40%),radial-gradient(circle_at_50%_88%,rgba(255,138,85,0.15),transparent_45%)]" />
       <form
         onSubmit={handleLogin}
         className="relative z-10 flex w-full max-w-md flex-col gap-5 rounded-3xl border border-white/10 bg-white/5 p-10 shadow-[0_30px_75px_-20px_rgba(0,0,0,0.55)] backdrop-blur-2xl"
@@ -98,12 +98,12 @@ const supabase = createClient();
             />
             <span className="text-neutral-300 group-hover:text-white transition-colors">Remember me</span>
           </label>
-            <Link
-              href="/forgot-password"
-              className="text-[#ff6b35] hover:text-[#ff8555] transition-colors font-medium"
-            >
-              Forgot password?
-            </Link>
+          <Link
+            href="/forgot-password"
+            className="text-[#ff6b35] hover:text-[#ff8555] transition-colors font-medium"
+          >
+            Forgot password?
+          </Link>
         </div>
 
         <Button

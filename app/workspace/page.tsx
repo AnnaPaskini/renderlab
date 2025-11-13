@@ -1,18 +1,15 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
-import { NavBar } from "@/components/navbar";
-import { WorkspaceLayout } from "@/components/workspace/WorkspaceLayout";
 import { ImageUploadPanel } from "@/components/workspace/ImageUploadPanel";
 import { PromptBuilderPanel } from "@/components/workspace/PromptBuilderPanelNew";
-import { PreviewStrip } from "@/components/workspace/PreviewStrip";
-import { ImagePreviewModal } from "@/components/common/ImagePreviewModal";
-import { toast } from "sonner";
-import { defaultToastStyle } from "@/lib/toast-config";
-import { useWorkspace } from "@/lib/context/WorkspaceContext";
+import { WorkspaceLayout } from "@/components/workspace/WorkspaceLayout";
 import { useHistory } from "@/lib/context/HistoryContext";
+import { useWorkspace } from "@/lib/context/WorkspaceContext";
+import { defaultToastStyle } from "@/lib/toast-config";
 import { Link as LinkIcon } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 export default function WorkspacePage() {
   const searchParams = useSearchParams();
@@ -32,10 +29,10 @@ export default function WorkspacePage() {
   useEffect(() => {
     // Prevent running multiple times (React Strict Mode runs effects twice)
     if (hasLoadedFromUrlRef.current) return;
-    
+
     const promptFromUrl = searchParams.get('prompt');
     const additionalPromptFromUrl = searchParams.get('additionalPrompt');
-    
+
     if (promptFromUrl) {
       const decodedPrompt = decodeURIComponent(promptFromUrl);
       setPrompt(decodedPrompt);
@@ -48,7 +45,7 @@ export default function WorkspacePage() {
       });
       hasLoadedFromUrlRef.current = true;
     }
-    
+
     if (additionalPromptFromUrl) {
       const decodedAdditionalPrompt = decodeURIComponent(additionalPromptFromUrl);
       setAdditionalDetailsFromUrl(decodedAdditionalPrompt);
@@ -60,9 +57,9 @@ export default function WorkspacePage() {
         },
         duration: 3000
       });
-      
+
       hasLoadedFromUrlRef.current = true;
-      
+
       // Clear the URL parameter after loading (optional - keeps URL clean)
       // You can remove this if you want the parameter to persist in URL
       setTimeout(() => {
@@ -83,7 +80,7 @@ export default function WorkspacePage() {
   const handleClearReference = () => {
     // Clear only the reference image
     setUploadedImage(null);
-    
+
     // Positive feedback toast
     toast.info('Reference cleared — prompt preserved', {
       style: {
@@ -92,7 +89,7 @@ export default function WorkspacePage() {
         border: 'none'
       }
     });
-    
+
     console.log('✅ [Workspace] Reference cleared, prompt preserved');
   };
 
@@ -102,9 +99,9 @@ export default function WorkspacePage() {
       toast.error('Please enter an image URL');
       return;
     }
-    
+
     setIsValidatingUrl(true);
-    
+
     try {
       // Check 1: Direct image URL pattern
       const imageExtensions = /\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i;
@@ -116,7 +113,7 @@ export default function WorkspacePage() {
         setIsValidatingUrl(false);
         return;
       }
-      
+
       // Check 2: Common non-image page URLs
       const pagePatterns = [
         'pinterest.com/pin/',
@@ -125,7 +122,7 @@ export default function WorkspacePage() {
         'twitter.com',
         'x.com'
       ];
-      
+
       if (pagePatterns.some(pattern => url.includes(pattern))) {
         toast.error('This link is not a direct image file', {
           description: 'Right-click the image → "Copy image address"',
@@ -134,11 +131,11 @@ export default function WorkspacePage() {
         setIsValidatingUrl(false);
         return;
       }
-      
+
       // Check 3: Try HEAD request to verify content type
       const response = await fetch(url, { method: 'HEAD' });
       const contentType = response.headers.get('content-type');
-      
+
       if (contentType?.startsWith('image/')) {
         setUploadedImage(url);
         toast.success('Image loaded from URL');
@@ -146,7 +143,7 @@ export default function WorkspacePage() {
       } else {
         toast.error('This URL does not point to an image file');
       }
-      
+
     } catch (error) {
       console.error('Failed to validate URL:', error);
       toast.error('Failed to load image from URL. Please check the link and try again.');
@@ -201,10 +198,10 @@ export default function WorkspacePage() {
       if (data?.status === "succeeded" && data?.output?.imageUrl) {
         const nextImage = data.output.imageUrl;
         setPreviews((prev) => [...prev, nextImage]);
-        
+
         // ✅ Refresh history to show new generation
         await refreshHistory();
-        
+
         // Show different toast based on mode
         if (uploadedImage) {
           toast.success("✨ Generated from reference image", { style: defaultToastStyle });
@@ -224,88 +221,79 @@ export default function WorkspacePage() {
   };
 
   return (
-    <>
-      <NavBar />
-      <WorkspaceLayout
-        leftPanel={
-          <div className="space-y-6">
-            {/* Upload Zone */}
-            <ImageUploadPanel
-              image={uploadedImage}
-              onImageChange={setUploadedImage}
-              onClearImage={handleClearReference}
-            />
-            
-            {/* URL Input - separate section */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="flex-1 border-t border-white/40 dark:border-white/20" />
-                <span className="text-sm text-neutral-600 dark:text-neutral-400 font-medium">OR</span>
-                <div className="flex-1 border-t border-white/40 dark:border-white/20" />
-              </div>
-              
-              <label className="flex items-center gap-2 text-sm font-medium text-neutral-900 dark:text-white">
-                <LinkIcon size={16} className="text-neutral-500 dark:text-neutral-400" />
-                Paste image URL
-              </label>
-              
-              <div className="flex gap-2">
-                <input
-                  type="url"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && imageUrl.trim()) {
-                      validateAndLoadImageUrl(imageUrl);
-                    }
-                  }}
-                  placeholder="https://example.com/image.jpg"
-                  className="flex-1 px-3 py-2 text-sm border border-white/8 rounded-lg bg-[#141414] focus:ring-2 focus:ring-[#ff6b35] focus:ring-opacity-50 focus:border-[#ff6b35] outline-none transition-all text-white placeholder:text-gray-500"
-                  disabled={isValidatingUrl}
-                />
-                
-                <button
-                  onClick={() => validateAndLoadImageUrl(imageUrl)}
-                  disabled={!imageUrl.trim() || isValidatingUrl}
-                  className="px-5 py-2.5 bg-[#202020] text-white text-sm font-medium rounded-lg hover:bg-[#282828] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                >
-                  {isValidatingUrl ? (
-                    <span className="flex items-center gap-2">
-                      <span className="animate-spin">⏳</span>
-                      Loading
-                    </span>
-                  ) : (
-                    'Load'
-                  )}
-                </button>
-              </div>
-              
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                Direct image links only (.jpg, .png, .webp)
-              </p>
-            </div>
-          </div>
-        }
-        rightPanel={
-          <PromptBuilderPanel
-            onPromptChange={setPrompt}
-            onGenerate={handleGenerate}
-            isGenerating={isGenerating}
-            onPreviewAdd={(url) => setPreviews((prev) => [...prev, url])}
-            uploadedImage={uploadedImage}
-            onHistoryRefresh={refreshHistory}
-            initialAdditionalDetails={additionalDetailsFromUrl}
+    <WorkspaceLayout
+      leftPanel={
+        <div className="space-y-6">
+          {/* Upload Zone */}
+          <ImageUploadPanel
+            image={uploadedImage}
+            onImageChange={setUploadedImage}
+            onClearImage={handleClearReference}
           />
-        }
-        uploadedImage={uploadedImage}
-        previews={previews}
-      />
-      
-      {/* Fullscreen Image Preview Modal */}
-      <ImagePreviewModal
-        imageUrl={previewImageUrl}
-        onClose={() => setPreviewImageUrl(null)}
-      />
-    </>
+
+          {/* URL Input - separate section */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 border-t border-white/40 dark:border-white/20" />
+              <span className="text-sm text-neutral-600 dark:text-neutral-400 font-medium">OR</span>
+              <div className="flex-1 border-t border-white/40 dark:border-white/20" />
+            </div>
+
+            <label className="flex items-center gap-2 text-sm font-medium text-neutral-900 dark:text-white">
+              <LinkIcon size={16} className="text-neutral-500 dark:text-neutral-400" />
+              Paste image URL
+            </label>
+
+            <div className="flex gap-2">
+              <input
+                type="url"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && imageUrl.trim()) {
+                    validateAndLoadImageUrl(imageUrl);
+                  }
+                }}
+                placeholder="https://example.com/image.jpg"
+                className="flex-1 px-3 py-2 text-sm border border-white/8 rounded-lg bg-[#141414] focus:ring-2 focus:ring-[#ff6b35] focus:ring-opacity-50 focus:border-[#ff6b35] outline-none transition-all text-white placeholder:text-gray-500"
+                disabled={isValidatingUrl}
+              />
+
+              <button
+                onClick={() => validateAndLoadImageUrl(imageUrl)}
+                disabled={!imageUrl.trim() || isValidatingUrl}
+                className="px-5 py-2.5 bg-[#202020] text-white text-sm font-medium rounded-lg hover:bg-[#282828] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              >
+                {isValidatingUrl ? (
+                  <span className="flex items-center gap-2">
+                    <span className="animate-spin">⏳</span>
+                    Loading
+                  </span>
+                ) : (
+                  'Load'
+                )}
+              </button>
+            </div>
+
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              Direct image links only (.jpg, .png, .webp)
+            </p>
+          </div>
+        </div>
+      }
+      rightPanel={
+        <PromptBuilderPanel
+          onPromptChange={setPrompt}
+          onGenerate={handleGenerate}
+          isGenerating={isGenerating}
+          onPreviewAdd={(url) => setPreviews((prev) => [...prev, url])}
+          uploadedImage={uploadedImage}
+          onHistoryRefresh={refreshHistory}
+          initialAdditionalDetails={additionalDetailsFromUrl}
+        />
+      }
+      uploadedImage={uploadedImage}
+      previews={previews}
+    />
   );
 }

@@ -1,17 +1,16 @@
 "use client";
+import { cn } from "@/lib/utils";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValueEvent,
+  useScroll,
+} from "framer-motion";
+import { Link } from "next-view-transitions";
+import { useState } from "react";
 import { Logo } from "../Logo";
 import { Button } from "../button";
 import { NavBarItem } from "./navbar-item";
-import {
-  useMotionValueEvent,
-  useScroll,
-  motion,
-  AnimatePresence,
-} from "framer-motion";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
-import { Link } from "next-view-transitions";
-import { ModeToggle } from "../mode-toggle";
 
 type Props = {
   navItems: {
@@ -36,10 +35,10 @@ export const DesktopNavbar = ({ navItems }: Props) => {
   return (
     <div
       className={cn(
-  "nav-surface nav-overlay relative flex w-full items-center justify-between gap-4 rounded-full border border-white/20 px-4 py-2 text-white text-shadow-soft transition duration-200 dark:border-white/20",
+        "nav-surface nav-overlay relative flex w-full items-center justify-between gap-4 rounded-full border border-white/20 px-4 py-2 text-white text-shadow-soft transition duration-200 dark:border-white/20",
         "shadow-[0_24px_48px_-20px_rgba(12,12,24,0.55)]",
         showBackground &&
-          "shadow-[0_30px_60px_-20px_rgba(12,12,24,0.65)]"
+        "shadow-[0_30px_60px_-20px_rgba(12,12,24,0.65)]"
       )}
     >
       <AnimatePresence>
@@ -51,7 +50,7 @@ export const DesktopNavbar = ({ navItems }: Props) => {
             transition={{
               duration: 1,
             }}
-            className="pointer-events-none absolute inset-0 h-full w-full rounded-full bg-[radial-gradient(circle_at_12%_20%,rgba(244,114,182,0.18),transparent_45%),radial-gradient(circle_at_85%_30%,rgba(250,204,21,0.14),transparent_40%),radial-gradient(circle_at_50%_90%,rgba(129,140,248,0.2),transparent_45%)]"
+            className="pointer-events-none absolute inset-0 h-full w-full rounded-full bg-[radial-gradient(circle_at_12%_20%,rgba(255,107,53,0.18),transparent_45%),radial-gradient(circle_at_85%_30%,rgba(250,204,21,0.14),transparent_40%),radial-gradient(circle_at_50%_90%,rgba(255,138,85,0.15),transparent_45%)]"
           />
         )}
       </AnimatePresence>
@@ -66,7 +65,6 @@ export const DesktopNavbar = ({ navItems }: Props) => {
         </div>
       </div>
       <div className="flex items-center space-x-2">
-        <ModeToggle />
         <Button
           variant="simple"
           as={Link}

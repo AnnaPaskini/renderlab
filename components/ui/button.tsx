@@ -10,18 +10,18 @@ import { cn } from "@/lib/utils";
  * Compatible with Radix Slot for polymorphic composition.
  */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-xl font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]",
+  "inline-flex items-center justify-center rounded-xl font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--rl-accent)] focus-visible:ring-offset-0 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]",
   {
     variants: {
       variant: {
         default:
-          "bg-[#ff6b35] hover:bg-[#ff8555] text-white shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 transition-all duration-200 border-0",
+          "bg-[var(--rl-accent)] hover:bg-[var(--rl-accent-light)] text-white shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 transition-all duration-200 border-0",
         secondary:
-          "bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700",
+          "bg-[var(--rl-panel)] text-[var(--rl-text)] hover:bg-[var(--rl-surface-elevated)] border border-[var(--rl-border)]",
         ghost:
-          "text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800",
+          "text-[var(--rl-text)] hover:bg-[var(--rl-panel)]",
         outline:
-          "border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100",
+          "border border-[var(--rl-border)] hover:bg-[var(--rl-panel)] text-[var(--rl-text)]",
         destructive:
           "bg-red-500 text-white hover:bg-red-600",
       },

@@ -143,12 +143,12 @@ export function PromptCard({ prompt, onLikeToggle, initialLiked = false }: Promp
         </div>
 
         {/* Back - Full prompt text */}
-        <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] bg-white p-6 flex flex-col">
+        <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] bg-[#161616] border border-white/8 p-6 flex flex-col">
           <div className="flex-1 overflow-y-auto">
-            <h3 className="font-bold text-lg mb-3">{prompt.title}</h3>
+            <h3 className="font-bold text-lg mb-3 text-white">{prompt.title}</h3>
             
             <div className="prose prose-sm max-w-none">
-              <p className="text-gray-700 whitespace-pre-wrap">{prompt.prompt}</p>
+              <p className="text-gray-300 whitespace-pre-wrap">{prompt.prompt}</p>
             </div>
             
             {/* Tags */}
@@ -157,7 +157,7 @@ export function PromptCard({ prompt, onLikeToggle, initialLiked = false }: Promp
                 {prompt.tags.map((tag, index) => (
                   <span
                     key={`${prompt.id}-tag-${index}`}
-                    className="px-2 py-1 bg-[var(--rl-surface-hover)] text-[var(--rl-muted)] text-xs rounded-full"
+                    className="px-2 py-1 bg-[#1a1a1a] text-gray-400 text-xs rounded-full border border-white/8"
                   >
                     #{tag}
                   </span>
@@ -167,16 +167,16 @@ export function PromptCard({ prompt, onLikeToggle, initialLiked = false }: Promp
           </div>
           
           {/* Action buttons */}
-          <div className="flex gap-2 mt-4 pt-4 border-t">
+          <div className="flex gap-2 mt-4 pt-4 border-t border-white/8">
             <button
               onClick={handleCopy}
-              className="flex-1 px-4 py-2.5 bg-[#ff6b35] text-white rounded-lg hover:bg-[#ff8555] text-sm font-medium transition-all duration-200"
+              className="flex-1 px-4 py-2.5 bg-[#ff6b35] text-white rounded-lg hover:bg-[#ff8555] text-sm font-semibold shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 transition-all duration-200"
             >
               Copy
             </button>
             <button
               onClick={handleAddToTemplate}
-              className="flex-1 px-4 py-2.5 border border-[var(--rl-border)] rounded-lg hover:bg-[var(--rl-surface-hover)] text-sm font-medium transition-colors"
+              className="flex-1 px-4 py-2.5 bg-[#1a1a1a] text-white border border-white/8 rounded-lg hover:bg-[#202020] hover:border-white/12 text-sm font-semibold transition-all duration-200"
             >
               Add to Template
             </button>
