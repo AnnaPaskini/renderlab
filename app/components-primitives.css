@@ -37,10 +37,16 @@
 /* ===== PANEL (Large containers) ===== */
 
 .rl-panel {
-    background: var(--rl-bg-elevated);
-    border-radius: var(--rl-radius-xl);
-    padding: var(--rl-space-8);
-    box-shadow: var(--rl-shadow-md);
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    box-shadow: var(--rl-shadow-panel);
+    transition: all 0.2s ease;
+}
+
+.rl-panel:hover {
+    box-shadow: var(--rl-shadow-panel-hover);
 }
 
 /* ===== MODAL ===== */
@@ -316,6 +322,7 @@
 .rl-drop-active {
     background: rgba(255, 107, 53, 0.05);
 }
+
 /* ===== CUSTOM SCROLLBAR ===== */
 
 .scrollbar-thin {
@@ -426,4 +433,50 @@
 [data-sonner-toast] [data-close-button]:hover {
     background: rgba(255, 255, 255, 0.1) !important;
     color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* ===== COLLAPSIBLE SECTIONS (DETAILS/SUMMARY) ===== */
+
+details summary {
+    cursor: pointer;
+    user-select: none;
+}
+
+details summary::-webkit-details-marker {
+    display: none;
+}
+
+details[open] summary span:last-child {
+    transform: rotate(180deg);
+}
+
+details summary span:last-child {
+    transition: transform 0.2s ease;
+    display: inline-block;
+}
+
+/* ===== INSET TEXTAREA (For sunken input areas) ===== */
+
+.rl-textarea-inset {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    color: white;
+    width: 100%;
+    resize: none;
+    transition: all var(--rl-transition-base);
+}
+
+.rl-textarea-inset:focus {
+    outline: none;
+    border-color: rgba(255, 107, 53, 0.5);
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.3),
+        0 0 0 2px rgba(255, 107, 53, 0.2);
+}
+
+.rl-textarea-inset::placeholder {
+    color: rgba(255, 255, 255, 0.3);
 }

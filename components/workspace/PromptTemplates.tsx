@@ -328,16 +328,23 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
         </div>
       )}
 
-      {/* Modal */}
+      {/* Modal - Template Preview with glass effect */}
       <Dialog open={!!previewTemplate} onOpenChange={() => setPreviewTemplate(null)}>
-        <DialogContent className="modal-content max-w-xl">
+        <DialogContent
+          className="rounded-xl text-rl-text w-full max-w-xl z-[60] border border-white/[0.08]"
+          style={{
+            background: 'rgba(30, 30, 30, 0.95)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0, 0, 0, 0.8), 0 32px 96px rgba(0, 0, 0, 0.5)'
+          }}
+        >
           {previewTemplate && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-2xl font-semibold text-[var(--rl-text)]">
+                <DialogTitle className="text-2xl font-semibold text-white">
                   {previewTemplate.name || previewTemplate.title || "Template"}
                 </DialogTitle>
-                <p className="text-sm text-[var(--rl-text-secondary)] mt-1">
+                <p className="text-sm text-gray-400 mt-1">
                   {previewTemplate.description ||
                     previewTemplate.style ||
                     previewTemplate.scenario ||
@@ -345,33 +352,33 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                 </p>
               </DialogHeader>
 
-              <div className="mt-5 rounded-xl border border-[var(--rl-border)] bg-[var(--rl-surface)] p-5">
-                <div className="grid grid-cols-2 gap-y-2 text-sm text-[var(--rl-text-secondary)]">
+              <div className="mt-5 rounded-xl border border-white/8 bg-black/30 p-5">
+                <div className="grid grid-cols-2 gap-y-2 text-sm text-gray-400">
                   <div>AI Model:</div>
-                  <div className="text-[var(--rl-text)]">
+                  <div className="text-white">
                     {previewTemplate.formData?.aiModel ||
                       previewTemplate.aiModel ||
                       "—"}
                   </div>
 
                   <div>Style:</div>
-                  <div className="text-[var(--rl-text)]">
+                  <div className="text-white">
                     {previewTemplate.formData?.style ||
                       previewTemplate.style ||
                       "—"}
                   </div>
 
                   <div>Scenario:</div>
-                  <div className="text-[var(--rl-text)]">
+                  <div className="text-white">
                     {previewTemplate.scenario || "—"}
                   </div>
                 </div>
 
-                <div className="mt-4 border-t border-[var(--rl-border)] pt-3">
-                  <div className="mb-1 text-sm text-[var(--rl-text-secondary)]">
+                <div className="mt-4 border-t border-white/8 pt-3">
+                  <div className="mb-1 text-sm text-gray-400">
                     Final Prompt:
                   </div>
-                  <p className="leading-relaxed whitespace-pre-line text-[var(--rl-text)]/90">
+                  <p className="leading-relaxed whitespace-pre-line text-white/90">
                     {previewTemplate.finalPrompt ||
                       previewTemplate.details ||
                       "No final prompt generated yet."}
@@ -380,25 +387,23 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
               </div>
 
               <DialogFooter className="mt-6 flex justify-end gap-3">
-                <Button
-                  variant="destructive"
+                <button
+                  className="rl-btn bg-red-600 hover:bg-red-700 text-white px-6 transition-all"
                   onClick={() => {
                     setPreviewTemplate(null);
                     openDeleteDialog(previewTemplate);
                   }}
                 >
                   Delete
-                </Button>
+                </button>
                 <button
-                  type="button"
-                  className="rl-btn-secondary text-sm"
+                  className="rl-btn rl-btn-secondary px-6"
                   onClick={handleCancel}
                 >
                   Cancel
                 </button>
                 <button
-                  type="button"
-                  className="rl-btn-primary text-sm"
+                  className="rl-btn rl-btn-primary px-6"
                   onClick={() => handleLoadTemplate(previewTemplate)}
                 >
                   Load Template
@@ -411,9 +416,16 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
       {/* Rename Template Dialog */}
       <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
-        <DialogContent className="modal-content">
+        <DialogContent
+          className="rounded-xl text-rl-text w-full max-w-md border border-white/[0.08]"
+          style={{
+            background: 'rgba(30, 30, 30, 0.95)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0, 0, 0, 0.8), 0 32px 96px rgba(0, 0, 0, 0.5)'
+          }}
+        >
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-[var(--rl-text)]">
+            <DialogTitle className="text-xl font-semibold text-white">
               Rename Template
             </DialogTitle>
           </DialogHeader>
@@ -439,8 +451,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
           <DialogFooter className="mt-6 flex justify-end gap-3">
             <button
-              type="button"
-              className="rl-btn-secondary text-sm"
+              className="rl-btn rl-btn-secondary px-6"
               onClick={() => {
                 setIsRenameOpen(false);
                 setRenameDraft("");
@@ -449,8 +460,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
               Cancel
             </button>
             <button
-              type="button"
-              className="rl-btn-primary text-sm"
+              className="rl-btn rl-btn-primary px-6"
               onClick={handleRenameSubmit}
               disabled={!renameDraft.trim()}
             >
@@ -462,39 +472,55 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
       {/* Delete Template Dialog */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <DialogContent className="modal-content">
+        <DialogContent
+          className="rounded-xl text-rl-text w-full max-w-md border border-white/[0.08]"
+          style={{
+            background: 'rgba(30, 30, 30, 0.95)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0, 0, 0, 0.8), 0 32px 96px rgba(0, 0, 0, 0.5)'
+          }}
+        >
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-[var(--rl-text)]">
+            <DialogTitle className="text-xl font-semibold text-white">
               Delete Template?
             </DialogTitle>
           </DialogHeader>
 
           <div className="mt-4">
-            <p className="text-sm text-[var(--rl-text-secondary)]">
-              Are you sure you want to delete "<strong>{deleteTarget?.name || deleteTarget?.title || 'this template'}</strong>"? This action cannot be undone.
+            <p className="text-sm text-gray-400">
+              Are you sure you want to delete "<strong className="text-white">{deleteTarget?.name || deleteTarget?.title || 'this template'}</strong>"? This action cannot be undone.
             </p>
           </div>
 
           <DialogFooter className="mt-6 flex justify-end gap-3">
             <button
-              type="button"
-              className="rl-btn-secondary text-sm"
+              className="rl-btn rl-btn-secondary px-6"
               onClick={() => setIsDeleteOpen(false)}
             >
               Cancel
             </button>
-            <Button variant="destructive" onClick={handleDeleteConfirm}>
+            <button
+              className="rl-btn bg-red-600 hover:bg-red-700 text-white px-6 transition-all"
+              onClick={handleDeleteConfirm}
+            >
               Delete
-            </Button>
+            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Create New Template Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="modal-content">
+        <DialogContent
+          className="rounded-xl text-rl-text w-full max-w-md border border-white/[0.08]"
+          style={{
+            background: 'rgba(30, 30, 30, 0.95)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0, 0, 0, 0.8), 0 32px 96px rgba(0, 0, 0, 0.5)'
+          }}
+        >
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-[var(--rl-text)]">
+            <DialogTitle className="text-xl font-semibold text-white">
               Create New Template
             </DialogTitle>
           </DialogHeader>
@@ -520,8 +546,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
           <DialogFooter className="mt-6 flex justify-end gap-3">
             <button
-              type="button"
-              className="rl-btn-secondary text-sm"
+              className="rl-btn rl-btn-secondary px-6"
               onClick={() => {
                 setIsCreateOpen(false);
                 setNewTemplateName("");
@@ -530,8 +555,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
               Cancel
             </button>
             <button
-              type="button"
-              className="rl-btn-primary text-sm"
+              className="rl-btn rl-btn-primary px-6"
               onClick={handleCreateTemplate}
               disabled={!newTemplateName.trim()}
             >

@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { Upload, X } from "lucide-react";
-import { motion } from "framer-motion";
-import clsx from "clsx";
-import { toast } from "sonner";
 import { defaultToastStyle } from "@/lib/toast-config";
+import clsx from "clsx";
+import { motion } from "framer-motion";
+import { Upload, X } from "lucide-react";
+import { useCallback, useState } from "react";
+import { toast } from "sonner";
 
 interface ImageUploadPanelProps {
   onImageChange: (image: string | null) => void;
@@ -69,7 +69,7 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
     <div className="flex w-full max-w-full flex-col gap-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-  <h2 className="text-lg font-semibold tracking-tight text-rl-text">
+        <h2 className="text-lg font-semibold tracking-tight text-rl-text">
           Upload Image
         </h2>
         {image && (
@@ -104,8 +104,8 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
           onDragOver={handleDrag}
           onDrop={handleDrop}
           className={clsx(
-            "relative mx-auto flex min-h-[360px] max-h-[60vh] w-full max-w-full flex-col items-center justify-center overflow-hidden rounded-2xl transition-all duration-300 p-16 sm:max-h-[65vh] lg:max-h-[70vh] cursor-pointer",
-            isDragActive ? "bg-[#181818] shadow-lg shadow-[#ff6b35]/10" : "bg-[#141414] hover:bg-[#181818] hover:shadow-lg hover:shadow-[#ff6b35]/10"
+            "relative mx-auto flex min-h-[360px] max-h-[60vh] w-full max-w-full flex-col items-center justify-center overflow-hidden rounded-2xl transition-all duration-300 p-16 sm:max-h-[65vh] lg:max-h-[70vh] cursor-pointer border-2 border-dashed",
+            isDragActive ? "bg-[#2a2a2a] border-white/20 shadow-lg shadow-[#ff6b35]/10" : "bg-[#262626] border-white/12 hover:bg-[#2a2a2a] hover:border-white/20 hover:shadow-lg hover:shadow-[#ff6b35]/10"
           )}
         >
           <label className="relative z-20 flex flex-col items-center justify-center cursor-pointer text-center w-full">
@@ -141,8 +141,8 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
           onDragOver={handleDrag}
           onDrop={handleDrop}
           className={clsx(
-            "relative mx-auto flex min-h-[360px] max-h-[60vh] w-full max-w-full items-center justify-center overflow-hidden rounded-2xl transition-all duration-300 p-6 sm:max-h-[65vh] lg:max-h-[70vh] cursor-pointer",
-            isDragActive ? "bg-[#181818] shadow-lg shadow-[#ff6b35]/10" : "bg-[#141414] hover:bg-[#181818] hover:shadow-lg hover:shadow-[#ff6b35]/10"
+            "relative mx-auto flex min-h-[360px] max-h-[60vh] w-full max-w-full items-center justify-center overflow-hidden rounded-2xl transition-all duration-300 p-6 sm:max-h-[65vh] lg:max-h-[70vh] cursor-pointer border-2 border-dashed",
+            isDragActive ? "bg-[#2a2a2a] border-white/20 shadow-lg shadow-[#ff6b35]/10" : "bg-[#262626] border-white/12 hover:bg-[#2a2a2a] hover:border-white/20 hover:shadow-lg hover:shadow-[#ff6b35]/10"
           )}
         >
           <div className="relative z-10 flex items-center justify-center w-full h-full">

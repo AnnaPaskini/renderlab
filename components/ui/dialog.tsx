@@ -10,7 +10,7 @@ const DialogTrigger = DialogPrimitive.Trigger;
 const DialogPortal = DialogPrimitive.Portal;
 const DialogClose = DialogPrimitive.Close;
 
-// --- Clean overlay with NO blur ---
+// --- Clean overlay with backdrop blur for Freepik style ---
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
@@ -18,7 +18,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      `fixed inset-0 z-[${Z.OVERLAY}] bg-black/70 transition-all duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out`,
+      `fixed inset-0 z-[${Z.OVERLAY}] bg-black/50 backdrop-blur-sm transition-all duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0`,
       className
     )}
     {...props}

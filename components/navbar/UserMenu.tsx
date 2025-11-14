@@ -52,7 +52,7 @@ export default function UserMenu() {
         />
       </div>
 
-      {/* Dropdown */}
+      {/* Dropdown - Position absolute, does NOT affect navbar height */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -60,7 +60,12 @@ export default function UserMenu() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="panel-dimmer panel-soft absolute right-0 top-full z-50 mt-3 w-52 overflow-hidden rounded-2xl"
+            className="absolute right-0 top-full z-50 mt-3 w-52 overflow-hidden rounded-xl"
+            style={{
+              background: '#1a1a1a',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.6), 0 20px 56px rgba(0, 0, 0, 0.4)'
+            }}
           >
             <button
               onClick={() => {

@@ -1,22 +1,11 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
-import { toast } from "react-hot-toast";
-import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogFooter,
+  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
@@ -25,12 +14,22 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useCollections } from "@/lib/useCollections";
-import * as ToggleGroup from "@radix-ui/react-toggle-group";
-import { cn } from "@/lib/utils";
-import { IconDotsVertical, IconChevronDown } from "@tabler/icons-react";
-import { ContextIndicator } from './ContextIndicator';
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useWorkspace } from '@/lib/context/WorkspaceContext';
+import { useCollections } from "@/lib/useCollections";
+import { cn } from "@/lib/utils";
+import { IconChevronDown, IconDotsVertical } from "@tabler/icons-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "react-hot-toast";
+import { ContextIndicator } from './ContextIndicator';
 
 export interface PromptBuilderPanelProps {
   onPromptChange?: (prompt: string) => void;
@@ -106,7 +105,7 @@ export function PromptBuilderPanel({
 
   const getPageSubtitle = () => {
     if (activeItem.type === null) {
-      return 'Keep crafting stunning visuals with RenderLab.';
+      return '';
     }
     return 'Make your changes and generate new variations.';
   };
@@ -133,9 +132,9 @@ export function PromptBuilderPanel({
   const [isTemplateDropdownOpen, setIsTemplateDropdownOpen] = useState(false);
 
   const selectTriggerClass =
-  "h-12 w-full rounded-xl border border-rl-glass-border bg-rl-panel px-3 text-left text-sm font-medium text-rl-text  shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6b35]";
+    "h-12 w-full rounded-xl border border-rl-glass-border bg-rl-panel px-3 text-left text-sm font-medium text-rl-text  shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6b35]";
   const inputSurfaceClass =
-  "w-full rounded-xl border border-rl-glass-border bg-rl-panel px-3 py-2 text-sm font-medium text-rl-text  shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6b35] placeholder:text-rl-text-secondary";
+    "w-full rounded-xl border border-rl-glass-border bg-rl-panel px-3 py-2 text-sm font-medium text-rl-text  shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6b35] placeholder:text-rl-text-secondary";
 
   const resolveString = (...values: unknown[]) => {
     for (const value of values) {
@@ -159,13 +158,13 @@ export function PromptBuilderPanel({
     // Filter function to exclude collection-generated templates
     const isOriginalTemplate = (template: any) => {
       const name = template?.name || template?.title || '';
-      
+
       // Exclude collection-generated templates
       if (name.includes(' • ')) return false;  // "Winter day • 3"
       if (name.includes(' - Copy')) return false;  // "autumn scene - Copy"
       if (/^\d+$/.test(name)) return false;  // Pure numbers like "999"
       if (/^\d+ • \d+$/.test(name)) return false;  // "9 • 56"
-      
+
       return true;
     };
 
@@ -317,7 +316,7 @@ export function PromptBuilderPanel({
     if (value === "template" || value === "collection") {
       // Clear WorkspaceContext when switching tabs
       clear();
-      
+
       setActiveMode(value);
       if (value === "template") {
         setActiveCollectionId(null);
@@ -337,7 +336,7 @@ export function PromptBuilderPanel({
     setActiveCollectionId(id);
     const collection = collections.find((item) => item.id === id) ?? null;
     setSelectedCollection(collection);
-    
+
     // Update WorkspaceContext
     if (collection) {
       // Transform localStorage Collection to match DB CollectionWithTemplates format
@@ -350,10 +349,10 @@ export function PromptBuilderPanel({
         templates: collection.templates || [],
         template_count: (collection.templates || []).length
       };
-      
+
       loadCollection(collectionWithCount as any);
     }
-    
+
     collectionPreviewSetRef.current.clear();
     setCollectionProgress(getInitialProgressState());
   };
@@ -448,7 +447,7 @@ export function PromptBuilderPanel({
         setDetails(activeItem.data.prompt);
         console.log('✅ [PromptBuilder] Loaded temporary prompt:', activeItem.data.prompt);
       }
-      
+
       // Note: Reference image (uploadedImage) is managed by parent component (workspace/page.tsx)
       // The parent needs to handle activeItem.data.reference_url
       if (activeItem.data.reference_url) {
@@ -546,10 +545,10 @@ export function PromptBuilderPanel({
 
     const templatesPayload = Array.isArray(collection.templates)
       ? collection.templates.map((template: any) => ({
-          id: template.id || `template-${Date.now()}`,
-          prompt: template.details || template.name || "",
-          model: template.aiModel || "google/nano-banana",
-        }))
+        id: template.id || `template-${Date.now()}`,
+        prompt: template.details || template.name || "",
+        model: template.aiModel || "google/nano-banana",
+      }))
       : [];
 
     if (!templatesPayload.length) {
@@ -590,12 +589,12 @@ export function PromptBuilderPanel({
         const blob = await fetch(uploadedImage).then(r => r.blob());
         const formData = new FormData();
         formData.append('file', blob, 'reference.png');
-        
+
         const uploadRes = await fetch('/api/upload', {
           method: 'POST',
           body: formData,
         });
-        
+
         const uploadData = await uploadRes.json();
         publicImageUrl = uploadData.output?.publicUrl || null;
         console.log('✅ Uploaded reference image:', publicImageUrl);
@@ -879,11 +878,11 @@ export function PromptBuilderPanel({
       name: `${template.name || template.title || 'Template'} - Copy`,
       createdAt: new Date().toISOString(),
     };
-    
+
     const existingTemplates = readTemplatesFromStorage();
     const updatedTemplates = [...existingTemplates, duplicated];
     saveTemplatesToStorage(updatedTemplates);
-    
+
     toast.success(`Template duplicated: ${duplicated.name}`);
   };
 
@@ -902,11 +901,11 @@ export function PromptBuilderPanel({
         ? { ...t, name: renameTemplateName.trim() }
         : t
     );
-    
+
     saveTemplatesToStorage(updatedTemplates);
-    
+
     toast.success(`Template renamed to: ${renameTemplateName.trim()}`);
-    
+
     setIsRenameTemplateOpen(false);
     setRenameTemplateTarget(null);
     setRenameTemplateName('');
@@ -924,259 +923,395 @@ export function PromptBuilderPanel({
     const updatedTemplates = existingTemplates.filter((t: any) =>
       t.id !== deleteTemplateTarget.id && t.createdAt !== deleteTemplateTarget.createdAt
     );
-    
+
     saveTemplatesToStorage(updatedTemplates);
-    
+
     // If this was the active template, clear it
     if (activeTemplateId === deleteTemplateTarget.id || activeTemplateId === deleteTemplateTarget.createdAt) {
       setActiveTemplateId(null);
     }
-    
+
     toast.success("Template deleted!");
-    
+
     setIsDeleteTemplateOpen(false);
     setDeleteTemplateTarget(null);
   };
 
   return (
-  <section className="flex h-full flex-col gap-4 overflow-hidden rounded-3xl border border-rl-glass-border bg-rl-panel p-6 text-rl-text  shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
-      <div className="flex-1 overflow-y-auto">
-  {currentTab === "builder" && (
+    <div className="flex h-full flex-col overflow-hidden text-rl-text">
+      <div className="flex-1 overflow-y-auto px-2">
+        {currentTab === "builder" && (
           <motion.div
             key="builder"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.3 }}
-            className="space-y-4"
+            className="space-y-6"
           >
-            <div>
-              <h2 className="text-2xl font-bold text-rl-text">{getPageTitle()}</h2>
-              <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{getPageSubtitle()}</p>
+            {/* Header with Clear All button - No container */}
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-rl-text">{getPageTitle()}</h2>
+                <p className="text-sm text-gray-400 mt-1">{getPageSubtitle()}</p>
+              </div>
+              <button
+                onClick={() => {
+                  if (window.confirm('Clear all settings and reset prompt builder?')) {
+                    setDetails('');
+                    setStyle('');
+                    setActiveTemplateId(null);
+                    setActiveCollectionId(null);
+                    setSelectedCollection(null);
+                    clear();
+                    toast.success('All cleared');
+                  }
+                }}
+                className="text-sm text-gray-400 hover:text-white transition-colors"
+              >
+                Clear All
+              </button>
             </div>
 
             {/* Context Indicator */}
-            <div className="mb-6">
+            <div>
               <ContextIndicator uploadedImage={uploadedImage} />
             </div>
 
-            <motion.div
-              layout
-              className="rounded-2xl border border-rl-glass-border bg-rl-panel p-4 text-rl-text  shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]"
+            {/* Current Prompt Display - Now Editable - Standalone Panel */}
+            <div
+              className="rounded-xl p-4 border border-white/[0.06]"
+              style={{
+                background: '#1a1a1a',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 20px 56px rgba(0, 0, 0, 0.3)'
+              }}
             >
-              <div className="flex flex-col gap-4">
-                <ToggleGroup.Root
-                  type="single"
-                  value={activeMode}
-                  onValueChange={handleModeChange}
-                  className="grid w-full grid-cols-2 gap-2 rounded-xl bg-rl-surface p-1 shadow-inner transition-all duration-300/60"
-                >
-                  <ToggleGroup.Item
-                    value="template"
-                    className={cn(
-                      "rounded-lg px-4 py-2 text-sm font-medium text-neutral-500 transition-all duration-300",
-                      "hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200",
-                      "data-[state=on]:bg-rl-panel data-[state=on]:text-rl-text data-[state=on]:shadow-sm",
-                    )}
-                  >
-                    Load Template
-                  </ToggleGroup.Item>
-                  <ToggleGroup.Item
-                    value="collection"
-                    className={cn(
-                      "rounded-lg px-4 py-2 text-sm font-medium text-neutral-500 transition-all duration-300",
-                      "hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200",
-                      "data-[state=on]:bg-rl-panel data-[state=on]:text-rl-text data-[state=on]:shadow-sm",
-                    )}
-                  >
-                    Load Collection
-                  </ToggleGroup.Item>
-                </ToggleGroup.Root>
-
-                <AnimatePresence mode="wait">
-                  {activeMode === "template" ? (
-                    <motion.div
-                      key="template-select"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.3 }}
-                      className="transition-all duration-300"
-                    >
-                      {templateOptions.length > 0 ? (
-                        <DropdownMenu open={isTemplateDropdownOpen} onOpenChange={setIsTemplateDropdownOpen}>
-                          <DropdownMenuTrigger asChild>
-                            <button className={cn(selectTriggerClass, "flex items-center justify-between")}>
-                              <span className="truncate">
-                                {activeTemplateId 
-                                  ? templateOptions.find(opt => opt.id === activeTemplateId)?.label || "Select a saved template"
-                                  : "Select a saved template"
-                                }
-                              </span>
-                              <IconChevronDown size={16} className="ml-2 flex-shrink-0" />
-                            </button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent 
-                            className="w-[400px] max-h-[400px] overflow-y-auto bg-[var(--rl-surface)] border border-[var(--rl-border)] rounded-lg shadow-lg"
-                            align="start"
-                          >
-                            {templateOptions.map((option) => {
-                              const template = templateLookup.get(option.id)?.template;
-                              return (
-                                <div
-                                  key={option.id}
-                                  className="flex items-center justify-between w-full group hover:bg-[var(--rl-surface-hover)] px-3 py-2 cursor-pointer"
-                                >
-                                  <div 
-                                    className="flex-1 min-w-0"
-                                    onClick={() => {
-                                      handleTemplateChange(option.id);
-                                      setIsTemplateDropdownOpen(false);
-                                    }}
-                                  >
-                                    <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                                      {template?.name || template?.title || "Untitled template"}
-                                    </div>
-                                    {(template?.style || template?.scenario) && (
-                                      <div className="text-sm text-gray-600 dark:text-gray-400 truncate mt-0.5">
-                                        {template.style || template.scenario}
-                                      </div>
-                                    )}
-                                  </div>
-
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <button
-                                        type="button"
-                                        aria-label="Template options"
-                                        className="opacity-0 group-hover:opacity-100 p-1.5 text-[var(--rl-muted)] hover:text-[var(--rl-foreground)] transition-opacity rounded-full hover:bg-[var(--rl-surface-hover)] ml-2"
-                                        onClick={(e) => e.stopPropagation()}
-                                      >
-                                        <IconDotsVertical size={16} stroke={1.5} />
-                                      </button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="w-32">
-                                      <DropdownMenuItem
-                                        onSelect={(e) => {
-                                          e.preventDefault();
-                                          e.stopPropagation();
-                                          handleDuplicateTemplate(template);
-                                        }}
-                                      >
-                                        Duplicate
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onSelect={(e) => {
-                                          e.preventDefault();
-                                          e.stopPropagation();
-                                          handleRenameTemplate(template);
-                                        }}
-                                      >
-                                        Rename
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
-                                        onSelect={(e) => {
-                                          e.preventDefault();
-                                          e.stopPropagation();
-                                          handleDeleteTemplate(template);
-                                        }}
-                                      >
-                                        Delete
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </div>
-                              );
-                            })}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      ) : (
-                        <div className="rounded-xl border border-white/8 bg-rl-panel p-4 text-sm font-medium text-rl-text-secondary  shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
-                          No saved templates found.
-                        </div>
-                      )}
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="collection-select"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.3 }}
-                      className="transition-all duration-300"
-                    >
-                      {collectionOptions.length > 0 ? (
-                        <Select
-                          value={activeCollectionId ?? undefined}
-                          onValueChange={handleCollectionChange}
-                        >
-                          <SelectTrigger className={selectTriggerClass}>
-                            <SelectValue placeholder="Select a collection" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {collectionOptions.map((option) => (
-                              <SelectItem key={option.id} value={option.id}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <div className="rounded-xl border border-white/8 bg-rl-panel p-4 text-sm font-medium text-rl-text-secondary  shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.05),inset_0_0_8px_rgba(0,0,0,0.04),0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-all duration-300 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-1px_2px_rgba(0,0,0,0.45),inset_0_0_10px_rgba(0,0,0,0.26),0_12px_36px_-14px_rgba(0,0,0,0.55)]">
-                          No saved collections yet.
-                        </div>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </motion.div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="text-sm font-medium text-rl-text">
-                  AI Model
-                </label>
-                <select
-                  value={aiModel}
-                  onChange={(e) => setAiModel(e.target.value)}
-                  className={inputSurfaceClass}
-                >
-                  <option>google/nano-banana</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-rl-text">
-                  Style
-                </label>
-                <select
-                  value={style}
-                  onChange={(e) => setStyle(e.target.value)}
-                  className={inputSurfaceClass}
-                >
-                  <option value="">Select style</option>
-                  <option>Photorealistic</option>
-                  <option>Watercolor</option>
-                  <option>Minimalist</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-rl-text">
-                  Additional Details
-                </label>
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
+                Current Prompt Preview
+              </h3>
+              <div
+                className="rounded-lg p-3"
+                style={{
+                  background: '#0f0f0f',
+                  boxShadow: 'inset 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(0, 0, 0, 0.3)'
+                }}
+              >
                 <textarea
                   value={details}
                   onChange={(e) => setDetails(e.target.value)}
-                  className={cn(inputSurfaceClass, "min-h-[96px] resize-none")}
-                  placeholder="Describe scene details..."
-                  rows={3}
+                  placeholder="Enter your prompt here or load a template..."
+                  className="w-full bg-transparent border-0 min-h-[80px] max-h-[120px] overflow-y-auto resize-none text-sm text-gray-300 leading-relaxed focus:outline-none focus:ring-0"
                 />
               </div>
+            </div>
 
-              <div className="mt-4 flex flex-col gap-3 transition-all duration-300">
+            {/* Main Generate Button */}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={hasCollectionSelection ? "collection-btn" : "template-btn"}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "rl-btn-primary w-full py-4 text-base font-semibold",
+                    ((isGenerating || isCollectionRun) || (hasCollectionSelection && !uploadedImage)) && "opacity-60 cursor-not-allowed",
+                  )}
+                  onClick={hasCollectionSelection ? handleGenerateCollection : handleGenerateTemplate}
+                  disabled={(isGenerating || isCollectionRun) || (hasCollectionSelection && !uploadedImage)}
+                >
+                  {hasCollectionSelection
+                    ? isCollectionRun
+                      ? "Generating Collection..."
+                      : "Generate Collection"
+                    : isGenerating
+                      ? "Generating..."
+                      : "Generate"}
+                </Button>
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Quick Load Section - Standalone Panel */}
+            <div
+              className="rounded-xl p-4 border border-white/[0.06]"
+              style={{
+                background: '#1a1a1a',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 20px 56px rgba(0, 0, 0, 0.3)'
+              }}
+            >
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">
+                Quick Load
+              </h3>
+
+              {/* Tab Buttons */}
+              <div className="flex border-b border-white/8 mb-4">
+                <button
+                  onClick={() => handleModeChange("template")}
+                  className={cn(
+                    "flex-1 py-2 text-sm font-medium transition-colors relative",
+                    activeMode === "template"
+                      ? "text-white"
+                      : "text-gray-400 hover:text-white"
+                  )}
+                >
+                  Template
+                  {activeMode === "template" && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#ff6b35]" />
+                  )}
+                </button>
+                <button
+                  onClick={() => handleModeChange("collection")}
+                  className={cn(
+                    "flex-1 py-2 text-sm font-medium transition-colors relative",
+                    activeMode === "collection"
+                      ? "text-white"
+                      : "text-gray-400 hover:text-white"
+                  )}
+                >
+                  Collection
+                  {activeMode === "collection" && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#ff6b35]" />
+                  )}
+                </button>
+              </div>
+
+              {/* Unified Dropdown + Load Button */}
+              <div className="flex flex-col gap-4">
+                <div className="flex gap-2">
+                  {activeMode === "template" ? (
+                    <>
+                      {templateOptions.length > 0 ? (
+                        <>
+                          <DropdownMenu open={isTemplateDropdownOpen} onOpenChange={setIsTemplateDropdownOpen}>
+                            <DropdownMenuTrigger asChild>
+                              <button className={cn(selectTriggerClass, "flex-[7] flex items-center justify-between")}>
+                                <span className="truncate">
+                                  {activeTemplateId
+                                    ? templateOptions.find(opt => opt.id === activeTemplateId)?.label || "Select template"
+                                    : "Select template"
+                                  }
+                                </span>
+                                <IconChevronDown size={16} className="ml-2 flex-shrink-0" />
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              className="w-[400px] max-h-[400px] overflow-y-auto bg-[var(--rl-surface)] border border-[var(--rl-border)] rounded-lg shadow-lg"
+                              align="start"
+                            >
+                              {templateOptions.map((option) => {
+                                const template = templateLookup.get(option.id)?.template;
+                                return (
+                                  <div
+                                    key={option.id}
+                                    className="flex items-center justify-between w-full group hover:bg-[var(--rl-surface-hover)] px-3 py-2 cursor-pointer"
+                                  >
+                                    <div
+                                      className="flex-1 min-w-0"
+                                      onClick={() => {
+                                        setActiveTemplateId(option.id);
+                                        setIsTemplateDropdownOpen(false);
+                                      }}
+                                    >
+                                      <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                                        {template?.name || template?.title || "Untitled template"}
+                                      </div>
+                                      {(template?.style || template?.scenario) && (
+                                        <div className="text-sm text-gray-600 dark:text-gray-400 truncate mt-0.5">
+                                          {template.style || template.scenario}
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <button
+                                          type="button"
+                                          aria-label="Template options"
+                                          className="opacity-0 group-hover:opacity-100 p-1.5 text-[var(--rl-muted)] hover:text-[var(--rl-foreground)] transition-opacity rounded-full hover:bg-[var(--rl-surface-hover)] ml-2"
+                                          onClick={(e) => e.stopPropagation()}
+                                        >
+                                          <IconDotsVertical size={16} stroke={1.5} />
+                                        </button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end" className="w-32">
+                                        <DropdownMenuItem
+                                          onSelect={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            handleDuplicateTemplate(template);
+                                          }}
+                                        >
+                                          Duplicate
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onSelect={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            handleRenameTemplate(template);
+                                          }}
+                                        >
+                                          Rename
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
+                                          onSelect={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            handleDeleteTemplate(template);
+                                          }}
+                                        >
+                                          Delete
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </div>
+                                );
+                              })}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                          <button
+                            onClick={() => {
+                              if (activeTemplateId) {
+                                handleTemplateChange(activeTemplateId);
+                              }
+                            }}
+                            disabled={!activeTemplateId}
+                            className="flex-[3] rl-btn rl-btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Load
+                          </button>
+                        </>
+                      ) : (
+                        <div className="text-sm text-gray-500 py-2">
+                          No saved templates found.
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {collectionOptions.length > 0 ? (
+                        <>
+                          <Select
+                            value={activeCollectionId ?? undefined}
+                            onValueChange={setActiveCollectionId}
+                          >
+                            <SelectTrigger className={cn(selectTriggerClass, "flex-[7]")}>
+                              <SelectValue placeholder="Select collection" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {collectionOptions.map((option) => (
+                                <SelectItem key={option.id} value={option.id}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <button
+                            onClick={() => {
+                              if (activeCollectionId) {
+                                handleCollectionChange(activeCollectionId);
+                              }
+                            }}
+                            disabled={!activeCollectionId || !uploadedImage}
+                            className="flex-[3] rl-btn rl-btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Load
+                          </button>
+                        </>
+                      ) : (
+                        <div className="text-sm text-gray-500 py-2">
+                          No saved collections yet.
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* Collection Warning */}
+                {activeMode === "collection" && !uploadedImage && (
+                  <p className="text-xs text-orange-400 flex items-center gap-1">
+                    <span>⚠</span> Upload reference image first
+                  </p>
+                )}
+
+                {/* Loaded Status Display */}
+                {activeMode === "template" && activeTemplateId && templateLookup.get(activeTemplateId) && (
+                  <div className="text-sm text-green-400 flex items-center gap-1">
+                    <span>✓</span>
+                    <span>Loaded: "{templateLookup.get(activeTemplateId)?.templateName}"</span>
+                  </div>
+                )}
+
+                {activeMode === "collection" && selectedCollection && (
+                  <div className="text-sm text-green-400 flex items-center gap-1">
+                    <span>✓</span>
+                    <span>Loaded: "{selectedCollection.title}" ({(selectedCollection.templates || []).length} prompts)</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+
+
+            {/* Advanced Settings Section - Standalone Panel */}
+            <details
+              className="rounded-xl p-4 border border-white/[0.06]"
+              style={{
+                background: '#1a1a1a',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 20px 56px rgba(0, 0, 0, 0.3)'
+              }}
+              open
+            >
+              <summary className="text-xs font-semibold text-gray-400 uppercase tracking-wide cursor-pointer list-none flex items-center justify-between mb-4">
+                <span>Advanced Settings</span>
+                <span className="text-lg">▼</span>
+              </summary>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-rl-text mb-2 block">
+                    AI Model
+                  </label>
+                  <select
+                    value={aiModel}
+                    onChange={(e) => setAiModel(e.target.value)}
+                    className={inputSurfaceClass}
+                  >
+                    <option>google/nano-banana</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-rl-text mb-2 block">
+                    Style
+                  </label>
+                  <select
+                    value={style}
+                    onChange={(e) => setStyle(e.target.value)}
+                    className={inputSurfaceClass}
+                  >
+                    <option value="">Select style</option>
+                    <option>Photorealistic</option>
+                    <option>Watercolor</option>
+                    <option>Minimalist</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-rl-text mb-2 block">
+                    Additional Details
+                  </label>
+                  <textarea
+                    value={details}
+                    onChange={(e) => setDetails(e.target.value)}
+                    className="w-full rounded-xl bg-black/30 border border-white/5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] px-3 py-3 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#ff6b35] resize-none min-h-[96px]"
+                    placeholder="Describe scene details..."
+                    rows={4}
+                  />
+                </div>
+
                 <div className="flex w-full gap-3">
                   <Button
                     variant="ghost"
@@ -1191,7 +1326,7 @@ export function PromptBuilderPanel({
                       className="flex-1 rounded-2xl border border-amber-400 bg-amber-50/95 text-sm font-semibold text-amber-700 transition-all duration-200 hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 dark:border-amber-500 dark:bg-amber-500/10 dark:text-amber-200"
                       onClick={handleCancelCollection}
                     >
-                        Cancel
+                      Cancel
                     </Button>
                   )}
                 </div>
@@ -1211,40 +1346,12 @@ export function PromptBuilderPanel({
                     </motion.div>
                   )}
                 </AnimatePresence>
-
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.div
-                    key={hasCollectionSelection ? "collection-generate" : "template-generate"}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "rl-btn-primary w-full",
-                        (isGenerating || isCollectionRun) && "opacity-60 cursor-not-allowed",
-                      )}
-                      onClick={hasCollectionSelection ? handleGenerateCollection : handleGenerateTemplate}
-                      disabled={isGenerating || isCollectionRun}
-                    >
-                      {hasCollectionSelection
-                        ? isCollectionRun
-                          ? "Generating Collection..."
-                          : "Generate Collection"
-                        : isGenerating
-                          ? "Generating..."
-                          : "Generate"}
-                    </Button>
-                  </motion.div>
-                </AnimatePresence>
               </div>
-            </div>
+            </details>
           </motion.div>
         )}
 
-  {currentTab === "custom" && (
+        {currentTab === "custom" && (
           <motion.div
             key="custom"
             initial={{ opacity: 0, y: 8 }}
@@ -1261,7 +1368,14 @@ export function PromptBuilderPanel({
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-  <DialogContent className="rounded-3xl border border-rl-glass-border bg-rl-panel text-rl-text  shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+        <DialogContent
+          className="rounded-xl text-rl-text w-full max-w-md border border-white/[0.08]"
+          style={{
+            background: 'rgba(30, 30, 30, 0.95)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0, 0, 0, 0.8), 0 32px 96px rgba(0, 0, 0, 0.5)'
+          }}
+        >
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold text-rl-text">
               Save Template
@@ -1276,16 +1390,14 @@ export function PromptBuilderPanel({
           />
 
           <DialogFooter className="mt-6 flex justify-end gap-3">
-            <Button
-              variant="ghost"
-              className="rl-btn-ghost"
+            <button
+              className="rl-btn rl-btn-secondary px-6"
               onClick={() => setIsDialogOpen(false)}
             >
               Cancel
-            </Button>
-            <Button
-              variant="ghost"
-              className="rl-btn-primary"
+            </button>
+            <button
+              className="rl-btn rl-btn-primary px-6"
               onClick={() => {
                 handleSaveTemplate();
                 setTemplateName("");
@@ -1293,14 +1405,21 @@ export function PromptBuilderPanel({
               }}
             >
               Save
-            </Button>
+            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Rename Template Dialog */}
       <Dialog open={isRenameTemplateOpen} onOpenChange={setIsRenameTemplateOpen}>
-        <DialogContent className="rounded-3xl border border-rl-glass-border bg-rl-panel text-rl-text  shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+        <DialogContent
+          className="rounded-xl text-rl-text w-full max-w-md border border-white/[0.08]"
+          style={{
+            background: 'rgba(30, 30, 30, 0.95)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0, 0, 0, 0.8), 0 32px 96px rgba(0, 0, 0, 0.5)'
+          }}
+        >
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold text-rl-text">
               Rename Template
@@ -1316,56 +1435,59 @@ export function PromptBuilderPanel({
           />
 
           <DialogFooter className="mt-6 flex justify-end gap-3">
-            <Button
-              variant="ghost"
-              className="rl-btn-ghost"
+            <button
+              className="rl-btn rl-btn-secondary px-6"
               onClick={() => setIsRenameTemplateOpen(false)}
             >
               Cancel
-            </Button>
-            <Button
-              variant="ghost"
-              className="rl-btn-primary"
+            </button>
+            <button
+              className="rl-btn rl-btn-primary px-6"
               onClick={handleRenameTemplateSubmit}
               disabled={!renameTemplateName.trim()}
             >
               Rename
-            </Button>
+            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Delete Template Dialog */}
       <Dialog open={isDeleteTemplateOpen} onOpenChange={setIsDeleteTemplateOpen}>
-        <DialogContent className="rounded-3xl border border-rl-glass-border bg-rl-panel text-rl-text  shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+        <DialogContent
+          className="rounded-xl text-rl-text w-full max-w-md border border-white/[0.08]"
+          style={{
+            background: 'rgba(30, 30, 30, 0.95)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0, 0, 0, 0.8), 0 32px 96px rgba(0, 0, 0, 0.5)'
+          }}
+        >
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold text-rl-text">
               Delete Template?
             </DialogTitle>
           </DialogHeader>
 
-          <p className="text-sm text-neutral-600 dark:text-neutral-300 mt-4">
+          <p className="text-sm text-neutral-400 mt-4">
             Are you sure you want to delete "{deleteTemplateTarget?.name || deleteTemplateTarget?.title || 'this template'}"? This action cannot be undone.
           </p>
 
           <DialogFooter className="mt-6 flex justify-end gap-3">
-            <Button
-              variant="ghost"
-              className="rl-btn-ghost"
+            <button
+              className="rl-btn rl-btn-secondary px-6"
               onClick={() => setIsDeleteTemplateOpen(false)}
             >
               Cancel
-            </Button>
-            <Button
-              variant="ghost"
-              className="bg-rl-error text-white px-6 py-3 rounded-rl-md font-medium hover:opacity-90 transition-all"
+            </button>
+            <button
+              className="rl-btn bg-red-600 hover:bg-red-700 text-white px-6 transition-all"
               onClick={handleDeleteTemplateConfirm}
             >
               Delete
-            </Button>
+            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </section>
+    </div>
   );
 }

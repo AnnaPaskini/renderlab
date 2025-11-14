@@ -59,61 +59,101 @@ export default function SubmitPromptPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
-      {/* Header */}
-      <div className="bg-[#161616] border-b border-white/8">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Link
-            href="/prompts"
-            className="text-sm text-[#ff6b35] hover:text-[#ff8555] mb-4 inline-flex items-center gap-1"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Prompts Library
-          </Link>
-          <h1 className="text-3xl font-bold text-white mt-2">Submit Your Prompt</h1>
-          <p className="text-gray-400 mt-2">
-            Share your best prompts with the RenderLab community.
-            Your submission will be reviewed before going live.
-          </p>
-        </div>
+    <div
+      className="min-h-screen relative"
+      style={{
+        background: `
+          radial-gradient(circle, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+          radial-gradient(circle at 30% 40%, rgba(255, 107, 53, 0.02) 0%, transparent 60%),
+          radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.02) 0%, transparent 60%),
+          #0a0a0a
+        `,
+        backgroundSize: '32px 32px, 100% 100%, 100% 100%, 100% 100%',
+        backgroundPosition: '0 0, 0 0, 0 0, 0 0'
+      }}
+    >
+      {/* Designer grid overlay - z-index under everything */}
+      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }} aria-hidden="true">
+        <div
+          className="absolute inset-0 opacity-40 dark:opacity-20"
+          style={{
+            backgroundImage: `
+              linear-gradient(0deg, transparent 24%, rgba(120,120,255,0.05) 25%, rgba(120,120,255,0.05) 26%, transparent 27%, transparent 74%, rgba(120,120,255,0.05) 75%, rgba(120,120,255,0.05) 76%, transparent 77%, transparent),
+              linear-gradient(90deg, transparent 24%, rgba(120,120,255,0.05) 25%, rgba(120,120,255,0.05) 26%, transparent 27%, transparent 74%, rgba(120,120,255,0.05) 75%, rgba(120,120,255,0.05) 76%, transparent 77%, transparent)
+            `,
+            backgroundSize: "40px 40px",
+          }}
+        />
       </div>
 
-      {/* Form */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-[#161616] rounded-xl shadow-lg shadow-black/60 p-6 lg:p-8 border border-white/8">
-          <SubmitPromptForm
-            onSuccess={handleSuccess}
-            onCancel={handleCancel}
-          />
+      {/* Content - z-index above grid */}
+      <div className="relative" style={{ zIndex: 1 }}>
+        {/* Header */}
+        <div className="border-b border-white/[0.08]" style={{ background: '#161616' }}>
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <Link
+              href="/prompts"
+              className="text-sm text-[#ff6b35] hover:text-[#ff8555] mb-4 inline-flex items-center gap-1 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Prompts Library
+            </Link>
+            <h1 className="text-3xl font-bold text-white mt-2">Submit Your Prompt</h1>
+            <p className="text-gray-400 mt-2">
+              Share your best prompts with the RenderLab community.
+              Your submission will be reviewed before going live.
+            </p>
+          </div>
         </div>
 
-        {/* Guidelines Box */}
-        <div className="mt-6 bg-[#ff6b35]/10 border border-[#ff6b35]/30 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-[#ff6b35] mb-2">
-            Submission Guidelines
-          </h3>
-          <ul className="text-sm text-[#ff6b35] space-y-1.5">
-          
-          
-            <li className="flex items-start gap-2">
-              <span className="text-[#ff6b35] mt-0.5">•</span>
-              <span>Images must be architectural visualization renders</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-[#ff6b35] mt-0.5">•</span>
-              <span>Prompts should be clear and descriptive (50-2000 characters)</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-[#ff6b35] mt-0.5">•</span>
-              <span>Approved prompts appear in the community library</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-[#ff6b35] mt-0.5">•</span>
-              <span>Track your submissions in <Link href="/account" className="underline hover:text-[#ff8555]">Account Settings</Link></span>
-            </li>
-          </ul>
+        {/* Form */}
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div
+            className="rounded-3xl p-8"
+            style={{
+              background: '#1a1a1a',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.6), 0 20px 64px rgba(0, 0, 0, 0.4)'
+            }}
+          >
+            <SubmitPromptForm
+              onSuccess={handleSuccess}
+              onCancel={handleCancel}
+            />
+          </div>
+
+          {/* Guidelines Box - Subdued brown tint, not orange */}
+          <div
+            className="mt-6 rounded-xl p-5"
+            style={{
+              background: 'rgba(139, 69, 19, 0.1)',
+              border: '1px solid rgba(139, 69, 19, 0.3)'
+            }}
+          >
+            <h3 className="text-sm font-semibold text-amber-200 mb-3">
+              Submission Guidelines
+            </h3>
+            <ul className="text-sm text-amber-100/90 space-y-2">
+              <li className="flex items-start gap-2">
+                <span className="text-amber-300 mt-0.5">•</span>
+                <span>Images must be architectural visualization renders</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-300 mt-0.5">•</span>
+                <span>Prompts should be clear and descriptive (50-2000 characters)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-300 mt-0.5">•</span>
+                <span>Approved prompts appear in the community library</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-300 mt-0.5">•</span>
+                <span>Track your submissions in <Link href="/account" className="underline hover:text-amber-200 transition-colors">Account Settings</Link></span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

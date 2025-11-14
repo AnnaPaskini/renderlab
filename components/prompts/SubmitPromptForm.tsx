@@ -144,9 +144,15 @@ export function SubmitPromptForm({ onSuccess, onCancel }: SubmitPromptFormProps)
             setErrors(prev => ({ ...prev, title: '' }));
           }}
           placeholder="Modern exterior with glass facade"
-          className={`w-full bg-[#1a1a1a] border text-white px-4 py-3 rounded-lg focus:outline-none placeholder:text-gray-500 transition-colors ${errors.title
-              ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-              : 'border-white/8 focus:border-[#ff6b35] focus:ring-2 focus:ring-[#ff6b35]/20'
+          style={{
+            background: '#0f0f0f',
+            boxShadow: errors.title
+              ? 'inset 0 2px 4px rgba(0, 0, 0, 0.3)'
+              : 'inset 0 2px 4px rgba(0, 0, 0, 0.3)'
+          }}
+          className={`w-full border text-white px-4 py-3 rounded-lg focus:outline-none placeholder:text-gray-500 transition-all ${errors.title
+            ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
+            : 'border-white/[0.08] focus:border-white/[0.15] focus:ring-2 focus:ring-white/[0.05]'
             }`}
         />
         {errors.title ? (
@@ -176,9 +182,13 @@ export function SubmitPromptForm({ onSuccess, onCancel }: SubmitPromptFormProps)
           }}
           placeholder="Transform the building facade into a modern glass structure with reflective panels. Add warm evening lighting and contemporary landscaping..."
           rows={6}
-          className={`w-full bg-[#1a1a1a] border text-white px-4 py-3 rounded-lg focus:outline-none resize-none placeholder:text-gray-500 transition-colors ${errors.prompt
-              ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-              : 'border-white/8 focus:border-[#ff6b35] focus:ring-2 focus:ring-[#ff6b35]/20'
+          style={{
+            background: '#0f0f0f',
+            boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.3)'
+          }}
+          className={`w-full border text-white px-4 py-3 rounded-lg focus:outline-none resize-none placeholder:text-gray-500 transition-all ${errors.prompt
+            ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
+            : 'border-white/[0.08] focus:border-white/[0.15] focus:ring-2 focus:ring-white/[0.05]'
             }`}
         />
         {errors.prompt ? (
@@ -207,8 +217,8 @@ export function SubmitPromptForm({ onSuccess, onCancel }: SubmitPromptFormProps)
             setErrors(prev => ({ ...prev, category: '' }));
           }}
           className={`w-full bg-[#1a1a1a] border text-white px-4 py-3 rounded-lg focus:outline-none transition-colors ${errors.category
-              ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-              : 'border-white/8 focus:border-[#ff6b35] focus:ring-2 focus:ring-[#ff6b35]/20'
+            ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
+            : 'border-white/8 focus:border-[#ff6b35] focus:ring-2 focus:ring-[#ff6b35]/20'
             }`}
         >
           <option value="" className="bg-[#1a1a1a]">Select category</option>

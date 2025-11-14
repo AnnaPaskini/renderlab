@@ -171,14 +171,18 @@ export function ImageUpload({ onUploadComplete, currentImage }: ImageUploadProps
           className={`
             flex flex-col items-center justify-center
             w-full rounded-lg border-2 border-dashed
-            cursor-pointer transition-colors
-            ${isDragging
-              ? 'border-[#ff6b35] bg-[#ff6b35]/10'
-              : 'border-white/8 hover:border-[#ff6b35] bg-[#1a1a1a]'
-            }
+            cursor-pointer transition-all
             ${uploading ? 'opacity-50 cursor-not-allowed' : ''}
           `}
-          style={{ paddingTop: '56.25%', position: 'relative' }}
+          style={{
+            paddingTop: '56.25%',
+            position: 'relative',
+            background: isDragging ? '#1f1f1f' : '#1a1a1a',
+            borderColor: isDragging ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.1)',
+            boxShadow: isDragging
+              ? 'inset 0 2px 8px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.4)'
+              : 'inset 0 2px 8px rgba(0, 0, 0, 0.3)'
+          }}
         >
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
             <div className="text-center">
@@ -189,7 +193,7 @@ export function ImageUpload({ onUploadComplete, currentImage }: ImageUploadProps
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                 ) : isDragging ? (
-                  <svg className="w-12 h-12 mx-auto text-[#ff6b35]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
                 ) : (

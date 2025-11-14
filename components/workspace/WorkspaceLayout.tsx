@@ -16,7 +16,6 @@ import {
 import { Toaster } from "react-hot-toast";
 import { toast } from "sonner";
 
-import UserMenu from "@/components/navbar/UserMenu";
 import { useAuth } from "@/components/providers/SupabaseAuthProvider";
 import { useHistory } from "@/lib/context/HistoryContext";
 import { Z } from "@/lib/z-layer-guide";
@@ -132,7 +131,19 @@ export function WorkspaceLayout({
     : rightPanel;
 
   return (
-    <main className="rl-ambient-bg flex flex-col min-h-screen w-full bg-rl-bg transition-colors duration-300">
+    <main
+      className="flex flex-col min-h-screen w-full transition-colors duration-300"
+      style={{
+        background: `
+          radial-gradient(circle, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+          radial-gradient(circle at 30% 40%, rgba(255, 107, 53, 0.02) 0%, transparent 60%),
+          radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.02) 0%, transparent 60%),
+          #0a0a0a
+        `,
+        backgroundSize: '32px 32px, 100% 100%, 100% 100%, 100% 100%',
+        backgroundPosition: '0 0, 0 0, 0 0, 0 0'
+      }}
+    >
       <div className="relative flex-1">
         <div className="dot-grid absolute inset-0" aria-hidden="true" />
         <div
@@ -147,43 +158,48 @@ export function WorkspaceLayout({
         />
 
         <div className={`relative z-[${Z.LOW}] flex min-h-full flex-col gap-rl-xl px-rl-lg pb-10 pt-16 md:px-rl-xl md:pt-20`}>
-          <div className="relative z-10 flex w-full items-center justify-between rounded-2xl bg-rl-panel px-8 py-4 text-sm font-semibold tracking-tight border border-rl-glass-border shadow-[0_2px_10px_rgba(0,0,0,0.05)] md:px-10 md:text-base">
-            <div>
-              <h1 className="text-2xl font-semibold text-rl-text md:text-3xl">
-                Hey, {greetingName} — keep crafting!
-              </h1>
-              <p className="text-sm font-medium text-rl-text-secondary mt-1">Create stunning architectural visualizations with AI</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <UserMenu />
-            </div>
-          </div>
+          {/* Header - Clean text without panel background */}
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-rl-text mb-1">
+              Hey, {greetingName} — keep crafting!
+            </h1>
+            <p className="text-sm text-gray-400 mb-6">
+              Create stunning architectural visualizations with AI
+            </p>
 
-          <div className="flex flex-wrap items-center gap-rl-md">
-            <button
-              onClick={() => setActiveTab("builder")}
-              className={`rl-btn-${activeTab === "builder" ? "primary" : "secondary"} text-sm`}
-            >
-              🧩 Builder
-            </button>
-            <button
-              onClick={() => setActiveTab("custom")}
-              className={`rl-btn-${activeTab === "custom" ? "primary" : "secondary"} text-sm`}
-            >
-              📁 Custom
-            </button>
+            {/* Tabs */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setActiveTab("builder")}
+                className={`rl-btn-${activeTab === "builder" ? "primary" : "secondary"} text-base font-semibold px-6 py-2.5 min-w-[110px]`}
+              >
+                Builder
+              </button>
+              <button
+                onClick={() => setActiveTab("custom")}
+                className={`rl-btn-${activeTab === "custom" ? "primary" : "secondary"} text-base font-semibold px-6 py-2.5 min-w-[110px]`}
+              >
+                Edit
+              </button>
+            </div>
           </div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex-1 w-full max-w-7xl mx-auto"
+            className="flex-1 w-full max-w-[1600px] mx-auto px-8"
           >
             {activeTab === "builder" ? (
-              <div className="flex flex-col lg:flex-row gap-12 w-full">
-                <div className="flex flex-col gap-10 lg:flex-[1.4]">
-                  <PanelWrapper>
+              <div className="grid grid-cols-1 md:grid-cols-[60fr_40fr] lg:grid-cols-[65fr_35fr] gap-8 w-full">
+                <div className="flex flex-col gap-10">
+                  <div
+                    className="rounded-3xl p-6 border border-white/[0.06] flex-[2]"
+                    style={{
+                      background: '#1a1a1a',
+                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 20px 56px rgba(0, 0, 0, 0.3)'
+                    }}
+                  >
                     {leftPanel}
                     <div className={`pointer-events-none absolute inset-0 z-[${Z.TOASTER}]`}>
                       <Toaster
@@ -204,9 +220,15 @@ export function WorkspaceLayout({
                         }}
                       />
                     </div>
-                  </PanelWrapper>
+                  </div>
 
-                  <PanelWrapper>
+                  <div
+                    className="rounded-3xl p-6 border border-white/[0.06] flex-[1]"
+                    style={{
+                      background: '#1a1a1a',
+                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 20px 56px rgba(0, 0, 0, 0.3)'
+                    }}
+                  >
                     <div className="mb-4 flex items-center justify-between">
                       <h3 className="text-lg font-semibold text-rl-text">Images History</h3>
                       <Link
@@ -216,7 +238,15 @@ export function WorkspaceLayout({
                         View all →
                       </Link>
                     </div>
-                    <div className="h-[20vh] overflow-hidden rounded-xl bg-rl-surface p-4">
+                    {/* Inset preview strip container */}
+                    <div
+                      className="rounded-xl p-5 flex items-center justify-center"
+                      style={{
+                        background: '#0f0f0f',
+                        boxShadow: 'inset 0 2px 8px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(0, 0, 0, 0.5)',
+                        minHeight: '16vh'
+                      }}
+                    >
                       {historyLoading ? (
                         <div className="flex h-full items-center justify-center text-sm font-medium text-rl-text-secondary">
                           Loading history...
@@ -280,7 +310,20 @@ export function WorkspaceLayout({
                                   animate={{ opacity: 1, scale: 1 }}
                                   exit={{ opacity: 0, scale: 0.9 }}
                                   transition={{ duration: 0.3 }}
-                                  className="group relative flex h-full w-32 cursor-pointer flex-shrink-0 overflow-hidden rounded-lg transition-transform hover:scale-105"
+                                  className="group relative flex h-full w-44 cursor-pointer flex-shrink-0 overflow-hidden rounded-xl border border-white/[0.06] transition-all duration-200"
+                                  style={{
+                                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.15)'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-4px)';
+                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.25)';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = '';
+                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
+                                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.15)';
+                                  }}
                                   onClick={() => setSelectedImage(img.image_url || null)}
                                 >
                                   <img
@@ -331,13 +374,19 @@ export function WorkspaceLayout({
                         </div>
                       )}
                     </div>
-                  </PanelWrapper>
+                  </div>
                 </div>
 
-                <div className="lg:flex-1">
-                  <PanelWrapper>
+                <div className="h-full">
+                  <div
+                    className="h-full rounded-3xl p-6 border border-white/[0.06] flex flex-col"
+                    style={{
+                      background: '#1a1a1a',
+                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 20px 56px rgba(0, 0, 0, 0.3)'
+                    }}
+                  >
                     {enhancedRightPanel}
-                  </PanelWrapper>
+                  </div>
                 </div>
               </div>
             ) : (

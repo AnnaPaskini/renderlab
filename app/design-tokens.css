@@ -32,6 +32,7 @@
     --rl-border-hover: rgba(255, 255, 255, 0.12);
 
     /* ===== SHADOWS - Freepik Elevation ===== */
+    /* NO orange glow on containers/panels - only on buttons */
 
     /* Level 0: Flat */
     --rl-shadow-none: none;
@@ -39,23 +40,35 @@
     /* Level 1: Surface */
     --rl-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
 
-    /* Level 2: Card */
-    --rl-shadow-md:
-        0 0 0 1px rgba(255, 255, 255, 0.06),
-        0 4px 12px rgba(0, 0, 0, 0.5),
-        0 2px 6px rgba(0, 0, 0, 0.4);
+    /* Level 2: Panel/Card - Floating effect */
+    --rl-shadow-panel:
+        0 4px 16px rgba(0, 0, 0, 0.5),
+        0 12px 40px rgba(0, 0, 0, 0.3);
 
-    /* Level 3: Elevated Card (hover) */
-    --rl-shadow-lg:
-        0 0 0 1px rgba(255, 255, 255, 0.08),
-        0 8px 20px rgba(0, 0, 0, 0.6),
-        0 4px 10px rgba(0, 0, 0, 0.5);
+    /* Level 3: Panel/Card Hover */
+    --rl-shadow-panel-hover:
+        0 6px 20px rgba(0, 0, 0, 0.6),
+        0 16px 48px rgba(0, 0, 0, 0.4);
 
     /* Level 4: Modal */
-    --rl-shadow-xl:
-        0 0 0 1px rgba(255, 255, 255, 0.08),
-        0 20px 50px rgba(0, 0, 0, 0.8),
-        0 10px 25px rgba(0, 0, 0, 0.6);
+    --rl-shadow-modal:
+        0 8px 32px rgba(0, 0, 0, 0.6),
+        0 20px 64px rgba(0, 0, 0, 0.4);
+
+    /* Inset shadows for inputs/containers */
+    --rl-shadow-inset:
+        inset 0 2px 4px rgba(0, 0, 0, 0.3);
+
+    --rl-shadow-inset-deep:
+        inset 0 2px 8px rgba(0, 0, 0, 0.6),
+        inset 0 0 0 1px rgba(0, 0, 0, 0.5);
+
+    /* Button shadows - orange OK for CTA buttons only */
+    --rl-shadow-button-orange:
+        0 4px 12px rgba(255, 107, 53, 0.3);
+
+    --rl-shadow-button-orange-hover:
+        0 6px 20px rgba(255, 107, 53, 0.4);
 
     /* ===== SPACING ===== */
     --rl-space-1: 0.25rem;

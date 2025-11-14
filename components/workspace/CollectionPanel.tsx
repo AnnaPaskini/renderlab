@@ -84,16 +84,23 @@ function LeonardoDialog({
 	if (!open || !mounted) return null;
 
 	const dialog = (
-		<div className="rl-modal-overlay animate-in fade-in duration-200">
+		<div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
 			{/* Backdrop */}
 			<div
 				className="absolute inset-0"
 				onClick={onClose}
 			/>
 
-			{/* Dialog - Design System Style */}
-			<div className="rl-modal animate-in zoom-in-95 duration-200">
-				<h3 className="rl-heading-2 mb-4">{title}</h3>
+			{/* Dialog - Glass Effect with Strong Backdrop */}
+			<div
+				className="rounded-xl p-6 w-full max-w-md relative animate-in zoom-in-95 duration-200 border border-white/[0.08]"
+				style={{
+					background: 'rgba(30, 30, 30, 0.95)',
+					backdropFilter: 'blur(20px) saturate(180%)',
+					boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0, 0, 0, 0.8), 0 32px 96px rgba(0, 0, 0, 0.5)'
+				}}
+			>
+				<h3 className="text-lg font-semibold mb-4 text-white">{title}</h3>
 				<div className="space-y-4">{children}</div>
 				{footer && <div className="mt-6 flex justify-end gap-3">{footer}</div>}
 			</div>
@@ -644,8 +651,8 @@ export function CollectionsPanel() {
 					onChange={(event) => setRenameDraft(event.target.value)}
 					placeholder="New name"
 					className={`rl-input ${renameDraft.trim() && isCollectionNameExists(renameDraft.trim(), renameTargetId || undefined)
-							? "text-red-400 border-red-500/50 focus:border-red-500"
-							: ""
+						? "text-red-400 border-red-500/50 focus:border-red-500"
+						: ""
 						}`}
 					autoFocus
 					onKeyDown={(event) => {

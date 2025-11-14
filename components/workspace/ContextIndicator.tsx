@@ -2,7 +2,7 @@
 'use client';
 
 import { useWorkspace } from '@/lib/context/WorkspaceContext';
-import { X, FileText, FolderOpen, Clock } from 'lucide-react';
+import { Clock, FileText, FolderOpen, X } from 'lucide-react';
 
 interface ContextIndicatorProps {
   uploadedImage?: string | null;
@@ -11,16 +11,9 @@ interface ContextIndicatorProps {
 export function ContextIndicator({ uploadedImage }: ContextIndicatorProps = {}) {
   const { activeItem, clear } = useWorkspace();
 
-  // Если ничего не загружено
+  // Don't show anything if nothing is loaded
   if (activeItem.type === null) {
-    return (
-      <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-gray-50">
-        <Clock size={16} className="text-gray-400" />
-        <span className="text-sm text-gray-500 italic">
-          No template loaded
-        </span>
-      </div>
-    );
+    return null;
   }
 
   // Определяем иконку и цвет по типу
@@ -40,13 +33,13 @@ export function ContextIndicator({ uploadedImage }: ContextIndicatorProps = {}) 
     if (activeItem.type === 'temporary') {
       const hasPrompt = activeItem.data?.prompt;
       const hasReference = uploadedImage || activeItem.data?.reference_url;
-      
+
       if (hasPrompt && !hasReference) {
         return 'Prompt active (no reference)';
       }
       return 'Loaded from History (not saved)';
     }
-    
+
     // Existing cases
     switch (activeItem.type) {
       case 'template':
@@ -61,14 +54,14 @@ export function ContextIndicator({ uploadedImage }: ContextIndicatorProps = {}) 
     if (activeItem.type === 'temporary') {
       const hasPrompt = activeItem.data?.prompt;
       const hasReference = uploadedImage || activeItem.data?.reference_url;
-      
+
       // Prompt-only mode: orange
       if (hasPrompt && !hasReference) {
         return 'bg-[#ff6b35]/10 text-[#ff6b35] border-[#ff6b35]/20';
       }
       return 'bg-amber-100 text-amber-700 border-amber-200';
     }
-    
+
     // Existing colors
     switch (activeItem.type) {
       case 'template':
@@ -82,7 +75,7 @@ export function ContextIndicator({ uploadedImage }: ContextIndicatorProps = {}) 
     <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${getBadgeColor()}`}>
       {getIcon()}
       <span className="text-sm font-medium">{getLabel()}</span>
-      <button 
+      <button
         onClick={clear}
         className="ml-2 hover:opacity-70 transition-opacity"
         title="Clear workspace"

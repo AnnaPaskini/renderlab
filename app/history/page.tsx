@@ -258,21 +258,36 @@ export default function HistoryPage() {
           <div className="space-y-12">
             {groups.map((group) => (
               <div key={group.date_group}>
-                {/* Date Header - Improved */}
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[var(--rl-border)] to-transparent"></div>
-                  <h2 className="text-lg font-semibold text-[var(--rl-foreground)] px-4 py-2 bg-[var(--rl-surface)] rounded-full shadow-sm border border-[var(--rl-border)]">
+                {/* Date Separator - Gradient Line with Centered Date */}
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+                  <span className="text-sm text-gray-400 font-medium px-4">
                     {format(new Date(group.date_group), 'MMMM d, yyyy')}
-                  </h2>
-                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[var(--rl-border)] to-transparent"></div>
+                  </span>
+                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
                 </div>
 
-                {/* Images Grid - Improved */}
+                {/* Images Grid - Floating Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {group.images.map((img: any) => (
                     <div
                       key={img.id}
-                      className="group bg-[var(--rl-surface)] rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-[var(--rl-border)] hover:border-[var(--rl-accent)]"
+                      className="group rounded-xl overflow-hidden transition-all duration-200"
+                      style={{
+                        background: '#1a1a1a',
+                        border: '1px solid rgba(255, 255, 255, 0.06)',
+                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.5), 0 12px 40px rgba(0, 0, 0, 0.3)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-4px)';
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.6), 0 20px 56px rgba(0, 0, 0, 0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = '';
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
+                        e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.5), 0 12px 40px rgba(0, 0, 0, 0.3)';
+                      }}
                     >
                       {/* Image */}
                       <div
@@ -312,9 +327,15 @@ export default function HistoryPage() {
                           </button>
                         </div>
 
-                        {/* VAR tag if this was based on reference */}
+                        {/* VAR badge if this was based on reference */}
                         {img.reference_url && (
-                          <div className="absolute top-2 left-2 bg-[#ff6b35]/90 text-white text-xs font-semibold px-2.5 py-1 rounded-md shadow-md pointer-events-none">
+                          <div
+                            className="absolute top-2 left-2 text-white text-[0.625rem] font-bold px-2 py-1 rounded-md pointer-events-none"
+                            style={{
+                              background: 'linear-gradient(135deg, #ff6b35 0%, #ff7849 100%)',
+                              boxShadow: '0 2px 8px rgba(255, 107, 53, 0.3)'
+                            }}
+                          >
                             VAR
                           </div>
                         )}
