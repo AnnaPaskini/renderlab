@@ -14,7 +14,7 @@ export function BrushControls({ brushSize, setBrushSize }: BrushControlsProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="absolute left-24 top-1/2 -translate-y-1/2 z-10"
+            className="absolute left-24 top-1/2 -translate-y-1/2 z-50"
         >
             <div className="bg-[#2a2a2a] rounded-2xl border border-white/10 p-4 
         shadow-[0_8px_32px_rgba(0,0,0,0.6)] min-w-[200px]">

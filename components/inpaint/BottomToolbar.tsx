@@ -7,17 +7,21 @@ interface BottomToolbarProps {
     inpaintPrompt: string;
     setInpaintPrompt: (prompt: string) => void;
     hasMask?: boolean;
+    onGenerate?: () => void;
+    isGenerating?: boolean;
 }
 
 export function BottomToolbar({
     inpaintPrompt,
     setInpaintPrompt,
-    hasMask = false
+    hasMask = false,
+    onGenerate,
+    isGenerating = false
 }: BottomToolbarProps) {
     const [referenceImage, setReferenceImage] = useState<string | null>(null);
     const paperclipInputRef = useRef<HTMLInputElement>(null);
 
-    const isGenerateDisabled = !hasMask || !inpaintPrompt.trim();
+    const isGenerateDisabled = !hasMask || !inpaintPrompt.trim() || isGenerating;
 
     const handlePaperclipUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -95,14 +99,19 @@ export function BottomToolbar({
 
                         {/* Generate button - colored when ready */}
                         <button
+                            onClick={onGenerate}
                             disabled={isGenerateDisabled}
                             className={`w-10 h-10 rounded-full flex items-center justify-center 
                                 transition-colors text-white ${isGenerateDisabled
                                     ? 'bg-gray-700 cursor-not-allowed'
-                                    : 'bg-blue-600 hover:bg-blue-500'
+                                    : 'bg-[#ff6b35] hover:bg-[#ff8555]'
                                 }`}
                             title={isGenerateDisabled ? 'Add mask and prompt to generate' : 'Generate'}>
-                            <ArrowUp size={20} strokeWidth={2.5} />
+                            {isGenerating ? (
+                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            ) : (
+                                <ArrowUp size={20} strokeWidth={2.5} />
+                            )}
                         </button>
                     </div>
                 </div>
