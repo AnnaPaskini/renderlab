@@ -17,6 +17,8 @@ interface CanvasAreaProps {
     onImageChange?: (image: string) => void;
     onSaveToUndoStack: () => void;
     onRemoveImage?: () => void; // Kyle spec: Remove Image button
+    onDrawingStart?: () => void;
+    onDrawingEnd?: () => void;
 }
 
 export function CanvasArea({
@@ -29,18 +31,36 @@ export function CanvasArea({
     showMask,
     onImageChange,
     onSaveToUndoStack,
-    onRemoveImage
+    onRemoveImage,
+    onDrawingStart,
+    onDrawingEnd
 }: CanvasAreaProps) {
     const [isDragActive, setIsDragActive] = useState(false);
-    const [isDrawing, setIsDrawing] = useState(false);
     const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
     const [globalCursorPos, setGlobalCursorPos] = useState<{ x: number; y: number } | null>(null); // Kyle spec: for fixed lasso icon
 
     // For smooth brush strokes
     const lastPointRef = useRef<{ x: number; y: number } | null>(null);
+    const isDrawingRef = useRef(false); // Use ref instead of state to prevent re-renders
 
     // For lasso tool
     const lassoPathRef = useRef<{ x: number; y: number }[]>([]);
+
+    // Global mouse up handler to stop drawing when mouse is released anywhere
+    useEffect(() => {
+        const handleGlobalMouseUp = () => {
+            if (isDrawingRef.current) {
+                stopDrawing();
+            }
+        };
+
+        document.addEventListener('mouseup', handleGlobalMouseUp);
+        document.addEventListener('mouseleave', handleGlobalMouseUp); // Also handle when mouse leaves window
+        return () => {
+            document.removeEventListener('mouseup', handleGlobalMouseUp);
+            document.removeEventListener('mouseleave', handleGlobalMouseUp);
+        };
+    }, []);
 
     const handleDrag = useCallback((e: React.DragEvent) => {
         e.preventDefault();
@@ -76,19 +96,9 @@ export function CanvasArea({
             const maskCanvas = maskCanvasRef.current!;
             const drawCanvas = drawCanvasRef.current!;
 
-            // Set canvas dimensions
-            const maxWidth = window.innerWidth - 300;
-            const maxHeight = window.innerHeight - 400; // Reduced height for lower positioning
-
-            let width = img.width;
-            let height = img.height;
-
-            // Scale to fit screen
-            if (width > maxWidth || height > maxHeight) {
-                const ratio = Math.min(maxWidth / width, maxHeight / height);
-                width = width * ratio;
-                height = height * ratio;
-            }
+            // Set canvas dimensions to fixed size (1024x1024 for consistency)
+            const width = 1024;
+            const height = 1024;
 
             imageCanvas.width = width;
             imageCanvas.height = height;
@@ -115,6 +125,7 @@ export function CanvasArea({
     };
 
     const drawBrushStroke = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, lastX?: number, lastY?: number) => {
+        ctx.save(); // Save context state for performance
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         ctx.lineWidth = brushSize;
@@ -133,9 +144,11 @@ export function CanvasArea({
             ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
             ctx.fill();
         }
+        ctx.restore(); // Restore context state
     }, [brushSize]);
 
     const drawEraserStroke = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, lastX?: number, lastY?: number) => {
+        ctx.save(); // Save context state for performance
         ctx.globalCompositeOperation = 'destination-out';
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
@@ -152,23 +165,26 @@ export function CanvasArea({
             ctx.fill();
         }
 
-        ctx.globalCompositeOperation = 'source-over';
+        ctx.restore(); // Restore context state
     }, [brushSize]);
 
     const startDrawing = (e: React.MouseEvent) => {
         if (!maskCanvasRef.current || !activeTool) return;
+
+        // Notify parent that drawing started
+        onDrawingStart?.();
 
         const coords = getCanvasCoordinates(e, maskCanvasRef.current);
 
         if (activeTool === 'lasso') {
             // Start lasso path
             lassoPathRef.current = [coords];
-            setIsDrawing(true);
+            isDrawingRef.current = true;
         } else {
             // Save state before drawing
             onSaveToUndoStack();
             lastPointRef.current = coords;
-            setIsDrawing(true);
+            isDrawingRef.current = true;
 
             const ctx = maskCanvasRef.current.getContext('2d');
             if (!ctx) return;
@@ -182,12 +198,9 @@ export function CanvasArea({
     };
 
     const draw = (e: React.MouseEvent) => {
-        if (!maskCanvasRef.current || !activeTool) return;
+        if (!isDrawingRef.current || !maskCanvasRef.current || !activeTool) return;
 
         const coords = getCanvasCoordinates(e, maskCanvasRef.current);
-        setCursorPos(coords);
-
-        if (!isDrawing) return;
 
         const ctx = maskCanvasRef.current.getContext('2d');
         if (!ctx) return;
@@ -246,8 +259,11 @@ export function CanvasArea({
     };
 
     const stopDrawing = () => {
-        if (!isDrawing || !maskCanvasRef.current) {
-            setIsDrawing(false);
+        // Notify parent that drawing ended
+        onDrawingEnd?.();
+
+        if (!isDrawingRef.current || !maskCanvasRef.current) {
+            isDrawingRef.current = false;
             return;
         }
 
@@ -279,7 +295,7 @@ export function CanvasArea({
             lassoPathRef.current = [];
         }
 
-        setIsDrawing(false);
+        isDrawingRef.current = false;
         lastPointRef.current = null;
     };
 
@@ -291,63 +307,80 @@ export function CanvasArea({
             const coords = getCanvasCoordinates(e, maskCanvasRef.current);
             setCursorPos(coords);
         }
-        draw(e);
+
+        // Only call draw if we're actively drawing
+        if (isDrawingRef.current) {
+            draw(e);
+        }
     };
 
     const handleMouseLeave = () => {
         setCursorPos(null);
         setGlobalCursorPos(null); // Kyle spec: hide lasso icon when leaving canvas
-        stopDrawing();
+        // CRITICAL: Don't stop drawing when mouse leaves canvas - allow continuous strokes
+        // Drawing should only stop on mouse up, not mouse leave
     };
 
     return (
         <div
-            className="absolute inset-0 flex items-center justify-center pb-[200px]"
+            className="relative w-full h-full flex items-center justify-center"
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
         >
-            {/* Empty State - MUCH LARGER drag area */}
+            {/* Empty State - Fill the container */}
             {!image && (
                 <div className={clsx(
-                    "w-full max-w-2xl aspect-video cursor-pointer",
-                    "border-2 border-dashed rounded-2xl transition-all duration-300",
-                    "flex flex-col items-center justify-center gap-4",
-                    isDragActive
-                        ? "bg-white/10 border-white/30 shadow-lg shadow-white/10 backdrop-blur-sm"
-                        : "bg-white/5 border-white/20 hover:bg-white/10 hover:border-white/30 backdrop-blur-sm"
+                    "absolute inset-0 flex items-center justify-center cursor-pointer",
+                    "border-2 border-dashed border-gray-600 rounded-lg",
+                    "hover:border-gray-500 transition-colors group"
                 )}
                     onClick={() => {
                         // Trigger file input if it exists in parent
                         const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
                         fileInput?.click();
                     }}>
-                    {/* Upload icon */}
-                    <div className="text-6xl text-gray-600">
-                        ↑
-                    </div>
-
-                    {/* Text */}
-                    <div className="text-center">
-                        <p className="text-xl text-white font-medium mb-2">
+                    <div className="text-center pointer-events-none">
+                        <div className="mb-4">
+                            <svg className="w-16 h-16 mx-auto text-gray-600 group-hover:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                        </div>
+                        <p className="text-xl font-medium text-white mb-2">
                             Drag & Drop your image
                         </p>
-                        <p className="text-sm text-gray-400">
-                            or click to upload
+                        <p className="text-sm text-gray-400">or click to upload</p>
+                        <p className="text-xs text-gray-500 mt-2">
+                            PNG, JPG, WebP • Max 50MB
                         </p>
                     </div>
 
-                    {/* Supported formats */}
-                    <p className="text-xs text-gray-500">
-                        PNG, JPG, WebP • Max 50MB
-                    </p>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file && file.type.startsWith('image/')) {
+                                const reader = new FileReader();
+                                reader.onload = (event) => {
+                                    const imageUrl = event.target?.result as string;
+                                    if (imageUrl && onImageChange) {
+                                        onImageChange(imageUrl);
+                                    }
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                            e.target.value = '';
+                        }}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
                 </div>
             )}
 
-            {/* Canvas Stack */}
+            {/* Canvas Stack - Fill the container */}
             {image && (
-                <div className="relative rounded-xl overflow-hidden w-[90%] max-w-4xl">
+                <div className="relative w-full h-full dot-grid rounded-lg overflow-hidden border border-white/10">
                     {/* ANNA FIX: Circular close icon (28-32px glass style) */}
                     <button
                         onClick={onRemoveImage}
@@ -363,7 +396,7 @@ export function CanvasArea({
                     {/* Base Image Canvas */}
                     <canvas
                         ref={imageCanvasRef}
-                        className="w-full h-auto object-contain rounded-xl"
+                        className="absolute inset-0 w-full h-full object-contain"
                     />
 
                     {/* Mask Overlay Canvas */}
@@ -379,7 +412,7 @@ export function CanvasArea({
                     {/* Interactive Drawing Canvas */}
                     <canvas
                         ref={drawCanvasRef}
-                        className="absolute inset-0"
+                        className="absolute inset-0 cursor-crosshair"
                         style={{
                             cursor: activeTool ? 'none' : 'default'
                         }}

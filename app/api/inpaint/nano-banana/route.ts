@@ -115,7 +115,8 @@ export async function POST(req: Request) {
         }
 
         if (!resultBase64) {
-            throw new Error('No image data in Gemini response');
+            console.error('[Nano Banana] Gemini response:', JSON.stringify(result, null, 2));
+            throw new Error('Gemini did not return an image. This may be due to content policy restrictions or API limitations. Please try a different prompt or mask area.');
         }
 
         // 9. Convert base64 to Blob

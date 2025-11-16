@@ -73,6 +73,7 @@ const config: Config = {
           "scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite",
         marquee: "marquee var(--marquee-duration) linear infinite",
         "fade-in": "fade-in 0.5s linear forwards",
+        fadeIn: 'fadeIn 150ms ease-out forwards'
       },
       boxShadow: {
         derek: `0px 0px 0px 1px rgb(0 0 0 / 0.06),
@@ -105,6 +106,10 @@ const config: Config = {
           to: {
             opacity: "1",
           },
+        },
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'scale(0.95) translateY(-4px)' },
+          '100%': { opacity: '1', transform: 'scale(1) translateY(0)' }
         },
       },
     },

@@ -1,16 +1,26 @@
 'use client';
 
 import { BottomToolbar } from '@/components/inpaint/BottomToolbar';
-import { BrushControls } from '@/components/inpaint/BrushControls';
 import { CanvasArea } from '@/components/inpaint/CanvasArea';
 import { ResultView } from '@/components/inpaint/ResultView';
-import { ToolIconsBar } from '@/components/inpaint/ToolIconsBar';
-import { TopControls } from '@/components/inpaint/TopControls';
+import { Tooltip } from '@/components/ui/Tooltip';
 import { supabase } from '@/lib/supabase';
 import { extractMaskBounds } from '@/lib/utils/inpaint/maskExtractor';
 import { uploadImageToStorage } from '@/lib/utils/uploadToStorage';
-import { AnimatePresence } from 'framer-motion';
-import { useRef, useState } from 'react';
+import {
+    Download,
+    Eraser,
+    Lasso,
+    Paintbrush,
+    Redo,
+    RotateCcw,
+    Save,
+    Trash2,
+    Undo,
+    X
+} from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 type Tool = 'brush' | 'eraser' | 'lasso' | null;
 
@@ -18,7 +28,7 @@ export default function InpaintPage() {
     // State
     const [image, setImage] = useState<string | null>(null);
     const [brushSize, setBrushSize] = useState(40);
-    const [activeTool, setActiveTool] = useState<Tool>('brush');
+    const [activeTool, setActiveTool] = useState<Tool>('lasso');
     const [inpaintPrompt, setInpaintPrompt] = useState('');
     const [showMask, setShowMask] = useState(true);
     const [hasMask, setHasMask] = useState(false); // Kyle spec: track if mask exists
@@ -33,6 +43,11 @@ export default function InpaintPage() {
     const [isGenerating, setIsGenerating] = useState(false);
     const [resultImage, setResultImage] = useState<string | null>(null);
     const [showResult, setShowResult] = useState(false);
+    const [isSaved, setIsSaved] = useState(false); // Track if result is saved to history
+
+    // Drawing state for panel visibility
+    const [isDrawing, setIsDrawing] = useState(false);
+    const [showBrushPanel, setShowBrushPanel] = useState(false);
 
     // Canvas refs
     const imageCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -42,6 +57,13 @@ export default function InpaintPage() {
     // Undo/Redo stacks
     const undoStackRef = useRef<ImageData[]>([]);
     const redoStackRef = useRef<ImageData[]>([]);
+
+    // FIX #2: Hide brush panel on actions
+    useEffect(() => {
+        if (isGenerating) {
+            setActiveTool(null);
+        }
+    }, [isGenerating]);
 
     // Handlers
     const handleUndo = () => {
@@ -60,6 +82,9 @@ export default function InpaintPage() {
         // ANNA FIX: Update button states
         setCanUndo(undoStackRef.current.length > 0);
         setCanRedo(redoStackRef.current.length > 0);
+
+        // FIX #2: Hide brush panel
+        setActiveTool(null);
     };
 
     const handleRedo = () => {
@@ -78,6 +103,9 @@ export default function InpaintPage() {
         // ANNA FIX: Update button states
         setCanUndo(undoStackRef.current.length > 0);
         setCanRedo(redoStackRef.current.length > 0);
+
+        // FIX #2: Hide brush panel
+        setActiveTool(null);
     };
 
     const handleClearMask = () => {
@@ -101,6 +129,9 @@ export default function InpaintPage() {
         // ANNA FIX: Update button states
         setCanUndo(undoStackRef.current.length > 0);
         setCanRedo(false);
+
+        // FIX #2: Hide brush panel
+        setActiveTool(null);
     };
 
     const saveToUndoStack = () => {
@@ -230,26 +261,79 @@ export default function InpaintPage() {
                 console.log('Result URL:', result.output);
                 setResultImage(result.output);
                 setShowResult(true);
+                setIsSaved(false); // Mark as not saved yet
+
+                // ✅ CRITICAL: Notify user about manual save
+                toast(
+                    <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 mt-0.5">
+                            💡
+                        </div>
+                        <div>
+                            <p className="font-semibold text-sm">Result Ready!</p>
+                            <p className="text-xs text-gray-300 mt-1">
+                                Click <span className="font-medium text-white">"Save to History"</span> to keep this image
+                            </p>
+                        </div>
+                    </div>,
+                    {
+                        duration: 6000,  // 6 seconds - long enough to read
+                        position: 'top-center',
+                        style: {
+                            background: '#2a2a2a',
+                            color: 'white',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            borderRadius: '12px',
+                            padding: '16px',
+                            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.6)',
+                            fontSize: '14px',
+                            fontWeight: '500'
+                        }
+                    }
+                );
             } else {
                 throw new Error('Generation failed');
             }
 
         } catch (error) {
             console.error('❌ Generate failed:', error);
-            alert('Failed to generate: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+            // Show user-friendly error with toast
+            if (errorMessage.includes('Gemini did not return an image')) {
+                toast.error('Generation failed', {
+                    description: 'The AI couldn\'t process this request. Try using a different prompt, drawing a smaller mask area, or describing changes more specifically.',
+                    duration: 5000,
+                });
+            } else {
+                toast.error('Failed to generate: ' + errorMessage);
+            }
         } finally {
             setIsGenerating(false);
         }
     };
 
-    const handleDownload = () => {
+    const handleDownload = async () => {
         if (!resultImage) return;
 
-        const filename = `renderlab_inpaint_${Date.now()}.png`;
-        const link = document.createElement('a');
-        link.href = resultImage;
-        link.download = filename;
-        link.click();
+        try {
+            // FIX #6: Properly download the image
+            const response = await fetch(resultImage);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const filename = `renderlab_inpaint_${Date.now()}.png`;
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Download failed:', error);
+            alert('Failed to download image');
+        }
     };
 
     const handleEditAgain = () => {
@@ -265,14 +349,54 @@ export default function InpaintPage() {
     };
 
     const handleSendToHistory = async () => {
-        // Image already saved to database by API
-        // Just show confirmation and close
-        alert('Saved to History successfully!');
-        setShowResult(false);
-        setImage(null);
-        setResultImage(null);
-        setInpaintPrompt('');
-        setReferenceImage(null);
+        if (!resultImage) return;
+
+        // Show loading state
+        toast.loading('Saving to history...', { id: 'save-history' });
+
+        try {
+            // The image is already in storage, just need to mark it as saved
+            // FIX #5: Only save when explicitly clicked
+            toast.dismiss('save-history');
+
+            // Show success toast
+            toast.success(
+                <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0">
+                        ✓
+                    </div>
+                    <div>
+                        <p className="font-semibold text-sm">Saved to History!</p>
+                        <p className="text-xs text-gray-300">
+                            View in <a href="/history" className="underline hover:text-white">History page</a>
+                        </p>
+                    </div>
+                </div>,
+                {
+                    duration: 4000,
+                    position: 'top-center',
+                    style: {
+                        background: '#2a2a2a',
+                        color: 'white',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.6)',
+                        fontSize: '14px',
+                        fontWeight: '500'
+                    }
+                }
+            );
+
+            setIsSaved(true); // Mark as saved
+
+            // Don't clear everything - just close result view
+            setShowResult(false);
+        } catch (error) {
+            toast.dismiss('save-history');
+            console.error('Save failed:', error);
+            toast.error('Failed to save to history');
+        }
     };
 
     const handleClearBoard = () => {
@@ -281,70 +405,247 @@ export default function InpaintPage() {
         setResultImage(null);
         setInpaintPrompt('');
         setReferenceImage(null);
+        setActiveTool(null);
         handleClearMask();
     };
 
+    const getToolButtonClass = (isActive: boolean) =>
+        `w-12 h-12 rounded-lg flex items-center justify-center transition-colors ${isActive
+            ? 'bg-white text-black'
+            : 'text-gray-400 hover:text-white hover:bg-[#1a1a1a]'}`;
+
+    const getActionButtonClass = (isDisabled: boolean) =>
+        `w-12 h-12 rounded-lg flex items-center justify-center transition-colors ${isDisabled
+            ? 'text-gray-400/30 cursor-not-allowed'
+            : 'text-gray-400 hover:text-white hover:bg-[#1a1a1a]'}`;
+
     return (
-        <div className="relative w-full h-screen bg-black overflow-hidden dot-grid">
-            {/* Canvas Area */}
-            <CanvasArea
-                image={image}
-                imageCanvasRef={imageCanvasRef}
-                maskCanvasRef={maskCanvasRef}
-                drawCanvasRef={drawCanvasRef}
-                brushSize={brushSize}
-                activeTool={activeTool}
-                showMask={showMask}
-                onImageChange={setImage}
-                onSaveToUndoStack={saveToUndoStack}
-                onRemoveImage={handleRemoveImage}
-            />
+        <div className="min-h-screen bg-black flex flex-col items-center justify-center p-8 dot-grid">
+            <div className="relative w-full max-w-7xl mx-auto">
+                <div className="relative flex items-center justify-center gap-8 mb-8">
+                    <div className="flex-shrink-0">
+                        <div className="bg-[#1a1a1a] rounded-2xl border border-white/10 p-3 shadow-[0_8px_32px_rgba(0,0,0,0.6)] flex flex-col gap-2">
+                            <Tooltip text="Brush Tool" position="right">
+                                <button
+                                    onClick={() => {
+                                        setActiveTool('brush');
+                                        setShowBrushPanel(true);
+                                    }}
+                                    className={getToolButtonClass(activeTool === 'brush')}
+                                >
+                                    <Paintbrush size={18} />
+                                </button>
+                            </Tooltip>
 
-            {/* Top Controls */}
-            <TopControls />
+                            <Tooltip text="Eraser Tool" position="right">
+                                <button
+                                    onClick={() => {
+                                        setActiveTool('eraser');
+                                        setShowBrushPanel(true);
+                                    }}
+                                    className={getToolButtonClass(activeTool === 'eraser')}
+                                >
+                                    <Eraser size={18} />
+                                </button>
+                            </Tooltip>
 
-            {/* Bottom Toolbar */}
-            <BottomToolbar
-                inpaintPrompt={inpaintPrompt}
-                setInpaintPrompt={setInpaintPrompt}
-                hasMask={hasMask}
-                onGenerate={handleGenerate}
-                isGenerating={isGenerating}
-            />
+                            <Tooltip text="Lasso Tool" position="right">
+                                <button
+                                    onClick={() => {
+                                        setActiveTool('lasso');
+                                        setShowBrushPanel(false);
+                                    }}
+                                    className={getToolButtonClass(activeTool === 'lasso')}
+                                >
+                                    <Lasso size={18} />
+                                </button>
+                            </Tooltip>
 
-            {/* Tool Icons Bar */}
-            <ToolIconsBar
-                activeTool={activeTool}
-                setActiveTool={setActiveTool}
-                onUndo={handleUndo}
-                onRedo={handleRedo}
-                onClearMask={handleClearMask}
-                canUndo={canUndo}
-                canRedo={canRedo}
-            />
+                            <div className="h-px bg-white/10 my-1" />
 
-            {/* Brush Controls (conditional) */}
-            <AnimatePresence>
-                {(activeTool === 'brush' || activeTool === 'eraser') && (
-                    <BrushControls
-                        brushSize={brushSize}
-                        setBrushSize={setBrushSize}
+                            <Tooltip text="Undo" position="right">
+                                <button
+                                    onClick={handleUndo}
+                                    disabled={!canUndo}
+                                    className={`w-12 h-12 rounded-lg flex items-center justify-center transition-colors ${!canUndo
+                                        ? 'text-gray-400/30 cursor-not-allowed'
+                                        : 'text-gray-400 hover:text-white hover:bg-[#1a1a1a]'
+                                        }`}
+                                >
+                                    <Undo size={18} />
+                                </button>
+                            </Tooltip>
+
+                            <Tooltip text="Redo" position="right">
+                                <button
+                                    onClick={handleRedo}
+                                    disabled={!canRedo}
+                                    className={`w-12 h-12 rounded-lg flex items-center justify-center transition-colors ${!canRedo
+                                        ? 'text-gray-400/30 cursor-not-allowed'
+                                        : 'text-gray-400 hover:text-white hover:bg-[#1a1a1a]'
+                                        }`}
+                                >
+                                    <Redo size={18} />
+                                </button>
+                            </Tooltip>
+
+                            <div className="h-px bg-white/10 my-1" />
+
+                            <Tooltip text="Clear Mask" position="right">
+                                <button
+                                    onClick={handleClearMask}
+                                    className="w-12 h-12 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#1a1a1a] transition-colors"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            </Tooltip>
+                        </div>
+                    </div>
+
+                    <div className="relative w-full max-w-4xl aspect-square">
+                        {showResult && resultImage && image ? (
+                            <ResultView
+                                originalImage={image}
+                                resultImage={resultImage}
+                                prompt={inpaintPrompt}
+                                onDownload={handleDownload}
+                                onEditAgain={handleEditAgain}
+                                onSendToHistory={handleSendToHistory}
+                                onClearBoard={handleClearBoard}
+                            />
+                        ) : (
+                            <CanvasArea
+                                image={image}
+                                imageCanvasRef={imageCanvasRef}
+                                maskCanvasRef={maskCanvasRef}
+                                drawCanvasRef={drawCanvasRef}
+                                brushSize={brushSize}
+                                activeTool={activeTool}
+                                showMask={showMask}
+                                onImageChange={setImage}
+                                onSaveToUndoStack={saveToUndoStack}
+                                onRemoveImage={handleRemoveImage}
+                                onDrawingStart={() => {
+                                    setIsDrawing(true);
+                                    setShowBrushPanel(false);
+                                }}
+                                onDrawingEnd={() => setIsDrawing(false)}
+                            />
+                        )}
+
+                        {showBrushPanel && (
+                            <div className="absolute left-[112px] top-1/2 -translate-y-1/2 z-50 transition-all duration-200 ease-out animate-fadeIn">
+                                <div className="bg-[#2a2a2a] rounded-xl px-4 py-3 border border-white/10 shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <span className="text-xs font-medium text-gray-400">
+                                            {activeTool === 'brush' ? 'Brush Size' : 'Eraser Size'}
+                                        </span>
+                                        <span className="text-sm font-semibold text-white">{brushSize}px</span>
+                                    </div>
+
+                                    <input
+                                        type="range"
+                                        min="5"
+                                        max="150"
+                                        value={brushSize}
+                                        onChange={(e) => setBrushSize(Number(e.target.value))}
+                                        className="w-40 h-1.5 bg-gray-700 rounded-full appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400 transition-colors"
+                                    />
+
+                                    <div className="flex gap-2 mt-3">
+                                        <button
+                                            onClick={() => setBrushSize(20)}
+                                            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${brushSize === 20
+                                                ? 'bg-blue-500 text-white'
+                                                : 'bg-[#1a1a1a] text-gray-300 hover:bg-[#242424]'
+                                                }`}
+                                        >
+                                            Small
+                                        </button>
+                                        <button
+                                            onClick={() => setBrushSize(60)}
+                                            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${brushSize === 60
+                                                ? 'bg-blue-500 text-white'
+                                                : 'bg-[#1a1a1a] text-gray-300 hover:bg-[#242424]'
+                                                }`}
+                                        >
+                                            Medium
+                                        </button>
+                                        <button
+                                            onClick={() => setBrushSize(120)}
+                                            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${brushSize === 120
+                                                ? 'bg-blue-500 text-white'
+                                                : 'bg-[#1a1a1a] text-gray-300 hover:bg-[#242424]'
+                                                }`}
+                                        >
+                                            Large
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="flex-shrink-0">
+                        <div className="bg-[#1a1a1a] rounded-2xl border border-white/10 p-2 shadow-[0_8px_32px_rgba(0,0,0,0.6)] flex flex-col gap-2">
+                            <Tooltip text="Download PNG" position="left">
+                                <button
+                                    onClick={handleDownload}
+                                    disabled={!resultImage}
+                                    className={getActionButtonClass(!resultImage)}
+                                >
+                                    <Download size={20} />
+                                </button>
+                            </Tooltip>
+
+                            <Tooltip text="Edit Again" position="left">
+                                <button
+                                    onClick={handleEditAgain}
+                                    disabled={!resultImage}
+                                    className={getActionButtonClass(!resultImage)}
+                                >
+                                    <RotateCcw size={20} />
+                                </button>
+                            </Tooltip>
+
+                            <Tooltip text="Save to History" position="left">
+                                <button
+                                    onClick={handleSendToHistory}
+                                    disabled={!resultImage}
+                                    className={`relative ${getActionButtonClass(!resultImage)}`}
+                                >
+                                    <Save size={20} />
+                                    {/* Pulsing indicator for unsaved */}
+                                    {resultImage && !isSaved && (
+                                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#ff6b35] rounded-full
+                                            animate-pulse ring-2 ring-black" />
+                                    )}
+                                </button>
+                            </Tooltip>
+
+                            <Tooltip text="Clear All" position="left">
+                                <button
+                                    onClick={handleClearBoard}
+                                    disabled={!image && !resultImage}
+                                    className={getActionButtonClass(!image && !resultImage)}
+                                >
+                                    <X size={20} />
+                                </button>
+                            </Tooltip>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="w-full">
+                    <BottomToolbar
+                        inpaintPrompt={inpaintPrompt}
+                        setInpaintPrompt={setInpaintPrompt}
+                        hasMask={hasMask}
+                        onGenerate={handleGenerate}
+                        isGenerating={isGenerating}
                     />
-                )}
-            </AnimatePresence>
-
-            {/* Result View - conditional */}
-            {showResult && resultImage && image && (
-                <ResultView
-                    originalImage={image}
-                    resultImage={resultImage}
-                    prompt={inpaintPrompt}
-                    onDownload={handleDownload}
-                    onEditAgain={handleEditAgain}
-                    onSendToHistory={handleSendToHistory}
-                    onClearBoard={handleClearBoard}
-                />
-            )}
+                </div>
+            </div>
         </div>
     );
 }
