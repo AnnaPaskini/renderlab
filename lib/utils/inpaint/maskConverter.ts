@@ -19,9 +19,6 @@ import sharp from 'sharp';
 export async function convertRedMaskToBlackWhite(
     maskUrl: string
 ): Promise<string> {
-    console.log('🎨 Converting red mask to black/white...');
-    console.log('Mask URL:', maskUrl);
-
     try {
         // Fetch mask image
         const response = await fetch(maskUrl);
@@ -37,8 +34,6 @@ export async function convertRedMaskToBlackWhite(
             .ensureAlpha() // Make sure we have alpha channel
             .raw()
             .toBuffer({ resolveWithObject: true });
-
-        console.log('📏 Mask dimensions:', info.width, 'x', info.height);
 
         // Create new buffer for black/white mask
         const outputData = Buffer.alloc(info.width * info.height * 4);
@@ -79,14 +74,6 @@ export async function convertRedMaskToBlackWhite(
             }
         }
 
-        console.log('🔴 Red pixels converted to BLACK:', redPixelCount);
-        console.log('⚪ Other pixels converted to WHITE:', whitePixelCount);
-        console.log('📊 Mask coverage:', Math.round((redPixelCount / (redPixelCount + whitePixelCount)) * 100), '%');
-
-        if (redPixelCount === 0) {
-            console.warn('⚠️  WARNING: No red pixels found in mask!');
-        }
-
         // Convert to PNG
         const pngBuffer = await sharp(outputData, {
             raw: {
@@ -98,7 +85,12 @@ export async function convertRedMaskToBlackWhite(
             .png()
             .toBuffer();
 
-        console.log('✅ Converted mask:', Math.round(pngBuffer.length / 1024), 'KB');
+        const coverage = Math.round((redPixelCount / (redPixelCount + whitePixelCount)) * 100);
+        console.log(`✅ Mask converted: ${coverage}% coverage, ${Math.round(pngBuffer.length / 1024)}KB`);
+
+        if (redPixelCount === 0) {
+            console.warn('⚠️  WARNING: No red pixels found in mask!');
+        }
 
         // Return as base64
         return pngBuffer.toString('base64');

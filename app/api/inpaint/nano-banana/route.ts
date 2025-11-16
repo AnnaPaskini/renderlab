@@ -40,21 +40,11 @@ async function urlToBase64(url: string): Promise<string> {
 
 export async function POST(request: NextRequest) {
     const startTime = Date.now();
-
-    console.log('\n═══════════════════════════════════════════');
-    console.log('[Nano Banana v3] Full Image + Actual Mask');
-    console.log('═══════════════════════════════════════════');
+    console.log('[Nano Banana] Starting inpaint request');
 
     try {
         const body: RequestBody = await request.json();
         const { userId, imageUrl, maskUrl, maskBounds, userPrompt, referenceUrls = [] } = body;
-
-        console.log('User ID:', userId);
-        console.log('Image URL:', imageUrl);
-        console.log('Mask URL:', maskUrl);
-        console.log('Mask Bounds:', maskBounds);
-        console.log('User Prompt:', userPrompt);
-        console.log('Reference Images:', referenceUrls.length);
 
         // Validate inputs
         if (!userId || !imageUrl || !maskUrl || !maskBounds || !userPrompt) {
@@ -71,10 +61,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        console.log('═══════════════════════════════════════════');
-
         // ✅ STEP 1: Get full original image
-        console.log('[Step 1] Fetching full original image...');
+        console.log('[Step 1/5] Fetching image...');
         const fullImageBase64 = await urlToBase64(imageUrl);
         console.log(`✅ Full image: ${Math.round(fullImageBase64.length * 0.75 / 1024)}KB`);
 
@@ -104,18 +92,17 @@ export async function POST(request: NextRequest) {
 
         // Add reference images if provided
         if (referenceUrls.length > 0) {
-            console.log('[Step 4] Adding reference images...');
+            console.log(`[Step 4/5] Adding ${referenceUrls.length} reference image(s)...`);
             for (let i = 0; i < referenceUrls.length; i++) {
                 const refBase64 = await urlToBase64(referenceUrls[i]);
                 parts.push({
                     inlineData: { mimeType: 'image/jpeg', data: refBase64 }
                 });
-                console.log(`✅ Reference ${i + 1} added`);
             }
         }
 
         // ✅ STEP 5: Call Gemini API
-        console.log('[Step 5] Calling Gemini API...');
+        console.log('[Step 5/5] Calling Gemini API...');
         const geminiResponse = await fetch(
             `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
             {
@@ -140,43 +127,22 @@ export async function POST(request: NextRequest) {
         }
 
         const geminiData = await geminiResponse.json();
-        console.log('✅ Gemini API responded');
-
-        // Debug logging
-        console.log('📦 Response:', {
-            candidates: geminiData.candidates?.length,
-            finishReason: geminiData.candidates?.[0]?.finishReason,
-            hasImage: !!geminiData.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData)
-        });
 
         // Extract generated image (using camelCase inlineData)
         const imagePart = geminiData.candidates?.[0]?.content?.parts?.find(
             (part: any) => part.inlineData
         );
 
-        console.log('🖼️  Image part found:', !!imagePart);
-
         const generatedImageBase64 = imagePart?.inlineData?.data;
 
         if (!generatedImageBase64) {
-            console.error('❌ NO IMAGE IN RESPONSE!');
-            console.error('Response structure:', {
-                hasCandidates: !!geminiData.candidates,
-                candidatesCount: geminiData.candidates?.length,
-                firstCandidate: geminiData.candidates?.[0],
-                finishReason: geminiData.candidates?.[0]?.finishReason,
-                safetyRatings: geminiData.candidates?.[0]?.safetyRatings,
-                contentParts: geminiData.candidates?.[0]?.content?.parts,
-                firstPart: geminiData.candidates?.[0]?.content?.parts?.[0]
-            });
-            console.error('Full response:', JSON.stringify(geminiData, null, 2));
+            if (process.env.NODE_ENV === 'development') {
+                console.error('❌ No image in response. Full response:', JSON.stringify(geminiData, null, 2));
+            }
             throw new Error('No image in Gemini response');
         }
 
-        console.log(`✅ Generated image received`);
-
-        // ✅ STEP 6: Upload result to Supabase
-        console.log('[Step 6] Uploading to Supabase...');
+        // ✅ Upload result to Supabase
         const supabase = await createClient();
         const timestamp = Date.now();
         const fileName = `${userId}/inpaint_${timestamp}.jpg`;
@@ -199,10 +165,7 @@ export async function POST(request: NextRequest) {
             .from('renderlab-images')
             .getPublicUrl(fileName);
 
-        console.log('✅ Uploaded:', publicUrl);
-
-        // ✅ STEP 7: Save to database
-        console.log('[Step 7] Saving to database...');
+        // ✅ Save to database
         const { data: dbData, error: dbError } = await supabase
             .from('inpaint_edits')
             .insert({
@@ -223,13 +186,7 @@ export async function POST(request: NextRequest) {
         }
 
         const totalTime = Date.now() - startTime;
-
-        console.log('═══════════════════════════════════════════');
-        console.log('🎉 SUCCESS!');
-        console.log('Approach: Full Image + Actual User Mask');
-        console.log('Total time:', totalTime, 'ms');
-        console.log('Result URL:', publicUrl);
-        console.log('═══════════════════════════════════════════\n');
+        console.log(`✅ Inpaint complete in ${totalTime}ms:`, publicUrl);
 
         return NextResponse.json({
             success: true,
@@ -241,11 +198,7 @@ export async function POST(request: NextRequest) {
 
     } catch (error: any) {
         const totalTime = Date.now() - startTime;
-
-        console.error('═══════════════════════════════════════════');
-        console.error('❌ ERROR after', totalTime, 'ms');
-        console.error(error);
-        console.error('═══════════════════════════════════════════\n');
+        console.error(`❌ Inpaint error after ${totalTime}ms:`, error.message);
 
         return NextResponse.json(
             {
