@@ -2,7 +2,7 @@
 
 import { Tooltip } from '@/components/ui/Tooltip';
 import { ArrowUp, Paperclip } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 
 interface BottomToolbarProps {
     inpaintPrompt: string;
@@ -10,6 +10,8 @@ interface BottomToolbarProps {
     hasMask?: boolean;
     onGenerate?: () => void;
     isGenerating?: boolean;
+    referenceImage?: string | null;  // NEW: Pass from parent
+    onReferenceImageChange?: (url: string | null) => void;  // NEW: Callback to parent
 }
 
 export function BottomToolbar({
@@ -17,25 +19,52 @@ export function BottomToolbar({
     setInpaintPrompt,
     hasMask = false,
     onGenerate,
-    isGenerating = false
+    isGenerating = false,
+    referenceImage = null,  // NEW: Use prop
+    onReferenceImageChange  // NEW: Use callback
 }: BottomToolbarProps) {
-    const [referenceImage, setReferenceImage] = useState<string | null>(null);
     const paperclipInputRef = useRef<HTMLInputElement>(null);
 
     const isGenerateDisabled = !hasMask || !inpaintPrompt.trim() || isGenerating;
 
-    const handlePaperclipUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handlePaperclipUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const imageUrl = event.target?.result as string;
-                if (imageUrl) {
-                    setReferenceImage(imageUrl);
-                    console.log('✅ Paperclip reference uploaded:', file.name);
+            try {
+                // Upload to Supabase instead of using data URL
+                const { supabase } = await import('@/lib/supabase');
+
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    console.error('❌ User not authenticated');
+                    return;
                 }
-            };
-            reader.readAsDataURL(file);
+
+                const fileName = `${user.id}/reference_${Date.now()}_${file.name}`;
+
+                const { data, error } = await supabase.storage
+                    .from('renderlab-images')
+                    .upload(fileName, file, {
+                        contentType: file.type,
+                        upsert: false
+                    });
+
+                if (error) throw error;
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('renderlab-images')
+                    .getPublicUrl(fileName);
+
+                console.log('📸 Reference uploaded to Supabase:', publicUrl);
+
+                // ✅ IMPORTANT: Call parent callback to update state
+                if (onReferenceImageChange) {
+                    onReferenceImageChange(publicUrl);
+                }
+
+            } catch (error) {
+                console.error('❌ Failed to upload reference image:', error);
+            }
         }
         e.target.value = '';
     };
@@ -63,7 +92,7 @@ export function BottomToolbar({
                                     className="w-[72px] h-[72px] object-cover rounded-lg border border-white/10"
                                 />
                                 <button
-                                    onClick={() => setReferenceImage(null)}
+                                    onClick={() => onReferenceImageChange?.(null)}
                                     className="absolute top-1 right-1 w-5 h-5 rounded-full 
                                     bg-white/10 backdrop-blur-sm border border-white/20 
                                     hover:bg-white/20 transition-all

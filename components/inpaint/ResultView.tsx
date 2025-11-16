@@ -10,6 +10,7 @@ interface ResultViewProps {
     onEditAgain: () => void;
     onSendToHistory: () => void;
     onClearBoard: () => void;
+    maskBounds?: { x: number; y: number; width: number; height: number };
 }
 
 export function ResultView({
@@ -19,7 +20,8 @@ export function ResultView({
     onDownload,
     onEditAgain,
     onSendToHistory,
-    onClearBoard
+    onClearBoard,
+    maskBounds
 }: ResultViewProps) {
     const [sliderPosition, setSliderPosition] = useState(50);
     const [isDragging, setIsDragging] = useState(false);
@@ -133,6 +135,31 @@ export function ResultView({
                     After
                 </div>
             </div>
+
+            {/* DEBUG OVERLAY - TEMPORARY FOR TESTING */}
+            {maskBounds && (
+                <div className="absolute inset-0 pointer-events-none z-50">
+                    {/* Red rectangle showing where mask was */}
+                    <div
+                        className="absolute border-4 border-red-500 bg-red-500/20"
+                        style={{
+                            left: `${(maskBounds.x / 1024) * 100}%`,
+                            top: `${(maskBounds.y / 1024) * 100}%`,
+                            width: `${(maskBounds.width / 1024) * 100}%`,
+                            height: `${(maskBounds.height / 1024) * 100}%`
+                        }}
+                    />
+
+                    {/* Info box */}
+                    <div className="absolute top-20 left-4 bg-black/90 text-white p-3
+                        text-xs font-mono rounded-lg border border-red-500">
+                        <div className="font-bold text-red-400 mb-2">DEBUG: Mask Position</div>
+                        <div>Coordinates: ({maskBounds.x}, {maskBounds.y})</div>
+                        <div>Size: {maskBounds.width} × {maskBounds.height}</div>
+                        <div>Percentage: {Math.round(maskBounds.width / 1024 * 100)}% × {Math.round(maskBounds.height / 1024 * 100)}%</div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

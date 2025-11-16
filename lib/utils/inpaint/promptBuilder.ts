@@ -1,5 +1,4 @@
 import type { MaskBounds } from '@/lib/constants/inpaint';
-import { getSpatialDescription } from './maskExtractor';
 
 /**
  * Build smart prompt for Gemini API
@@ -15,57 +14,58 @@ export function buildSmartPrompt(
     maskBounds: MaskBounds,
     referenceUrls: string[] = []
 ): string {
-
     const { x, y, width, height, imageWidth, imageHeight } = maskBounds;
 
-    // Calculate relative positions as percentages
+    // Calculate end coordinates
+    const x2 = x + width;
+    const y2 = y + height;
+
+    // Calculate percentages (for semantic understanding)
     const leftPercent = Math.round((x / imageWidth) * 100);
     const topPercent = Math.round((y / imageHeight) * 100);
     const widthPercent = Math.round((width / imageWidth) * 100);
     const heightPercent = Math.round((height / imageHeight) * 100);
-    const rightPercent = leftPercent + widthPercent;
-    const bottomPercent = topPercent + heightPercent;
 
-    // Get spatial description (e.g., "center-top", "left-middle")
-    const position = getSpatialDescription(maskBounds);
+    // Semantic position (for context)
+    let horizontal = leftPercent < 33 ? 'left' : leftPercent > 66 ? 'right' : 'center';
+    let vertical = topPercent < 33 ? 'upper' : topPercent > 66 ? 'lower' : 'middle';
 
-    // System instruction
-    const systemInstruction =
-        `You are editing an architectural visualization render. ` +
-        `The user wants to modify a specific area of the image while preserving all other elements.`;
+    return `You are editing an architectural visualization image.
 
-    // Spatial context with precise coordinates
-    const spatialContext =
-        `Focus on the ${position} portion of the image. ` +
-        `The edit area spans approximately ${leftPercent}-${rightPercent}% horizontally (from left edge) ` +
-        `and ${topPercent}-${bottomPercent}% vertically (from top edge), ` +
-        `covering about ${widthPercent}×${heightPercent}% of the total image area.`;
+CRITICAL - EXACT EDIT AREA SPECIFICATION:
 
-    // User's edit instruction
-    const editInstruction = userPrompt.trim();
+The image is ${imageWidth}×${imageHeight} pixels. You MUST edit ONLY the following rectangular area:
 
-    // Reference images note (if provided)
-    const referenceNote = referenceUrls.length > 0
-        ? `Use the ${referenceUrls.length} reference image${referenceUrls.length > 1 ? 's' : ''} provided to match style, materials, colors, and design language.`
-        : '';
+PIXEL-PERFECT BOUNDARIES:
+- Starting point (top-left corner): pixel (${x}, ${y})
+- Ending point (bottom-right corner): pixel (${x2}, ${y2})
+- Width: ${width} pixels (columns ${x} through ${x2})
+- Height: ${height} pixels (rows ${y} through ${y2})
+- Area percentage: ${widthPercent}% × ${heightPercent}% of total image
+- Semantic location: ${vertical}-${horizontal} portion
 
-    // Preservation instructions
-    const preservationNote =
-        `IMPORTANT: Only modify the specified area. ` +
-        `Preserve all other architectural elements, lighting, shadows, perspective, and photorealistic quality. ` +
-        `Maintain consistency with the original render's style and atmosphere. ` +
-        `Ensure seamless blending at the edges of the edited area.`;
+COORDINATE SYSTEM:
+- Origin (0,0) is at the TOP-LEFT corner of the image
+- X-axis increases from left to right (0 to ${imageWidth})
+- Y-axis increases from top to bottom (0 to ${imageHeight})
+- Your edit area starts at column ${x}, row ${y}
+- Your edit area ends at column ${x2}, row ${y2}
 
-    // Combine all parts
-    return [
-        systemInstruction,
-        spatialContext,
-        editInstruction,
-        referenceNote,
-        preservationNote
-    ]
-        .filter(part => part.length > 0)
-        .join('\n\n');
+USER'S REQUEST:
+${userPrompt}
+
+CRITICAL REQUIREMENTS:
+1. Edit ONLY pixels within x=[${x},${x2}] and y=[${y},${y2}]
+2. DO NOT modify ANY pixels outside these exact boundaries
+3. Preserve everything outside the edit area EXACTLY as it is
+4. The rectangular edit area is ${width} pixels wide and ${height} pixels tall
+5. Maintain seamless blending at the boundaries (pixels at x=${x}, x=${x2}, y=${y}, y=${y2})
+6. Keep original lighting, shadows, perspective, and architectural style
+7. Ensure photorealistic quality matching the original render
+
+${referenceUrls.length > 0 ? `Use the ${referenceUrls.length} reference image${referenceUrls.length > 1 ? 's' : ''} provided to match style, materials, colors, and design language.` : ''}
+
+Execute the user's request ONLY within the specified pixel boundaries. Think of it as editing a ${width}×${height} rectangle that starts at position (${x},${y}) in the ${imageWidth}×${imageHeight} image.`;
 }
 
 /**

@@ -44,6 +44,7 @@ export default function InpaintPage() {
     const [resultImage, setResultImage] = useState<string | null>(null);
     const [showResult, setShowResult] = useState(false);
     const [isSaved, setIsSaved] = useState(false); // Track if result is saved to history
+    const [lastMaskBounds, setLastMaskBounds] = useState<{ x: number; y: number; width: number; height: number } | null>(null); // DEBUG: Store mask bounds for visual debugging
 
     // Drawing state for panel visibility
     const [isDrawing, setIsDrawing] = useState(false);
@@ -209,45 +210,113 @@ export default function InpaintPage() {
                 return;
             }
 
-            // 2. Convert canvas to Blob
+            // 2. Convert image canvas to Blob (mask not needed - extracted in-memory)
             console.log('📦 Converting canvas to Blob...');
             const imageBlob = await new Promise<Blob>((resolve) => {
                 imageCanvasRef.current!.toBlob((blob) => resolve(blob!), 'image/png');
             });
 
-            const maskBlob = await new Promise<Blob>((resolve) => {
-                maskCanvasRef.current!.toBlob((blob) => resolve(blob!), 'image/png');
-            });
-
-            // 3. Upload to Supabase
-            console.log('☁️ Uploading to Supabase...');
+            // 3. Upload base image to Supabase (mask processed in-memory by Sharp)
+            console.log('☁️ Uploading base image to Supabase...');
             const imageUrl = await uploadImageToStorage(imageBlob, user.id, `inpaint_base_${Date.now()}.png`);
-            const maskUrl = await uploadImageToStorage(maskBlob, user.id, `inpaint_mask_${Date.now()}.png`);
 
-            if (!imageUrl || !maskUrl) {
-                throw new Error('Failed to upload images');
+            if (!imageUrl) {
+                throw new Error('Failed to upload base image');
             }
 
-            console.log('✅ Images uploaded:', { imageUrl, maskUrl });
+            console.log('✅ Base image uploaded:', imageUrl);
 
-            // 4. Extract mask bounds
+            // ✅ UPLOAD MASK TO SUPABASE (V3 - actual user-drawn shape)
+            console.log('☁️ Uploading mask image to Supabase...');
+            const maskBlob = await new Promise<Blob>((resolve) => {
+                maskCanvasRef.current?.toBlob((blob) => {
+                    if (blob) resolve(blob);
+                }, 'image/png');
+            });
+
+            const maskUrl = await uploadImageToStorage(maskBlob, user.id, `inpaint_mask_${Date.now()}.png`);
+
+            if (!maskUrl) {
+                throw new Error('Failed to upload mask image');
+            }
+
+            console.log('✅ Mask image uploaded:', maskUrl);
+
+            // 4. Extract mask bounds (Sharp will process mask in-memory)
             console.log('📐 Extracting mask bounds...');
             const maskBounds = extractMaskBounds(maskCanvasRef.current);
             console.log('✅ Mask bounds:', maskBounds);
 
-            // 5. Call API
-            console.log('🤖 Calling Gemini API...');
+            // DEBUG: Add visual debug to verify mask canvas content
+            if (maskCanvasRef.current) {
+                // Save mask canvas as image for debugging
+                const debugMaskUrl = maskCanvasRef.current.toDataURL('image/png');
+                console.log('🖼️  DEBUG: Mask Canvas Image (copy this URL to browser to view):');
+                console.log(debugMaskUrl.substring(0, 100) + '...');
+
+                // Download mask for inspection
+                const link = document.createElement('a');
+                link.href = debugMaskUrl;
+                link.download = 'mask-debug.png';
+                link.click();
+
+                console.log('✅ Mask canvas downloaded as mask-debug.png');
+            }
+
+            // DEBUG: Store mask bounds for visual debugging
+            setLastMaskBounds(maskBounds);
+
+            if (!maskBounds) {
+                toast.error('Please draw a mask on the image');
+                return;
+            }
+
+            // ✅ ADD THIS LOGGING BLOCK - FRONTEND MASK BOUNDS
+            console.log('═══════════════════════════════════════════');
+            console.log('🎨 FRONTEND: Mask Bounds Extracted');
+            console.log('═══════════════════════════════════════════');
+            console.log('Canvas Size:', maskCanvasRef.current.width, '×', maskCanvasRef.current.height);
+            console.log('Mask Bounds:', maskBounds);
+            console.log('Mask Position:', {
+                topLeft: `(${maskBounds.x}, ${maskBounds.y})`,
+                bottomRight: `(${maskBounds.x + maskBounds.width}, ${maskBounds.y + maskBounds.height})`,
+                percentageOfImage: `${Math.round(maskBounds.width / maskBounds.imageWidth * 100)}% × ${Math.round(maskBounds.height / maskBounds.imageHeight * 100)}%`
+            });
+            console.log('Semantic Location:', (() => {
+                const leftPercent = (maskBounds.x / maskBounds.imageWidth) * 100;
+                const topPercent = (maskBounds.y / maskBounds.imageHeight) * 100;
+                const horizontal = leftPercent < 33 ? 'left' : leftPercent > 66 ? 'right' : 'center';
+                const vertical = topPercent < 33 ? 'upper' : topPercent > 66 ? 'lower' : 'middle';
+                return `${vertical}-${horizontal}`;
+            })());
+            console.log('User Prompt:', inpaintPrompt);
+            console.log('═══════════════════════════════════════════\n');
+
+            // ✅ BUILD OPTIMIZED REQUEST PAYLOAD
+            console.log('🎨 Reference image in state:', referenceImage);
+
+            const requestPayload = {
+                userId: user.id,                    // ✅ Required by backend
+                imageUrl: imageUrl,                 // ✅ Uploaded base image
+                maskUrl: maskUrl,                   // ✅ V3: Actual mask PNG with user-drawn shape
+                maskBounds: maskBounds,             // ✅ Extracted mask bounds
+                userPrompt: inpaintPrompt.trim(),   // ✅ User's instruction
+                referenceUrls: referenceImage ? [referenceImage] : []  // ✅ Reference images (0-3)
+            };
+
+            console.log('📦 Final request payload:', requestPayload);
+
+            console.log('🚀 FRONTEND: Sending API Request');
+            console.log('API Endpoint:', '/api/inpaint/nano-banana');
+            console.log('Request Payload:', requestPayload);
+            console.log('\n');
+
+            // 5. Call Optimized Nano Banana API
+            console.log('🤖 Calling Gemini API with Sharp processing...');
             const response = await fetch('/api/inpaint/nano-banana', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    imageUrl,
-                    maskUrl,
-                    maskBounds,
-                    userPrompt: inpaintPrompt,
-                    referenceUrls: referenceImage ? [referenceImage] : [],
-                    baseImageUrl: image
-                })
+                body: JSON.stringify(requestPayload)
             });
 
             const result = await response.json();
@@ -256,14 +325,22 @@ export default function InpaintPage() {
                 throw new Error(result.error || 'API request failed');
             }
 
-            if (result.success) {
+            // ✅ HANDLE OPTIMIZED API RESPONSE
+            console.log('✅ FRONTEND: API Response Received');
+            console.log('Success:', result.success);
+            console.log('Result URL:', result.url);
+            console.log('Processing Time:', result.processingTimeMs, 'ms');
+            console.log('Memory Estimate:', result.memoryEstimate);
+            console.log('═══════════════════════════════════════════\n\n');
+
+            if (result.success && result.url) {
                 console.log('✅ Generation successful!');
-                console.log('Result URL:', result.output);
-                setResultImage(result.output);
+                console.log('Result URL:', result.url);
+                setResultImage(result.url);
                 setShowResult(true);
                 setIsSaved(false); // Mark as not saved yet
 
-                // ✅ CRITICAL: Notify user about manual save
+                // ✅ Show success notification with processing time
                 toast(
                     <div className="flex items-start gap-3">
                         <div className="flex-shrink-0 mt-0.5">
@@ -272,6 +349,7 @@ export default function InpaintPage() {
                         <div>
                             <p className="font-semibold text-sm">Result Ready!</p>
                             <p className="text-xs text-gray-300 mt-1">
+                                Generated in {Math.round(result.processingTimeMs / 1000)}s •
                                 Click <span className="font-medium text-white">"Save to History"</span> to keep this image
                             </p>
                         </div>
@@ -296,7 +374,7 @@ export default function InpaintPage() {
             }
 
         } catch (error) {
-            console.error('❌ Generate failed:', error);
+            console.error('❌ FRONTEND: Generation Error', error);
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
             // Show user-friendly error with toast
@@ -512,6 +590,7 @@ export default function InpaintPage() {
                                 onEditAgain={handleEditAgain}
                                 onSendToHistory={handleSendToHistory}
                                 onClearBoard={handleClearBoard}
+                                maskBounds={lastMaskBounds || undefined}
                             />
                         ) : (
                             <CanvasArea
@@ -643,6 +722,8 @@ export default function InpaintPage() {
                         hasMask={hasMask}
                         onGenerate={handleGenerate}
                         isGenerating={isGenerating}
+                        referenceImage={referenceImage}
+                        onReferenceImageChange={setReferenceImage}
                     />
                 </div>
             </div>

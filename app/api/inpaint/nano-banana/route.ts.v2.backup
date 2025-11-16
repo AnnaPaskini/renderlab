@@ -1,0 +1,252 @@
+// app/api/inpaint/nano-banana/route.ts
+/**
+ * UPDATED: Full Image + Mask Visualization Approach
+ * 
+ * Instead of cropping, we send:
+ * 1. Full original image
+ * 2. Mask visualization (white canvas with red rectangle)
+ * 3. Reference images (optional)
+ * 
+ * This gives Gemini full context while clearly showing WHERE to edit.
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabaseServer';
+import { MaskBounds } from '@/lib/constants/inpaint';
+import { 
+  createMaskVisualization, 
+  buildMaskBasedPrompt,
+  urlToBase64,
+  bufferToBase64
+} from '@/lib/utils/inpaint/maskVisualizer';
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent';
+
+interface RequestBody {
+    userId: string;
+    imageUrl: string;
+    maskBounds: MaskBounds;
+    userPrompt: string;
+    referenceUrls?: string[]; // Optional reference images
+}
+
+export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  
+  console.log('\n═══════════════════════════════════════════');
+  console.log('[Nano Banana v2] Full Image + Mask Approach');
+  console.log('═══════════════════════════════════════════');
+  
+  try {
+    const body: RequestBody = await request.json();
+    const { userId, imageUrl, maskBounds, userPrompt, referenceUrls = [] } = body;
+    
+    console.log('User ID:', userId);
+    console.log('Image URL:', imageUrl);
+    console.log('Mask Bounds:', maskBounds);
+    console.log('User Prompt:', userPrompt);
+    console.log('Reference Images:', referenceUrls.length);
+    
+    // Validate inputs
+    if (!userId || !imageUrl || !maskBounds || !userPrompt) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+    
+    if (referenceUrls.length > 3) {
+      return NextResponse.json(
+        { error: 'Maximum 3 reference images allowed' },
+        { status: 400 }
+      );
+    }
+    
+    console.log('═══════════════════════════════════════════');
+    
+    // ✅ STEP 1: Get full original image (NO CROPPING!)
+    console.log('[Step 1] Fetching full original image...');
+    const fullImageBase64 = await urlToBase64(imageUrl);
+    console.log(`✅ Full image: ${Math.round(fullImageBase64.length * 0.75 / 1024)}KB`);
+    
+    // ✅ STEP 2: Create mask visualization (red rectangle on white)
+    console.log('[Step 2] Creating mask visualization...');
+    const maskVisualizationBuffer = await createMaskVisualization(maskBounds);
+    const maskVisualizationBase64 = bufferToBase64(maskVisualizationBuffer);
+    console.log(`✅ Mask visualization: ${Math.round(maskVisualizationBuffer.length / 1024)}KB`);
+    
+    // ✅ STEP 3: Build smart prompt
+    console.log('[Step 3] Building mask-based prompt...');
+    const smartPrompt = buildMaskBasedPrompt(
+      userPrompt, 
+      maskBounds, 
+      referenceUrls.length
+    );
+    
+    console.log('📝 SMART PROMPT:');
+    console.log('═══════════════════════════════════════════');
+    console.log(smartPrompt);
+    console.log('═══════════════════════════════════════════');
+    
+    // ✅ STEP 4: Build API request parts
+    const parts: any[] = [
+      { text: smartPrompt },
+      { inlineData: { mimeType: 'image/jpeg', data: fullImageBase64 }},
+      { inlineData: { mimeType: 'image/png', data: maskVisualizationBase64 }}
+    ];
+    
+    // Add reference images if provided
+    if (referenceUrls.length > 0) {
+      console.log('[Step 4] Adding reference images...');
+      for (let i = 0; i < referenceUrls.length; i++) {
+        const refBase64 = await urlToBase64(referenceUrls[i]);
+        parts.push({
+          inlineData: { mimeType: 'image/jpeg', data: refBase64 }
+        });
+        console.log(`✅ Reference ${i + 1} added`);
+      }
+    }
+    
+    // ✅ STEP 5: Call Gemini API
+    console.log('[Step 5] Calling Gemini API...');
+    const geminiResponse = await fetch(
+      `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts }],
+          generationConfig: {
+            temperature: 0.4,
+            topK: 32,
+            topP: 1,
+            maxOutputTokens: 4096
+          }
+        })
+      }
+    );
+    
+    if (!geminiResponse.ok) {
+      const errorText = await geminiResponse.text();
+      console.error('❌ Gemini API error:', errorText);
+      throw new Error(`Gemini API failed: ${geminiResponse.status}`);
+    }
+    
+    const geminiData = await geminiResponse.json();
+    console.log('✅ Gemini API responded');
+    
+    // Debug logging
+    console.log('📦 Gemini Response Structure:', {
+      candidates: geminiData.candidates?.length,
+      finishReason: geminiData.candidates?.[0]?.finishReason,
+      partsCount: geminiData.candidates?.[0]?.content?.parts?.length
+    });
+    
+    // Extract generated image (using camelCase inlineData)
+    const imagePart = geminiData.candidates?.[0]?.content?.parts?.find(
+      (part: any) => part.inlineData
+    );
+    
+    console.log('🖼️  Image part found:', !!imagePart);
+    
+    const generatedImageBase64 = imagePart?.inlineData?.data;
+    
+    if (!generatedImageBase64) {
+      console.error('❌ NO IMAGE IN RESPONSE!');
+      console.error('Response structure:', {
+        hasCandidates: !!geminiData.candidates,
+        candidatesCount: geminiData.candidates?.length,
+        firstCandidate: geminiData.candidates?.[0],
+        finishReason: geminiData.candidates?.[0]?.finishReason,
+        safetyRatings: geminiData.candidates?.[0]?.safetyRatings,
+        contentParts: geminiData.candidates?.[0]?.content?.parts,
+        firstPart: geminiData.candidates?.[0]?.content?.parts?.[0]
+      });
+      console.error('Full response:', JSON.stringify(geminiData, null, 2));
+      throw new Error('No image in Gemini response');
+    }
+    
+    console.log(`✅ Generated image received`);
+    
+    // ✅ STEP 6: Upload result to Supabase
+    console.log('[Step 6] Uploading to Supabase...');
+    const supabase = await createClient();
+    const timestamp = Date.now();
+    const fileName = `${userId}/inpaint_${timestamp}.jpg`;
+    
+    const generatedBuffer = Buffer.from(generatedImageBase64, 'base64');
+    
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('renderlab-images')
+      .upload(fileName, generatedBuffer, {
+        contentType: 'image/jpeg',
+        upsert: false
+      });
+    
+    if (uploadError) {
+      console.error('❌ Upload error:', uploadError);
+      throw uploadError;
+    }
+    
+    const { data: { publicUrl } } = supabase.storage
+      .from('renderlab-images')
+      .getPublicUrl(fileName);
+    
+    console.log('✅ Uploaded:', publicUrl);
+    
+    // ✅ STEP 7: Save to database
+    console.log('[Step 7] Saving to database...');
+    const { data: dbData, error: dbError } = await supabase
+      .from('inpaint_edits')
+      .insert({
+        user_id: userId,
+        base_image_url: imageUrl,
+        result_image_url: publicUrl,
+        mask_bounds: maskBounds,
+        user_prompt: userPrompt,
+        reference_urls: referenceUrls,
+        model: 'gemini-2.5-flash-image-v2',
+        processing_time_ms: Date.now() - startTime
+      })
+      .select()
+      .single();
+    
+    if (dbError) {
+      console.error('❌ Database error:', dbError);
+    }
+    
+    const totalTime = Date.now() - startTime;
+    
+    console.log('═══════════════════════════════════════════');
+    console.log('🎉 SUCCESS!');
+    console.log('Approach: Full Image + Mask Visualization');
+    console.log('Total time:', totalTime, 'ms');
+    console.log('Result URL:', publicUrl);
+    console.log('═══════════════════════════════════════════\n');
+    
+    return NextResponse.json({
+      success: true,
+      url: publicUrl,
+      editId: dbData?.id,
+      processingTimeMs: totalTime,
+      approach: 'full-image-with-mask'
+    });
+    
+  } catch (error: any) {
+    const totalTime = Date.now() - startTime;
+    
+    console.error('═══════════════════════════════════════════');
+    console.error('❌ ERROR after', totalTime, 'ms');
+    console.error(error);
+    console.error('═══════════════════════════════════════════\n');
+    
+    return NextResponse.json(
+      { 
+        error: error.message || 'Processing failed',
+        processingTimeMs: totalTime
+      },
+      { status: 500 }
+    );
+  }
+}

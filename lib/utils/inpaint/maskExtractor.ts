@@ -14,21 +14,35 @@ export function extractMaskBounds(canvas: HTMLCanvasElement): MaskBounds {
     }
 
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const pixels = imageData.data;
+    const { data, width, height } = imageData;
 
-    let minX = canvas.width;
-    let minY = canvas.height;
+    let minX = width;
+    let minY = height;
     let maxX = 0;
     let maxY = 0;
+    let hasContent = false;
 
-    // Scan all pixels to find bounds of non-transparent areas
-    for (let y = 0; y < canvas.height; y++) {
-        for (let x = 0; x < canvas.width; x++) {
-            const index = (y * canvas.width + x) * 4;
-            const alpha = pixels[index + 3];
+    console.log('🔍 Scanning mask canvas:', width, 'x', height);
+    let pixelCount = 0;
 
-            // If pixel is not transparent (alpha > 0)
-            if (alpha > 0) {
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const index = (y * width + x) * 4;
+            const r = data[index];
+            const g = data[index + 1];
+            const b = data[index + 2];
+            const a = data[index + 3];
+
+            // MORE LENIENT: Any red-ish pixel with some opacity
+            const isColored = (
+                a > 5 &&                    // Has some opacity (not fully transparent)
+                r > 100 &&                  // Has red channel
+                (r > g + 50 || r > b + 50)  // Red is dominant
+            );
+
+            if (isColored) {
+                hasContent = true;
+                pixelCount++;
                 minX = Math.min(minX, x);
                 minY = Math.min(minY, y);
                 maxX = Math.max(maxX, x);
@@ -37,8 +51,11 @@ export function extractMaskBounds(canvas: HTMLCanvasElement): MaskBounds {
         }
     }
 
-    // If no mask drawn, return full canvas bounds
-    if (minX === canvas.width) {
+    console.log('✅ Found', pixelCount, 'colored pixels');
+    console.log('Bounds:', { minX, minY, maxX, maxY });
+
+    if (!hasContent) {
+        console.error('❌ No colored pixels found in mask canvas!');
         return {
             x: 0,
             y: 0,
@@ -54,8 +71,8 @@ export function extractMaskBounds(canvas: HTMLCanvasElement): MaskBounds {
         y: minY,
         width: maxX - minX + 1,
         height: maxY - minY + 1,
-        imageWidth: canvas.width,
-        imageHeight: canvas.height
+        imageWidth: width,
+        imageHeight: height
     };
 }
 

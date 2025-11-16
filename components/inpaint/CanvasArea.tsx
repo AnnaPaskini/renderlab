@@ -118,9 +118,19 @@ export function CanvasArea({
 
     const getCanvasCoordinates = (e: React.MouseEvent, canvas: HTMLCanvasElement) => {
         const rect = canvas.getBoundingClientRect();
+
+        // Get mouse position relative to displayed canvas
+        const displayX = e.clientX - rect.left;
+        const displayY = e.clientY - rect.top;
+
+        // Scale coordinates to match internal canvas coordinate system (1024x1024)
+        // The canvas is displayed with object-contain, so we need to scale
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
         return {
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top
+            x: displayX * scaleX,
+            y: displayY * scaleY
         };
     };
 
