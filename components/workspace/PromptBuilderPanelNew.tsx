@@ -1047,7 +1047,7 @@ export function PromptBuilderPanel({
               </h3>
 
               {/* Tab Buttons */}
-              <div className="flex border-b border-white/8 mb-4">
+              <div className="flex mb-4">
                 <button
                   onClick={() => handleModeChange("template")}
                   className={cn(

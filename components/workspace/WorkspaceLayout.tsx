@@ -347,6 +347,19 @@ export function WorkspaceLayout({
                                       </svg>
                                     </button>
 
+                                    {/* View in Edit button - Center (hover only) */}
+                                    <Link
+                                      href={`/inpaint?image=${encodeURIComponent(img.image_url || '')}`}
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rl-btn rl-btn-primary text-xs px-3 py-1.5 shadow-lg whitespace-nowrap pointer-events-auto opacity-80 hover:opacity-100 transition-opacity"
+                                      style={{ transform: 'translate(-50%, -50%)' }}
+                                    >
+                                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                      </svg>
+                                      View in Edit
+                                    </Link>
+
                                     {/* Download button - Bottom-right (hover only) */}
                                     <button
                                       onClick={handleDownload}

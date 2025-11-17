@@ -91,6 +91,7 @@ export function CanvasArea({
         if (!image || !imageCanvasRef.current || !maskCanvasRef.current || !drawCanvasRef.current) return;
 
         const img = new Image();
+        img.crossOrigin = 'anonymous';  // Fix CORS for canvas export
         img.onload = () => {
             const imageCanvas = imageCanvasRef.current!;
             const maskCanvas = maskCanvasRef.current!;

@@ -20,6 +20,7 @@ import {
     X
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 
 type Tool = 'brush' | 'eraser' | 'lasso' | null;
@@ -44,7 +45,7 @@ export default function InpaintPage() {
     const [resultImage, setResultImage] = useState<string | null>(null);
     const [showResult, setShowResult] = useState(false);
     const [isSaved, setIsSaved] = useState(false); // Track if result is saved to history
-    const [lastMaskBounds, setLastMaskBounds] = useState<{ x: number; y: number; width: number; height: number } | null>(null); // DEBUG: Store mask bounds for visual debugging
+    const [isSaveButtonPulsing, setIsSaveButtonPulsing] = useState(false); // Pulse animation for Save button
 
     // Drawing state for panel visibility
     const [isDrawing, setIsDrawing] = useState(false);
@@ -58,6 +59,16 @@ export default function InpaintPage() {
     // Undo/Redo stacks
     const undoStackRef = useRef<ImageData[]>([]);
     const redoStackRef = useRef<ImageData[]>([]);
+
+    // Load image from URL parameter
+    const searchParams = useSearchParams();
+    
+    useEffect(() => {
+        const imageUrl = searchParams.get('image');
+        if (imageUrl) {
+            setImage(decodeURIComponent(imageUrl));
+        }
+    }, [searchParams]);
 
     // FIX #2: Hide brush panel on actions
     useEffect(() => {
@@ -247,25 +258,6 @@ export default function InpaintPage() {
             const maskBounds = extractMaskBounds(maskCanvasRef.current);
             console.log('✅ Mask bounds:', maskBounds);
 
-            // DEBUG: Add visual debug to verify mask canvas content
-            if (maskCanvasRef.current) {
-                // Save mask canvas as image for debugging
-                const debugMaskUrl = maskCanvasRef.current.toDataURL('image/png');
-                console.log('🖼️  DEBUG: Mask Canvas Image (copy this URL to browser to view):');
-                console.log(debugMaskUrl.substring(0, 100) + '...');
-
-                // Download mask for inspection
-                const link = document.createElement('a');
-                link.href = debugMaskUrl;
-                link.download = 'mask-debug.png';
-                link.click();
-
-                console.log('✅ Mask canvas downloaded as mask-debug.png');
-            }
-
-            // DEBUG: Store mask bounds for visual debugging
-            setLastMaskBounds(maskBounds);
-
             if (!maskBounds) {
                 toast.error('Please draw a mask on the image');
                 return;
@@ -339,6 +331,12 @@ export default function InpaintPage() {
                 setResultImage(result.url);
                 setShowResult(true);
                 setIsSaved(false); // Mark as not saved yet
+                setIsSaveButtonPulsing(true); // Trigger pulse animation
+                
+                // Stop pulsing after 3 seconds
+                setTimeout(() => {
+                    setIsSaveButtonPulsing(false);
+                }, 3000);
 
                 // ✅ Show success notification with processing time
                 toast(
@@ -467,6 +465,7 @@ export default function InpaintPage() {
             );
 
             setIsSaved(true); // Mark as saved
+            setIsSaveButtonPulsing(false); // Stop pulsing since it's saved
 
             // Don't clear everything - just close result view
             setShowResult(false);
@@ -484,6 +483,7 @@ export default function InpaintPage() {
         setInpaintPrompt('');
         setReferenceImage(null);
         setActiveTool(null);
+        setIsSaveButtonPulsing(false); // Reset pulse when clearing
         handleClearMask();
     };
 
@@ -590,7 +590,6 @@ export default function InpaintPage() {
                                 onEditAgain={handleEditAgain}
                                 onSendToHistory={handleSendToHistory}
                                 onClearBoard={handleClearBoard}
-                                maskBounds={lastMaskBounds || undefined}
                             />
                         ) : (
                             <CanvasArea
@@ -691,13 +690,12 @@ export default function InpaintPage() {
                                 <button
                                     onClick={handleSendToHistory}
                                     disabled={!resultImage}
-                                    className={`relative ${getActionButtonClass(!resultImage)}`}
+                                    className={`relative ${getActionButtonClass(!resultImage)} ${isSaveButtonPulsing ? 'animate-pulse' : ''}`}
                                 >
                                     <Save size={20} />
                                     {/* Pulsing indicator for unsaved */}
                                     {resultImage && !isSaved && (
-                                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#ff6b35] rounded-full
-                                            animate-pulse ring-2 ring-black" />
+                                        <div className={`absolute -top-1 -right-1 w-3 h-3 bg-[#ff6b35] rounded-full ring-2 ring-black ${isSaveButtonPulsing ? 'animate-pulse' : ''}`} />
                                     )}
                                 </button>
                             </Tooltip>
