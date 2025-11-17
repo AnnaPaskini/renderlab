@@ -19,10 +19,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/components/providers/SupabaseAuthProvider";
 import { useHistory } from "@/lib/context/HistoryContext";
 import { Z } from "@/lib/z-layer-guide";
-import { CollectionsPanel } from "./CollectionPanel";
 import ImagePreviewModal from "./ImagePreviewModal";
-import { PanelWrapper } from "./PanelWrapper";
-import { PromptTemplates } from "./PromptTemplates";
 
 
 interface WorkspaceLayoutProps {
@@ -40,7 +37,6 @@ export function WorkspaceLayout({
   uploadedImage,
   previews = [],
 }: WorkspaceLayoutProps) {
-  const [activeTab, setActiveTab] = useState<"builder" | "custom">("builder");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const previewTimestampsRef = useRef<Map<string, string>>(new Map());
 
@@ -123,12 +119,7 @@ export function WorkspaceLayout({
     return [...previews].reverse();
   }, [previews]);
 
-  const enhancedRightPanel = isValidElement(rightPanel)
-    ? cloneElement(rightPanel as ReactElement<any>, {
-      activeTab,
-      onTabChange: setActiveTab,
-    })
-    : rightPanel;
+  const enhancedRightPanel = rightPanel;
 
   return (
     <main
@@ -167,20 +158,20 @@ export function WorkspaceLayout({
               Create stunning architectural visualizations with AI
             </p>
 
-            {/* Tabs */}
+            {/* Quick Actions */}
             <div className="flex gap-2">
-              <button
-                onClick={() => setActiveTab("builder")}
-                className={`rl-btn-${activeTab === "builder" ? "primary" : "secondary"} text-base font-semibold px-6 py-2.5 min-w-[110px]`}
+              <Link
+                href="/inpaint"
+                className="rl-btn-secondary text-base font-semibold px-6 py-2.5 min-w-[110px] inline-flex items-center justify-center"
               >
-                Builder
-              </button>
-              <button
-                onClick={() => setActiveTab("custom")}
-                className={`rl-btn-${activeTab === "custom" ? "primary" : "secondary"} text-base font-semibold px-6 py-2.5 min-w-[110px]`}
+                Edit in Inpaint
+              </Link>
+              <Link
+                href="/custom"
+                className="rl-btn-secondary text-base font-semibold px-6 py-2.5 min-w-[110px] inline-flex items-center justify-center"
               >
-                Edit
-              </button>
+                Manage Templates
+              </Link>
             </div>
           </div>
 
@@ -190,8 +181,7 @@ export function WorkspaceLayout({
             transition={{ duration: 0.5 }}
             className="flex-1 w-full max-w-[1600px] mx-auto px-8"
           >
-            {activeTab === "builder" ? (
-              <div className="grid grid-cols-1 md:grid-cols-[60fr_40fr] lg:grid-cols-[65fr_35fr] gap-8 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-[60fr_40fr] lg:grid-cols-[65fr_35fr] gap-8 w-full">
                 <div className="flex flex-col gap-10">
                   <div
                     className="rounded-3xl p-6 border border-white/[0.06] flex-[2]"
@@ -402,20 +392,6 @@ export function WorkspaceLayout({
                   </div>
                 </div>
               </div>
-            ) : (
-              <div className="flex flex-col md:flex-row gap-10 w-full">
-                <div className="md:flex-1">
-                  <PanelWrapper>
-                    <PromptTemplates activeTab={activeTab} setActiveTab={setActiveTab} />
-                  </PanelWrapper>
-                </div>
-                <div className="md:flex-1">
-                  <PanelWrapper>
-                    <CollectionsPanel />
-                  </PanelWrapper>
-                </div>
-              </div>
-            )}
           </motion.div>
 
           {bottomPanel && (

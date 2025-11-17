@@ -3,10 +3,20 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CollectionsPanel } from '@/components/workspace/CollectionPanel';
 import { PromptTemplates } from '@/components/workspace/PromptTemplates';
-import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function CustomPage() {
-  const [activeTab, setActiveTab] = useState('templates');
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tabParam || 'templates');
+
+  // Update active tab when URL changes
+  useEffect(() => {
+    if (tabParam) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   return (
     <div

@@ -3,17 +3,20 @@
 import UserMenu from '@/components/navbar/UserMenu';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 const tabs = [
   { name: 'Workspace', href: '/workspace' },
-  { name: 'Custom', href: '/custom' },
+  { name: 'Inpaint', href: '/inpaint' },
+  { name: 'Templates', href: '/custom?tab=templates' },
+  { name: 'Collections', href: '/custom?tab=collections' },
   { name: 'History', href: '/history' },
   { name: 'Prompts Library', href: '/prompts' }
 ];
 
 export function MainNavbar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   return (
     <nav className="border-b border-white/10 bg-[#0a0a0a]">
@@ -21,7 +24,11 @@ export function MainNavbar() {
         <div className="flex items-center justify-between">
           <div className="flex space-x-8">
             {tabs.map((tab) => {
-              const isActive = pathname.startsWith(tab.href);
+              // Extract base path and query params
+              const [basePath, queryString] = tab.href.split('?');
+              const isActive = queryString
+                ? pathname === basePath && searchParams.toString().includes(queryString)
+                : pathname.startsWith(basePath);
               return (
                 <Link
                   key={tab.href}
