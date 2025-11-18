@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabaseServer";
 import { generateSingle } from "@/lib/generateSingle";
+import { createClient } from "@/lib/supabaseServer";
 import { uploadImageToStorage } from '@/lib/utils/uploadToStorage';
+import { NextResponse } from "next/server";
 
 /**
  * CREATE endpoint with optional reference image support.
@@ -87,6 +87,9 @@ export async function POST(req: Request) {
     console.log("✅ [STORAGE] Uploaded successfully:", permanentUrl);
     console.log("🔵 [DB INSERT] referenceImageUrl =", referenceImageUrl);
 
+    // Generate thumbnail URL using Supabase Transform API
+    const thumbnailUrl = `${permanentUrl}?width=512&quality=80&format=webp`;
+
     // ✅ Save to DB with reference_url and prompt
     const { data: newImage, error: dbError } = await supabase
       .from("images")
@@ -96,6 +99,7 @@ export async function POST(req: Request) {
           name: imageName,
           prompt: prompt, // ✅ Save the actual prompt text
           url: permanentUrl, // ✅ Use permanent Supabase Storage URL
+          thumbnail_url: thumbnailUrl,
           reference_url: referenceImageUrl || null,
           created_at: timestamp,
         },
@@ -107,7 +111,7 @@ export async function POST(req: Request) {
       console.error("❌ [DB ERROR]", dbError);
     } else {
       console.log("✅ [DB SAVED] Image + Reference URL inserted");
-      
+
       // ✅ Generate thumbnail asynchronously (don't wait)
       if (newImage) {
         fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/generate-thumbnail`, {

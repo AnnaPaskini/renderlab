@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabaseBrowser";
-import type { Session } from "@supabase/supabase-js";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,35 +16,35 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const persistSessionCookies = (session: Session | null) => {
-    if (!session) return;
-    const secure = window.location.protocol === "https:" ? "; Secure" : "";
-    const accessTokenMaxAge = session.expires_in ?? 3600;
-    const refreshTokenMaxAge = 60 * 60 * 24 * 30; // 30 days
-
-    document.cookie = `renderlab-access-token=${session.access_token}; Path=/; Max-Age=${accessTokenMaxAge}; SameSite=Lax${secure}`;
-
-    if (session.refresh_token) {
-      document.cookie = `renderlab-refresh-token=${session.refresh_token}; Path=/; Max-Age=${refreshTokenMaxAge}; SameSite=Lax${secure}`;
-    }
-  };
   const supabase = createClient();
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
 
+    console.log('🔐 Attempting login for:', email);
+
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
+      console.error('❌ Login error:', error);
       toast.error(error.message || "Invalid credentials");
+      setLoading(false);
     } else {
-      toast.success("Welcome back!");
-      persistSessionCookies(data.session);
-      router.push("/workspace");
-    }
+      console.log('✅ Login successful!', data);
+      console.log('✅ User:', data.user?.email);
+      console.log('✅ Session:', data.session ? 'Yes' : 'No');
 
-    setLoading(false);
+      toast.success("Welcome back!");
+
+      // Supabase SSR automatically handles cookies
+      // Just wait a bit for cookies to propagate, then redirect
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      console.log('🔄 Redirecting to /workspace...');
+      // Use window.location for hard redirect (ensures middleware runs with fresh cookies)
+      window.location.href = "/workspace";
+    }
   };
 
   return (
@@ -115,7 +114,7 @@ export default function LoginPage() {
         </Button>
 
         <p className="text-center text-sm text-neutral-300">
-          Don’t have an account?{" "}
+          Don't have an account?{" "}
           <Link href="/signup" className="font-medium text-[#ff6b35] hover:text-[#ff8555]">
             Create one
           </Link>

@@ -8,12 +8,10 @@ import "./design-tokens.css"; // 1. Tokens FIRST
 import "./globals.css"; // 3. Global styles
 import "./renderlab-theme.css"; // 4. Custom overrides
 
-import { HistoryErrorBoundary } from "@/app/providers/HistoryErrorBoundary";
 import { MainNavbar } from '@/components/layout/MainNavbar';
 import { NavBar } from "@/components/navbar";
 import { SupabaseAuthProvider } from "@/components/providers/SupabaseAuthProvider";
 import { Toaster } from "@/components/ui/sonner";
-import { HistoryProvider } from "@/lib/context/HistoryContext";
 import { WorkspaceProvider } from "@/lib/context/WorkspaceContext";
 import { toastConfig } from "@/lib/toast-config";
 
@@ -69,19 +67,15 @@ export default async function RootLayout({
         >
           <ViewTransitions>
             <SupabaseAuthProvider>
-              <HistoryErrorBoundary>
-                <HistoryProvider>
-                  <WorkspaceProvider>
-                    {showNavbar && <NavBar />}
-                    {showMainNavbar && <MainNavbar />}
-                    {children}
-                    <Toaster
-                      position="bottom-right"
-                      toastOptions={toastConfig}
-                    />
-                  </WorkspaceProvider>
-                </HistoryProvider>
-              </HistoryErrorBoundary>
+              <WorkspaceProvider>
+                {showNavbar && <NavBar />}
+                {showMainNavbar && <MainNavbar />}
+                {children}
+                <Toaster
+                  position="bottom-right"
+                  toastOptions={toastConfig}
+                />
+              </WorkspaceProvider>
             </SupabaseAuthProvider>
           </ViewTransitions>
         </ThemeProvider>

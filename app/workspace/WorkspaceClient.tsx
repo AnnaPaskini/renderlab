@@ -1,9 +1,8 @@
-"use client";
+'use client';
 
 import { ImageUploadPanel } from "@/components/workspace/ImageUploadPanel";
 import { PromptBuilderPanel } from "@/components/workspace/PromptBuilderPanelNew";
 import { WorkspaceLayout } from "@/components/workspace/WorkspaceLayout";
-import { useHistory } from "@/lib/context/HistoryContext";
 import { useWorkspace } from "@/lib/context/WorkspaceContext";
 import { defaultToastStyle } from "@/lib/toast-config";
 import { Link as LinkIcon } from "lucide-react";
@@ -11,10 +10,20 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-export default function WorkspacePage() {
+interface PreviewImage {
+  id: string;
+  thumbnail_url: string | null;
+  url: string;
+  created_at: string;
+}
+
+interface WorkspaceClientProps {
+  initialPreviewImages: PreviewImage[];
+}
+
+export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) {
   const searchParams = useSearchParams();
   const { activeItem, loadTemporary } = useWorkspace();
-  const { refresh: refreshHistory } = useHistory();
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("");
   const [previews, setPreviews] = useState<string[]>([]);
@@ -23,6 +32,7 @@ export default function WorkspacePage() {
   const [isValidatingUrl, setIsValidatingUrl] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [additionalDetailsFromUrl, setAdditionalDetailsFromUrl] = useState<string | null>(null);
+  const [previewImages, setPreviewImages] = useState<PreviewImage[]>(initialPreviewImages);
   const hasLoadedFromUrlRef = useRef(false);
 
   // Load prompt from URL query parameter (from Prompts Library)
@@ -91,6 +101,18 @@ export default function WorkspacePage() {
     });
 
     console.log('✅ [Workspace] Reference cleared, prompt preserved');
+  };
+
+  // Handle removing image from preview strip
+  const handleRemoveFromPreview = (imageId: string) => {
+    setPreviewImages(prev => prev.filter(img => img.id !== imageId));
+    toast.info('Removed from view', {
+      style: {
+        background: '#ff6b35',
+        color: 'white',
+        border: 'none'
+      }
+    });
   };
 
   // URL validation and loading function
@@ -199,9 +221,6 @@ export default function WorkspacePage() {
         const nextImage = data.output.imageUrl;
         setPreviews((prev) => [...prev, nextImage]);
 
-        // ✅ Refresh history to show new generation
-        await refreshHistory();
-
         // Show different toast based on mode
         if (uploadedImage) {
           toast.success("✨ Generated from reference image", { style: defaultToastStyle });
@@ -221,79 +240,82 @@ export default function WorkspacePage() {
   };
 
   return (
-    <WorkspaceLayout
-      leftPanel={
-        <div className="space-y-6">
-          {/* Upload Zone */}
-          <ImageUploadPanel
-            image={uploadedImage}
-            onImageChange={setUploadedImage}
-            onClearImage={handleClearReference}
-          />
+    <>
+      <WorkspaceLayout
+        previewImages={previewImages}
+        onRemovePreview={handleRemoveFromPreview}
+        leftPanel={
+          <div className="space-y-6">
+            {/* Upload Zone */}
+            <ImageUploadPanel
+              image={uploadedImage}
+              onImageChange={setUploadedImage}
+              onClearImage={handleClearReference}
+            />
 
-          {/* URL Input - separate section */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="flex-1 border-t border-white/40 dark:border-white/20" />
-              <span className="text-sm text-neutral-600 dark:text-neutral-400 font-medium">OR</span>
-              <div className="flex-1 border-t border-white/40 dark:border-white/20" />
+            {/* URL Input - separate section */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 border-t border-white/40 dark:border-white/20" />
+                <span className="text-sm text-neutral-600 dark:text-neutral-400 font-medium">OR</span>
+                <div className="flex-1 border-t border-white/40 dark:border-white/20" />
+              </div>
+
+              <label className="flex items-center gap-2 text-sm font-medium text-neutral-900 dark:text-white">
+                <LinkIcon size={16} className="text-neutral-500 dark:text-neutral-400" />
+                Paste image URL
+              </label>
+
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && imageUrl.trim()) {
+                      validateAndLoadImageUrl(imageUrl);
+                    }
+                  }}
+                  placeholder="https://example.com/image.jpg"
+                  className="flex-1 px-3 py-2 text-sm border border-white/8 rounded-lg bg-[#141414] focus:ring-2 focus:ring-[#ff6b35] focus:ring-opacity-50 focus:border-[#ff6b35] outline-none transition-all text-white placeholder:text-gray-500"
+                  disabled={isValidatingUrl}
+                />
+
+                <button
+                  onClick={() => validateAndLoadImageUrl(imageUrl)}
+                  disabled={!imageUrl.trim() || isValidatingUrl}
+                  className="px-5 py-2.5 bg-[#202020] text-white text-sm font-medium rounded-lg hover:bg-[#282828] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                >
+                  {isValidatingUrl ? (
+                    <span className="flex items-center gap-2">
+                      <span className="animate-spin">⏳</span>
+                      Loading
+                    </span>
+                  ) : (
+                    'Load'
+                  )}
+                </button>
+              </div>
+
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                Direct image links only (.jpg, .png, .webp)
+              </p>
             </div>
-
-            <label className="flex items-center gap-2 text-sm font-medium text-neutral-900 dark:text-white">
-              <LinkIcon size={16} className="text-neutral-500 dark:text-neutral-400" />
-              Paste image URL
-            </label>
-
-            <div className="flex gap-2">
-              <input
-                type="url"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && imageUrl.trim()) {
-                    validateAndLoadImageUrl(imageUrl);
-                  }
-                }}
-                placeholder="https://example.com/image.jpg"
-                className="flex-1 px-3 py-2 text-sm border border-white/8 rounded-lg bg-[#141414] focus:ring-2 focus:ring-[#ff6b35] focus:ring-opacity-50 focus:border-[#ff6b35] outline-none transition-all text-white placeholder:text-gray-500"
-                disabled={isValidatingUrl}
-              />
-
-              <button
-                onClick={() => validateAndLoadImageUrl(imageUrl)}
-                disabled={!imageUrl.trim() || isValidatingUrl}
-                className="px-5 py-2.5 bg-[#202020] text-white text-sm font-medium rounded-lg hover:bg-[#282828] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-              >
-                {isValidatingUrl ? (
-                  <span className="flex items-center gap-2">
-                    <span className="animate-spin">⏳</span>
-                    Loading
-                  </span>
-                ) : (
-                  'Load'
-                )}
-              </button>
-            </div>
-
-            <p className="text-xs text-neutral-500 dark:text-neutral-400">
-              Direct image links only (.jpg, .png, .webp)
-            </p>
           </div>
-        </div>
-      }
-      rightPanel={
-        <PromptBuilderPanel
-          onPromptChange={setPrompt}
-          onGenerate={handleGenerate}
-          isGenerating={isGenerating}
-          onPreviewAdd={(url) => setPreviews((prev) => [...prev, url])}
-          uploadedImage={uploadedImage}
-          onHistoryRefresh={refreshHistory}
-          initialAdditionalDetails={additionalDetailsFromUrl}
-        />
-      }
-      uploadedImage={uploadedImage}
-      previews={previews}
-    />
+        }
+        rightPanel={
+          <PromptBuilderPanel
+            onPromptChange={setPrompt}
+            onGenerate={handleGenerate}
+            isGenerating={isGenerating}
+            onPreviewAdd={(url) => setPreviews((prev) => [...prev, url])}
+            uploadedImage={uploadedImage}
+            initialAdditionalDetails={additionalDetailsFromUrl}
+          />
+        }
+        uploadedImage={uploadedImage}
+        previews={previews}
+      />
+    </>
   );
 }

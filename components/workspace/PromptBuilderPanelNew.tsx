@@ -39,7 +39,6 @@ export interface PromptBuilderPanelProps {
   onTabChange?: (tab: "builder" | "custom") => void;
   onPreviewAdd?: (url: string) => void;
   uploadedImage?: string | null;
-  onHistoryRefresh?: () => Promise<void>;
   initialAdditionalDetails?: string | null;
 }
 
@@ -57,7 +56,6 @@ export function PromptBuilderPanel({
   onTabChange,
   onPreviewAdd,
   uploadedImage,
-  onHistoryRefresh,
   initialAdditionalDetails,
 }: PromptBuilderPanelProps) {
   const [internalIsGenerating, setInternalIsGenerating] = useState(false);
@@ -816,11 +814,6 @@ export function PromptBuilderPanel({
               : failedCount;
 
         console.log(`[stream] done: ${succeeded} succeeded, ${failed} failed`);
-
-        // ✅ Refresh history after collection completion
-        if (onHistoryRefresh && succeeded > 0) {
-          await onHistoryRefresh();
-        }
 
         if (failed > 0) {
           toast(`Collection completed with ${failed} failure${failed === 1 ? "" : "s"}.`, {

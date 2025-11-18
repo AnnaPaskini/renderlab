@@ -344,8 +344,8 @@ export function CanvasArea({
             {!image && (
                 <div className={clsx(
                     "absolute inset-0 flex items-center justify-center cursor-pointer",
-                    "border-2 border-dashed border-gray-600 rounded-lg",
-                    "hover:border-gray-500 transition-colors group"
+                    "border-2 border-dashed rounded-2xl transition-all duration-300",
+                    isDragActive ? "bg-black/50 border-white/20 shadow-[0_0_0_2px_rgba(255,107,53,0.3),0_0_30px_rgba(255,107,53,0.2),0_0_60px_rgba(255,107,53,0.1)]" : "bg-black/50 border-white/12 hover:bg-black/60 hover:border-white/20 hover:shadow-[0_0_0_2px_rgba(255,107,53,0.2),0_0_20px_rgba(255,107,53,0.15),0_0_40px_rgba(255,107,53,0.08)]"
                 )}
                     onClick={() => {
                         // Trigger file input if it exists in parent

@@ -1,26 +1,276 @@
 "use client";
 
-import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import {
-  ReactElement,
   ReactNode,
-  cloneElement,
-  isValidElement,
   useEffect,
   useMemo,
   useRef,
-  useState,
+  useState
 } from "react";
 import { Toaster } from "react-hot-toast";
-import { toast } from "sonner";
 
 import { useAuth } from "@/components/providers/SupabaseAuthProvider";
-import { useHistory } from "@/lib/context/HistoryContext";
 import { Z } from "@/lib/z-layer-guide";
+import { Download, Eye, MoreVertical, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import ImagePreviewModal from "./ImagePreviewModal";
 
+
+interface PreviewImage {
+  id: string;
+  thumbnail_url: string | null;
+  url: string;
+  created_at: string;
+}
+
+interface PreviewThumbnailProps {
+  image: PreviewImage;
+  onRemove?: (id: string) => void;
+}
+
+function PreviewThumbnail({ image, onRemove }: PreviewThumbnailProps) {
+  const router = useRouter();
+  const [isHovered, setIsHovered] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+
+  const handleViewInEdit = () => {
+    // Take full URL, NOT thumbnail
+    const fullUrl = image.url;
+    // Add safe flag: if url contains ? → add &download=1, if not → ?download=1
+    const safeUrl = fullUrl + (fullUrl.includes('?') ? '&download=1' : '?download=1');
+    // Redirect: /inpaint?image=<encodeURIComponent(fullUrl)>
+    router.push(`/inpaint?image=${encodeURIComponent(safeUrl)}`);
+  };
+
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(image.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `image-${image.id}.png`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
+    setShowMenu(false);
+  };
+
+  const handleRemove = () => {
+    if (onRemove) {
+      onRemove(image.id);
+    }
+    setShowMenu(false);
+  };
+
+  const formatDateTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const day = date.getDate();
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = monthNames[date.getMonth()];
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${day}${month} ${hours}:${minutes}`;
+  };
+
+  return (
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setShowMenu(false);
+      }}
+      style={{
+        position: 'relative',
+        width: '100%',
+        paddingBottom: '100%',
+        borderRadius: '8px',
+        overflow: 'hidden',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        background: '#1a1a1a',
+        cursor: 'pointer',
+      }}
+    >
+      <img
+        src={image.thumbnail_url || image.url}
+        alt="Preview"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+        }}
+      />
+
+      {/* Date/Time tag - bottom right */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '6px',
+          right: '6px',
+          background: 'rgba(0, 0, 0, 0.8)',
+          color: 'white',
+          fontSize: '9px',
+          fontWeight: '500',
+          padding: '2px 6px',
+          borderRadius: '4px',
+          zIndex: 10,
+        }}
+      >
+        {formatDateTime(image.created_at)}
+      </div>
+
+      {/* 3-dot menu button - top right */}
+      {isHovered && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowMenu(!showMenu);
+          }}
+          style={{
+            position: 'absolute',
+            top: '6px',
+            right: '6px',
+            background: 'rgba(0, 0, 0, 0.7)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: '4px',
+            padding: '4px',
+            cursor: 'pointer',
+            zIndex: 20,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <MoreVertical size={12} color="white" />
+        </button>
+      )}
+
+      {/* Dropdown menu */}
+      {showMenu && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '32px',
+            right: '6px',
+            background: '#1a1a1a',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: '6px',
+            padding: '4px',
+            zIndex: 30,
+            minWidth: '100px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+          }}
+        >
+          <button
+            onClick={handleDownload}
+            style={{
+              width: '100%',
+              padding: '6px 8px',
+              fontSize: '11px',
+              background: 'transparent',
+              color: 'white',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              borderRadius: '4px',
+              textAlign: 'left',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#2a2a2a';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+            }}
+          >
+            <Download size={10} />
+            Download
+          </button>
+          {onRemove && (
+            <button
+              onClick={handleRemove}
+              style={{
+                width: '100%',
+                padding: '6px 8px',
+                fontSize: '11px',
+                background: 'transparent',
+                color: 'white',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                borderRadius: '4px',
+                textAlign: 'left',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#2a2a2a';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent';
+              }}
+            >
+              <X size={10} />
+              Remove from view
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Hover overlay with centered Edit button */}
+      {isHovered && !showMenu && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '8px',
+          }}
+        >
+          <button
+            onClick={handleViewInEdit}
+            style={{
+              padding: '8px 16px',
+              fontSize: '12px',
+              fontWeight: '500',
+              borderRadius: '6px',
+              background: '#ff6b35',
+              color: 'white',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#ff8555';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = '#ff6b35';
+            }}
+          >
+            <Eye size={14} />
+            Edit
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface WorkspaceLayoutProps {
   leftPanel: ReactNode;
@@ -28,6 +278,8 @@ interface WorkspaceLayoutProps {
   bottomPanel?: ReactNode;
   uploadedImage?: string | null;
   previews?: string[];
+  previewImages?: PreviewImage[];
+  onRemovePreview?: (id: string) => void;
 }
 
 export function WorkspaceLayout({
@@ -36,22 +288,13 @@ export function WorkspaceLayout({
   bottomPanel,
   uploadedImage,
   previews = [],
+  previewImages = [],
+  onRemovePreview,
 }: WorkspaceLayoutProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const previewTimestampsRef = useRef<Map<string, string>>(new Map());
 
   const { user } = useAuth();
-  const { groups, loading: historyLoading, refresh } = useHistory();
-
-  // Get last 5 generations from user history with deduplication
-  const recentGenerations = useMemo(() => {
-    return groups
-      .flatMap(group => group.images)
-      .filter((img, index, self) =>
-        index === self.findIndex(i => i.id === img.id)
-      ) // Deduplicate by id
-      .slice(0, 5);
-  }, [groups]);
 
   const displayName = user?.user_metadata?.full_name?.trim() || user?.email || "Creator";
   const avatarUrl = user?.user_metadata?.avatar_url || "/default-avatar.png";
@@ -182,216 +425,94 @@ export function WorkspaceLayout({
             className="flex-1 w-full max-w-[1600px] mx-auto px-8"
           >
             <div className="grid grid-cols-1 md:grid-cols-[60fr_40fr] lg:grid-cols-[65fr_35fr] gap-8 w-full">
-                <div className="flex flex-col gap-10">
-                  <div
-                    className="rounded-3xl p-6 border border-white/[0.06] flex-[2]"
-                    style={{
-                      background: '#1a1a1a',
-                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 20px 56px rgba(0, 0, 0, 0.3)'
-                    }}
-                  >
-                    {leftPanel}
-                    <div className={`pointer-events-none absolute inset-0 z-[${Z.TOASTER}]`}>
-                      <Toaster
-                        position="bottom-right"
-                        reverseOrder={false}
-                        gutter={8}
-                        containerStyle={{ position: "absolute" }}
-                        toastOptions={{
-                          duration: 1800,
-                          className: "pointer-events-auto flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium shadow-lg",
-                          style: {
-                            backgroundColor: "rgba(var(--background-end-rgb), 0.92)",
-                            color: "rgb(var(--foreground-rgb))",
-                            border: "1px solid rgba(var(--foreground-rgb), 0.12)",
-                            boxShadow: "0 16px 32px rgba(15, 15, 35, 0.18)",
-                            backdropFilter: "blur(8px)",
-                          },
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <div
-                    className="rounded-3xl p-6 border border-white/[0.06] flex-[1]"
-                    style={{
-                      background: '#1a1a1a',
-                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 20px 56px rgba(0, 0, 0, 0.3)'
-                    }}
-                  >
-                    <div className="mb-4 flex items-center justify-between">
-                      <h3 className="text-lg font-semibold text-rl-text">Images History</h3>
-                      <Link
-                        href="/history"
-                        className="text-sm text-rl-accent hover:text-rl-accent-hover font-medium transition-colors hover:underline"
-                      >
-                        View all →
-                      </Link>
-                    </div>
-                    {/* Inset preview strip container */}
-                    <div
-                      className="rounded-xl p-5 flex items-center justify-center"
-                      style={{
-                        background: '#0f0f0f',
-                        boxShadow: 'inset 0 2px 8px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(0, 0, 0, 0.5)',
-                        minHeight: '16vh'
+              <div className="flex flex-col gap-10">
+                <div
+                  className="rounded-3xl p-6 border border-white/[0.06] flex-[2]"
+                  style={{
+                    background: '#1a1a1a',
+                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 20px 56px rgba(0, 0, 0, 0.3)'
+                  }}
+                >
+                  {leftPanel}
+                  <div className={`pointer-events-none absolute inset-0 z-[${Z.TOASTER}]`}>
+                    <Toaster
+                      position="bottom-right"
+                      reverseOrder={false}
+                      gutter={8}
+                      containerStyle={{ position: "absolute" }}
+                      toastOptions={{
+                        duration: 1800,
+                        className: "pointer-events-auto flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium shadow-lg",
+                        style: {
+                          backgroundColor: "rgba(var(--background-end-rgb), 0.92)",
+                          color: "rgb(var(--foreground-rgb))",
+                          border: "1px solid rgba(var(--foreground-rgb), 0.12)",
+                          boxShadow: "0 16px 32px rgba(15, 15, 35, 0.18)",
+                          backdropFilter: "blur(8px)",
+                        },
                       }}
-                    >
-                      {historyLoading ? (
-                        <div className="flex h-full items-center justify-center text-sm font-medium text-rl-text-secondary">
-                          Loading history...
-                        </div>
-                      ) : recentGenerations.length > 0 ? (
-                        <div className="flex h-full gap-4 overflow-x-auto">
-                          <AnimatePresence initial={false}>
-                            {recentGenerations.map((img, idx) => {
-                              const formattedTimestamp = format(new Date(img.created_at), "MMM d, yy");
-
-                              const handleDownload = async (e: React.MouseEvent) => {
-                                e.stopPropagation();
-                                if (!img.image_url) return;
-                                try {
-                                  const response = await fetch(img.image_url);
-                                  const blob = await response.blob();
-                                  const url = window.URL.createObjectURL(blob);
-                                  const a = document.createElement('a');
-                                  a.href = url;
-                                  a.download = `renderlab-${img.id}.jpg`;
-                                  document.body.appendChild(a);
-                                  a.click();
-                                  document.body.removeChild(a);
-                                  window.URL.revokeObjectURL(url);
-                                } catch (error) {
-                                  console.error('Download failed:', error);
-                                }
-                              };
-
-                              const handleRemoveFromView = async (e: React.MouseEvent) => {
-                                e.stopPropagation();
-                                try {
-                                  const response = await fetch(`/api/images/${img.id}/hide`, {
-                                    method: 'PATCH',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ hidden: true })
-                                  });
-
-                                  const result = await response.json();
-                                  if (!result.success) throw new Error(result.error);
-
-                                  // Show success toast
-                                  toast.success('Removed from preview strip', {
-                                    description: 'Image is still available in History',
-                                    duration: 3000,
-                                  });
-
-                                  // Smooth refresh - AnimatePresence will handle the exit animation
-                                  await refresh();
-                                } catch (error: any) {
-                                  console.error('Remove failed:', error);
-                                  toast.error('Failed to remove image');
-                                }
-                              };
-
-                              return (
-                                <motion.div
-                                  key={`history-${img.id}-${img.created_at}-${idx}`}
-                                  layout
-                                  initial={{ opacity: 0, scale: 0.95 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  exit={{ opacity: 0, scale: 0.9 }}
-                                  transition={{ duration: 0.3 }}
-                                  className="group relative flex h-full w-44 cursor-pointer flex-shrink-0 overflow-hidden rounded-xl border border-white/[0.06] transition-all duration-200"
-                                  style={{
-                                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.15)'
-                                  }}
-                                  onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(-4px)';
-                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-                                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.25)';
-                                  }}
-                                  onMouseLeave={(e) => {
-                                    e.currentTarget.style.transform = '';
-                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
-                                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.15)';
-                                  }}
-                                  onClick={() => setSelectedImage(img.image_url || null)}
-                                >
-                                  <img
-                                    src={img.thumb_url || img.image_url || ''}
-                                    alt={`Generation ${idx + 1}`}
-                                    loading="lazy"
-                                    decoding="async"
-                                    className="h-full w-full rounded-lg object-cover transition-opacity duration-300"
-                                  />
-
-                                  {/* Hover overlay */}
-                                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors opacity-0 group-hover:opacity-100">
-                                    {/* X button - Top-right (hover only) */}
-                                    <button
-                                      onClick={handleRemoveFromView}
-                                      className="absolute top-2 right-2 p-2 bg-black/80 hover:bg-black rounded-full shadow-lg transition-colors"
-                                      title="Remove from preview strip"
-                                    >
-                                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                      </svg>
-                                    </button>
-
-                                    {/* View in Edit button - Center (hover only) */}
-                                    <Link
-                                      href={`/inpaint?image=${encodeURIComponent(img.image_url || '')}`}
-                                      onClick={(e) => e.stopPropagation()}
-                                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rl-btn rl-btn-primary text-xs px-3 py-1.5 shadow-lg whitespace-nowrap pointer-events-auto opacity-80 hover:opacity-100 transition-opacity"
-                                      style={{ transform: 'translate(-50%, -50%)' }}
-                                    >
-                                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                      </svg>
-                                      View in Edit
-                                    </Link>
-
-                                    {/* Download button - Bottom-right (hover only) */}
-                                    <button
-                                      onClick={handleDownload}
-                                      className="absolute bottom-2 right-2 p-2 bg-black/80 hover:bg-black rounded-full shadow-lg transition-colors"
-                                      title="Download"
-                                    >
-                                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                      </svg>
-                                    </button>
-                                  </div>
-
-                                  {/* Date label - Bottom-left (always visible) */}
-                                  <div className="absolute bottom-2 left-2 rounded-md bg-black/80 px-2 py-1 text-xs font-medium text-white pointer-events-none">
-                                    {formattedTimestamp}
-                                  </div>
-                                </motion.div>
-                              );
-                            })}
-                          </AnimatePresence>
-                        </div>
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-sm font-medium text-rl-text-secondary">
-                          No generations yet.
-                        </div>
-                      )}
-                    </div>
+                    />
                   </div>
                 </div>
 
-                <div className="h-full">
+                <div
+                  className="rounded-3xl p-6 border border-white/[0.06] flex-[1]"
+                  style={{
+                    background: '#1a1a1a',
+                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 20px 56px rgba(0, 0, 0, 0.3)'
+                  }}
+                >
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-rl-text">Images History</h3>
+                    <Link
+                      href="/history"
+                      className="text-sm text-rl-accent hover:text-rl-accent-hover font-medium transition-colors hover:underline"
+                    >
+                      View all →
+                    </Link>
+                  </div>
+                  {/* Inset preview strip container */}
                   <div
-                    className="h-full rounded-3xl p-6 border border-white/[0.06] flex flex-col"
+                    className="rounded-xl p-3 flex items-center justify-center"
                     style={{
-                      background: '#1a1a1a',
-                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 20px 56px rgba(0, 0, 0, 0.3)'
+                      background: '#0f0f0f',
+                      boxShadow: 'inset 0 2px 8px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(0, 0, 0, 0.5)',
+                      minHeight: '20vh'
                     }}
                   >
-                    {enhancedRightPanel}
+                    {previewImages.length === 0 ? (
+                      <div className="flex h-full items-center justify-center text-sm font-medium text-rl-text-secondary">
+                        <Link href="/history" className="text-rl-accent hover:text-rl-accent-hover transition-colors">
+                          View your generated images →
+                        </Link>
+                      </div>
+                    ) : (
+                      <div className="w-full grid grid-cols-5 gap-2">
+                        {previewImages.slice(0, 5).map((img) => (
+                          <PreviewThumbnail
+                            key={img.id}
+                            image={img}
+                            onRemove={onRemovePreview}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
+
+              <div className="h-full">
+                <div
+                  className="h-full rounded-3xl p-6 border border-white/[0.06] flex flex-col"
+                  style={{
+                    background: '#1a1a1a',
+                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 20px 56px rgba(0, 0, 0, 0.3)'
+                  }}
+                >
+                  {enhancedRightPanel}
+                </div>
+              </div>
+            </div>
           </motion.div>
 
           {bottomPanel && (

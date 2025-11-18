@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
-import pLimit from "p-limit";
 import { generateSingle } from "@/lib/generateSingle";
 import { createClient } from "@/lib/supabaseServer";
 import { uploadImageToStorage } from '@/lib/utils/uploadToStorage';
+import { NextResponse } from "next/server";
+import pLimit from "p-limit";
 
 export const runtime = "nodejs";
 
@@ -192,11 +192,11 @@ export async function POST(req: Request) {
 
               if (result.status === "ok" && result.url) {
                 succeeded += 1;
-                
+
                 // Upload to storage and save to database
                 try {
                   const replicateUrl = result.url;
-                  
+
                   // Upload to permanent storage
                   console.log(`🔵 [STORAGE] Uploading image #${index} to Supabase Storage:`, replicateUrl);
                   const permanentUrl = await uploadImageToStorage(
@@ -212,6 +212,9 @@ export async function POST(req: Request) {
 
                   console.log(`✅ [STORAGE] Uploaded image #${index} successfully:`, permanentUrl);
 
+                  // Generate thumbnail URL using Supabase Transform API
+                  const thumbnailUrl = `${permanentUrl}?width=512&quality=80&format=webp`;
+
                   const imageName = `${collectionName || "Collection"} - ${index + 1}`;
                   const { data: newImage, error: dbError } = await supabase
                     .from("images")
@@ -220,17 +223,18 @@ export async function POST(req: Request) {
                       name: imageName,
                       prompt: normalized.prompt, // ✅ Save the actual prompt text
                       url: permanentUrl, // ✅ Use permanent Supabase Storage URL
+                      thumbnail_url: thumbnailUrl,
                       reference_url: normalized.imageUrl || baseImage || null,
                       collection_id: collectionId,
                     }])
                     .select()
                     .single();
-                  
+
                   if (dbError) {
                     console.error(`❌ [COLLECTION] DB Error #${index}:`, dbError);
                   } else {
                     console.log(`✅ [COLLECTION] Saved to DB with reference_url:`, normalized.imageUrl || baseImage || null);
-                    
+
                     // ✅ Generate thumbnail asynchronously (don't wait)
                     if (newImage) {
                       fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/generate-thumbnail`, {
@@ -257,7 +261,7 @@ export async function POST(req: Request) {
                 } catch (dbErr) {
                   console.error(`❌ [COLLECTION] Error processing image #${index}:`, dbErr);
                   failed += 1;
-                  
+
                   const errorPayload: ProgressPayload = {
                     type: "progress",
                     index,
