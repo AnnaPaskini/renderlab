@@ -1,57 +1,47 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
-const logoNames = [
-  "adobe.png",
-  "autodesk-dark.png",
-  "behance.png",
-  "google-original-wordmark.png",
-  "vercel.png",
+
+const logos = [
+  { name: "adobe", file: "adobe.png" },
+  { name: "autodesk-dark", file: "autodesk-dark.png" },
+  { name: "autodesk-logo-2-dark", file: "autodesk-logo-2-dark.png" },
+  { name: "behance", file: "behance.png" },
+  { name: "google-original-wordmark", file: "google-original-wordmark.png" },
+  { name: "google-original", file: "google-original.png" },
+  { name: "lumion", file: "lumion.png" },
+  { name: "sketchup", file: "sketchup.png" },
+  { name: "vercel", file: "vercel.png" },
+  { name: "enscape", file: "enscape.jpeg" },
 ];
 
-const logos = logoNames.map((file) => ({
-  name: file.split(".")[0],
-  logo: `/logos/${file}`,
-}));
-
 export function Companies() {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIndex((prev) => (prev + 1) % logos.length);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <section className="py-16 text-center">
-      <h3 className="text-sm font-semibold text-gray-500 mb-12">
+    <section className="py-12 text-center">
+      <h3 className="text-sm font-semibold text-[var(--rl-text-secondary)] mb-12">
         Trusted by companies worldwide
       </h3>
 
-      <div className="h-12 flex justify-center items-center relative">
-        <AnimatePresence mode="wait">
+      <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+        {logos.map((logo, index) => (
           <motion.div
-            key={logos[index].name}
-            initial={{ opacity: 0, y: 10 }}
+            key={logo.name}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.4 }}
-            className="absolute"
+            transition={{ duration: 0.4, delay: index * 0.1 }}
+            className="flex items-center justify-center"
           >
             <Image
-              src={logos[index].logo}
-              alt={logos[index].name}
+              src={`/logos/${logo.file}`}
+              alt={logo.name}
               width={120}
-              height={40}
-              className="object-contain w-auto h-full"
+              height={32}
+              className="h-[32px] w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
               priority
             />
           </motion.div>
-        </AnimatePresence>
+        ))}
       </div>
     </section>
   );

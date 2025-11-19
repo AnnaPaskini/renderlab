@@ -17,7 +17,10 @@ export function RenderLabLayout({
       <div className="mx-auto p-6" style={{ maxWidth }}>
         {showHeader && (
           <header className="flex items-center justify-between pb-4">
-            <h1 className="text-xl font-semibold">Hey, Anna – Keep Crafting ✨</h1>
+            <div className="relative w-fit">
+              <h1 className="text-xl font-semibold">Hey, Anna – Keep Crafting ✨</h1>
+              <div className="absolute inset-0 -z-10 bg-gradient-to-r from-white/[0.06] via-white/[0.03] to-transparent backdrop-blur-[2px] rounded-xl px-6 py-4"></div>
+            </div>
           </header>
         )}
         <motion.div

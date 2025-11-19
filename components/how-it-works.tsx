@@ -1,21 +1,29 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Button } from "@/components/button";
+import { motion } from "framer-motion";
 
 export function HowItWorks() {
   const steps = [
     {
-      title: "Upload your render",
-      desc: "Drag and drop your existing render. The platform automatically analyzes lighting, perspective, and depth.",
+      title: "Step 1 — Upload or Attach",
+      desc: "Send your render from your device or paste a direct image link. RenderLab supports JPG, PNG, WebP, and high-resolution files up to 8K.",
     },
     {
-      title: "Choose transformation",
-      desc: "Select what you want to enhance — lighting, time of day, materials, or overall polish.",
+      title: "Step 2 — Modify Anything",
+      desc: "Highlight any part of the image and describe what you want to change. Lighting, materials, furniture, backgrounds — the AI handles all the heavy lifting.",
     },
     {
-      title: "Generate and download",
-      desc: "RenderLab applies AI corrections and delivers a ready-to-use image in seconds.",
+      title: "Step 3 — Generate in Batches",
+      desc: "Run multiple versions at once to explore ideas faster. Pick your favorite or refine further with inpainting or additional prompts.",
+    },
+    {
+      title: "Step 4 — Save Your Templates",
+      desc: "Store your favorite prompts as reusable templates for instant use later. Your whole workflow becomes one click.",
+    },
+    {
+      title: "Step 5 — Share with Your Team",
+      desc: "Send your templates to teammates or clients for feedback — perfect for consistent visual pipelines in studios and agencies.",
     },
   ];
 
@@ -35,7 +43,7 @@ export function HowItWorks() {
           Simple workflow. Instant results. No plugins or complex setup required.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           {steps.map((step, i) => (
             <motion.div
               key={i}
@@ -61,12 +69,12 @@ export function HowItWorks() {
 
         <div className="mt-12 flex justify-center">
           <Button
-  variant="outline"
-  size="lg"
-  className="border-gray-900 text-gray-900 dark:text-white hover:bg-gray-900 dark:hover:bg-gray-800 transition-colors"
->
-  Try RenderLab Now
-</Button>
+            variant="outline"
+            size="lg"
+            className="border-gray-900 text-gray-900 dark:text-white hover:bg-gray-900 dark:hover:bg-gray-800 transition-colors"
+          >
+            Try RenderLab Now
+          </Button>
         </div>
       </div>
     </section>

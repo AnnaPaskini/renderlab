@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import {
   IconAdjustmentsBolt,
   IconCloud,
@@ -13,57 +12,85 @@ import {
 export const GridFeatures = () => {
   const features = [
     {
-      title: "Built for developers",
+      title: "AI-Powered Rendering",
       description:
-        "Built for engineers, developers, dreamers, thinkers and doers.",
-      icon: <IconTerminal2 />,
+        "Transform architectural renders with intelligent AI that understands design principles and spatial relationships.",
+      icon: <IconTerminal2 className="w-6 h-6 text-white" />,
     },
     {
-      title: "Ease of use",
+      title: "Template Collections",
       description:
-        "It's as easy as using an Apple, and as expensive as buying one.",
-      icon: <IconEaseInOut />,
+        "Access professionally curated template libraries designed specifically for architectural visualization workflows.",
+      icon: <IconEaseInOut className="w-6 h-6 text-white" />,
     },
     {
-      title: "Pricing like no other",
+      title: "Batch Processing",
       description:
-        "Our prices are best in the market. No cap, no lock, no credit card required.",
-      icon: <IconCurrencyDollar />,
+        "Process multiple renders simultaneously with automated quality optimization and consistent styling.",
+      icon: <IconCurrencyDollar className="w-6 h-6 text-white" />,
     },
     {
-      title: "100% Uptime guarantee",
-      description: "We just cannot be taken down by anyone.",
-      icon: <IconCloud />,
-    },
-    {
-      title: "Multi-tenant Architecture",
-      description: "You can simply share passwords instead of buying new seats",
-      icon: <IconRouteAltLeft />,
-    },
-    {
-      title: "24/7 Customer Support",
+      title: "Cloud Integration",
       description:
-        "We are available a 100% of the time. Atleast our AI Agents are.",
-      icon: <IconHelp />,
+        "Seamlessly integrate with your existing cloud storage and project management tools for streamlined workflows.",
+      icon: <IconCloud className="w-6 h-6 text-white" />,
     },
     {
-      title: "Money back guarantee",
+      title: "Real-time Collaboration",
       description:
-        "If you donot like EveryAI, we will convince you to like us.",
-      icon: <IconAdjustmentsBolt />,
+        "Work together with your team in real-time, sharing feedback and iterations instantly across projects.",
+      icon: <IconRouteAltLeft className="w-6 h-6 text-white" />,
     },
     {
-      title: "And everything else",
-      description: "I just ran out of copy ideas. Accept my sincere apologies",
-      icon: <IconHeart />,
+      title: "Expert Support",
+      description:
+        "Get dedicated support from architectural visualization specialists who understand your unique challenges.",
+      icon: <IconHelp className="w-6 h-6 text-white" />,
+    },
+    {
+      title: "Quality Assurance",
+      description:
+        "Automated quality checks ensure every render meets professional standards before final delivery.",
+      icon: <IconAdjustmentsBolt className="w-6 h-6 text-white" />,
+    },
+    {
+      title: "Version Control",
+      description:
+        "Track changes, maintain revision history, and easily rollback to previous versions of your renders.",
+      icon: <IconHeart className="w-6 h-6 text-white" />,
     },
   ];
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4  relative z-10 py-10">
-      {features.map((feature, index) => (
-        <Feature key={feature.title} {...feature} index={index} />
-      ))}
-    </div>
+    <section className="relative py-20">
+      <div className="absolute inset-0 overflow-hidden opacity-40">
+        <div className="absolute inset-0 bg-grid-white/[0.02]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
+      </div>
+
+      <div className="relative z-10">
+        <div className="text-center mb-20 space-y-6">
+          <div className="flex items-center justify-center gap-4 mb-8">
+            <div className="w-12 h-px bg-gradient-to-r from-transparent to-orange-500" />
+            <span className="text-orange-500 text-sm tracking-widest uppercase">Features</span>
+            <div className="w-12 h-px bg-gradient-to-l from-transparent to-orange-500" />
+          </div>
+
+          <h2 className="text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 via-neutral-200 to-neutral-400">
+            Everything You Need
+          </h2>
+
+          <p className="text-neutral-400 text-lg md:text-xl max-w-2xl mx-auto">
+            Powerful tools and features designed specifically for architectural visualization professionals
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {features.map((feature, index) => (
+            <Feature key={feature.title} {...feature} index={index} />
+          ))}
+        </div>
+      </div>
+    </section>
   );
 };
 
@@ -79,27 +106,14 @@ const Feature = ({
   index: number;
 }) => {
   return (
-    <div
-      className={cn(
-        "flex flex-col lg:border-r  py-10 relative group dark:border-neutral-800",
-        (index === 0 || index === 4) && "lg:border-l dark:border-neutral-800",
-        index < 4 && "lg:border-b dark:border-neutral-800"
-      )}
-    >
-      {index < 4 && (
-  <div className="opacity-0 group-hover:opacity-100 transition duration-200 group absolute inset-0 h-full w-full bg-gradient-to-t from-[var(--rl-surface-hover)] to-transparent pointer-events-none" />
-      )}
-      {index >= 4 && (
-  <div className="opacity-0 group-hover:opacity-100 transition duration-200 group absolute inset-0 h-full w-full bg-gradient-to-b from-[var(--rl-surface-hover)] to-transparent pointer-events-none" />
-      )}
-      <div className="mb-4 relative z-10 px-10">{icon}</div>
-      <div className="text-lg font-bold mb-2 relative z-10 px-10">
-        <div className="absolute left-0 inset-y-0 h-6 w-1 rounded-tr-full rounded-br-full bg-neutral-300 dark:bg-neutral-700 group-hover:bg-[#ff6b35] transition duration-200" />
-        <span className="group-hover:translate-x-2 transition duration-200 inline-block">
-          {title}
-        </span>
+    <div className="relative bg-[#0c0c0c]/50 border border-white/10 rounded-xl p-6 transition-all duration-300 hover:bg-white/5 group">
+      <div className="mb-4 flex justify-center">
+        {icon}
       </div>
-      <p className="text-sm text-muted dark:text-muted-dark max-w-xs mx-auto relative z-10 px-10">
+      <h3 className="text-lg font-semibold text-white mb-2 text-center">
+        {title}
+      </h3>
+      <p className="text-sm text-neutral-400 leading-relaxed text-center">
         {description}
       </p>
     </div>

@@ -1,23 +1,23 @@
 'use client';
 
-import { HeroParallax } from "@/components/landing/HeroParallax";
-import { FeatureGrid } from "@/components/landing/FeatureGrid";
 import { CTASection } from "@/components/landing/CTASection";
+import { FeatureGrid } from "@/components/landing/FeatureGrid";
+import { HeroParallax } from "@/components/landing/HeroParallax";
 import { RenderLabPanel } from "@/components/panels/RenderLabPanel";
 import { RenderLabButton } from "@/components/ui/RenderLabButton";
 
 export default function LandingPreviewPage() {
   return (
-    <div className="min-h-screen bg-[var(--rl-bg)]">
+    <div className="min-h-screen bg-[var(--rl-bg)] dot-grid">
       {/* Hero Parallax Section */}
       <HeroParallax />
-      
+
       {/* Feature Grid Section */}
       <FeatureGrid />
-      
+
       {/* CTA Section */}
       <CTASection />
-      
+
       {/* Developer Documentation Section */}
       <div className="relative z-20 bg-[var(--rl-surface)] px-4 py-16 border-t border-[var(--rl-border)]">
         <div className="max-w-6xl mx-auto space-y-8">
@@ -96,7 +96,7 @@ export default function LandingPreviewPage() {
               <p className="text-[var(--rl-text-secondary)] mb-4">
                 Scroll back to the top to experience the parallax effect again
               </p>
-              <RenderLabButton 
+              <RenderLabButton
                 variant="outline"
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               >

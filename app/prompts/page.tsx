@@ -65,10 +65,10 @@ export default function PromptsLibraryPage() {
   }, [filters]);
 
   return (
-    <div className="rl-ambient-bg min-h-screen bg-[#0a0a0a]">
+    <div className="rl-ambient-bg min-h-screen bg-[#0a0a0a] pt-32 pb-12">
       {/* Header */}
       <div className="relative z-10 bg-[#0a0a0a] border-b border-white/8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
           <div>
             <h1 className="text-3xl font-bold text-white">Prompts Library</h1>
             <p className="text-gray-400 mt-2">
@@ -79,7 +79,7 @@ export default function PromptsLibraryPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-12">
         {/* Filters */}
         <div className="rl-card p-8 mb-10">
           <FilterBar onFilterChange={setFilters} />

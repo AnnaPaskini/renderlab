@@ -32,7 +32,7 @@ export default function CustomPage() {
         backgroundPosition: '0 0, 0 0, 0 0, 0 0'
       }}
     >
-      <div className="max-w-7xl mx-auto px-8 py-12">
+      <div className="max-w-7xl mx-auto px-8 pt-32 pb-12">
         {/* Header */}
         <div className="mb-10">
           <h1 className="text-4xl font-bold text-white mb-2">
@@ -55,13 +55,13 @@ export default function CustomPage() {
           >
             <TabsTrigger
               value="templates"
-              className="px-8 py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#ff6b35] data-[state=active]:to-[#ff7849] data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(255,107,53,0.3)] transition-all text-gray-400 data-[state=active]:text-white font-semibold"
+              className="px-8 py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#ff6b35] data-[state=active]:to-[#ff7849] data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(255,107,53,0.3)] transition-all font-semibold text-gray-100 hover:text-white"
             >
               Templates
             </TabsTrigger>
             <TabsTrigger
               value="collections"
-              className="px-8 py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#ff6b35] data-[state=active]:to-[#ff7849] data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(255,107,53,0.3)] transition-all text-gray-400 data-[state=active]:text-white font-semibold"
+              className="px-8 py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#ff6b35] data-[state=active]:to-[#ff7849] data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(255,107,53,0.3)] transition-all font-semibold text-gray-100 hover:text-white"
             >
               Collections
             </TabsTrigger>

@@ -1,5 +1,4 @@
 "use client";
-
 import {
   motion,
   MotionValue,
@@ -64,7 +63,7 @@ export const HeroParallax = ({
         className="absolute top-0 left-0 w-full h-[650px] bg-gradient-to-b from-black/95 via-black/70 to-transparent pointer-events-none z-[5]"
       />
       <div className="relative z-[30]">
-        <Header />
+        <HeroHeader />
       </div>
       <motion.div
         className="relative z-[10]"
@@ -110,17 +109,6 @@ export const HeroParallax = ({
 };
 
 
-export const Header = () => (
-  <div className="max-w-7xl relative mx-auto py-20 md:py-40 px-4 w-full left-0 top-0 z-[25]">
-    <h1 className="text-2xl md:text-7xl font-bold dark:text-white">
-      The Ultimate <br /> development studio
-    </h1>
-    <p className="max-w-2xl text-base md:text-xl mt-8 dark:text-white">
-      We build beautiful products together. No subscription. Pay as you go.
-    </p>
-  </div>
-);
-
 export const ProductCard = ({
   product,
   translate,
@@ -163,5 +151,22 @@ export const ProductCard = ({
         {product.title}
       </h2>
     </motion.div>
+  );
+};
+export const HeroHeader = () => {
+  return (
+    <div className="max-w-7xl relative mx-auto py-20 md:py-32 px-4 w-full left-0 top-0">
+      <h1 className="text-3xl md:text-7xl font-bold text-white leading-tight tracking-tight">
+        Transform Your <br /> 
+        <span className="bg-gradient-to-r from-white via-neutral-100 to-neutral-300 bg-clip-text text-transparent">
+          Architectural Renders
+        </span>
+      </h1>
+
+      <p className="max-w-[540px] text-base md:text-lg mt-6 text-neutral-300 font-light leading-relaxed opacity-75">
+        Professional visualization tools for architects and designers. 
+        Enhance your renders with AI-powered templates in seconds.
+      </p>
+    </div>
   );
 };

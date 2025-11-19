@@ -3,12 +3,13 @@
 import { Companies } from "@/components/companies";
 import { Container } from "@/components/container";
 import { CTA } from "@/components/cta";
+import { GridFeatures } from "@/components/grid-features";
 import { Testimonials } from "@/components/testimonials";
+import { AvatarCircles } from "@/components/ui/avatar-circles";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 import { HeroParallax } from "@/components/ui/hero-parallax";
 import { ParallaxScroll } from "@/components/ui/parallax-scroll";
 import { Spotlight } from "@/components/ui/spotlight";
-import { IconDownload, IconPalette, IconUpload } from "@tabler/icons-react";
 
 export default function Home() {
   // Hero Parallax - NUMBERED system (easy to swap!)
@@ -110,25 +111,6 @@ export default function Home() {
     },
   ];
 
-  // How It Works Steps
-  const howItWorksSteps = [
-    {
-      icon: IconUpload,
-      title: "Upload Your Render",
-      description: "Start by uploading your architectural render or 3D visualization. Supports all major formats including JPG, PNG, and high-resolution files up to 8K."
-    },
-    {
-      icon: IconPalette,
-      title: "Choose Your Template",
-      description: "Select from professional presets designed specifically for architectural visualization. Adjust lighting, materials, mood, and atmosphere with a single click."
-    },
-    {
-      icon: IconDownload,
-      title: "Download & Share",
-      description: "Get your enhanced render in seconds. Download in original quality or optimized for web. Share directly with clients or on social media."
-    }
-  ];
-
   // Template Gallery - numbered system
   const templateGallery = [
     "/renders/1.jpg",
@@ -179,7 +161,7 @@ export default function Home() {
 
       {/* Companies */}
       <section
-        className="relative w-full py-12 -mt-20"
+        className="relative w-full py-18 -mt-18"
         style={{
           background: 'radial-gradient(circle at 50% 0%, rgba(0,80,80,0.15) 0%, rgba(0,0,0,1) 70%)'
         }}
@@ -192,58 +174,8 @@ export default function Home() {
         <div className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-neutral-800 to-transparent" />
       </div>
 
-      {/* How It Works */}
-      <section className="relative py-32">
-        <div className="absolute inset-0 overflow-hidden opacity-40">
-          <BackgroundBeams />
-        </div>
-        <div className="absolute inset-0 bg-grid-white/[0.02]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
-
-        <Container className="relative z-10">
-          <div className="text-center mb-20 space-y-6">
-            <div className="flex items-center justify-center gap-4 mb-8">
-              <div className="w-12 h-px bg-gradient-to-r from-transparent to-orange-500" />
-              <span className="text-orange-500 text-sm tracking-widest uppercase">Simple Process</span>
-              <div className="w-12 h-px bg-gradient-to-l from-transparent to-orange-500" />
-            </div>
-
-            <h2 className="text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 via-neutral-200 to-neutral-400">
-              How It Works
-            </h2>
-
-            <p className="text-neutral-400 text-lg md:text-xl max-w-2xl mx-auto">
-              Three simple steps to transform your architectural renders into stunning visualizations
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
-            {howItWorksSteps.map((step, index) => {
-              const IconComponent = step.icon;
-              return (
-                <div
-                  key={index}
-                  className="relative bg-[#101014]/80 border border-white/5 rounded-2xl p-10 lg:p-14 shadow-[0_0_40px_rgba(0,0,0,0.35)]"
-                >
-                  <div className="flex flex-col items-center text-center space-y-6">
-                    <div className="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md w-fit">
-                      <IconComponent size={48} className="text-white" />
-                    </div>
-                    <div className="space-y-4">
-                      <h3 className="text-white font-semibold text-2xl">
-                        {step.title}
-                      </h3>
-                      <p className="text-neutral-300 leading-relaxed text-base max-w-[480px]">
-                        {step.description}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Container>
-      </section>
+      {/* Features Grid */}
+      <GridFeatures />
 
       {/* Divider */}
       <div className="relative">
@@ -264,7 +196,7 @@ export default function Home() {
             </div>
 
             <h2 className="text-4xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 via-neutral-200 to-neutral-400">
-              Professional Templates
+              Professional Templates & Prompts
             </h2>
 
             <p className="text-neutral-400 text-lg md:text-xl max-w-2xl mx-auto">
@@ -298,6 +230,24 @@ export default function Home() {
             <h2 className="text-4xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 via-neutral-200 to-neutral-400">
               Loved by Architects
             </h2>
+          </div>
+
+          <div className="flex flex-col items-center gap-3 mb-12">
+            <AvatarCircles
+              avatarUrls={[
+                "https://i.pravatar.cc/150?img=1",
+                "https://i.pravatar.cc/150?img=2",
+                "https://i.pravatar.cc/150?img=3",
+                "https://i.pravatar.cc/150?img=4",
+                "https://i.pravatar.cc/150?img=5",
+                "https://i.pravatar.cc/150?img=6",
+                "https://i.pravatar.cc/150?img=7",
+                "https://i.pravatar.cc/150?img=8",
+              ]}
+            />
+            <p className="text-sm text-neutral-400">
+              Trusted by Founders and Entrepreneurs from all over the world
+            </p>
           </div>
 
           <Testimonials />
