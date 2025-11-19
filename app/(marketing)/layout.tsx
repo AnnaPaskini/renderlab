@@ -1,16 +1,13 @@
+import { Footer } from "@/components/footer";
 import type { Metadata } from "next";
 import "../globals.css";
-import { GeistSans } from "geist/font/sans";
-import { NavBar } from "@/components/navbar";
-import { cn } from "@/lib/utils";
-import { Footer } from "@/components/footer";
 
 export const metadata: Metadata = {
-  title: "Everything AI",
+  title: "RenderLab - AI-Powered Architectural Visualization",
   description:
-    "Everything AI is a platform that provides a wide range of AI tools and services to help you stay on top of your business. Generate images, text and everything else that you need to get your business off the ground.",
+    "Transform your architectural renders with AI-powered templates. Professional visualization tools for architects and designers. Enhance your renders in seconds.",
   openGraph: {
-    images: ["https://ai-saas-template-aceternity.vercel.app/banner.png"],
+    images: ["https://renderlab.app/banner.png"],
   },
 };
 
@@ -21,7 +18,6 @@ export default function RootLayout({
 }>) {
   return (
     <main>
-      <NavBar />
       {children}
       <Footer />
     </main>

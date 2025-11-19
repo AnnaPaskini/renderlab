@@ -8,8 +8,7 @@ import "./design-tokens.css"; // 1. Tokens FIRST
 import "./globals.css"; // 3. Global styles
 import "./renderlab-theme.css"; // 4. Custom overrides
 
-import { MainNavbar } from '@/components/layout/MainNavbar';
-import { NavBar } from "@/components/navbar";
+import { NavbarWrapper } from "@/components/navbar/NavbarWrapper";
 import { SupabaseAuthProvider } from "@/components/providers/SupabaseAuthProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { WorkspaceProvider } from "@/lib/context/WorkspaceContext";
@@ -31,23 +30,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const headersList = await headers();
-  const pathname = headersList.get("x-pathname") ?? "";
-  const showNavbar =
-    pathname === "/" ||
-    pathname.startsWith("/pricing") ||
-    pathname.startsWith("/blog") ||
-    pathname.startsWith("/contact");
-
-  const showMainNavbar =
-    pathname.startsWith("/workspace") ||
-    pathname.startsWith("/custom") ||
-    pathname.startsWith("/prompts") ||
-    pathname.startsWith("/history") ||
-    pathname.startsWith("/account");
-
-  console.log('🔍 [Layout Debug] Current pathname:', pathname);
-  console.log('🔍 [Layout Debug] showMainNavbar:', showMainNavbar);
-  console.log('🔍 [Layout Debug] showNavbar:', showNavbar);
+  const pathname = headersList.get("x-pathname") ?? "/";
 
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
@@ -68,8 +51,7 @@ export default async function RootLayout({
           <ViewTransitions>
             <SupabaseAuthProvider>
               <WorkspaceProvider>
-                {showNavbar && <NavBar />}
-                {showMainNavbar && <MainNavbar />}
+                <NavbarWrapper />
                 {children}
                 <Toaster
                   position="bottom-right"

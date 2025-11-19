@@ -26,30 +26,30 @@ export const HeroParallax = ({
     offset: ["start start", "end start"],
   });
 
-  const springConfig = { stiffness: 300, damping: 30, bounce: 100 };
+  const springConfig = { stiffness: 100, damping: 30, bounce: 0 };
 
   const translateX = useSpring(
-    useTransform(scrollYProgress, [0, 1], [0, 1000]),
+    useTransform(scrollYProgress, [0, 1], [0, 200]),
     springConfig
   );
   const translateXReverse = useSpring(
-    useTransform(scrollYProgress, [0, 1], [0, -1000]),
+    useTransform(scrollYProgress, [0, 1], [0, -200]),
     springConfig
   );
   const rotateX = useSpring(
-    useTransform(scrollYProgress, [0, 0.2], [15, 0]),
+    useTransform(scrollYProgress, [0, 0.2], [8, 0]),
     springConfig
   );
   const opacity = useSpring(
-    useTransform(scrollYProgress, [0, 0.2], [0.2, 1]),
+    useTransform(scrollYProgress, [0, 0.1], [0.2, 1]),
     springConfig
   );
   const rotateZ = useSpring(
-    useTransform(scrollYProgress, [0, 0.2], [20, 0]),
+    useTransform(scrollYProgress, [0, 0.1], [20, 0]),
     springConfig
   );
   const translateY = useSpring(
-    useTransform(scrollYProgress, [0, 0.2], [-700, 500]),
+    useTransform(scrollYProgress, [0, 0.1], [-300, 150]),
     springConfig
   );
 
@@ -58,7 +58,7 @@ export const HeroParallax = ({
   return (
     <div
       ref={ref}
-      className="h-[300vh] py-40 overflow-hidden antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d]"
+      className="h-[180vh] py-20 overflow-hidden antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d]"
     >
       <div
         className="absolute top-0 left-0 w-full h-[650px] bg-gradient-to-b from-black/95 via-black/70 to-transparent pointer-events-none z-[5]"
@@ -116,9 +116,7 @@ export const Header = () => (
       The Ultimate <br /> development studio
     </h1>
     <p className="max-w-2xl text-base md:text-xl mt-8 dark:text-white">
-      We build beautiful products with the latest technologies and frameworks.
-      We are a team of passionate developers and designers that love to build
-      amazing products.
+      We build beautiful products together. No subscription. Pay as you go.
     </p>
   </div>
 );

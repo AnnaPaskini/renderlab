@@ -8,7 +8,7 @@ import { BackgroundBeams } from "@/components/ui/background-beams";
 import { HeroParallax } from "@/components/ui/hero-parallax";
 import { ParallaxScroll } from "@/components/ui/parallax-scroll";
 import { Spotlight } from "@/components/ui/spotlight";
-import { StickyScroll } from "@/components/ui/sticky-scroll-reveal";
+import { IconDownload, IconPalette, IconUpload } from "@tabler/icons-react";
 
 export default function Home() {
   // Hero Parallax - NUMBERED system (easy to swap!)
@@ -110,68 +110,23 @@ export default function Home() {
     },
   ];
 
-  // Sticky Scroll - How It Works
-  const howItWorksContent = [
+  // How It Works Steps
+  const howItWorksSteps = [
     {
+      icon: IconUpload,
       title: "Upload Your Render",
-      description:
-        "Start by uploading your architectural render or 3D visualization. Supports all major formats including JPG, PNG, and high-resolution files up to 8K.",
-      content: (
-        <div className="h-full w-full relative">
-          <img
-            src="/renders/3.jpg"
-            alt="Upload interface"
-            className="w-full h-full object-cover rounded-lg"
-          />
-          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/80 to-blue-500/80 flex items-center justify-center rounded-lg">
-            <div className="text-center space-y-4 text-white">
-              <div className="text-6xl">📤</div>
-              <p className="text-2xl font-bold">Upload</p>
-            </div>
-          </div>
-        </div>
-      ),
+      description: "Start by uploading your architectural render or 3D visualization. Supports all major formats including JPG, PNG, and high-resolution files up to 8K."
     },
     {
+      icon: IconPalette,
       title: "Choose Your Template",
-      description:
-        "Select from professional presets designed specifically for architectural visualization. Adjust lighting, materials, mood, and atmosphere with a single click.",
-      content: (
-        <div className="h-full w-full relative">
-          <img
-            src="/renders/7.jpg"
-            alt="Template selection"
-            className="w-full h-full object-cover rounded-lg"
-          />
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/80 to-pink-500/80 flex items-center justify-center rounded-lg">
-            <div className="text-center space-y-4 text-white">
-              <div className="text-6xl">🎨</div>
-              <p className="text-2xl font-bold">Edit</p>
-            </div>
-          </div>
-        </div>
-      ),
+      description: "Select from professional presets designed specifically for architectural visualization. Adjust lighting, materials, mood, and atmosphere with a single click."
     },
     {
+      icon: IconDownload,
       title: "Download & Share",
-      description:
-        "Get your enhanced render in seconds. Download in original quality or optimized for web. Share directly with clients or on social media.",
-      content: (
-        <div className="h-full w-full relative">
-          <img
-            src="/renders/1.jpg"
-            alt="Download result"
-            className="w-full h-full object-cover rounded-lg"
-          />
-          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/80 to-yellow-500/80 flex items-center justify-center rounded-lg">
-            <div className="text-center space-y-4 text-white">
-              <div className="text-6xl">⬇️</div>
-              <p className="text-2xl font-bold">Download</p>
-            </div>
-          </div>
-        </div>
-      ),
-    },
+      description: "Get your enhanced render in seconds. Download in original quality or optimized for web. Share directly with clients or on social media."
+    }
   ];
 
   // Template Gallery - numbered system
@@ -224,7 +179,7 @@ export default function Home() {
 
       {/* Companies */}
       <section
-        className="relative w-full py-32"
+        className="relative w-full py-12 -mt-20"
         style={{
           background: 'radial-gradient(circle at 50% 0%, rgba(0,80,80,0.15) 0%, rgba(0,0,0,1) 70%)'
         }}
@@ -248,12 +203,12 @@ export default function Home() {
         <Container className="relative z-10">
           <div className="text-center mb-20 space-y-6">
             <div className="flex items-center justify-center gap-4 mb-8">
-              <div className="w-12 h-px bg-gradient-to-r from-transparent to-cyan-500" />
-              <span className="text-cyan-500 text-sm tracking-widest uppercase">Simple Process</span>
-              <div className="w-12 h-px bg-gradient-to-l from-transparent to-cyan-500" />
+              <div className="w-12 h-px bg-gradient-to-r from-transparent to-orange-500" />
+              <span className="text-orange-500 text-sm tracking-widest uppercase">Simple Process</span>
+              <div className="w-12 h-px bg-gradient-to-l from-transparent to-orange-500" />
             </div>
 
-            <h2 className="text-4xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 via-neutral-200 to-neutral-400">
+            <h2 className="text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 via-neutral-200 to-neutral-400">
               How It Works
             </h2>
 
@@ -262,7 +217,31 @@ export default function Home() {
             </p>
           </div>
 
-          <StickyScroll content={howItWorksContent} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+            {howItWorksSteps.map((step, index) => {
+              const IconComponent = step.icon;
+              return (
+                <div
+                  key={index}
+                  className="relative bg-[#101014]/80 border border-white/5 rounded-2xl p-10 lg:p-14 shadow-[0_0_40px_rgba(0,0,0,0.35)]"
+                >
+                  <div className="flex flex-col items-center text-center space-y-6">
+                    <div className="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md w-fit">
+                      <IconComponent size={48} className="text-white" />
+                    </div>
+                    <div className="space-y-4">
+                      <h3 className="text-white font-semibold text-2xl">
+                        {step.title}
+                      </h3>
+                      <p className="text-neutral-300 leading-relaxed text-base max-w-[480px]">
+                        {step.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </Container>
       </section>
 
@@ -274,14 +253,14 @@ export default function Home() {
       {/* Templates */}
       <section className="relative py-32 bg-gradient-to-b from-black via-neutral-950 to-black">
         <div className="absolute inset-0 bg-dot-white/[0.03]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-purple-500/5 rounded-full blur-[150px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-orange-500/5 rounded-full blur-[150px]" />
 
         <Container className="relative z-10">
           <div className="text-center mb-20 space-y-6">
             <div className="flex items-center justify-center gap-4 mb-8">
-              <div className="w-12 h-px bg-gradient-to-r from-transparent to-purple-500" />
-              <span className="text-purple-500 text-sm tracking-widest uppercase">Ready to Use</span>
-              <div className="w-12 h-px bg-gradient-to-l from-transparent to-purple-500" />
+              <div className="w-12 h-px bg-gradient-to-r from-transparent to-orange-500" />
+              <span className="text-orange-500 text-sm tracking-widest uppercase">Ready to Use</span>
+              <div className="w-12 h-px bg-gradient-to-l from-transparent to-orange-500" />
             </div>
 
             <h2 className="text-4xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 via-neutral-200 to-neutral-400">
@@ -306,14 +285,14 @@ export default function Home() {
       <section className="relative py-32">
         <div className="absolute inset-0 bg-grid-white/[0.02]" />
         <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-cyan-500/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-orange-500/5 rounded-full blur-[120px]" />
 
         <Container className="relative z-10">
           <div className="text-center mb-20 space-y-6">
             <div className="flex items-center justify-center gap-4 mb-8">
-              <div className="w-12 h-px bg-gradient-to-r from-transparent to-emerald-500" />
-              <span className="text-emerald-500 text-sm tracking-widest uppercase">Testimonials</span>
-              <div className="w-12 h-px bg-gradient-to-l from-transparent to-emerald-500" />
+              <div className="w-12 h-px bg-gradient-to-r from-transparent to-orange-500" />
+              <span className="text-orange-500 text-sm tracking-widest uppercase">Testimonials</span>
+              <div className="w-12 h-px bg-gradient-to-l from-transparent to-orange-500" />
             </div>
 
             <h2 className="text-4xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 via-neutral-200 to-neutral-400">
@@ -337,7 +316,7 @@ export default function Home() {
         </div>
         <div className="absolute inset-0 bg-dot-white/[0.03]" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[800px] bg-blue-500/10 rounded-full blur-[200px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[800px] bg-orange-500/10 rounded-full blur-[200px]" />
 
         <div className="relative z-10">
           <CTA />

@@ -391,9 +391,9 @@ export function WorkspaceLayout({
           }}
         />
 
-        <div className={`relative z-[${Z.LOW}] flex min-h-full flex-col gap-rl-xl px-rl-lg pb-10 pt-16 md:px-rl-xl md:pt-20`}>
+        <div className={`relative z-[${Z.LOW}] flex min-h-full flex-col gap-rl-xl px-rl-lg pb-10 pt-24 md:px-rl-xl md:pt-28`}>
           {/* Header - Clean text without panel background */}
-          <div className="mb-8">
+          <div className="bg-white/0.5 dark:bg-white/0.03 backdrop-blur-[2px] rounded-xl py-8 px-6 mb-8">
             <h1 className="text-2xl font-bold text-rl-text mb-1">
               Hey, {greetingName} — keep crafting!
             </h1>
@@ -402,7 +402,7 @@ export function WorkspaceLayout({
             </p>
 
             {/* Quick Actions */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 mt-6">
               <Link
                 href="/inpaint"
                 className="rl-btn-secondary text-base font-semibold px-6 py-2.5 min-w-[110px] inline-flex items-center justify-center"
@@ -422,7 +422,7 @@ export function WorkspaceLayout({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex-1 w-full max-w-[1600px] mx-auto px-8"
+            className="flex-1 w-full max-w-[1600px] mx-auto px-8 mt-14"
           >
             <div className="grid grid-cols-1 md:grid-cols-[60fr_40fr] lg:grid-cols-[65fr_35fr] gap-8 w-full">
               <div className="flex flex-col gap-10">
