@@ -498,7 +498,7 @@ export default function InpaintPage() {
             : 'text-gray-400 hover:text-white hover:bg-[#1a1a1a]'}`;
 
     return (
-        <div className="min-h-screen bg-black pt-32 pb-8 px-8 dot-grid">
+        <div className="min-h-screen pt-32 pb-8 px-8">
             <div className="relative w-full max-w-7xl mx-auto">
                 <div className="relative flex items-center justify-center gap-8 mb-8">
                     <div className="flex-shrink-0">

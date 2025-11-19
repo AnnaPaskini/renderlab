@@ -121,17 +121,7 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="rl-ambient-bg min-h-screen rl-bg-app">
-      {/* Header */}
-      <div className="relative z-10 rl-bg-elevated border-b rl-border-visible">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-3xl font-bold text-white">Account Settings</h1>
-          <p className="text-gray-400 mt-2">
-            Manage your account and preferences
-          </p>
-        </div>
-      </div>
-
+    <div className="rl-ambient-bg min-h-screen pt-20">
       {/* Tabs */}
       <div className="rl-bg-elevated border-b rl-border-visible">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -153,61 +143,89 @@ export default function AccountPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-20">
         {activeTab === 'profile' && (
-          <div className="rl-card p-10">
-            <h2 className="text-xl font-bold text-white mb-8">Profile Information</h2>
+          <>
+            {/* Profile Header */}
+            <div className="pt-10 pb-6">
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+                Account Settings
+              </h1>
 
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-white mb-1">
-                  Email
-                </label>
-                <p className="text-gray-300">{user?.email}</p>
-              </div>
+              <p className="text-neutral-300 max-w-2xl mb-8">
+                Manage your account and preferences
+              </p>
 
-              {profile?.full_name && (
+              <div className="w-full h-px bg-white/5 mb-10" />
+            </div>
+
+            <div className="rl-card p-10">
+              <h2 className="text-xl font-bold text-white mb-8">Profile Information</h2>
+
+              <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-white mb-1">
-                    Name
+                    Email
                   </label>
-                  <p className="text-gray-300">{profile.full_name}</p>
+                  <p className="text-gray-300">{user?.email}</p>
                 </div>
-              )}
 
-              <div className="pt-4">
-                <p className="text-sm text-gray-400">
-                  Settings coming soon...
-                </p>
+                {profile?.full_name && (
+                  <div>
+                    <label className="block text-sm font-medium text-white mb-1">
+                      Name
+                    </label>
+                    <p className="text-gray-300">{profile.full_name}</p>
+                  </div>
+                )}
+
+                <div className="pt-4">
+                  <p className="text-sm text-gray-400">
+                    Settings coming soon...
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          </>
         )}
 
         {activeTab === 'prompts' && (
-          <div className="space-y-8">
+          <>
+            {/* My Prompts Header */}
+            <div className="pt-10 pb-6">
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+                My Prompts
+              </h1>
+
+              <p className="text-neutral-300 max-w-2xl mb-8">
+                Discover and manage all prompts you've submitted to the RenderLab community.
+              </p>
+
+              <div className="w-full h-px bg-white/5 mb-10" />
+            </div>
+
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
               <div className="rl-card p-6">
                 <div className="text-2xl font-bold text-white">{stats.total}</div>
                 <div className="text-sm text-gray-400">Total Prompts</div>
               </div>
-              <div className="rl-card p-6 bg-yellow-600/5">
-                <div className="text-2xl font-bold text-yellow-500">{stats.pending}/5</div>
-                <div className="text-sm text-yellow-400">Pending Review</div>
+              <div className="rl-card p-6">
+                <div className="text-2xl font-bold text-white">{stats.pending}/5</div>
+                <div className="text-sm text-gray-400">Pending Review</div>
               </div>
-              <div className="rl-card p-6 bg-green-600/5">
-                <div className="text-2xl font-bold text-green-500">{stats.approved}</div>
-                <div className="text-sm text-green-400">Approved</div>
+              <div className="rl-card p-6">
+                <div className="text-2xl font-bold text-white">{stats.approved}</div>
+                <div className="text-sm text-gray-400">Approved</div>
               </div>
-              <div className="rl-card p-6 bg-red-600/5">
-                <div className="text-2xl font-bold text-red-500">{stats.rejected}</div>
-                <div className="text-sm text-red-400">Rejected</div>
+              <div className="rl-card p-6">
+                <div className="text-2xl font-bold text-white">{stats.rejected}</div>
+                <div className="text-sm text-gray-400">Rejected</div>
               </div>
             </div>
 
             {/* Filters */}
-            <div className="rl-card p-6">
+            <div className="rl-card p-6 mb-8">
               <div className="flex gap-2">
                 {(['all', 'pending', 'approved', 'rejected'] as const).map(filter => (
                   <button
@@ -270,14 +288,7 @@ export default function AccountPage() {
                             </h3>
 
                             {/* Status Badge */}
-                            <span
-                              className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${prompt.status === 'approved'
-                                ? 'bg-green-600/10 text-green-500 border border-green-500/30'
-                                : prompt.status === 'pending'
-                                  ? 'bg-yellow-600/10 text-yellow-500 border border-yellow-500/30'
-                                  : 'bg-red-600/10 text-red-500 border border-red-500/30'
-                                }`}
-                            >
+                            <span className="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap bg-white/5 text-gray-300 border border-white/10">
                               {prompt.status.charAt(0).toUpperCase() + prompt.status.slice(1)}
                             </span>
                           </div>
@@ -354,7 +365,7 @@ export default function AccountPage() {
                 })}
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </div>

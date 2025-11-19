@@ -200,9 +200,9 @@
 }
 
 .rl-filter-btn.active {
-    background: var(--rl-bg-card);
-    color: var(--rl-accent-solid);
-    border-color: var(--rl-accent-solid);
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.2);
     font-weight: 600;
 }
 
@@ -275,16 +275,16 @@
     transition: all var(--rl-transition-base);
     cursor: pointer;
     background: none;
-    color: var(--rl-text-tertiary);
+    color: #a3a3a3;
 }
 
 .rl-tab-btn:hover {
-    color: var(--rl-text-primary);
+    color: #ffffff;
 }
 
 .rl-tab-btn.active {
-    border-bottom-color: var(--rl-accent-solid);
-    color: var(--rl-accent-solid);
+    border-bottom-color: #ff6b35;
+    color: #ffffff;
 }
 
 /* Link/button with accent color */

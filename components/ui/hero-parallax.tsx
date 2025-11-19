@@ -157,14 +157,14 @@ export const HeroHeader = () => {
   return (
     <div className="max-w-7xl relative mx-auto py-20 md:py-32 px-4 w-full left-0 top-0">
       <h1 className="text-3xl md:text-7xl font-bold text-white leading-tight tracking-tight">
-        Transform Your <br /> 
+        Transform Your <br />
         <span className="bg-gradient-to-r from-white via-neutral-100 to-neutral-300 bg-clip-text text-transparent">
           Architectural Renders
         </span>
       </h1>
 
       <p className="max-w-[540px] text-base md:text-lg mt-6 text-neutral-300 font-light leading-relaxed opacity-75">
-        Professional visualization tools for architects and designers. 
+        Professional visualization tools for architects and designers.
         Enhance your renders with AI-powered templates in seconds.
       </p>
     </div>

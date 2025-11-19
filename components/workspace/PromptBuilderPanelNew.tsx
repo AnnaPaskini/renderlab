@@ -1040,33 +1040,33 @@ export function PromptBuilderPanel({
               </h3>
 
               {/* Tab Buttons */}
-              <div className="flex mb-4">
+              <div className="flex mb-4 border-b border-white/10">
                 <button
                   onClick={() => handleModeChange("template")}
                   className={cn(
-                    "flex-1 py-2 text-sm font-medium transition-colors relative",
+                    "relative flex-1 py-2 text-sm font-medium transition-colors",
                     activeMode === "template"
                       ? "text-white"
-                      : "text-gray-400 hover:text-white"
+                      : "text-neutral-400 hover:text-white"
                   )}
                 >
                   Template
                   {activeMode === "template" && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#ff6b35]" />
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-orange-600" />
                   )}
                 </button>
                 <button
                   onClick={() => handleModeChange("collection")}
                   className={cn(
-                    "flex-1 py-2 text-sm font-medium transition-colors relative",
+                    "relative flex-1 py-2 text-sm font-medium transition-colors",
                     activeMode === "collection"
                       ? "text-white"
-                      : "text-gray-400 hover:text-white"
+                      : "text-neutral-400 hover:text-white"
                   )}
                 >
                   Collection
                   {activeMode === "collection" && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#ff6b35]" />
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-orange-600" />
                   )}
                 </button>
               </div>

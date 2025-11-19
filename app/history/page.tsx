@@ -41,7 +41,7 @@ export default async function HistoryPage() {
     console.log('✅ Loaded images:', images.length);
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white pt-32 pb-12 px-5">
+        <div className="min-h-screen text-white pt-32 pb-12 px-5">
             {/* Header */}
             <div className="max-w-7xl mx-auto mb-10">
                 <h1 className="text-3xl font-bold mb-2.5">History</h1>

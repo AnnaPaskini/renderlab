@@ -19,19 +19,8 @@ export default function CustomPage() {
   }, [tabParam]);
 
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background: `
-          radial-gradient(circle, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-          radial-gradient(circle at 30% 40%, rgba(255, 107, 53, 0.02) 0%, transparent 60%),
-          radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.02) 0%, transparent 60%),
-          #0a0a0a
-        `,
-        backgroundSize: '32px 32px, 100% 100%, 100% 100%, 100% 100%',
-        backgroundPosition: '0 0, 0 0, 0 0, 0 0'
-      }}
-    >
+    <div className="min-h-screen">
+
       <div className="max-w-7xl mx-auto px-8 pt-32 pb-12">
         {/* Header */}
         <div className="mb-10">
@@ -45,25 +34,24 @@ export default function CustomPage() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList
-            className="mb-8 p-1 rounded-2xl"
-            style={{
-              background: '#1a1a1a',
-              border: '1px solid rgba(255, 255, 255, 0.06)',
-              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.5), 0 12px 40px rgba(0, 0, 0, 0.3)'
-            }}
-          >
+          <TabsList className="mb-8 bg-transparent border-b border-white/10 p-0 h-auto">
             <TabsTrigger
               value="templates"
-              className="px-8 py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#ff6b35] data-[state=active]:to-[#ff7849] data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(255,107,53,0.3)] transition-all font-semibold text-gray-100 hover:text-white"
+              className="relative px-1 py-3 text-sm font-medium transition-colors duration-200 bg-transparent border-0 shadow-none data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:shadow-none text-neutral-400 hover:text-white data-[state=active]:hover:text-white rounded-none"
             >
               Templates
+              {activeTab === "templates" && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-orange-600" />
+              )}
             </TabsTrigger>
             <TabsTrigger
               value="collections"
-              className="px-8 py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#ff6b35] data-[state=active]:to-[#ff7849] data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(255,107,53,0.3)] transition-all font-semibold text-gray-100 hover:text-white"
+              className="relative px-1 py-3 text-sm font-medium transition-colors duration-200 bg-transparent border-0 shadow-none data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:shadow-none text-neutral-400 hover:text-white data-[state=active]:hover:text-white rounded-none"
             >
               Collections
+              {activeTab === "collections" && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-orange-600" />
+              )}
             </TabsTrigger>
           </TabsList>
 

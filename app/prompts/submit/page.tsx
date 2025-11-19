@@ -61,31 +61,7 @@ export default function SubmitPromptPage() {
   return (
     <div
       className="min-h-screen relative"
-      style={{
-        background: `
-          radial-gradient(circle, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-          radial-gradient(circle at 30% 40%, rgba(255, 107, 53, 0.02) 0%, transparent 60%),
-          radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.02) 0%, transparent 60%),
-          #0a0a0a
-        `,
-        backgroundSize: '32px 32px, 100% 100%, 100% 100%, 100% 100%',
-        backgroundPosition: '0 0, 0 0, 0 0, 0 0'
-      }}
     >
-      {/* Designer grid overlay - z-index under everything */}
-      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }} aria-hidden="true">
-        <div
-          className="absolute inset-0 opacity-40 dark:opacity-20"
-          style={{
-            backgroundImage: `
-              linear-gradient(0deg, transparent 24%, rgba(120,120,255,0.05) 25%, rgba(120,120,255,0.05) 26%, transparent 27%, transparent 74%, rgba(120,120,255,0.05) 75%, rgba(120,120,255,0.05) 76%, transparent 77%, transparent),
-              linear-gradient(90deg, transparent 24%, rgba(120,120,255,0.05) 25%, rgba(120,120,255,0.05) 26%, transparent 27%, transparent 74%, rgba(120,120,255,0.05) 75%, rgba(120,120,255,0.05) 76%, transparent 77%, transparent)
-            `,
-            backgroundSize: "40px 40px",
-          }}
-        />
-      </div>
-
       {/* Content - z-index above grid */}
       <div className="relative" style={{ zIndex: 1 }}>
         {/* Header */}

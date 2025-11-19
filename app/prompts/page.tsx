@@ -65,9 +65,9 @@ export default function PromptsLibraryPage() {
   }, [filters]);
 
   return (
-    <div className="rl-ambient-bg min-h-screen bg-[#0a0a0a] pt-32 pb-12">
+    <div className="rl-ambient-bg min-h-screen pt-32 pb-12">
       {/* Header */}
-      <div className="relative z-10 bg-[#0a0a0a] border-b border-white/8">
+      <div className="relative z-10 border-b border-white/8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
           <div>
             <h1 className="text-3xl font-bold text-white">Prompts Library</h1>

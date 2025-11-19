@@ -8,6 +8,7 @@ import "./design-tokens.css"; // 1. Tokens FIRST
 import "./globals.css"; // 3. Global styles
 import "./renderlab-theme.css"; // 4. Custom overrides
 
+import { LayoutContent } from "@/components/layout/LayoutContent";
 import { NavbarWrapper } from "@/components/navbar/NavbarWrapper";
 import { SupabaseAuthProvider } from "@/components/providers/SupabaseAuthProvider";
 import { Toaster } from "@/components/ui/sonner";
@@ -52,7 +53,9 @@ export default async function RootLayout({
             <SupabaseAuthProvider>
               <WorkspaceProvider>
                 <NavbarWrapper />
-                {children}
+                <LayoutContent>
+                  {children}
+                </LayoutContent>
                 <Toaster
                   position="bottom-right"
                   toastOptions={toastConfig}

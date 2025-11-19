@@ -367,33 +367,11 @@ export function WorkspaceLayout({
   return (
     <main
       className="flex flex-col min-h-screen w-full transition-colors duration-300"
-      style={{
-        background: `
-          radial-gradient(circle, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-          radial-gradient(circle at 30% 40%, rgba(255, 107, 53, 0.02) 0%, transparent 60%),
-          radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.02) 0%, transparent 60%),
-          #0a0a0a
-        `,
-        backgroundSize: '32px 32px, 100% 100%, 100% 100%, 100% 100%',
-        backgroundPosition: '0 0, 0 0, 0 0, 0 0'
-      }}
     >
       <div className="relative flex-1">
-        <div className="dot-grid absolute inset-0" aria-hidden="true" />
-        <div
-          className={`absolute inset-0 z-[${Z.BASE}] opacity-40 dark:opacity-20`}
-          style={{
-            backgroundImage: `
-              linear-gradient(0deg, transparent 24%, rgba(120,120,255,0.05) 25%, rgba(120,120,255,0.05) 26%, transparent 27%, transparent 74%, rgba(120,120,255,0.05) 75%, rgba(120,120,255,0.05) 76%, transparent 77%, transparent),
-              linear-gradient(90deg, transparent 24%, rgba(120,120,255,0.05) 25%, rgba(120,120,255,0.05) 26%, transparent 27%, transparent 74%, rgba(120,120,255,0.05) 75%, rgba(120,120,255,0.05) 76%, transparent 77%, transparent)
-            `,
-            backgroundSize: "40px 40px",
-          }}
-        />
-
         <div className={`relative z-[${Z.LOW}] flex min-h-full flex-col gap-rl-xl px-rl-lg pb-10 pt-24 md:px-rl-xl md:pt-28`}>
           {/* Header - Clean text without panel background */}
-          <div className="bg-white/0.5 dark:bg-white/0.03 backdrop-blur-[2px] rounded-xl py-8 px-6 mb-8">
+          <div className="py-8 mb-2">
             <h1 className="text-2xl font-bold text-rl-text mb-1">
               Hey, {greetingName} — keep crafting!
             </h1>
@@ -422,7 +400,7 @@ export function WorkspaceLayout({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex-1 w-full max-w-[1600px] mx-auto px-8 mt-14"
+            className="flex-1 w-full max-w-[1600px] mx-auto px-8 mt-4"
           >
             <div className="grid grid-cols-1 md:grid-cols-[60fr_40fr] lg:grid-cols-[65fr_35fr] gap-8 w-full">
               <div className="flex flex-col gap-10">

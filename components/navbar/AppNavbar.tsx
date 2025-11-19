@@ -1,10 +1,58 @@
 "use client";
 
+import { createClient } from "@/lib/supabaseBrowser";
+import { FileText, LogOut, PenLine, Settings } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+// Apple-style MenuItem component
+const MenuItem = ({ icon, label, href, onClick }: { icon: React.ReactNode; label: string; href?: string; onClick?: () => void }) => {
+    const content = (
+        <button className="w-full flex items-center gap-3 px-3 h-12 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition">
+            {icon}
+            <span className="text-sm font-medium">{label}</span>
+        </button>
+    );
+
+    if (href) {
+        return <Link href={href}>{content}</Link>;
+    }
+
+    return <div onClick={onClick}>{content}</div>;
+};
 
 export const AppNavbar = () => {
     const pathname = usePathname();
+    const router = useRouter();
+    const supabase = createClient();
+    const [email, setEmail] = useState<string | null>(null);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as Element;
+            if (!target.closest('.dropdown-container')) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        if (isDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isDropdownOpen]);
+
+    // Logout handler
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        router.replace("/login");
+        setIsDropdownOpen(false);
+    };
 
     const navItems = [
         { name: "Workspace", href: "/workspace" },
@@ -30,33 +78,45 @@ export const AppNavbar = () => {
                     </Link>
 
                     {/* Navigation Tabs */}
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-6">
                         {navItems.map((item) => (
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`px-4 py-2 text-sm font-medium transition-all duration-200 rounded-full ${pathname === item.href
-                                    ? "text-white opacity-100"
-                                    : "text-neutral-400 opacity-60 hover:text-white hover:opacity-100"
+                                className={`relative px-1 py-2 text-sm font-medium transition-colors duration-200 ${pathname === item.href
+                                    ? "text-white"
+                                    : "text-neutral-400 hover:text-white"
                                     }`}
                             >
                                 {item.name}
+                                {pathname === item.href && (
+                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-orange-600" />
+                                )}
                             </Link>
                         ))}
                     </div>
 
                     {/* User Menu */}
                     <div className="flex items-center space-x-4">
-                        {/* Credits Badge */}
-                        <div className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-medium text-white flex items-center space-x-1.5 backdrop-blur-sm">
-                            <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />
-                            <span>3 credits</span>
+                        {/* User Menu Dropdown */}
+                        <div className="relative dropdown-container">
+                            <button
+                                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-sm font-semibold hover:shadow-lg hover:shadow-orange-500/30 transition-all hover:scale-105 focus:outline-none"
+                            >
+                                A
+                            </button>
+                            {isDropdownOpen && (
+                                <div className="absolute right-0 top-[60px] w-64 rounded-2xl backdrop-blur-xl bg-neutral-900/95 border border-white/10 shadow-2xl shadow-black/50 p-2 z-50">
+                                    <MenuItem icon={<Settings className="w-5 h-5" />} label="Account Settings" href="/account" />
+                                    <div className="w-full h-px bg-white/10 my-1" />
+                                    <MenuItem icon={<FileText className="w-5 h-5" />} label="My Prompts" href="/account?tab=prompts" />
+                                    <MenuItem icon={<PenLine className="w-5 h-5" />} label="Submit Prompt" href="/prompts/submit" />
+                                    <div className="w-full h-px bg-white/10 my-1" />
+                                    <MenuItem icon={<LogOut className="w-5 h-5" />} label="Logout" onClick={handleLogout} />
+                                </div>
+                            )}
                         </div>
-
-                        {/* User Avatar */}
-                        <button className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-sm font-semibold hover:shadow-lg hover:shadow-orange-500/30 transition-all hover:scale-105">
-                            A
-                        </button>
                     </div>
                 </div>
             </div>
