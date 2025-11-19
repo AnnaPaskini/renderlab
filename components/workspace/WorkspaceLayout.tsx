@@ -28,9 +28,10 @@ interface PreviewImage {
 interface PreviewThumbnailProps {
   image: PreviewImage;
   onRemove?: (id: string) => void;
+  onView?: (url: string) => void;
 }
 
-function PreviewThumbnail({ image, onRemove }: PreviewThumbnailProps) {
+function PreviewThumbnail({ image, onRemove, onView }: PreviewThumbnailProps) {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -42,6 +43,12 @@ function PreviewThumbnail({ image, onRemove }: PreviewThumbnailProps) {
     const safeUrl = fullUrl + (fullUrl.includes('?') ? '&download=1' : '?download=1');
     // Redirect: /inpaint?image=<encodeURIComponent(fullUrl)>
     router.push(`/inpaint?image=${encodeURIComponent(safeUrl)}`);
+  };
+
+  const handleView = () => {
+    if (onView) {
+      onView(image.url);
+    }
   };
 
   const handleDownload = async () => {
@@ -196,6 +203,32 @@ function PreviewThumbnail({ image, onRemove }: PreviewThumbnailProps) {
             <Download size={10} />
             Download
           </button>
+          <button
+            onClick={handleViewInEdit}
+            style={{
+              width: '100%',
+              padding: '6px 8px',
+              fontSize: '11px',
+              background: 'transparent',
+              color: 'white',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              borderRadius: '4px',
+              textAlign: 'left',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#2a2a2a';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+            }}
+          >
+            <Eye size={10} />
+            Edit (Inpaint)
+          </button>
           {onRemove && (
             <button
               onClick={handleRemove}
@@ -227,13 +260,13 @@ function PreviewThumbnail({ image, onRemove }: PreviewThumbnailProps) {
         </div>
       )}
 
-      {/* Hover overlay with centered Edit button */}
+      {/* Hover overlay with View icon */}
       {isHovered && !showMenu && (
         <div
           style={{
             position: 'absolute',
             inset: 0,
-            background: 'rgba(0, 0, 0, 0.7)',
+            background: 'rgba(0, 0, 0, 0.3)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -241,30 +274,27 @@ function PreviewThumbnail({ image, onRemove }: PreviewThumbnailProps) {
           }}
         >
           <button
-            onClick={handleViewInEdit}
+            onClick={handleView}
             style={{
-              padding: '8px 16px',
-              fontSize: '12px',
-              fontWeight: '500',
-              borderRadius: '6px',
-              background: '#ff6b35',
+              padding: '8px',
+              borderRadius: '50%',
+              background: 'rgba(255, 255, 255, 0.2)',
               color: 'white',
               border: 'none',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
+              justifyContent: 'center',
               transition: 'all 0.2s',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#ff8555';
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#ff6b35';
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
             }}
           >
-            <Eye size={14} />
-            Edit
+            <Eye size={20} />
           </button>
         </div>
       )}
@@ -291,7 +321,7 @@ export function WorkspaceLayout({
   previewImages = [],
   onRemovePreview,
 }: WorkspaceLayoutProps) {
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
   const previewTimestampsRef = useRef<Map<string, string>>(new Map());
 
   const { user } = useAuth();
@@ -321,7 +351,7 @@ export function WorkspaceLayout({
   }, [displayName]);
 
   useEffect(() => {
-    if (!selectedImage) {
+    if (selectedImageIndex === null) {
       return;
     }
 
@@ -329,7 +359,7 @@ export function WorkspaceLayout({
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setSelectedImage(null);
+        setSelectedImageIndex(null);
       }
     };
 
@@ -339,7 +369,7 @@ export function WorkspaceLayout({
       document.body.style.overflow = "";
       window.removeEventListener("keydown", handleEscape);
     };
-  }, [selectedImage]);
+  }, [selectedImageIndex]);
 
   useEffect(() => {
     const map = previewTimestampsRef.current;
@@ -466,11 +496,12 @@ export function WorkspaceLayout({
                       </div>
                     ) : (
                       <div className="w-full grid grid-cols-5 gap-2">
-                        {previewImages.slice(0, 5).map((img) => (
+                        {previewImages.slice(0, 5).map((img, index) => (
                           <PreviewThumbnail
                             key={img.id}
                             image={img}
                             onRemove={onRemovePreview}
+                            onView={() => setSelectedImageIndex(index)}
                           />
                         ))}
                       </div>
@@ -507,11 +538,14 @@ export function WorkspaceLayout({
       </div>
 
       <AnimatePresence>
-        {selectedImage && (
+        {selectedImageIndex !== null && (
           <ImagePreviewModal
-            key={selectedImage}
-            src={selectedImage}
-            onClose={() => setSelectedImage(null)}
+            key={previewImages[selectedImageIndex]?.id}
+            src={previewImages[selectedImageIndex]?.url}
+            onClose={() => setSelectedImageIndex(null)}
+            images={previewImages.map(img => ({ id: img.id, url: img.url }))}
+            currentIndex={selectedImageIndex}
+            onNavigate={setSelectedImageIndex}
           />
         )}
       </AnimatePresence>

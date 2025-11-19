@@ -4,6 +4,7 @@ import { ImageUploadPanel } from "@/components/workspace/ImageUploadPanel";
 import { PromptBuilderPanel } from "@/components/workspace/PromptBuilderPanelNew";
 import { WorkspaceLayout } from "@/components/workspace/WorkspaceLayout";
 import { useWorkspace } from "@/lib/context/WorkspaceContext";
+import { createClient } from "@/lib/supabaseBrowser";
 import { defaultToastStyle } from "@/lib/toast-config";
 import { Link as LinkIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -85,6 +86,69 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
       console.log('✅ [Workspace] Loaded temporary reference image:', activeItem.data.reference_url);
     }
   }, [activeItem]);
+
+  // ✅ REALTIME SUBSCRIPTION: Listen for new images
+  useEffect(() => {
+    const supabase = createClient();
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    const setupRealtimeSubscription = async () => {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        console.log('⚠️ [Realtime] No user found, skipping subscription');
+        return;
+      }
+
+      console.log('🔴 [Realtime] Setting up subscription for user:', user.id);
+
+      // Create channel and subscribe to INSERT events
+      channel = supabase
+        .channel('workspace-images')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'images',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('🔴 [Realtime] New image inserted:', payload);
+
+            const newImage = payload.new as PreviewImage;
+
+            // Prepend new image to preview strip (most recent first)
+            setPreviewImages((prev) => [newImage, ...prev]);
+
+            // Show toast notification
+            toast.success('✨ New image generated!', {
+              description: 'Added to workspace preview',
+              style: {
+                background: '#10b981',
+                color: 'white',
+                border: 'none'
+              },
+              duration: 3000
+            });
+          }
+        )
+        .subscribe((status) => {
+          console.log('🔴 [Realtime] Subscription status:', status);
+        });
+    };
+
+    setupRealtimeSubscription();
+
+    // Cleanup: Unsubscribe when component unmounts
+    return () => {
+      if (channel) {
+        console.log('🔴 [Realtime] Cleaning up subscription');
+        supabase.removeChannel(channel);
+      }
+    };
+  }, []); // Empty dependency array - only run once on mount
 
   // Clear reference image handler - preserves prompt and context
   const handleClearReference = () => {

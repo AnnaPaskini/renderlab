@@ -50,6 +50,7 @@ export default function InpaintPage() {
     // Drawing state for panel visibility
     const [isDrawing, setIsDrawing] = useState(false);
     const [showBrushPanel, setShowBrushPanel] = useState(false);
+    const [canvasSize, setCanvasSize] = useState({ width: 1024, height: 1024 });
 
     // Canvas refs
     const imageCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -293,7 +294,9 @@ export default function InpaintPage() {
                 maskUrl: maskUrl,                   // ✅ V3: Actual mask PNG with user-drawn shape
                 maskBounds: maskBounds,             // ✅ Extracted mask bounds
                 userPrompt: inpaintPrompt.trim(),   // ✅ User's instruction
-                referenceUrls: referenceImage ? [referenceImage] : []  // ✅ Reference images (0-3)
+                referenceUrls: referenceImage ? [referenceImage] : [],  // ✅ Reference images (0-3)
+                width: canvasSize.width,            // ✅ Canvas width for aspect ratio
+                height: canvasSize.height           // ✅ Canvas height for aspect ratio
             };
 
             console.log('📦 Final request payload:', requestPayload);
@@ -608,6 +611,7 @@ export default function InpaintPage() {
                                     setShowBrushPanel(false);
                                 }}
                                 onDrawingEnd={() => setIsDrawing(false)}
+                                onCanvasSizeChange={setCanvasSize}
                             />
                         )}
 

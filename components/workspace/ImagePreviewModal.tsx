@@ -5,9 +5,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 interface ImagePreviewModalProps {
   src: string;
   onClose: () => void;
+  images?: { id: string; url: string }[];
+  currentIndex?: number;
+  onNavigate?: (index: number) => void;
 }
 
-function ImagePreviewModal({ src, onClose }: ImagePreviewModalProps) {
+function ImagePreviewModal({ src, onClose, images = [], currentIndex = 0, onNavigate }: ImagePreviewModalProps) {
   const [scale, setScale] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -38,14 +41,21 @@ function ImagePreviewModal({ src, onClose }: ImagePreviewModalProps) {
     setIsDragging(false);
   }, [src]);
 
-  // Закрытие по Esc
+  // Закрытие по Esc и навигация по стрелкам
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") handleClose();
+      else if (e.key === "ArrowLeft" && images.length > 1 && onNavigate) {
+        const newIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
+        onNavigate(newIndex);
+      } else if (e.key === "ArrowRight" && images.length > 1 && onNavigate) {
+        const newIndex = currentIndex < images.length - 1 ? currentIndex + 1 : 0;
+        onNavigate(newIndex);
+      }
     };
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [handleClose]);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleClose, images, currentIndex, onNavigate]);
 
   // Scroll-zoom (через addEventListener, чтобы обойти passive:true)
   const showMessage = useCallback((text: string) => {

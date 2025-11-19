@@ -101,6 +101,7 @@ export async function POST(req: Request) {
           url: permanentUrl, // ✅ Use permanent Supabase Storage URL
           thumbnail_url: thumbnailUrl,
           reference_url: referenceImageUrl || null,
+          model: model || 'nano-banana', // ✅ Save the AI model used
           created_at: timestamp,
         },
       ])

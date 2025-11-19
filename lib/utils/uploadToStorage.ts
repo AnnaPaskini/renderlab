@@ -41,7 +41,7 @@ export async function uploadImageToStorage(
       // Extract extension from URL
       extension = urlString.split('.').pop()?.split('?')[0] || 'png';
     } else {
-      console.error('Invalid source type for uploadImageToStorage');
+      console.error('Invalaid source type for uploadImageToStorage');
       return null;
     }
 

@@ -15,6 +15,7 @@ import {
     convertRedMaskToBlackWhite
 } from '@/lib/utils/inpaint/maskConverter';
 import { NextRequest, NextResponse } from 'next/server';
+import sharp from 'sharp';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent';
@@ -26,6 +27,8 @@ interface RequestBody {
     maskBounds: MaskBounds;
     userPrompt: string;
     referenceUrls?: string[];
+    width: number;    // ✅ Canvas width for aspect ratio
+    height: number;   // ✅ Canvas height for aspect ratio
 }
 
 /**
@@ -44,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     try {
         const body: RequestBody = await request.json();
-        const { userId, imageUrl, maskUrl, maskBounds, userPrompt, referenceUrls = [] } = body;
+        const { userId, imageUrl, maskUrl, maskBounds, userPrompt, referenceUrls = [], width, height } = body;
 
         // Validate inputs
         if (!userId || !imageUrl || !maskUrl || !maskBounds || !userPrompt) {
@@ -142,16 +145,36 @@ export async function POST(request: NextRequest) {
             throw new Error('No image in Gemini response');
         }
 
+        // ✅ Post-process to preserve aspect ratio
+        console.log('[Post-processing] Resizing to original aspect ratio...');
+        console.log(`[Post-processing] Original size: ${width}x${height}`);
+
+        const generatedBuffer: Buffer = Buffer.from(generatedImageBase64, 'base64');
+
+        // Resize to original aspect ratio using Sharp
+        let resizedBuffer: Buffer;
+        try {
+            resizedBuffer = await sharp(generatedBuffer)
+                .resize(width, height, {
+                    fit: 'cover',
+                    position: 'center'
+                })
+                .jpeg({ quality: 90 })
+                .toBuffer() as Buffer;
+            console.log(`✅ [Post-processing] Resized to ${width}x${height}`);
+        } catch (resizeError: any) {
+            console.error('⚠️ [Post-processing] Resize failed:', resizeError.message);
+            resizedBuffer = generatedBuffer; // Use original if resize fails
+        }
+
         // ✅ Upload result to Supabase
         const supabase = await createClient();
         const timestamp = Date.now();
         const fileName = `${userId}/inpaint_${timestamp}.jpg`;
 
-        const generatedBuffer = Buffer.from(generatedImageBase64, 'base64');
-
         const { data: uploadData, error: uploadError } = await supabase.storage
             .from('renderlab-images')
-            .upload(fileName, generatedBuffer, {
+            .upload(fileName, resizedBuffer, {
                 contentType: 'image/jpeg',
                 upsert: false
             });

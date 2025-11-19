@@ -19,6 +19,7 @@ interface CanvasAreaProps {
     onRemoveImage?: () => void; // Kyle spec: Remove Image button
     onDrawingStart?: () => void;
     onDrawingEnd?: () => void;
+    onCanvasSizeChange?: (size: { width: number; height: number }) => void;
 }
 
 export function CanvasArea({
@@ -33,11 +34,13 @@ export function CanvasArea({
     onSaveToUndoStack,
     onRemoveImage,
     onDrawingStart,
-    onDrawingEnd
+    onDrawingEnd,
+    onCanvasSizeChange
 }: CanvasAreaProps) {
     const [isDragActive, setIsDragActive] = useState(false);
     const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
     const [globalCursorPos, setGlobalCursorPos] = useState<{ x: number; y: number } | null>(null); // Kyle spec: for fixed lasso icon
+    const [canvasSize, setCanvasSize] = useState({ width: 1024, height: 1024 });
 
     // For smooth brush strokes
     const lastPointRef = useRef<{ x: number; y: number } | null>(null);
@@ -73,16 +76,37 @@ export function CanvasArea({
         e.stopPropagation();
         setIsDragActive(false);
 
+        console.log('File dropped:', e.dataTransfer.files);
         const file = e.dataTransfer.files?.[0];
-        if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const imageUrl = event.target?.result as string;
-                if (imageUrl && onImageChange) {
-                    onImageChange(imageUrl);
-                }
-            };
-            reader.readAsDataURL(file);
+        if (file) {
+            console.log('Dropped file:', file.name, file.type, file.size);
+            const maxSize = 50 * 1024 * 1024; // 50MB
+            if (file.size > maxSize) {
+                console.error('Dropped file too large:', file.size, 'max:', maxSize);
+                alert('File size must be less than 50MB');
+                return;
+            }
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const imageUrl = event.target?.result as string;
+                    console.log('Dropped file read successfully, URL length:', imageUrl?.length);
+                    if (imageUrl && onImageChange) {
+                        onImageChange(imageUrl);
+                    } else {
+                        console.error('No imageUrl or onImageChange for dropped file');
+                    }
+                };
+                reader.onerror = (error) => {
+                    console.error('FileReader error for dropped file:', error);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                console.error('Dropped file is not an image:', file.type);
+                alert('Please drop an image file');
+            }
+        } else {
+            console.log('No file in drop');
         }
     }, [onImageChange]);
 
@@ -97,10 +121,29 @@ export function CanvasArea({
             const maskCanvas = maskCanvasRef.current!;
             const drawCanvas = drawCanvasRef.current!;
 
-            // Set canvas dimensions to fixed size (1024x1024 for consistency)
-            const width = 1024;
-            const height = 1024;
+            // Вычисляем размер canvas с сохранением aspect ratio
+            const MAX_SIZE = 1024;
+            let width = img.width;
+            let height = img.height;
 
+            // Масштабируем если изображение больше MAX_SIZE
+            if (width > MAX_SIZE || height > MAX_SIZE) {
+                const aspectRatio = width / height;
+
+                if (width > height) {
+                    width = MAX_SIZE;
+                    height = MAX_SIZE / aspectRatio;
+                } else {
+                    height = MAX_SIZE;
+                    width = MAX_SIZE * aspectRatio;
+                }
+            }
+
+            // Округляем до целых чисел
+            width = Math.round(width);
+            height = Math.round(height);
+
+            // Устанавливаем размер ВСЕХ canvas
             imageCanvas.width = width;
             imageCanvas.height = height;
             maskCanvas.width = width;
@@ -108,10 +151,16 @@ export function CanvasArea({
             drawCanvas.width = width;
             drawCanvas.height = height;
 
-            // Draw image
-            const ctx = imageCanvas.getContext('2d');
-            if (ctx) {
-                ctx.drawImage(img, 0, 0, width, height);
+            // Рисуем изображение без растягивания
+            const imgCtx = imageCanvas.getContext("2d");
+            if (imgCtx) {
+                imgCtx.drawImage(img, 0, 0, width, height);
+            }
+
+            // Сохраняем размеры для отправки на API
+            setCanvasSize({ width, height });
+            if (onCanvasSizeChange) {
+                onCanvasSizeChange({ width, height });
             }
         };
         img.src = image;
@@ -346,12 +395,7 @@ export function CanvasArea({
                     "absolute inset-0 flex items-center justify-center cursor-pointer",
                     "border-2 border-dashed rounded-2xl transition-all duration-300",
                     isDragActive ? "bg-black/50 border-white/20 shadow-[0_0_0_2px_rgba(255,107,53,0.3),0_0_30px_rgba(255,107,53,0.2),0_0_60px_rgba(255,107,53,0.1)]" : "bg-black/50 border-white/12 hover:bg-black/60 hover:border-white/20 hover:shadow-[0_0_0_2px_rgba(255,107,53,0.2),0_0_20px_rgba(255,107,53,0.15),0_0_40px_rgba(255,107,53,0.08)]"
-                )}
-                    onClick={() => {
-                        // Trigger file input if it exists in parent
-                        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-                        fileInput?.click();
-                    }}>
+                )}>
                     <div className="text-center pointer-events-none">
                         <div className="mb-4">
                             <svg className="w-16 h-16 mx-auto text-gray-600 group-hover:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -371,16 +415,38 @@ export function CanvasArea({
                         type="file"
                         accept="image/*"
                         onChange={(e) => {
+                            console.log('File input changed:', e.target.files);
                             const file = e.target.files?.[0];
-                            if (file && file.type.startsWith('image/')) {
-                                const reader = new FileReader();
-                                reader.onload = (event) => {
-                                    const imageUrl = event.target?.result as string;
-                                    if (imageUrl && onImageChange) {
-                                        onImageChange(imageUrl);
-                                    }
-                                };
-                                reader.readAsDataURL(file);
+                            if (file) {
+                                console.log('File selected:', file.name, file.type, file.size);
+                                const maxSize = 50 * 1024 * 1024; // 50MB
+                                if (file.size > maxSize) {
+                                    console.error('File too large:', file.size, 'max:', maxSize);
+                                    alert('File size must be less than 50MB');
+                                    e.target.value = '';
+                                    return;
+                                }
+                                if (file.type.startsWith('image/')) {
+                                    const reader = new FileReader();
+                                    reader.onload = (event) => {
+                                        const imageUrl = event.target?.result as string;
+                                        console.log('File read successfully, URL length:', imageUrl?.length);
+                                        if (imageUrl && onImageChange) {
+                                            onImageChange(imageUrl);
+                                        } else {
+                                            console.error('No imageUrl or onImageChange');
+                                        }
+                                    };
+                                    reader.onerror = (error) => {
+                                        console.error('FileReader error:', error);
+                                    };
+                                    reader.readAsDataURL(file);
+                                } else {
+                                    console.error('File is not an image:', file.type);
+                                    alert('Please select an image file');
+                                }
+                            } else {
+                                console.log('No file selected');
                             }
                             e.target.value = '';
                         }}

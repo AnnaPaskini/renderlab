@@ -1,5 +1,49 @@
 import Replicate from "replicate";
 
+const MODEL_MAP: Record<string, string> = {
+  "nano-banana": "google/nano-banana",
+  "seedream4": "bytedance/seedream-4",
+  "flux": "black-forest-labs/flux-kontext-pro",
+};
+
+// ==========================================
+// UNIVERSAL URL EXTRACTOR FOR ALL MODELS
+// ==========================================
+async function extractUrlFromOutput(output: any): Promise<string | null> {
+  if (!output) return null;
+
+  // 1. Array of strings (Nano-Banana, Flux)
+  if (Array.isArray(output) && typeof output[0] === "string") {
+    return output[0];
+  }
+
+  // 2. Object with .url() method (Seedream4, Flux)
+  if (typeof output?.url === "function") {
+    return await output.url();
+  }
+
+  // 3. Array of objects (Seedream can return ReadableStream items)
+  if (Array.isArray(output)) {
+    for (const item of output) {
+      if (typeof item?.url === "function") return await item.url();
+      if (typeof item === "string") return item;
+    }
+  }
+
+  // 4. Async iterator (Seedream)
+  if (Symbol.asyncIterator in output) {
+    for await (const item of output as any) {
+      if (typeof item?.url === "function") return await item.url();
+      if (typeof item === "string") return item;
+    }
+  }
+
+  return null;
+}
+
+// ==========================================
+// MAIN GENERATION FUNCTION
+// ==========================================
 export async function generateSingle({
   prompt,
   model,
@@ -14,61 +58,72 @@ export async function generateSingle({
       auth: process.env.REPLICATE_API_TOKEN,
     });
 
-    // Логируем, чтобы убедиться, что reference реально есть
-    console.log("🟣 [generateSingle] Parameters received:", { prompt: prompt?.substring(0, 50), model, imageUrl });
+    const selectedModel = MODEL_MAP[model || "nano-banana"];
 
-    const input: Record<string, any> = {
-      prompt,
-    };
+    console.log("🟣 Model:", selectedModel);
+    console.log("🟣 Prompt:", prompt.slice(0, 100));
+    console.log("🟣 Has reference:", !!imageUrl);
 
-    // ✅ Добавляем reference, если есть
-    if (imageUrl) {
-      input.image_input = [imageUrl]; // nano-banana uses array format
-      input.aspect_ratio = "match_input_image";
-      input.output_format = "jpg";
-      console.log("🟣 [generateSingle] Added image_input:", imageUrl);
-    } else {
-      console.log("⚠️ [generateSingle] No imageUrl provided, generating text-only");
+    // ======================================
+    // MODEL-SPECIFIC INPUT
+    // ======================================
+    let input: Record<string, any> = {};
+
+    // FLUX
+    if (model === "flux") {
+      input = {
+        prompt,
+        input_image: imageUrl || null,
+        aspect_ratio: "match_input_image",
+        output_format: "jpg",
+        safety_tolerance: 2,
+        prompt_upsampling: false,
+      };
     }
 
-    console.log("🟣 [generateSingle] Final input sent to Replicate:", JSON.stringify(input, null, 2));
-
-    const output = await replicate.run(`${model || "google/nano-banana"}` as `${string}/${string}`, { input });
-
-    console.log("🟣 [generateSingle] Replicate output type:", typeof output);
-    console.log("🟣 [generateSingle] Replicate output:", output);
-
-    let imageResult: string | null = null;
-
-    // Handle different output formats
-    if (Array.isArray(output) && output.length > 0) {
-      imageResult = output[0];
-    } else if (typeof output === "string") {
-      imageResult = output;
-    } else if (output && typeof output === "object") {
-      // New Replicate SDK: output might be an async iterator or have url() method
-      if (typeof (output as any).url === "function") {
-        imageResult = await (output as any).url();
-      } else if (typeof (output as any).url === "string") {
-        imageResult = (output as any).url;
-      } else if (Symbol.asyncIterator in output) {
-        // Handle async iterator
-        const results: string[] = [];
-        for await (const item of output as any) {
-          if (typeof item === "string") {
-            results.push(item);
-          }
-        }
-        imageResult = results[0] || null;
-      }
+    // SEEDREAM4
+    else if (model === "seedream4") {
+      input = {
+        prompt,
+        image_input: imageUrl ? [imageUrl] : [],
+        size: "2K",
+        width: 2048,
+        height: 2048,
+        aspect_ratio: imageUrl ? "match_input_image" : "4:3",
+        enhance_prompt: true,
+        sequential_image_generation: "disabled",
+      };
     }
 
-    console.log("🟣 [generateSingle] Extracted imageResult:", imageResult);
+    // NANO-BANANA
+    else {
+      input = {
+        prompt,
+        image_input: imageUrl ? [imageUrl] : [],
+        aspect_ratio: "match_input_image",
+        output_format: "jpg",
+      };
+    }
+
+    console.log("🟣 Final input:", input);
+
+    // ======================================
+    // RUN REPLICATE
+    // ======================================
+    const output = await replicate.run(selectedModel as any, { input });
+    console.log("🟣 Raw output:", output);
+
+    // ======================================
+    // EXTRACT FINAL URL (handles streams)
+    // ======================================
+    const finalUrl = await extractUrlFromOutput(output);
+    console.log("🟣 Final URL extracted:", finalUrl);
 
     return {
       status: "ok",
-      url: imageResult,
+      url: finalUrl,
     };
+
   } catch (error: any) {
     console.error("❌ [generateSingle] Error:", error);
     return {
