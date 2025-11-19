@@ -180,7 +180,7 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
       return;
     }
 
-    console.log("Model used:", model || "google/nano-banana");
+    console.log("Model used:", model || "nano-banana");
     console.log("Has reference image:", !!uploadedImage);
     setIsGenerating(true);
 
@@ -190,7 +190,7 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt,
-          model: model || "google/nano-banana",
+          model: model || "nano-banana",
           imageUrl: uploadedImage || null,
         }),
       });

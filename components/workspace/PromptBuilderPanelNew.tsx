@@ -62,7 +62,7 @@ export function PromptBuilderPanel({
   const [internalActiveTab, setInternalActiveTab] = useState<"builder" | "custom">(
     activeTab ?? "builder"
   );
-  const [aiModel, setAiModel] = useState("google/nano-banana");
+  const [aiModel, setAiModel] = useState("nano-banana");
   const [style, setStyle] = useState("");
   const [details, setDetails] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -369,7 +369,7 @@ export function PromptBuilderPanel({
 
     const resolvedAiModel =
       resolveString(templateData.aiModel, templateData.formData?.aiModel) ||
-      "google/nano-banana";
+      "nano-banana";
     const resolvedStyle = resolveString(
       templateData.style,
       templateData.formData?.style,
@@ -545,7 +545,7 @@ export function PromptBuilderPanel({
       ? collection.templates.map((template: any) => ({
         id: template.id || `template-${Date.now()}`,
         prompt: template.details || template.name || "",
-        model: template.aiModel || "google/nano-banana",
+        model: template.aiModel || "nano-banana",
       }))
       : [];
 
@@ -1272,7 +1272,9 @@ export function PromptBuilderPanel({
                     onChange={(e) => setAiModel(e.target.value)}
                     className={inputSurfaceClass}
                   >
-                    <option>google/nano-banana</option>
+                    <option value="nano-banana">Nano Banana</option>
+                    <option value="seedream4">Seedream4</option>
+                    <option value="flux">Flux</option>
                   </select>
                 </div>
 
