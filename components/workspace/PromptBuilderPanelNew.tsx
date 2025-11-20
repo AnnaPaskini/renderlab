@@ -405,7 +405,7 @@ export function PromptBuilderPanel({
         const template = JSON.parse(stored);
         setAiModel(template.aiModel || "");
         setStyle(template.style || "");
-        setDetails(template.details || template.finalPrompt || "");
+        setDetails(template.details || ""); // Only use raw details, never finalPrompt (assembled)
         console.log("🔄 Builder updated from storage:", template);
       }
     };
@@ -422,7 +422,7 @@ export function PromptBuilderPanel({
         const template = JSON.parse(activeTemplate);
         setAiModel(template?.formData?.aiModel ?? template?.aiModel ?? "");
         setStyle(template?.formData?.style ?? template?.style ?? "");
-        setDetails(template?.formData?.customPrompt ?? template?.details ?? "");
+        setDetails(template?.details ?? ""); // Only use raw details, never customPrompt (assembled)
         console.log("✅ Template loaded into builder:", template);
         localStorage.removeItem("RenderAI_activeTemplate");
       } catch (error) {
@@ -471,10 +471,14 @@ export function PromptBuilderPanel({
   // Sync form with WorkspaceContext when temporary item is loaded
   useEffect(() => {
     if (activeItem.type === 'temporary' && activeItem.data) {
-      // Update prompt field
+      // DON'T load activeItem.data.prompt into details - it contains assembled prompt!
+      // History stores full assembled prompts like "Please create a new image with..."
+      // Loading that into details causes infinite duplication
+      
+      // Load assembled prompt into customPrompt instead of details
       if (activeItem.data.prompt) {
-        setDetails(activeItem.data.prompt);
-        console.log('✅ [PromptBuilder] Loaded temporary prompt:', activeItem.data.prompt);
+        setCustomPrompt(activeItem.data.prompt);
+        console.log('✅ [PromptBuilder] Loaded assembled prompt into customPrompt:', activeItem.data.prompt);
       }
 
       // Note: Reference image (uploadedImage) is managed by parent component (workspace/page.tsx)
