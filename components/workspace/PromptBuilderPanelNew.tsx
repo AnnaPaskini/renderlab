@@ -33,6 +33,7 @@ import { ContextIndicator } from './ContextIndicator';
 import { ModeToggle } from './prompt-builder/ModeToggle';
 import { PromptPreview } from './prompt-builder/PromptPreview';
 import { TemplateBuilder } from './prompt-builder/TemplateBuilder';
+import { CollectionBrowser } from './prompt-builder/CollectionBrowser';
 
 export interface PromptBuilderPanelProps {
   onPromptChange?: (prompt: string) => void;
@@ -1145,42 +1146,15 @@ export function PromptBuilderPanel({
                       )}
                     </>
                   ) : (
-                    <>
-                      {collectionOptions.length > 0 ? (
-                        <>
-                          <Select
-                            value={activeCollectionId ?? undefined}
-                            onValueChange={setActiveCollectionId}
-                          >
-                            <SelectTrigger className={cn(selectTriggerClass, "flex-[7]")}>
-                              <SelectValue placeholder="Select collection" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {collectionOptions.map((option) => (
-                                <SelectItem key={option.id} value={option.id}>
-                                  {option.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <button
-                            onClick={() => {
-                              if (activeCollectionId) {
-                                handleCollectionChange(activeCollectionId);
-                              }
-                            }}
-                            disabled={!activeCollectionId || !uploadedImage}
-                            className="flex-[3] rl-btn rl-btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            Load
-                          </button>
-                        </>
-                      ) : (
-                        <div className="text-sm text-gray-500 py-2">
-                          No saved collections yet.
-                        </div>
-                      )}
-                    </>
+                    <CollectionBrowser
+                      collectionOptions={collectionOptions}
+                      activeCollectionId={activeCollectionId}
+                      selectedCollection={selectedCollection}
+                      uploadedImage={uploadedImage}
+                      onCollectionIdChange={setActiveCollectionId}
+                      onLoadCollection={handleCollectionChange}
+                      selectTriggerClass={selectTriggerClass}
+                    />
                   )}
                 </div>
 
