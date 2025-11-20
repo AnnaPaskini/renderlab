@@ -5,6 +5,7 @@ import { HistoryGrid } from './HistoryGrid';
 interface HistoryImage {
     id: string;
     thumbnail_url: string | null;
+    url: string;
     prompt: string;
     created_at: string;
 }
@@ -25,7 +26,7 @@ export default async function HistoryPage() {
     // Fetch user's images (server-side, ONE database call)
     const { data, error } = await supabase
         .from('images')
-        .select('id, thumbnail_url, prompt, created_at')
+        .select('id, thumbnail_url, url, prompt, created_at')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(20);
