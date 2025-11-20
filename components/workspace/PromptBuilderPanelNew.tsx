@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useWorkspace } from '@/lib/context/WorkspaceContext';
+import { createClient } from "@/lib/supabaseBrowser";
 import { useCollections } from "@/lib/useCollections";
 import { cn } from "@/lib/utils";
 import { IconChevronDown, IconDotsVertical } from "@tabler/icons-react";
@@ -25,7 +27,6 @@ import { toast } from "react-hot-toast";
 import { ContextIndicator } from './ContextIndicator';
 import { CollectionBrowser } from './prompt-builder/CollectionBrowser';
 import { ModeToggle } from './prompt-builder/ModeToggle';
-import { PromptPreview } from './prompt-builder/PromptPreview';
 import { TemplateBuilder } from './prompt-builder/TemplateBuilder';
 
 export interface PromptBuilderPanelProps {
@@ -55,6 +56,8 @@ export function PromptBuilderPanel({
   uploadedImage,
   initialAdditionalDetails,
 }: PromptBuilderPanelProps) {
+  console.log("🟢 RERENDER Panel, uploadedImage =", uploadedImage);
+
   const [internalIsGenerating, setInternalIsGenerating] = useState(false);
   const [internalActiveTab, setInternalActiveTab] = useState<"builder" | "custom">(
     activeTab ?? "builder"
@@ -63,9 +66,12 @@ export function PromptBuilderPanel({
   const [style, setStyle] = useState("");
   const [details, setDetails] = useState(""); // Raw pills only: "golden hour, bird's-eye view"
   const [customPrompt, setCustomPrompt] = useState(""); // User's manual edits to assembled prompt
+  const [editablePrompt, setEditablePrompt] = useState(""); // Editable prompt for generation
   const [avoidElements, setAvoidElements] = useState("");
+  const [avoidItems, setAvoidItems] = useState<string[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [templateName, setTemplateName] = useState("");
+  const isLoadingTemplateRef = useRef(false);
 
   const shouldUseInternalGenerating = controlledIsGenerating === undefined;
   const isGenerating = controlledIsGenerating ?? internalIsGenerating;
@@ -110,11 +116,18 @@ export function PromptBuilderPanel({
   // Collection and template state
   const { collections } = useCollections();
   const [templates, setTemplates] = useState<any[]>([]);
+  const [templateRenderKey, setTemplateRenderKey] = useState(0);
   const [activeCollectionId, setActiveCollectionId] = useState<string | null>(null);
   const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
   const [activeMode, setActiveMode] = useState<"template" | "collection">("template");
   const [selectedCollection, setSelectedCollection] = useState<any>(null);
   const collectionPreviewSetRef = useRef<Set<string>>(new Set());
+
+  // Debug templates state changes
+  useEffect(() => {
+    console.log('🔄 Templates state changed:', templates);
+    console.log('🔄 Templates count:', templates?.length);
+  }, [templates]);
   const getInitialProgressState = () => ({ total: 0, succeeded: 0, failed: 0, active: false });
   const [collectionProgress, setCollectionProgress] = useState(getInitialProgressState);
   const [isCollectionRun, setIsCollectionRun] = useState(false);
@@ -143,6 +156,9 @@ export function PromptBuilderPanel({
   };
 
   const { options: templateOptions, lookup: templateLookup } = useMemo(() => {
+    console.log('🔵 Computing templateOptions from templates:', templates);
+    console.log('🔵 Templates length:', templates?.length);
+
     const map = new Map<string, TemplateRecord>();
     const options: { id: string; label: string }[] = [];
 
@@ -155,13 +171,27 @@ export function PromptBuilderPanel({
     // Filter function to exclude collection-generated templates
     const isOriginalTemplate = (template: any) => {
       const name = template?.name || template?.title || '';
+      console.log('🔵 Checking template:', name);
 
       // Exclude collection-generated templates
-      if (name.includes(' • ')) return false;  // "Winter day • 3"
-      if (name.includes(' - Copy')) return false;  // "autumn scene - Copy"
-      if (/^\d+$/.test(name)) return false;  // Pure numbers like "999"
-      if (/^\d+ • \d+$/.test(name)) return false;  // "9 • 56"
+      if (name.includes(' • ')) {
+        console.log('🔵 Excluding (contains •):', name);
+        return false;
+      }
+      if (name.includes(' - Copy')) {
+        console.log('🔵 Excluding (contains - Copy):', name);
+        return false;
+      }
+      if (/^\d+$/.test(name)) {
+        console.log('🔵 Excluding (pure number):', name);
+        return false;
+      }
+      if (/^\d+ • \d+$/.test(name)) {
+        console.log('🔵 Excluding (number • number):', name);
+        return false;
+      }
 
+      console.log('🔵 Including template:', name);
       return true;
     };
 
@@ -202,12 +232,13 @@ export function PromptBuilderPanel({
     // Only register original templates (not collection-generated ones)
     templates
       .filter(isOriginalTemplate)
-      .forEach((template, index) =>
-        registerTemplate(template, { fallbackIndex: index }),
-      );
+      .forEach((template, index) => {
+        console.log('🔵 Registering template:', template.name);
+        registerTemplate(template, { fallbackIndex: index });
+      });
 
-    // Collections are handled separately in Load Collection mode
-    // So we don't register collection templates here anymore
+    console.log('🔵 Final templateOptions:', options);
+    console.log('🔵 Options count:', options.length);
 
     return { options, lookup: map };
   }, [collections, templates]);
@@ -264,30 +295,50 @@ export function PromptBuilderPanel({
     onTabChange?.(tab);
   };
 
-  // Load templates from localStorage
+  // Load templates from Supabase
+  const loadTemplatesFromSupabase = async () => {
+    try {
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        console.log('⚠️ No user logged in, skipping template load');
+        setTemplates([]);
+        return;
+      }
+
+      console.log('📥 Loading templates from Supabase for user:', user.id);
+
+      const { data, error } = await supabase
+        .from('templates')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ Failed to load templates:', error);
+        throw error;
+      }
+
+      console.log('✅ Loaded templates from Supabase:', data);
+      console.log('✅ Templates count:', data?.length);
+      console.log('✅ First template structure:', data?.[0]);
+      setTemplates(data || []);
+      setTemplateRenderKey(prev => prev + 1); // Force re-render
+    } catch (error) {
+      console.error('❌ Error loading templates:', error);
+      toast.error('Failed to load templates');
+    }
+  };
+
   useEffect(() => {
-    const savedTemplates = JSON.parse(
-      localStorage.getItem("RenderAI_customTemplates") || "[]"
-    );
-    // Add IDs if they don't exist
-    const templatesWithIds = savedTemplates.map((t: any, idx: number) => ({
-      ...t,
-      id: t.id || `${t.name}-${idx}`,
-    }));
-    setTemplates(templatesWithIds);
+    loadTemplatesFromSupabase();
   }, []);
 
   // Reload templates when returning to builder tab or when custom tab is active
   useEffect(() => {
     if (currentTab === "builder" || currentTab === "custom") {
-      const savedTemplates = JSON.parse(
-        localStorage.getItem("RenderAI_customTemplates") || "[]"
-      );
-      const templatesWithIds = savedTemplates.map((t: any, idx: number) => ({
-        ...t,
-        id: t.id || `${t.name}-${idx}`,
-      }));
-      setTemplates(templatesWithIds);
+      loadTemplatesFromSupabase();
     }
   }, [currentTab]);
 
@@ -319,12 +370,14 @@ export function PromptBuilderPanel({
       if (value === "template") {
         setActiveCollectionId(null);
         setSelectedCollection(null);
+        setAvoidItems([]); // Clear avoid items when switching modes
         collectionPreviewSetRef.current.clear();
         setCollectionProgress(getInitialProgressState());
         setIsCollectionRun(false);
         abortControllerRef.current?.abort();
       } else {
         setActiveTemplateId(null);
+        setAvoidItems([]); // Clear avoid items when switching modes
       }
     }
   };
@@ -367,24 +420,27 @@ export function PromptBuilderPanel({
     // Update WorkspaceContext
     loadTemplate(templateData);
 
-    const resolvedAiModel =
-      resolveString(templateData.aiModel, templateData.formData?.aiModel) ||
-      "nano-banana";
-    const resolvedStyle = resolveString(
-      templateData.style,
-      templateData.formData?.style,
-    );
-    const resolvedDetails = resolveString(
-      templateData.details,
-      templateData.formData?.customPrompt,
-      templateData.formData?.prompt,
-      templateData.finalPrompt,
-    );
+    // For simple templates saved to Supabase, just use the prompt field directly
+    const templatePrompt = templateData.prompt || '';
+
+    // Set loading flag BEFORE any state updates to prevent clearing customPrompt
+    isLoadingTemplateRef.current = true;
 
     setActiveTemplateId(id);
-    setAiModel(resolvedAiModel);
-    setStyle(resolvedStyle);
-    setDetails(resolvedDetails);
+    setAiModel(templateData.aiModel || "nano-banana");
+    setStyle(templateData.style || "");
+    setDetails(""); // Clear details for simple templates
+    setAvoidElements("");
+    setAvoidItems([]); // Clear avoid items when loading template
+
+    // Load the prompt into both customPrompt and editablePrompt
+    setCustomPrompt(templatePrompt);
+    setEditablePrompt(templatePrompt); // Load template prompt into editable textarea
+
+    // Reset flag after all updates
+    setTimeout(() => {
+      isLoadingTemplateRef.current = false;
+    }, 50);
 
     toast.success(`Template "${record.templateName}" loaded`, {
       duration: 1500,
@@ -420,35 +476,128 @@ export function PromptBuilderPanel({
     if (activeTemplate) {
       try {
         const template = JSON.parse(activeTemplate);
-        setAiModel(template?.formData?.aiModel ?? template?.aiModel ?? "");
-        setStyle(template?.formData?.style ?? template?.style ?? "");
-        setDetails(template?.details ?? ""); // Only use raw details, never customPrompt (assembled)
-        console.log("✅ Template loaded into builder:", template);
+
+        console.log("🔵 Loading template:", template);
+        console.log("🔵 Template.prompt:", template.prompt);
+
+        isLoadingTemplateRef.current = true;
+
+        // Simple load - just set the prompt text
+        if (template?.prompt) {
+          setCustomPrompt(template.prompt);
+          setEditablePrompt(template.prompt); // Also load into editable textarea
+          console.log("✅ Loaded prompt into workspace:", template.prompt);
+        }
+
+        // Reset flag after a short delay to allow state updates
+        setTimeout(() => {
+          isLoadingTemplateRef.current = false;
+        }, 100);
+
+        console.log("✅ Template loaded successfully");
         localStorage.removeItem("RenderAI_activeTemplate");
       } catch (error) {
         console.error("❌ Error loading template:", error);
+        isLoadingTemplateRef.current = false;
       }
     }
   }, []);
 
-  const assemblePrompt = () => {
-    // Don't check if details starts with "Please create" - that's the bug!
-    // Just build fresh every time
+  // Initial prompt logic - only set when editablePrompt is empty
+  useEffect(() => {
+    // Системные фразы, которые можно безопасно перезаписать
+    const isSystemPrompt = (text: string) =>
+      text.trim() === "" ||
+      text.trim() === "Create a new image." ||
+      text.trim() === "Transform the reference image.";
 
-    // 1. Base prompt
-    let prompt = uploadedImage
-      ? "Please change reference image"
-      : "Please create a new image";
-
-    // 2. Add details if they exist
-    if (details && details.trim()) {
-      // Details should be comma-separated pills: "golden hour, bird's-eye view"
-      prompt += ` with ${details.trim()}`;
+    // Если текущий editablePrompt НЕ системный — не трогаем
+    if (!isSystemPrompt(editablePrompt)) {
+      console.log("🟡 User-custom text detected — keeping it.");
+      return;
     }
 
-    // 3. Add avoid elements
+    // Если системный — обновляем в зависимости от картинки
+    if (uploadedImage) {
+      console.log("🟣 Setting: Transform the reference image.");
+      setEditablePrompt("Transform the reference image.");
+    } else {
+      console.log("🔵 Setting: Create a new image.");
+      setEditablePrompt("Create a new image.");
+    }
+  }, [uploadedImage]);
+
+  const assemblePrompt = () => {
+    // 1. Base context - IMPROVED PHRASING
+    let prompt = uploadedImage
+      ? "Transform the reference image"
+      : "Create a new image";
+
+    // 2. Process details with smart category context
+    if (details && details.trim()) {
+      const options = details.split(',').map(opt => opt.trim()).filter(Boolean);
+
+      if (options.length > 0) {
+        // Map each option to include descriptive context
+        const descriptiveOptions = options.map(option => {
+          const lowerOption = option.toLowerCase();
+
+          // Lighting Setup category
+          if (['golden hour', 'overcast soft light', 'noon light', 'blue hour dusk',
+            'night ambient', 'interior daylight', 'artificial balanced lighting',
+            'studio controlled lighting'].includes(lowerOption)) {
+            return `a ${lowerOption} lighting setup`;
+          }
+
+          // Camera Angle category
+          if (["eye-level", "bird's-eye view", "worm's-eye view", 'street-level',
+            'corner view', 'centered view', 'diagonal view', 'symmetrical centered'].includes(lowerOption)) {
+            return `a ${lowerOption} camera angle`;
+          }
+
+          // Interior Style category
+          if (['minimalist', 'scandinavian', 'mid-century modern', 'industrial',
+            'bohemian', 'japandi', 'art deco', 'contemporary'].includes(lowerOption)) {
+            return `a ${lowerOption} interior style`;
+          }
+
+          // Color Palette category
+          if (['warm neutrals', 'cool neutrals', 'earth tones', 'monochrome',
+            'pastel accents', 'bold contrast'].includes(lowerOption)) {
+            return `${lowerOption} color palette`;
+          }
+
+          // If not in any category, return as-is (user custom input)
+          return lowerOption;
+        });
+
+        // Join with proper grammar
+        if (descriptiveOptions.length === 1) {
+          prompt += ` with ${descriptiveOptions[0]}`;
+        } else if (descriptiveOptions.length === 2) {
+          prompt += ` with ${descriptiveOptions[0]} and ${descriptiveOptions[1]}`;
+        } else {
+          // Multiple options: "X, Y, and Z"
+          const lastOption = descriptiveOptions.pop();
+          prompt += ` with ${descriptiveOptions.join(', ')}, and ${lastOption}`;
+        }
+      }
+    }
+
+    // 3. Add avoid elements at the end
     if (avoidElements && avoidElements.trim()) {
-      prompt += `. Please avoid ${avoidElements.trim()}`;
+      const avoidList = avoidElements.split(',').map(item => item.trim()).filter(Boolean);
+
+      if (avoidList.length > 0) {
+        if (avoidList.length === 1) {
+          prompt += `. Please avoid ${avoidList[0]}`;
+        } else if (avoidList.length === 2) {
+          prompt += `. Please avoid ${avoidList[0]} and ${avoidList[1]}`;
+        } else {
+          const lastItem = avoidList.pop();
+          prompt += `. Please avoid ${avoidList.join(', ')}, and ${lastItem}`;
+        }
+      }
     }
 
     // 4. End with period
@@ -458,6 +607,50 @@ export function PromptBuilderPanel({
 
     return prompt;
   };
+
+  // Handle avoid element clicks
+  const handleAvoidClick = (item: string) => {
+    setAvoidItems(prev => {
+      if (prev.includes(item)) return prev;
+      return [...prev, item];
+    });
+
+    // After updating avoidItems, update editablePrompt:
+    updatePromptWithAvoid();
+  };
+
+  // Update editable prompt with avoid elements
+  const updatePromptWithAvoid = () => {
+    const base = editablePrompt
+      .replace(/Do not use:[\s\S]*/i, '')  // remove old avoid line
+      .trim();
+
+    if (avoidItems.length === 0) {
+      setEditablePrompt(base);
+      return;
+    }
+
+    const last = avoidItems[avoidItems.length - 1];
+    const others = avoidItems.slice(0, -1);
+
+    let avoidLine = '';
+    if (others.length === 0) {
+      avoidLine = `Do not use: ${last}.`;
+    } else {
+      avoidLine = `Do not use: ${others.join(', ')}, and ${last}.`;
+    }
+
+    setEditablePrompt(`${base}\n${avoidLine}`);
+  };
+
+  // Sync assembled prompt to editable textarea when bookmarks change
+  // REMOVED: This was causing bookmark clicks to reset the prompt instead of appending
+  // useEffect(() => {
+  //   if (details || avoidElements) {
+  //     const assembled = assemblePrompt();
+  //     setEditablePrompt(assembled);
+  //   }
+  // }, [details, avoidElements, uploadedImage]);
 
   // Send prompt updates to parent
   useEffect(() => {
@@ -474,7 +667,7 @@ export function PromptBuilderPanel({
       // DON'T load activeItem.data.prompt into details - it contains assembled prompt!
       // History stores full assembled prompts like "Please create a new image with..."
       // Loading that into details causes infinite duplication
-      
+
       // Load assembled prompt into customPrompt instead of details
       if (activeItem.data.prompt) {
         setCustomPrompt(activeItem.data.prompt);
@@ -490,49 +683,86 @@ export function PromptBuilderPanel({
     }
   }, [activeItem]);
 
-  const handleSaveTemplate = () => {
-    const finalTemplateName = templateName?.trim() || "Untitled Template";
+  const handleSaveTemplate = async () => {
+    try {
+      const finalTemplateName = templateName?.trim() || "Untitled Template";
+      const supabase = createClient();
 
-    const stored = JSON.parse(
-      localStorage.getItem("RenderAI_customTemplates") || "[]"
-    );
+      // Get current user
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    // Check for duplicate names (case-insensitive, name only)
-    const nameExists = stored.some(
-      (t: any) => (t.name || t.title || '').toLowerCase() === finalTemplateName.toLowerCase()
-    );
+      if (authError || !user) {
+        toast.error('Please sign in to save templates', {
+          duration: 2500,
+          style: { fontSize: "14px" },
+        });
+        return;
+      }
 
-    if (nameExists) {
-      toast.error(`A template named '${finalTemplateName}' already exists. Please choose a different name.`, {
-        duration: 2500,
+      // Check for duplicate names
+      const { data: existingTemplates, error: checkError } = await supabase
+        .from('templates')
+        .select('name')
+        .eq('user_id', user.id)
+        .ilike('name', finalTemplateName);
+
+      if (checkError) {
+        console.error('❌ Error checking for duplicates:', checkError);
+        throw checkError;
+      }
+
+      if (existingTemplates && existingTemplates.length > 0) {
+        toast.error(`A template named '${finalTemplateName}' already exists. Please choose a different name.`, {
+          duration: 2500,
+          style: { fontSize: "14px" },
+        });
+        return;
+      }
+
+      // Assemble the full prompt before saving
+      const fullPrompt = customPrompt || assemblePrompt();
+
+      console.log("💾 Saving template:");
+      console.log("💾 name:", finalTemplateName);
+      console.log("💾 prompt:", fullPrompt);
+
+      // Simple save - just name and prompt
+      const { data, error } = await supabase
+        .from('templates')
+        .insert({
+          user_id: user.id,
+          name: finalTemplateName,
+          prompt: fullPrompt,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Supabase error:', error);
+        throw error;
+      }
+
+      console.log('✅ Template saved to Supabase:', data);
+
+      toast.success(`Template "${finalTemplateName}" saved`, {
+        duration: 1500,
         style: { fontSize: "14px" },
       });
-      return;
+
+      // Reload templates list
+      await loadTemplatesFromSupabase();
+
+      // Close the save dialog
+      setIsDialogOpen(false);
+      setTemplateName("");
+    } catch (error) {
+      console.error('❌ Failed to save template:', error);
+      toast.error('Failed to save template. Please try again.');
     }
-
-    const template = {
-      name: finalTemplateName,
-      aiModel,
-      style,
-      details,
-      createdAt: new Date().toISOString(),
-    };
-
-    stored.push(template);
-    localStorage.setItem("RenderAI_customTemplates", JSON.stringify(stored));
-
-    toast.success(`Template "${finalTemplateName}" saved`, {
-      duration: 1500,
-      style: { fontSize: "14px" },
-    });
-
-    setTimeout(() => {
-      handleTabChange("custom");
-    }, 500);
   };
 
   const handleGenerateTemplate = async () => {
-    const prompt = details.trim();
+    const prompt = editablePrompt.trim();
     if (!prompt) {
       toast.error("Please enter a prompt or load a template first.");
       return;
@@ -877,39 +1107,59 @@ export function PromptBuilderPanel({
   };
 
   // Template management handlers
-  const CUSTOM_TEMPLATES_STORAGE = "RenderAI_customTemplates";
-
-  const readTemplatesFromStorage = () => {
+  const readTemplatesFromStorage = async () => {
     try {
-      const raw = localStorage.getItem(CUSTOM_TEMPLATES_STORAGE);
-      if (!raw) return [];
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('templates')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       console.error("Failed to read templates from storage", error);
       return [];
     }
   };
 
-  const saveTemplatesToStorage = (templates: any[]) => {
-    localStorage.setItem(CUSTOM_TEMPLATES_STORAGE, JSON.stringify(templates));
-    // Refresh the templates list
-    setTemplates(templates);
+  const saveTemplatesToStorage = async (templates: any[]) => {
+    await loadTemplatesFromSupabase();
   };
 
-  const handleDuplicateTemplate = (template: any) => {
-    const duplicated = {
-      ...template,
-      id: `${template.id || 'template'}-copy-${Date.now()}`,
-      name: `${template.name || template.title || 'Template'} - Copy`,
-      createdAt: new Date().toISOString(),
-    };
+  const handleDuplicateTemplate = async (template: any) => {
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
 
-    const existingTemplates = readTemplatesFromStorage();
-    const updatedTemplates = [...existingTemplates, duplicated];
-    saveTemplatesToStorage(updatedTemplates);
+      if (!user) {
+        toast.error('Please sign in to duplicate templates');
+        return;
+      }
 
-    toast.success(`Template duplicated: ${duplicated.name}`);
+      const duplicated = {
+        user_id: user.id,
+        name: `${template.name || 'Template'} - Copy`,
+        prompt: template.prompt,
+      };
+
+      const { error } = await supabase
+        .from('templates')
+        .insert(duplicated);
+
+      if (error) throw error;
+
+      await loadTemplatesFromSupabase();
+      toast.success(`Template duplicated: ${duplicated.name}`);
+    } catch (error) {
+      console.error('Failed to duplicate template:', error);
+      toast.error('Failed to duplicate template');
+    }
   };
 
   const handleRenameTemplate = (template: any) => {
@@ -918,23 +1168,28 @@ export function PromptBuilderPanel({
     setIsRenameTemplateOpen(true);
   };
 
-  const handleRenameTemplateSubmit = () => {
+  const handleRenameTemplateSubmit = async () => {
     if (!renameTemplateTarget || !renameTemplateName.trim()) return;
 
-    const existingTemplates = readTemplatesFromStorage();
-    const updatedTemplates = existingTemplates.map((t: any) =>
-      t.id === renameTemplateTarget.id || t.createdAt === renameTemplateTarget.createdAt
-        ? { ...t, name: renameTemplateName.trim() }
-        : t
-    );
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from('templates')
+        .update({ name: renameTemplateName.trim() })
+        .eq('id', renameTemplateTarget.id);
 
-    saveTemplatesToStorage(updatedTemplates);
+      if (error) throw error;
 
-    toast.success(`Template renamed to: ${renameTemplateName.trim()}`);
+      await loadTemplatesFromSupabase();
+      toast.success(`Template renamed to: ${renameTemplateName.trim()}`);
 
-    setIsRenameTemplateOpen(false);
-    setRenameTemplateTarget(null);
-    setRenameTemplateName('');
+      setIsRenameTemplateOpen(false);
+      setRenameTemplateTarget(null);
+      setRenameTemplateName('');
+    } catch (error) {
+      console.error('Failed to rename template:', error);
+      toast.error('Failed to rename template');
+    }
   };
 
   const handleDeleteTemplate = (template: any) => {
@@ -942,25 +1197,32 @@ export function PromptBuilderPanel({
     setIsDeleteTemplateOpen(true);
   };
 
-  const handleDeleteTemplateConfirm = () => {
+  const handleDeleteTemplateConfirm = async () => {
     if (!deleteTemplateTarget) return;
 
-    const existingTemplates = readTemplatesFromStorage();
-    const updatedTemplates = existingTemplates.filter((t: any) =>
-      t.id !== deleteTemplateTarget.id && t.createdAt !== deleteTemplateTarget.createdAt
-    );
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from('templates')
+        .delete()
+        .eq('id', deleteTemplateTarget.id);
 
-    saveTemplatesToStorage(updatedTemplates);
+      if (error) throw error;
 
-    // If this was the active template, clear it
-    if (activeTemplateId === deleteTemplateTarget.id || activeTemplateId === deleteTemplateTarget.createdAt) {
-      setActiveTemplateId(null);
+      // If this was the active template, clear it
+      if (activeTemplateId === deleteTemplateTarget.id) {
+        setActiveTemplateId(null);
+      }
+
+      await loadTemplatesFromSupabase();
+      toast.success("Template deleted!");
+
+      setIsDeleteTemplateOpen(false);
+      setDeleteTemplateTarget(null);
+    } catch (error) {
+      console.error('Failed to delete template:', error);
+      toast.error('Failed to delete template');
     }
-
-    toast.success("Template deleted!");
-
-    setIsDeleteTemplateOpen(false);
-    setDeleteTemplateTarget(null);
   };
 
   return (
@@ -989,6 +1251,7 @@ export function PromptBuilderPanel({
                     setCustomPrompt(''); // Clear manual edits
                     setStyle('');
                     setAvoidElements('');
+                    setAvoidItems([]); // Clear avoid items
                     setActiveTemplateId(null);
                     setActiveCollectionId(null);
                     setSelectedCollection(null);
@@ -998,6 +1261,7 @@ export function PromptBuilderPanel({
                     abortControllerRef.current?.abort();
                     abortControllerRef.current = null;
                     clear();
+                    setEditablePrompt("");  // Clear editable prompt
                     toast.success('All cleared');
                   }
                 }}
@@ -1067,11 +1331,27 @@ export function PromptBuilderPanel({
                 <div className="flex gap-2">
                   {activeMode === "template" ? (
                     <>
+                      {(() => {
+                        console.log('🎯 Template mode active, templateOptions.length:', templateOptions.length);
+                        console.log('🎯 templateOptions:', templateOptions);
+                        return null;
+                      })()}
                       {templateOptions.length > 0 ? (
                         <>
-                          <DropdownMenu open={isTemplateDropdownOpen} onOpenChange={setIsTemplateDropdownOpen}>
+                          {console.log('✅ Showing dropdown, templateOptions.length:', templateOptions.length)}
+                          <DropdownMenu
+                            key={`template-dropdown-${templateRenderKey}`}
+                            open={isTemplateDropdownOpen}
+                            onOpenChange={(open) => {
+                              console.log('🎯 Dropdown onOpenChange:', open);
+                              setIsTemplateDropdownOpen(open);
+                            }}
+                          >
                             <DropdownMenuTrigger asChild>
-                              <button className={cn(selectTriggerClass, "flex-[7] flex items-center justify-between")}>
+                              <button
+                                className={cn(selectTriggerClass, "flex-[7] flex items-center justify-between")}
+                                onClick={() => console.log('🎯 Dropdown trigger clicked')}
+                              >
                                 <span className="truncate">
                                   {activeTemplateId
                                     ? templateOptions.find(opt => opt.id === activeTemplateId)?.label || "Select template"
@@ -1085,8 +1365,15 @@ export function PromptBuilderPanel({
                               className="w-[400px] max-h-[400px] overflow-y-auto bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg"
                               align="start"
                             >
+                              {(() => {
+                                console.log('🎯 DropdownMenuContent rendering, templateOptions:', templateOptions);
+                                console.log('🎯 templateOptions.length:', templateOptions.length);
+                                return null;
+                              })()}
                               {templateOptions.map((option) => {
+                                console.log('🔵 Rendering template option:', option);
                                 const template = templateLookup.get(option.id)?.template;
+                                console.log('🔵 Template data:', template);
                                 return (
                                   <div
                                     key={option.id}
@@ -1172,7 +1459,11 @@ export function PromptBuilderPanel({
                         </>
                       ) : (
                         <div className="text-sm text-neutral-500 dark:text-neutral-400 py-2">
-                          No saved templates found.
+                          {(() => {
+                            console.log('🔴 No templates found - templateOptions.length:', templateOptions.length);
+                            console.log('🔴 Raw templates state:', templates);
+                            return "No saved templates found.";
+                          })()}
                         </div>
                       )}
                     </>
@@ -1217,12 +1508,19 @@ export function PromptBuilderPanel({
 
             {/* Advanced Settings Section - Standalone Panel */}
             <div className="space-y-4">
-              {/* NEW: Show assembled prompt preview */}
-              <PromptPreview
-                prompt={customPrompt || assemblePrompt()}
-                onChange={setCustomPrompt}
-                placeholder="Select options from bookmarks below to build your prompt..."
-              />
+              {/* Editable Prompt Field */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-white">
+                  Prompt (Editable)
+                </label>
+                <textarea
+                  value={editablePrompt}
+                  onChange={(e) => setEditablePrompt(e.target.value)}
+                  placeholder="Your prompt will appear here. You can edit it freely before generating."
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white resize-none text-sm min-h-[120px]"
+                  disabled={isGenerating}
+                />
+              </div>
 
               {/* Existing TemplateBuilder */}
               <TemplateBuilder
@@ -1231,13 +1529,27 @@ export function PromptBuilderPanel({
                 details={details}
                 onDetailsChange={(value) => {
                   setDetails(value);
-                  setCustomPrompt(''); // Clear manual edits when pills are clicked
+                  if (!isLoadingTemplateRef.current) {
+                    setCustomPrompt(''); // Clear manual edits when pills are clicked
+                  }
+                }}
+                onBookmarkClick={(text) => {
+                  const current = editablePrompt.trim();
+                  if (!current) {
+                    setEditablePrompt(text);
+                  } else {
+                    setEditablePrompt(`${current}, ${text}`);
+                  }
                 }}
                 avoidElements={avoidElements}
                 onAvoidElementsChange={(value) => {
+                  console.log('📥 PromptBuilder received avoid elements:', value);
                   setAvoidElements(value);
-                  setCustomPrompt(''); // Clear manual edits when avoid elements change
+                  if (!isLoadingTemplateRef.current) {
+                    setCustomPrompt(''); // Clear manual edits when avoid elements change
+                  }
                 }}
+                onAvoidClick={handleAvoidClick}
                 uploadedImage={uploadedImage}
                 onSaveTemplate={() => setIsDialogOpen(true)}
                 onCancelCollection={handleCancelCollection}
@@ -1268,16 +1580,14 @@ export function PromptBuilderPanel({
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent
           className="rounded-xl text-rl-text w-full max-w-md border border-white/[0.08]"
-          style={{
-            background: 'rgba(30, 30, 30, 0.95)',
-            backdropFilter: 'blur(20px) saturate(180%)',
-            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0, 0, 0, 0.8), 0 32px 96px rgba(0, 0, 0, 0.5)'
-          }}
         >
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold text-rl-text">
               Save Template
             </DialogTitle>
+            <DialogDescription>
+              Enter a name for your template to save it for future use.
+            </DialogDescription>
           </DialogHeader>
 
           <Input
@@ -1296,11 +1606,7 @@ export function PromptBuilderPanel({
             </button>
             <button
               className="rl-btn rl-btn-primary px-6"
-              onClick={() => {
-                handleSaveTemplate();
-                setTemplateName("");
-                setIsDialogOpen(false);
-              }}
+              onClick={handleSaveTemplate}
             >
               Save
             </button>
@@ -1312,16 +1618,14 @@ export function PromptBuilderPanel({
       <Dialog open={isRenameTemplateOpen} onOpenChange={setIsRenameTemplateOpen}>
         <DialogContent
           className="rounded-xl text-rl-text w-full max-w-md border border-white/[0.08]"
-          style={{
-            background: 'rgba(30, 30, 30, 0.95)',
-            backdropFilter: 'blur(20px) saturate(180%)',
-            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0, 0, 0, 0.8), 0 32px 96px rgba(0, 0, 0, 0.5)'
-          }}
         >
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold text-rl-text">
               Rename Template
             </DialogTitle>
+            <DialogDescription>
+              Enter a new name for your template.
+            </DialogDescription>
           </DialogHeader>
 
           <Input
@@ -1354,21 +1658,15 @@ export function PromptBuilderPanel({
       <Dialog open={isDeleteTemplateOpen} onOpenChange={setIsDeleteTemplateOpen}>
         <DialogContent
           className="rounded-xl text-rl-text w-full max-w-md border border-white/[0.08]"
-          style={{
-            background: 'rgba(30, 30, 30, 0.95)',
-            backdropFilter: 'blur(20px) saturate(180%)',
-            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0, 0, 0, 0.8), 0 32px 96px rgba(0, 0, 0, 0.5)'
-          }}
         >
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold text-rl-text">
               Delete Template?
             </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{deleteTemplateTarget?.name || deleteTemplateTarget?.title || 'this template'}"? This action cannot be undone.
+            </DialogDescription>
           </DialogHeader>
-
-          <p className="text-sm text-neutral-400 mt-4">
-            Are you sure you want to delete "{deleteTemplateTarget?.name || deleteTemplateTarget?.title || 'this template'}"? This action cannot be undone.
-          </p>
 
           <DialogFooter className="mt-6 flex justify-end gap-3">
             <button

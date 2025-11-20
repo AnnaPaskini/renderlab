@@ -6,12 +6,12 @@ import { useState } from "react";
 interface BookmarkSelectorProps {
     onPillSelect: (text: string) => void;
     onAvoidElementsChange: (elements: string) => void;
+    onAvoidClick: (item: string) => void;
     disabled?: boolean;
 }
 
-export function BookmarkSelector({ onPillSelect, onAvoidElementsChange, disabled }: BookmarkSelectorProps) {
+export function BookmarkSelector({ onPillSelect, onAvoidElementsChange, onAvoidClick, disabled }: BookmarkSelectorProps) {
     const [activeBookmark, setActiveBookmark] = useState<string | null>(null);
-    const [selectedAvoidElements, setSelectedAvoidElements] = useState<string[]>([]);
 
     const bookmarkData: Record<string, string[]> = {
         "Lighting Setup": [
@@ -52,52 +52,42 @@ export function BookmarkSelector({ onPillSelect, onAvoidElementsChange, disabled
             "pastel accents",
             "bold contrast",
         ],
-        "Elements to Avoid": [
-            "flat lighting",
-            "missing contact shadows",
-            "distorted furniture scale",
-            "cold white balance",
-            "excessive bloom",
-            "unrealistic materials",
-            "incorrect perspective",
-            "oversaturated colors",
+        "Image Styles": [
+            "winter day",
+            "summer",
+            "autum day",
+            "spring day",
+            "sketch",
+            "photorealistic",
+            "watercolor",
+            "storybook style",
+            "soft pastel"
         ],
+        // "Elements to Avoid": [
+        //     "flat lighting",
+        //     "missing contact shadows",
+        //     "distorted furniture scale",
+        //     "cold white balance",
+        //     "excessive bloom",
+        //     "unrealistic materials",
+        //     "incorrect perspective",
+        //     "oversaturated colors",
+        // ],
     };
 
     const handlePillClick = (pillText: string, bookmarkName: string) => {
         console.log('🔵 Pill clicked:', pillText);
         console.log('🔵 Bookmark:', bookmarkName);
 
-        if (bookmarkName === "Elements to Avoid") {
-            // Toggle avoid element
-            let newSelected;
-            if (selectedAvoidElements.includes(pillText)) {
-                newSelected = selectedAvoidElements.filter(e => e !== pillText);
-            } else {
-                newSelected = [...selectedAvoidElements, pillText];
-            }
-
-            setSelectedAvoidElements(newSelected);
-
-            // Build avoid string (without prefix, will be added in assembly)
-            const avoidString = newSelected.length > 0
-                ? newSelected.join(", ")
-                : "";
-            onAvoidElementsChange(avoidString);
-
-            // AUTO-CLOSE bookmark (same as other categories)
-            setActiveBookmark(null);
-        } else {
-            // Regular pill - add to prompt and close bookmark
-            console.log('🔵 Calling onPillSelect with:', pillText);
-            onPillSelect(pillText);
-            setActiveBookmark(null);
-        }
+        // Regular pill - add to prompt and close bookmark
+        console.log('🔵 Calling onPillSelect with:', pillText);
+        onPillSelect(pillText);
+        setActiveBookmark(null);
     };
 
     return (
         <div className="space-y-3">
-            {/* Bookmarks - 5 tabs including Elements to Avoid */}
+            {/* Bookmarks - 5 tabs */}
             <div className="flex gap-6">
                 {Object.keys(bookmarkData).map((name) => (
                     <button
@@ -134,9 +124,6 @@ export function BookmarkSelector({ onPillSelect, onAvoidElementsChange, disabled
                         className="flex flex-wrap gap-2 overflow-hidden"
                     >
                         {bookmarkData[activeBookmark].map((pillText, idx) => {
-                            const isAvoidCategory = activeBookmark === "Elements to Avoid";
-                            const isSelected = isAvoidCategory && selectedAvoidElements.includes(pillText);
-
                             return (
                                 <motion.button
                                     key={`${activeBookmark}-${idx}`}
@@ -147,18 +134,12 @@ export function BookmarkSelector({ onPillSelect, onAvoidElementsChange, disabled
                                     whileTap={{ scale: 0.97 }}
                                     className={`
                   px-3 py-1.5
-                  ${isSelected
-                                            ? "bg-purple-100 dark:bg-purple-900/30 border-purple-400 dark:border-purple-600"
-                                            : "bg-neutral-100 dark:bg-neutral-800 border-neutral-300 dark:border-neutral-600"
-                                        }
+                  bg-neutral-100 dark:bg-neutral-800 border-neutral-300 dark:border-neutral-600
                   hover:bg-neutral-200 dark:hover:bg-neutral-700
                   border
                   rounded-full
                   text-sm 
-                  ${isSelected
-                                            ? "text-purple-700 dark:text-purple-300"
-                                            : "text-neutral-700 dark:text-white"
-                                        }
+                  text-neutral-700 dark:text-white
                   transition-colors
                   cursor-pointer
                 `}

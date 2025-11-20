@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Z } from "@/lib/z-layer-guide";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import * as React from "react";
 
@@ -18,7 +17,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      `fixed inset-0 z-[${Z.OVERLAY}] bg-black/50 backdrop-blur-sm transition-all duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0`,
+      `fixed inset-0 z-[10000] bg-black/50 backdrop-blur-sm transition-all duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0`,
       className
     )}
     {...props}
@@ -36,7 +35,7 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        `glass-panel fixed left-[50%] top-[50%] z-[${Z.MODAL}] grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-2xl p-6 duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out`,
+        `fixed left-[50%] top-[50%] z-[10001] flex flex-col w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-2xl p-6 duration-200 bg-black data-[state=open]:animate-in data-[state=closed]:animate-out`,
         className
       )}
       {...props}

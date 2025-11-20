@@ -71,6 +71,9 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     // Load template into Workspace Context
     loadTemplate(template);
 
+    // Also store in localStorage for immediate pickup by PromptBuilder
+    localStorage.setItem("RenderAI_activeTemplate", JSON.stringify(template));
+
     // Show success message
     toast.success("Template loaded into Builder", {
       style: defaultToastStyle,
@@ -331,7 +334,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
       {/* Modal - Template Preview with glass effect */}
       <Dialog open={!!previewTemplate} onOpenChange={() => setPreviewTemplate(null)}>
         <DialogContent
-          className="rounded-xl text-rl-text w-full max-w-xl z-[60] border border-white/[0.08]"
+          className="rounded-xl text-rl-text w-full max-w-xl border border-white/[0.08]"
           style={{
             background: 'rgba(30, 30, 30, 0.95)',
             backdropFilter: 'blur(20px) saturate(180%)',

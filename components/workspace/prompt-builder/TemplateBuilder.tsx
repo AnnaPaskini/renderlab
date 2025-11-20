@@ -14,9 +14,13 @@ interface TemplateBuilderProps {
     details: string;
     onDetailsChange: (value: string) => void;
 
+    // Bookmark clicks - append to editable prompt
+    onBookmarkClick: (text: string) => void;
+
     // Avoid Elements
     avoidElements: string;
     onAvoidElementsChange: (value: string) => void;
+    onAvoidClick: (item: string) => void;
 
     // Uploaded Image
     uploadedImage?: string | null;
@@ -36,8 +40,10 @@ export function TemplateBuilder({
     onAiModelChange,
     details,
     onDetailsChange,
+    onBookmarkClick,
     avoidElements,
     onAvoidElementsChange,
+    onAvoidClick,
     uploadedImage,
     onSaveTemplate,
     onCancelCollection,
@@ -47,9 +53,11 @@ export function TemplateBuilder({
 }: TemplateBuilderProps) {
     const handlePillSelect = (pillText: string) => {
         console.log('🟢 TemplateBuilder received:', pillText);
-        console.log('🟢 Current details before:', details);
 
-        // Just add the pill text without any prefix - assemblePrompt handles context
+        // Call bookmark click handler to append to editable prompt
+        onBookmarkClick(pillText);
+
+        // Still update details for UI consistency
         let newDetails = "";
 
         if (!details || details.trim() === "") {
@@ -92,6 +100,7 @@ export function TemplateBuilder({
                 <BookmarkSelector
                     onPillSelect={handlePillSelect}
                     onAvoidElementsChange={onAvoidElementsChange}
+                    onAvoidClick={onAvoidClick}
                     disabled={isGenerating}
                 />
 
