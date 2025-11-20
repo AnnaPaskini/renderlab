@@ -39,6 +39,19 @@ export async function POST(req: Request) {
       referenceImageUrl = body.image.trim();
     }
 
+    // Handle base64 data URLs - upload to storage first
+    if (referenceImageUrl && referenceImageUrl.startsWith('data:')) {
+      console.log("🔵 [STORAGE] Uploading base64 reference image to storage");
+      const uploadedUrl = await uploadImageToStorage(referenceImageUrl, user.id, `reference_${Date.now()}.png`);
+      if (uploadedUrl) {
+        referenceImageUrl = uploadedUrl;
+        console.log("✅ [STORAGE] Reference image uploaded:", uploadedUrl);
+      } else {
+        console.error("❌ [STORAGE] Failed to upload reference image");
+        return NextResponse.json({ error: "Failed to upload reference image" }, { status: 500 });
+      }
+    }
+
     console.log("🔵 [GENERATE] Prompt:", prompt);
     console.log("🔵 [GENERATE] Model:", model || "default");
     console.log("🔵 [GENERATE] Reference:", referenceImageUrl || "none");

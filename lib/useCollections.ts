@@ -72,11 +72,10 @@ export function useCollections() {
       const { data, error } = await supabase
         .from('collections')
         .insert({
-          user_id: user.id,
           id: newCollection.id,
+          user_id: user.id,
           title: newCollection.title,
           templates: newCollection.templates,
-          created_at: newCollection.createdAt,
         })
         .select()
         .single();
@@ -251,11 +250,10 @@ export function useCollections() {
       const { data, error } = await supabase
         .from('collections')
         .insert({
-          user_id: user.id,
           id: newCollection.id,
+          user_id: user.id,
           title: newCollection.title,
           templates: newCollection.templates,
-          created_at: newCollection.createdAt,
         })
         .select()
         .single();

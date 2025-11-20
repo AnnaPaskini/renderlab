@@ -1,9 +1,10 @@
 "use client";
 
-import { IconDotsVertical } from "@tabler/icons-react";
+import { IconDotsVertical, IconUpload } from "@tabler/icons-react";
 import { useEffect, useState, type DragEvent } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
+import { createClient } from "../../lib/supabaseBrowser";
 import { useCollections, type Collection } from "../../lib/useCollections";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
@@ -23,9 +24,17 @@ type TemplateLike = {
 	style?: string;
 	scenario?: string;
 	details?: string;
+	prompt?: string;
 	createdAt?: string;
 	addedAt?: string;
 	source?: string;
+};
+
+type GenerationResult = {
+	templateName: string;
+	imageUrl: string;
+	templateId: string;
+	prompt: string;
 };
 
 const CUSTOM_TEMPLATES_STORAGE = "RenderAI_customTemplates";
@@ -135,6 +144,14 @@ export function CollectionsPanel() {
 	const [duplicateTargetId, setDuplicateTargetId] = useState<string | null>(null);
 	const [duplicateDraft, setDuplicateDraft] = useState("");
 	const [isDropActive, setIsDropActive] = useState(false);
+
+	// Generation states
+	const [isGenerationDialogOpen, setIsGenerationDialogOpen] = useState(false);
+	const [referenceImage, setReferenceImage] = useState<string | null>(null);
+	const [isGenerating, setIsGenerating] = useState(false);
+	const [generationResults, setGenerationResults] = useState<GenerationResult[]>([]);
+	const [currentGenerating, setCurrentGenerating] = useState(0);
+	const [allTemplates, setAllTemplates] = useState<TemplateLike[]>([]);
 
 	// Validation helpers
 	const isCollectionNameExists = (name: string, excludeId?: string): boolean => {
@@ -249,8 +266,8 @@ export function CollectionsPanel() {
 	};
 
 	const handleOpenTemplatePicker = () => {
-		const options = readTemplatesFromStorage();
-		setTemplateOptions(options);
+		// Use templates loaded from Supabase instead of localStorage
+		setTemplateOptions(allTemplates);
 		setTemplateSelection(null);
 		setIsTemplatePickerOpen(true);
 	};
@@ -353,6 +370,229 @@ export function CollectionsPanel() {
 		setIsTemplatePickerOpen(false);
 	};
 
+	// === LOAD TEMPLATES FROM SUPABASE ===
+	const loadTemplatesFromSupabase = async () => {
+		try {
+			const supabase = createClient();
+			const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+			if (authError || !user) {
+				console.log('⚠️ No user logged in, skipping template load');
+				setAllTemplates([]);
+				return;
+			}
+
+			const { data, error } = await supabase
+				.from('templates')
+				.select('*')
+				.eq('user_id', user.id)
+				.order('created_at', { ascending: false });
+
+			if (error) {
+				console.error('❌ Failed to load templates:', error);
+				throw error;
+			}
+
+			console.log('✅ Loaded templates from Supabase:', data?.length || 0);
+			setAllTemplates(data || []);
+		} catch (error) {
+			console.error('Failed to load templates:', error);
+			setAllTemplates([]);
+		}
+	};
+
+	// Load templates on mount
+	useEffect(() => {
+		loadTemplatesFromSupabase();
+	}, []);
+
+	// === HANDLE IMAGE UPLOAD ===
+	const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0];
+		if (!file) return;
+
+		if (!file.type.startsWith('image/')) {
+			toast.error('Please upload an image file');
+			return;
+		}
+
+		const reader = new FileReader();
+		reader.onload = (e) => {
+			const result = e.target?.result as string;
+			setReferenceImage(result);
+		};
+		reader.readAsDataURL(file);
+	};
+
+	// === BATCH GENERATION LOGIC ===
+	const handleBatchGenerate = async () => {
+		if (!referenceImage) {
+			toast.error('Upload reference image first');
+			return;
+		}
+
+		try {
+			setIsGenerating(true);
+			setGenerationResults([]);
+
+			const templateIds = activeCollection?.templates || [];
+			const templateDetails = allTemplates.filter(t =>
+				templateIds.some(ct => ct.id === t.id)
+			);
+
+			console.log(`Starting sequential generation for ${templateDetails.length} templates`);
+
+			let successCount = 0;
+
+			// SEQUENTIAL - one at a time
+			for (let i = 0; i < templateDetails.length; i++) {
+				const template = templateDetails[i];
+				setCurrentGenerating(i + 1);
+
+				console.log(`[${i + 1}/${templateDetails.length}] Generating: ${template.name}`);
+
+				try {
+					// Wait for this generation to complete before starting next
+					const response = await fetch('/api/generate', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							prompt: template.prompt || '',
+							model: 'nano-banana',
+							image: referenceImage,
+						}),
+					});
+
+					if (!response.ok) {
+						const errorText = await response.text();
+						console.error(`API error for ${template.name}:`, response.status, errorText);
+						throw new Error(`Generation failed: ${response.status}`);
+					}
+
+					const result = await response.json();
+					console.log(`Result for ${template.name}:`, result);
+
+					const imageUrl = result.output?.imageUrl;
+
+					if (!imageUrl) {
+						console.error(`No imageUrl in response for ${template.name}:`, result);
+						throw new Error('No image URL in response');
+					}
+
+					// Add to results
+					setGenerationResults(prev => [...prev, {
+						templateName: template.name || 'Untitled',
+						imageUrl: imageUrl,
+						templateId: template.id || '',
+						prompt: template.prompt || '',
+					}]);
+
+					successCount++;
+					console.log(`✓ Success [${i + 1}/${templateDetails.length}]: ${template.name}`);
+					toast.success(`Generated ${i + 1}/${templateDetails.length}`);
+
+					// Small delay between generations to avoid rate limits
+					if (i < templateDetails.length - 1) {
+						await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
+					}
+
+				} catch (error) {
+					console.error(`✗ Failed [${i + 1}/${templateDetails.length}]: ${template.name}`, error);
+					toast.error(`Failed: ${template.name}`);
+					// Continue with next template even if one fails
+				}
+			}
+
+			toast.success(`Batch complete: ${successCount}/${templateDetails.length} succeeded`);
+
+		} catch (error) {
+			console.error('Batch generation error:', error);
+			toast.error('Batch generation failed');
+		} finally {
+			setIsGenerating(false);
+			setCurrentGenerating(0);
+		}
+	};
+
+	// === SAVE TO HISTORY ===
+	const handleSaveToHistory = async () => {
+		try {
+			const supabase = createClient();
+			const { data: { user } } = await supabase.auth.getUser();
+			if (!user) {
+				toast.error('Please log in to save to history');
+				return;
+			}
+
+			if (generationResults.length === 0) {
+				toast.error('No results to save');
+				return;
+			}
+
+			console.log(`💾 Saving ${generationResults.length} results to history`);
+
+			for (const result of generationResults) {
+				const { error } = await supabase.from('history').insert({
+					user_id: user.id,
+					image_url: result.imageUrl,
+					prompt: result.prompt,
+					model: 'leonardo-phoenix-1.0',
+					reference_image: referenceImage,
+					collection_id: activeCollection?.id || null,
+					created_at: new Date().toISOString(),
+				});
+
+				if (error) {
+					console.error('Failed to save to history:', error);
+					throw error;
+				}
+			}
+
+			toast.success('Saved to history', {
+				description: `${generationResults.length} images saved`,
+			});
+
+		} catch (error) {
+			console.error('Save to history failed:', error);
+			toast.error('Failed to save to history');
+		}
+	};
+
+	// === DOWNLOAD ALL ===
+	const handleDownloadAll = async () => {
+		try {
+			for (let i = 0; i < generationResults.length; i++) {
+				const result = generationResults[i];
+				const response = await fetch(result.imageUrl);
+				const blob = await response.blob();
+				const url = window.URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = `${result.templateName.replace(/\s+/g, '-')}-${i + 1}.png`;
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+				window.URL.revokeObjectURL(url);
+
+				// Small delay between downloads
+				await new Promise(resolve => setTimeout(resolve, 500));
+			}
+
+			toast.success('All images downloaded');
+		} catch (error) {
+			console.error('Download failed:', error);
+			toast.error('Failed to download images');
+		}
+	};
+
+	// === OPEN GENERATION DIALOG ===
+	const handleOpenGenerationDialog = () => {
+		setIsGenerationDialogOpen(true);
+		setReferenceImage(null);
+		setGenerationResults([]);
+		setCurrentGenerating(0);
+	};
+
 	const renderCollectionMenu = (collection: Collection) => (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -436,6 +676,7 @@ export function CollectionsPanel() {
 								}
 							}}
 							onBack={closeDetailView}
+							onGenerate={handleOpenGenerationDialog}
 						/>
 					</div>
 					<div className="flex-1 space-y-3 overflow-auto pr-1">
@@ -780,19 +1021,20 @@ export function CollectionsPanel() {
 									key={template.id}
 									type="button"
 									onClick={() => setTemplateSelection(template)}
-									className={`rl-item-selectable w-full text-left ${isActive ? "selected" : ""
-										}`}
+									className={`rl-item-selectable w-full text-left px-4 py-3 rounded-lg transition-colors duration-200
+										${isActive ? "bg-[#ff6b35] text-white font-semibold" : "bg-neutral-800 text-white hover:bg-neutral-700"}
+										border border-transparent hover:border-[#ff6b35] focus:outline-none focus:ring-2 focus:ring-[#ff6b35]`}
 								>
-									<div className="font-medium text-gray-900">
+									<div className="font-medium">
 										{template.name || template.title || "Untitled template"}
 									</div>
 									{template.style || template.scenario ? (
-										<div className="text-sm text-gray-600 mt-1">
+										<div className="text-sm text-gray-200 mt-1">
 											{template.style || template.scenario}
 										</div>
 									) : null}
 									{template.details ? (
-										<div className="mt-2 line-clamp-2 text-xs text-gray-500">
+										<div className="mt-2 line-clamp-2 text-xs text-gray-300">
 											{template.details}
 										</div>
 									) : null}
@@ -801,6 +1043,175 @@ export function CollectionsPanel() {
 						})}
 					</div>
 				)}
+			</LeonardoDialog>
+
+			{/* Generation Dialog */}
+			<LeonardoDialog
+				open={isGenerationDialogOpen}
+				onClose={() => !isGenerating && setIsGenerationDialogOpen(false)}
+				title={`Generate Collection: ${activeCollection?.title || 'Untitled'}`}
+			>
+				<div className="space-y-6">
+					{/* Reference Image Upload */}
+					{!referenceImage ? (
+						<div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-[#ff6b35] transition-colors cursor-pointer">
+							<input
+								type="file"
+								accept="image/*"
+								onChange={handleImageUpload}
+								className="hidden"
+								id="reference-image-upload"
+								disabled={isGenerating}
+							/>
+							<label htmlFor="reference-image-upload" className="cursor-pointer">
+								<IconUpload size={48} className="mx-auto mb-3 text-gray-500" />
+								<p className="text-sm text-gray-400 mb-1">Upload reference image</p>
+								<p className="text-xs text-gray-500">Click or drag to upload</p>
+							</label>
+						</div>
+					) : (
+						<div className="relative">
+							<img
+								src={referenceImage}
+								alt="Reference"
+								className="w-full h-48 object-cover rounded-lg"
+							/>
+							{!isGenerating && (
+								<button
+									onClick={() => setReferenceImage(null)}
+									className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded px-3 py-1 text-sm"
+								>
+									Remove
+								</button>
+							)}
+						</div>
+					)}
+
+					{/* Templates Preview */}
+					{referenceImage && (
+						<div>
+							<p className="text-sm text-gray-400 mb-3">
+								Templates in collection: <span className="text-white font-medium">{activeCollection?.templates?.length || 0}</span>
+							</p>
+							<div className="space-y-2 max-h-48 overflow-y-auto pr-2">
+								{allTemplates
+									.filter(t => activeCollection?.templates?.some(ct => ct.id === t.id))
+									.map((t, idx) => (
+										<div
+											key={t.id}
+											className={`p-3 rounded-lg transition-colors ${isGenerating && idx < currentGenerating
+												? 'bg-green-900/30 border border-green-500/50'
+												: isGenerating && idx === currentGenerating - 1
+													? 'bg-[#ff6b35]/20 border border-[#ff6b35]'
+													: 'bg-neutral-800/50 border border-neutral-700'
+												}`}
+										>
+											<div className="flex items-center justify-between">
+												<span className="text-sm text-white">{t.name || t.title || 'Untitled'}</span>
+												{isGenerating && idx < currentGenerating && (
+													<span className="text-xs text-green-400">Done</span>
+												)}
+												{isGenerating && idx === currentGenerating - 1 && (
+													<span className="text-xs text-[#ff6b35]">Generating...</span>
+												)}
+											</div>
+										</div>
+									))}
+							</div>
+						</div>
+					)}
+
+					{/* Progress Bar */}
+					{isGenerating && (
+						<div className="space-y-2">
+							<div className="flex justify-between text-sm">
+								<span className="text-gray-400">
+									Generating {currentGenerating}/{activeCollection?.templates?.length || 0}...
+								</span>
+								<span className="text-[#ff6b35] font-medium">
+									{Math.round((currentGenerating / (activeCollection?.templates?.length || 1)) * 100)}%
+								</span>
+							</div>
+							<div className="w-full bg-gray-700 rounded-full h-2.5 overflow-hidden">
+								<div
+									className="bg-gradient-to-r from-[#ff6b35] to-[#ff8c42] h-2.5 rounded-full transition-all duration-500 ease-out"
+									style={{
+										width: `${(currentGenerating / (activeCollection?.templates?.length || 1)) * 100}%`
+									}}
+								/>
+							</div>
+						</div>
+					)}
+
+					{/* Results Grid */}
+					{generationResults.length > 0 && (
+						<div>
+							<p className="text-sm text-gray-400 mb-3">Generated Images ({generationResults.length})</p>
+							<div className="grid grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-2">
+								{generationResults.map((result, i) => (
+									<div key={i} className="space-y-2">
+										<img
+											src={result.imageUrl}
+											alt={result.templateName}
+											className="w-full h-32 object-cover rounded-lg border border-neutral-700"
+										/>
+										<p className="text-xs text-gray-400 truncate">{result.templateName}</p>
+									</div>
+								))}
+							</div>
+						</div>
+					)}
+
+					{/* Action Buttons */}
+					<div className="flex gap-3 pt-4 border-t border-neutral-700">
+						{!isGenerating && generationResults.length === 0 && (
+							<>
+								<button
+									onClick={() => setIsGenerationDialogOpen(false)}
+									className="flex-1 px-4 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-neutral-800 transition rounded-lg border border-neutral-700"
+								>
+									Cancel
+								</button>
+								<button
+									onClick={handleBatchGenerate}
+									disabled={!referenceImage || (activeCollection?.templates?.length || 0) === 0}
+									className="flex-1 px-4 py-2 text-sm font-medium bg-gradient-to-r from-[#ff6b35] to-[#ff8c42] text-white rounded-lg hover:from-[#ff8c42] hover:to-[#ff6b35] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#ff6b35]/30"
+								>
+									Generate Collection
+								</button>
+							</>
+						)}
+
+						{generationResults.length > 0 && !isGenerating && (
+							<>
+								<button
+									onClick={() => setIsGenerationDialogOpen(false)}
+									className="flex-1 px-4 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-neutral-800 transition rounded-lg border border-neutral-700"
+								>
+									Close
+								</button>
+								<button
+									onClick={handleDownloadAll}
+									className="flex-1 px-4 py-2 text-sm font-medium text-white bg-neutral-700 hover:bg-neutral-600 transition rounded-lg"
+								>
+									Download All
+								</button>
+								<button
+									onClick={handleSaveToHistory}
+									className="flex-1 px-4 py-2 text-sm font-medium bg-gradient-to-r from-[#ff6b35] to-[#ff8c42] text-white rounded-lg hover:from-[#ff8c42] hover:to-[#ff6b35] transition shadow-lg shadow-[#ff6b35]/30"
+								>
+									Save to History
+								</button>
+							</>
+						)}
+
+						{isGenerating && (
+							<div className="flex-1 text-center py-2 text-sm text-gray-400">
+								Generation in progress...
+							</div>
+						)}
+					</div>
+				</div>
 			</LeonardoDialog>
 		</>
 	);
