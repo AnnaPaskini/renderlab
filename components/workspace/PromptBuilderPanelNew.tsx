@@ -30,6 +30,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import { ContextIndicator } from './ContextIndicator';
+import { ModelSelector } from './prompt-builder/ModelSelector';
 
 export interface PromptBuilderPanelProps {
   onPromptChange?: (prompt: string) => void;
@@ -1263,20 +1264,11 @@ export function PromptBuilderPanel({
                 <span className="text-lg">▼</span>
               </summary>
               <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-rl-text mb-2 block">
-                    AI Model
-                  </label>
-                  <select
-                    value={aiModel}
-                    onChange={(e) => setAiModel(e.target.value)}
-                    className={inputSurfaceClass}
-                  >
-                    <option value="nano-banana">Nano Banana</option>
-                    <option value="seedream4">Seedream4</option>
-                    <option value="flux">Flux</option>
-                  </select>
-                </div>
+                <ModelSelector
+                  value={aiModel}
+                  onChange={setAiModel}
+                  disabled={isGenerating}
+                />
 
                 <div>
                   <label className="text-sm font-medium text-rl-text mb-2 block">
