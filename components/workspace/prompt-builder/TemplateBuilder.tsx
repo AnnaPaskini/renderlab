@@ -10,13 +10,16 @@ interface TemplateBuilderProps {
     aiModel: string;
     onAiModelChange: (value: string) => void;
 
-    // Style
-    style: string;
-    onStyleChange: (value: string) => void;
-
     // Details
     details: string;
     onDetailsChange: (value: string) => void;
+
+    // Avoid Elements
+    avoidElements: string;
+    onAvoidElementsChange: (value: string) => void;
+
+    // Uploaded Image
+    uploadedImage?: string | null;
 
     // Actions
     onSaveTemplate: () => void;
@@ -26,31 +29,38 @@ interface TemplateBuilderProps {
     isGenerating: boolean;
     isCollectionRun: boolean;
     progressMessage?: string;
-
-    // Styling
-    inputSurfaceClass: string;
 }
 
 export function TemplateBuilder({
     aiModel,
     onAiModelChange,
-    style,
-    onStyleChange,
     details,
     onDetailsChange,
+    avoidElements,
+    onAvoidElementsChange,
+    uploadedImage,
     onSaveTemplate,
     onCancelCollection,
     isGenerating,
     isCollectionRun,
     progressMessage,
-    inputSurfaceClass,
 }: TemplateBuilderProps) {
     const handlePillSelect = (pillText: string) => {
-        // Add pill text to details field
-        const newDetails = details
-            ? `${details}, ${pillText}`
-            : pillText;
+        console.log('🟢 TemplateBuilder received:', pillText);
+        console.log('🟢 Current details before:', details);
 
+        // Just add the pill text without any prefix - assemblePrompt handles context
+        let newDetails = "";
+
+        if (!details || details.trim() === "") {
+            // First selection
+            newDetails = pillText;
+        } else {
+            // Subsequent selections - just append
+            newDetails = `${details}, ${pillText}`;
+        }
+
+        console.log('🟢 New details after:', newDetails);
         onDetailsChange(newDetails);
     };
 
@@ -68,52 +78,22 @@ export function TemplateBuilder({
                 <span className="text-lg">▼</span>
             </summary>
             <div className="space-y-4">
-                {/* NEW: Bookmark Selector */}
-                <BookmarkSelector
-                    onPillSelect={handlePillSelect}
-                    disabled={isGenerating}
-                />
-
-                {/* Divider */}
-                <div className="h-px bg-neutral-200 dark:bg-neutral-700" />
-
-                {/* Model Selector */}
+                {/* 1. AI MODEL - AT THE TOP */}
                 <ModelSelector
                     value={aiModel}
                     onChange={onAiModelChange}
                     disabled={isGenerating}
                 />
 
-                {/* Style Dropdown */}
-                <div>
-                    <label className="text-sm font-medium text-rl-text mb-2 block">
-                        Style
-                    </label>
-                    <select
-                        value={style}
-                        onChange={(e) => onStyleChange(e.target.value)}
-                        className={inputSurfaceClass}
-                    >
-                        <option value="">Select style</option>
-                        <option>Photorealistic</option>
-                        <option>Watercolor</option>
-                        <option>Minimalist</option>
-                    </select>
-                </div>
+                {/* Divider */}
+                <div className="h-px bg-neutral-200 dark:bg-neutral-700" />
 
-                {/* Additional Details Textarea */}
-                <div>
-                    <label className="text-sm font-medium text-rl-text mb-2 block">
-                        Additional Details
-                    </label>
-                    <textarea
-                        value={details}
-                        onChange={(e) => onDetailsChange(e.target.value)}
-                        className="w-full rounded-xl bg-black/30 border border-white/5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] px-3 py-3 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#ff6b35] resize-none min-h-[96px]"
-                        placeholder="Describe scene details..."
-                        rows={4}
-                    />
-                </div>
+                {/* 2. BOOKMARKS (4 categories + Elements to Avoid) */}
+                <BookmarkSelector
+                    onPillSelect={handlePillSelect}
+                    onAvoidElementsChange={onAvoidElementsChange}
+                    disabled={isGenerating}
+                />
 
                 {/* Action Buttons */}
                 <div className="flex w-full gap-3">

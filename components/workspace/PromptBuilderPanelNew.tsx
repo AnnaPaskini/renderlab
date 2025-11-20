@@ -61,7 +61,9 @@ export function PromptBuilderPanel({
   );
   const [aiModel, setAiModel] = useState("nano-banana");
   const [style, setStyle] = useState("");
-  const [details, setDetails] = useState("");
+  const [details, setDetails] = useState(""); // Raw pills only: "golden hour, bird's-eye view"
+  const [customPrompt, setCustomPrompt] = useState(""); // User's manual edits to assembled prompt
+  const [avoidElements, setAvoidElements] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [templateName, setTemplateName] = useState("");
 
@@ -294,6 +296,7 @@ export function PromptBuilderPanel({
       setSelectedCollection(null);
       setActiveCollectionId(null);
       setDetails("");
+      setCustomPrompt(""); // Clear manual edits when switching tabs
       collectionPreviewSetRef.current.clear();
       setCollectionProgress(getInitialProgressState());
       setIsCollectionRun(false);
@@ -428,11 +431,42 @@ export function PromptBuilderPanel({
     }
   }, []);
 
+  const assemblePrompt = () => {
+    // Don't check if details starts with "Please create" - that's the bug!
+    // Just build fresh every time
+
+    // 1. Base prompt
+    let prompt = uploadedImage
+      ? "Please change reference image"
+      : "Please create a new image";
+
+    // 2. Add details if they exist
+    if (details && details.trim()) {
+      // Details should be comma-separated pills: "golden hour, bird's-eye view"
+      prompt += ` with ${details.trim()}`;
+    }
+
+    // 3. Add avoid elements
+    if (avoidElements && avoidElements.trim()) {
+      prompt += `. Please avoid ${avoidElements.trim()}`;
+    }
+
+    // 4. End with period
+    if (!prompt.endsWith('.')) {
+      prompt += '.';
+    }
+
+    return prompt;
+  };
+
+  // Send prompt updates to parent
   useEffect(() => {
     if (onPromptChange) {
-      onPromptChange(details);
+      // Use customPrompt if user manually edited, otherwise use assembled prompt
+      const prompt = customPrompt || assemblePrompt();
+      onPromptChange(prompt);
     }
-  }, [details, onPromptChange]);
+  }, [details, avoidElements, uploadedImage, customPrompt, onPromptChange]);
 
   // Sync form with WorkspaceContext when temporary item is loaded
   useEffect(() => {
@@ -786,7 +820,7 @@ export function PromptBuilderPanel({
       } catch (streamError) {
         if (streamError instanceof DOMException && streamError.name === "AbortError") {
           console.log("Collection stream aborted by user");
-          toast("Generation canceled by user.", { icon: "⚠️" });
+          toast("Generation canceled by user.");
         } else {
           console.error("Stream reading failed:", streamError);
           toast.error("Collection generation failed during stream read.");
@@ -813,20 +847,18 @@ export function PromptBuilderPanel({
         console.log(`[stream] done: ${succeeded} succeeded, ${failed} failed`);
 
         if (failed > 0) {
-          toast(`Collection completed with ${failed} failure${failed === 1 ? "" : "s"}.`, {
-            icon: "⚠️",
-          });
+          toast(`Collection completed with ${failed} failure${failed === 1 ? "" : "s"}.`);
         } else {
-          toast.success(`✅ Collection completed: ${succeeded} succeeded, 0 failed.`);
+          toast.success(`Collection completed: ${succeeded} succeeded, 0 failed.`);
         }
       } else {
         console.log("Collection stream completed without a terminal event.");
-        toast("Collection generation finalized.", { icon: "ℹ️" });
+        toast("Collection generation finalized.");
       }
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") {
         console.log("Collection fetch aborted by user");
-        toast("Generation canceled by user.", { icon: "⚠️" });
+        toast("Generation canceled by user.");
       } else {
         console.error("Collection generation failed", error);
         toast.error("Collection generation failed. Check console for details.");
@@ -948,11 +980,19 @@ export function PromptBuilderPanel({
               <button
                 onClick={() => {
                   if (window.confirm('Clear all settings and reset prompt builder?')) {
+                    setAiModel("nano-banana");
                     setDetails('');
+                    setCustomPrompt(''); // Clear manual edits
                     setStyle('');
+                    setAvoidElements('');
                     setActiveTemplateId(null);
                     setActiveCollectionId(null);
                     setSelectedCollection(null);
+                    setActiveMode("template");
+                    setCollectionProgress(getInitialProgressState());
+                    setIsCollectionRun(false);
+                    abortControllerRef.current?.abort();
+                    abortControllerRef.current = null;
                     clear();
                     toast.success('All cleared');
                   }
@@ -967,14 +1007,6 @@ export function PromptBuilderPanel({
             <div>
               <ContextIndicator uploadedImage={uploadedImage} />
             </div>
-
-            {/* Current Prompt Display - Now Editable - Standalone Panel */}
-            <PromptPreview
-              prompt={details}
-              onChange={setDetails}
-              placeholder="Enter your prompt here or load a template..."
-              label="Current Prompt Preview"
-            />
 
             {/* Main Generate Button */}
             <AnimatePresence mode="wait" initial={false}>
@@ -1180,20 +1212,36 @@ export function PromptBuilderPanel({
 
 
             {/* Advanced Settings Section - Standalone Panel */}
-            <TemplateBuilder
-              aiModel={aiModel}
-              onAiModelChange={setAiModel}
-              style={style}
-              onStyleChange={setStyle}
-              details={details}
-              onDetailsChange={setDetails}
-              onSaveTemplate={() => setIsDialogOpen(true)}
-              onCancelCollection={handleCancelCollection}
-              isGenerating={isGenerating}
-              isCollectionRun={isCollectionRun}
-              progressMessage={progressMessage}
-              inputSurfaceClass={inputSurfaceClass}
-            />
+            <div className="space-y-4">
+              {/* NEW: Show assembled prompt preview */}
+              <PromptPreview
+                prompt={customPrompt || assemblePrompt()}
+                onChange={setCustomPrompt}
+                placeholder="Select options from bookmarks below to build your prompt..."
+              />
+
+              {/* Existing TemplateBuilder */}
+              <TemplateBuilder
+                aiModel={aiModel}
+                onAiModelChange={setAiModel}
+                details={details}
+                onDetailsChange={(value) => {
+                  setDetails(value);
+                  setCustomPrompt(''); // Clear manual edits when pills are clicked
+                }}
+                avoidElements={avoidElements}
+                onAvoidElementsChange={(value) => {
+                  setAvoidElements(value);
+                  setCustomPrompt(''); // Clear manual edits when avoid elements change
+                }}
+                uploadedImage={uploadedImage}
+                onSaveTemplate={() => setIsDialogOpen(true)}
+                onCancelCollection={handleCancelCollection}
+                isGenerating={isGenerating}
+                isCollectionRun={isCollectionRun}
+                progressMessage={progressMessage}
+              />
+            </div>
           </motion.div>
         )}
 

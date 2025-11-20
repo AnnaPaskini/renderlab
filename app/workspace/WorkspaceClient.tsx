@@ -123,7 +123,7 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
             setPreviewImages((prev) => [newImage, ...prev]);
 
             // Show toast notification
-            toast.success('✨ New image generated!', {
+            toast.success('New image generated!', {
               description: 'Added to workspace preview',
               style: {
                 background: '#10b981',
@@ -285,11 +285,20 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
         const nextImage = data.output.imageUrl;
         setPreviews((prev) => [...prev, nextImage]);
 
+        // ✅ Also update previewImages for immediate preview strip update
+        const newPreviewImage: PreviewImage = {
+          id: data.output.id || `temp-${Date.now()}`,
+          url: data.output.imageUrl,
+          thumbnail_url: data.output.thumbnailUrl || data.output.imageUrl,
+          created_at: new Date().toISOString(),
+        };
+        setPreviewImages((prev) => [newPreviewImage, ...prev]);
+
         // Show different toast based on mode
         if (uploadedImage) {
-          toast.success("✨ Generated from reference image", { style: defaultToastStyle });
+          toast.success("Generated from reference image", { style: defaultToastStyle });
         } else {
-          toast.success("✨ Generated from text prompt only", { style: defaultToastStyle });
+          toast.success("Generated from text prompt only", { style: defaultToastStyle });
         }
       } else {
         console.error("Unexpected API response:", data);

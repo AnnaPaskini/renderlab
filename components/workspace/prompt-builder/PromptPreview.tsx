@@ -2,7 +2,7 @@
 
 interface PromptPreviewProps {
     prompt: string;
-    onChange: (value: string) => void;
+    onChange?: (value: string) => void;
     placeholder?: string;
     label?: string;
 }
@@ -13,6 +13,8 @@ export function PromptPreview({
     placeholder = "Enter your prompt here or load a template...",
     label = "Current Prompt Preview"
 }: PromptPreviewProps) {
+    const isEditable = !!onChange;
+
     return (
         <div
             className="rounded-xl p-4 border border-white/[0.06]"
@@ -31,12 +33,18 @@ export function PromptPreview({
                     boxShadow: 'inset 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(0, 0, 0, 0.3)'
                 }}
             >
-                <textarea
-                    value={prompt}
-                    onChange={(e) => onChange(e.target.value)}
-                    placeholder={placeholder}
-                    className="w-full bg-transparent border-0 min-h-[80px] max-h-[120px] overflow-y-auto resize-none text-sm text-gray-300 leading-relaxed focus:outline-none focus:ring-0"
-                />
+                {isEditable ? (
+                    <textarea
+                        value={prompt}
+                        onChange={(e) => onChange(e.target.value)}
+                        placeholder={placeholder}
+                        className="w-full bg-transparent border-0 min-h-[80px] max-h-[120px] overflow-y-auto resize-none text-sm text-gray-300 leading-relaxed focus:outline-none focus:ring-0"
+                    />
+                ) : (
+                    <p className="text-sm text-gray-300 leading-relaxed min-h-[80px]">
+                        {prompt || placeholder}
+                    </p>
+                )}
             </div>
         </div>
     );
