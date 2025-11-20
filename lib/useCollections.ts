@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createClient } from "./supabaseBrowser";
 
 export interface Collection {
   id: string;
@@ -9,115 +10,302 @@ export interface Collection {
   createdAt: string;
 }
 
-const STORAGE_KEY = "RenderLab_collections";
-
 export function useCollections() {
   const [collections, setCollections] = useState<Collection[]>([]);
 
-  // === LOAD COLLECTIONS FROM LOCALSTORAGE ===
-  useEffect(() => {
+  // === LOAD COLLECTIONS FROM SUPABASE ===
+  const loadCollectionsFromSupabase = async () => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY); // ← ИСПРАВЛЕНО
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          setCollections(parsed);
-        }
-      }
-    } catch (err) {
-      console.error("Error restoring collections:", err);
-    }
-  }, []);
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-  // === SAVE COLLECTIONS ===
-  const saveCollections = (data: Collection[]) => {
-    setCollections(data);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      if (authError || !user) {
+        console.log('⚠️ No user logged in, skipping collections load');
+        setCollections([]);
+        return;
+      }
+
+      console.log('📥 Loading collections from Supabase for user:', user.id);
+
+      const { data, error } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ Failed to load collections:', error);
+        throw error;
+      }
+
+      console.log('✅ Loaded collections from Supabase:', data?.length || 0);
+      setCollections(data || []);
+    } catch (error) {
+      console.error('Failed to load collections:', error);
+      setCollections([]);
+    }
   };
 
-  // === CREATE COLLECTION ===
-  const createCollection = (title: string) => {
-    const newCollection: Collection = {
-      id: crypto.randomUUID(),
-      title: title.trim() || "Untitled Collection",
-      templates: [],
-      createdAt: new Date().toISOString(),
-    };
+  // Load collections on mount
+  useEffect(() => {
+    loadCollectionsFromSupabase();
+  }, []);
 
-    const updated = [...collections, newCollection];
-    saveCollections(updated);
-    return newCollection.id;
+  // === CREATE COLLECTION ===
+  const createCollection = async (title: string) => {
+    try {
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        console.error('Auth error while creating collection:', authError);
+        return null;
+      }
+
+      const newCollection: Collection = {
+        id: crypto.randomUUID(),
+        title: title.trim() || "Untitled Collection",
+        templates: [],
+        createdAt: new Date().toISOString(),
+      };
+
+      const { data, error } = await supabase
+        .from('collections')
+        .insert({
+          user_id: user.id,
+          id: newCollection.id,
+          title: newCollection.title,
+          templates: newCollection.templates,
+          created_at: newCollection.createdAt,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase insert error:', error);
+        throw error;
+      }
+
+      console.log('Collection created in Supabase:', data);
+
+      // Reload collections
+      await loadCollectionsFromSupabase();
+
+      return newCollection.id;
+    } catch (error) {
+      console.error('Failed to create collection:', error);
+      return null;
+    }
   };
 
   // === DELETE COLLECTION ===
-  const deleteCollection = (id: string) => {
-    const updated = collections.filter((c) => c.id !== id);
-    saveCollections(updated);
+  const deleteCollection = async (id: string) => {
+    try {
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        console.error('Auth error while deleting collection:', authError);
+        return;
+      }
+
+      const { error } = await supabase
+        .from('collections')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Supabase delete error:', error);
+        throw error;
+      }
+
+      console.log('Collection deleted from Supabase');
+
+      // Reload collections
+      await loadCollectionsFromSupabase();
+    } catch (error) {
+      console.error('Failed to delete collection:', error);
+    }
   };
 
   // === ADD TEMPLATE TO COLLECTION ===
-  const addTemplate = (collectionId: string, template: any) => {
-    const updated = collections.map((col) => {
-      if (col.id !== collectionId) return col;
+  const addTemplate = async (collectionId: string, template: any) => {
+    try {
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-      const existing = col.templates || [];
+      if (authError || !user) {
+        console.error('Auth error while adding template:', authError);
+        return;
+      }
+
+      // Find the collection
+      const collection = collections.find((c) => c.id === collectionId);
+      if (!collection) {
+        console.error('Collection not found:', collectionId);
+        return;
+      }
+
+      const existing = collection.templates || [];
       const alreadyExists = template?.id && existing.some((t) => t.id === template.id);
-      if (alreadyExists) return col;
+      if (alreadyExists) return;
 
-      return { ...col, templates: [...existing, template] };
-    });
+      const updatedTemplates = [...existing, template];
 
-    saveCollections(updated);
+      const { error } = await supabase
+        .from('collections')
+        .update({ templates: updatedTemplates })
+        .eq('id', collectionId)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Supabase update error:', error);
+        throw error;
+      }
+
+      console.log('Template added to collection in Supabase');
+
+      // Reload collections
+      await loadCollectionsFromSupabase();
+    } catch (error) {
+      console.error('Failed to add template to collection:', error);
+    }
   };
 
   // === REMOVE TEMPLATE FROM COLLECTION ===
-  const removeTemplate = (collectionId: string, templateId: string) => {
-    const updated = collections.map((col) =>
-      col.id === collectionId
-        ? { ...col, templates: (col.templates || []).filter((t) => t.id !== templateId) }
-        : col
-    );
-    saveCollections(updated);
+  const removeTemplate = async (collectionId: string, templateId: string) => {
+    try {
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        console.error('Auth error while removing template:', authError);
+        return;
+      }
+
+      // Find the collection
+      const collection = collections.find((c) => c.id === collectionId);
+      if (!collection) {
+        console.error('Collection not found:', collectionId);
+        return;
+      }
+
+      const updatedTemplates = (collection.templates || []).filter((t) => t.id !== templateId);
+
+      const { error } = await supabase
+        .from('collections')
+        .update({ templates: updatedTemplates })
+        .eq('id', collectionId)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Supabase update error:', error);
+        throw error;
+      }
+
+      console.log('Template removed from collection in Supabase');
+
+      // Reload collections
+      await loadCollectionsFromSupabase();
+    } catch (error) {
+      console.error('Failed to remove template from collection:', error);
+    }
   };
 
   // === DUPLICATE COLLECTION ===
-  const duplicateCollection = (id: string, customTitle?: string) => {
-    const original = collections.find((c) => c.id === id);
-    if (!original) return null;
+  const duplicateCollection = async (id: string, customTitle?: string) => {
+    try {
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    const baseTitle = original.title || "Untitled Collection";
-    const newTitle = customTitle?.trim() || `${baseTitle} - Copy`;
+      if (authError || !user) {
+        console.error('Auth error while duplicating collection:', authError);
+        return null;
+      }
 
-    const uniqueId = crypto.randomUUID();
+      const original = collections.find((c) => c.id === id);
+      if (!original) return null;
 
-    const clonedTemplates = (original.templates || []).map((template) => ({
-      ...template,
-      id:
-        template.id ||
-        template.createdAt ||
-        `${template.name || "template"}-${Math.random().toString(36).slice(2, 8)}`,
-      duplicatedFrom: template.id ?? template.createdAt ?? null,
-    }));
+      const baseTitle = original.title || "Untitled Collection";
+      const newTitle = customTitle?.trim() || `${baseTitle} - Copy`;
 
-    const newCollection: Collection = {
-      id: uniqueId,
-      title: newTitle,
-      templates: clonedTemplates,
-      createdAt: new Date().toISOString(),
-    };
+      const uniqueId = crypto.randomUUID();
 
-    const updated = [...collections, newCollection];
-    saveCollections(updated);
+      const clonedTemplates = (original.templates || []).map((template) => ({
+        ...template,
+        id:
+          template.id ||
+          template.createdAt ||
+          `${template.name || "template"}-${Math.random().toString(36).slice(2, 8)}`,
+        duplicatedFrom: template.id ?? template.createdAt ?? null,
+      }));
 
-    return newCollection.id;
+      const newCollection: Collection = {
+        id: uniqueId,
+        title: newTitle,
+        templates: clonedTemplates,
+        createdAt: new Date().toISOString(),
+      };
+
+      const { data, error } = await supabase
+        .from('collections')
+        .insert({
+          user_id: user.id,
+          id: newCollection.id,
+          title: newCollection.title,
+          templates: newCollection.templates,
+          created_at: newCollection.createdAt,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase insert error:', error);
+        throw error;
+      }
+
+      console.log('Collection duplicated in Supabase:', data);
+
+      // Reload collections
+      await loadCollectionsFromSupabase();
+
+      return newCollection.id;
+    } catch (error) {
+      console.error('Failed to duplicate collection:', error);
+      return null;
+    }
   };
 
   // === RENAME COLLECTION ===
-  const renameCollection = (id: string, newTitle: string) => {
-    const updated = collections.map((col) =>
-      col.id === id ? { ...col, title: newTitle.trim() } : col
-    );
-    saveCollections(updated);
+  const renameCollection = async (id: string, newTitle: string) => {
+    try {
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        console.error('Auth error while renaming collection:', authError);
+        return;
+      }
+
+      const { error } = await supabase
+        .from('collections')
+        .update({ title: newTitle.trim() })
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Supabase update error:', error);
+        throw error;
+      }
+
+      console.log('Collection renamed in Supabase');
+
+      // Reload collections
+      await loadCollectionsFromSupabase();
+    } catch (error) {
+      console.error('Failed to rename collection:', error);
+    }
   };
 
   // === GET COLLECTION BY ID ===

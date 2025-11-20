@@ -1,6 +1,7 @@
 "use client";
 
 import { useWorkspace } from "@/lib/context/WorkspaceContext";
+import { createClient } from "@/lib/supabaseBrowser";
 import { defaultToastStyle } from "@/lib/toast-config";
 import { IconDotsVertical } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
@@ -46,21 +47,52 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newTemplateName, setNewTemplateName] = useState("");
 
+  // === LOAD TEMPLATES FROM SUPABASE ===
+  const loadTemplatesFromSupabase = async () => {
+    try {
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        console.log('⚠️ No user logged in, skipping template load');
+        setTemplates([]);
+        return;
+      }
+
+      console.log('📥 Loading templates from Supabase for user:', user.id);
+
+      const { data, error } = await supabase
+        .from('templates')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ Failed to load templates:', error);
+        throw error;
+      }
+
+      console.log('✅ Loaded templates from Supabase:', data?.length || 0);
+      setTemplates(data || []);
+    } catch (error) {
+      console.error('Failed to load templates:', error);
+      toast.error('Failed to load templates. Please try again.', {
+        duration: 2500,
+        style: defaultToastStyle,
+      });
+      setTemplates([]);
+    }
+  };
+
   // === LOAD ALL ON MOUNT ===
   useEffect(() => {
-    const savedTemplates =
-      JSON.parse(localStorage.getItem("RenderAI_customTemplates") || "[]") || [];
-
-    setTemplates(savedTemplates);
+    loadTemplatesFromSupabase();
   }, []);
 
   // === RELOAD CUSTOM TEMPLATES ON TAB SWITCH ===
   useEffect(() => {
     if (activeTab === "custom") {
-      const stored = JSON.parse(
-        localStorage.getItem("RenderAI_customTemplates") || "[]"
-      );
-      setTemplates(stored);
+      loadTemplatesFromSupabase();
     }
   }, [activeTab]);
 
@@ -96,43 +128,74 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     if (setActiveTab) setActiveTab("custom");
   };
 
-  // === HELPER: CHECK FOR DUPLICATE NAMES ===
-  const isTemplateNameExists = (name: string, excludeCreatedAt?: string): boolean => {
-    const stored = JSON.parse(localStorage.getItem("RenderAI_customTemplates") || "[]");
-    return stored.some((t: any) =>
-      t.createdAt !== excludeCreatedAt &&
-      (t.name || t.title || '').toLowerCase() === name.toLowerCase()
-    );
-  };
-
   // === THREE-DOT MENU HANDLERS ===
-  const handleDuplicateTemplate = (template: any) => {
-    const proposedName = `${template.name || template.title || 'Template'} - Copy`;
+  const handleDuplicateTemplate = async (template: any) => {
+    try {
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    // Check for duplicate names (case-insensitive)
-    if (isTemplateNameExists(proposedName)) {
-      toast.error(`A template named '${proposedName}' already exists. Please choose a different name.`, {
+      if (authError || !user) {
+        toast.error('Please sign in to duplicate templates', {
+          duration: 2500,
+          style: defaultToastStyle,
+        });
+        return;
+      }
+
+      const proposedName = `${template.name || template.title || 'Template'} - Copy`;
+
+      // Check for duplicate names (case-insensitive)
+      const { data: existingTemplates, error: checkError } = await supabase
+        .from('templates')
+        .select('id, name')
+        .eq('user_id', user.id)
+        .ilike('name', proposedName);
+
+      if (checkError) {
+        console.error('Error checking existing templates:', checkError);
+        throw checkError;
+      }
+
+      if (existingTemplates && existingTemplates.length > 0) {
+        toast.error(`A template named '${proposedName}' already exists. Please choose a different name.`, {
+          duration: 2500,
+          style: defaultToastStyle,
+        });
+        return;
+      }
+
+      // Create duplicate
+      const { data, error } = await supabase
+        .from('templates')
+        .insert({
+          user_id: user.id,
+          name: proposedName,
+          prompt: template.prompt || '',
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase insert error:', error);
+        throw error;
+      }
+
+      console.log('Template duplicated in Supabase:', data);
+
+      // Reload templates
+      await loadTemplatesFromSupabase();
+
+      toast.success(`Template duplicated: ${proposedName}`, {
+        duration: 1500,
+        style: defaultToastStyle,
+      });
+    } catch (error) {
+      console.error('Failed to duplicate template:', error);
+      toast.error('Failed to duplicate template. Please try again.', {
         duration: 2500,
         style: defaultToastStyle,
       });
-      return;
     }
-
-    const duplicated = {
-      ...template,
-      name: proposedName,
-      createdAt: new Date().toISOString(),
-    };
-
-    const stored = JSON.parse(localStorage.getItem("RenderAI_customTemplates") || "[]");
-    const updated = [...stored, duplicated];
-    localStorage.setItem("RenderAI_customTemplates", JSON.stringify(updated));
-    setTemplates(updated);
-
-    toast.success(`Template duplicated: ${duplicated.name}`, {
-      duration: 1500,
-      style: defaultToastStyle,
-    });
   };
 
   const openRenameDialog = (template: any) => {
@@ -141,38 +204,76 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     setIsRenameOpen(true);
   };
 
-  const handleRenameSubmit = () => {
+  const handleRenameSubmit = async () => {
     if (!renameTarget || !renameDraft.trim()) return;
 
-    const newName = renameDraft.trim();
+    try {
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    // Check for duplicate names (excluding current template)
-    if (isTemplateNameExists(newName, renameTarget.createdAt)) {
-      toast.error(`A template named '${newName}' already exists. Please choose a different name.`, {
+      if (authError || !user) {
+        toast.error('Please sign in to rename templates', {
+          duration: 2500,
+          style: defaultToastStyle,
+        });
+        return;
+      }
+
+      const newName = renameDraft.trim();
+
+      // Check for duplicate names (excluding current template)
+      const { data: existingTemplates, error: checkError } = await supabase
+        .from('templates')
+        .select('id, name')
+        .eq('user_id', user.id)
+        .ilike('name', newName)
+        .neq('id', renameTarget.id);
+
+      if (checkError) {
+        console.error('Error checking existing templates:', checkError);
+        throw checkError;
+      }
+
+      if (existingTemplates && existingTemplates.length > 0) {
+        toast.error(`A template named '${newName}' already exists. Please choose a different name.`, {
+          duration: 2500,
+          style: defaultToastStyle,
+        });
+        return;
+      }
+
+      // Update template name
+      const { error } = await supabase
+        .from('templates')
+        .update({ name: newName })
+        .eq('id', renameTarget.id)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Supabase update error:', error);
+        throw error;
+      }
+
+      console.log('Template renamed in Supabase');
+
+      // Reload templates
+      await loadTemplatesFromSupabase();
+
+      toast.success(`Template renamed to: ${newName}`, {
+        duration: 1500,
+        style: defaultToastStyle,
+      });
+
+      setIsRenameOpen(false);
+      setRenameTarget(null);
+      setRenameDraft('');
+    } catch (error) {
+      console.error('Failed to rename template:', error);
+      toast.error('Failed to rename template. Please try again.', {
         duration: 2500,
         style: defaultToastStyle,
       });
-      return;
     }
-
-    const stored = JSON.parse(localStorage.getItem("RenderAI_customTemplates") || "[]");
-    const updated = stored.map((t: any) =>
-      t.createdAt === renameTarget.createdAt
-        ? { ...t, name: newName }
-        : t
-    );
-
-    localStorage.setItem("RenderAI_customTemplates", JSON.stringify(updated));
-    setTemplates(updated);
-
-    toast.success(`Template renamed to: ${newName}`, {
-      duration: 1500,
-      style: defaultToastStyle,
-    });
-
-    setIsRenameOpen(false);
-    setRenameTarget(null);
-    setRenameDraft('');
   };
 
   const openDeleteDialog = (template: any) => {
@@ -180,59 +281,127 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     setIsDeleteOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
 
-    const stored = JSON.parse(localStorage.getItem("RenderAI_customTemplates") || "[]");
-    const updated = stored.filter((t: any) => t.createdAt !== deleteTarget.createdAt);
+    try {
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    localStorage.setItem("RenderAI_customTemplates", JSON.stringify(updated));
-    setTemplates(updated);
+      if (authError || !user) {
+        toast.error('Please sign in to delete templates', {
+          duration: 2500,
+          style: defaultToastStyle,
+        });
+        return;
+      }
 
-    toast.success("Template deleted", {
-      duration: 1200,
-      style: defaultToastStyle,
-    });
+      // Delete template
+      const { error } = await supabase
+        .from('templates')
+        .delete()
+        .eq('id', deleteTarget.id)
+        .eq('user_id', user.id);
 
-    setIsDeleteOpen(false);
-    setDeleteTarget(null);
-  };
+      if (error) {
+        console.error('Supabase delete error:', error);
+        throw error;
+      }
 
-  // === CREATE NEW TEMPLATE ===
-  const handleCreateTemplate = () => {
-    if (!newTemplateName.trim()) return;
+      console.log('Template deleted from Supabase');
 
-    const templateName = newTemplateName.trim();
+      // Reload templates
+      await loadTemplatesFromSupabase();
 
-    // Check for duplicate names
-    if (isTemplateNameExists(templateName)) {
-      toast.error(`A template named '${templateName}' already exists. Please choose a different name.`, {
+      toast.success("Template deleted", {
+        duration: 1200,
+        style: defaultToastStyle,
+      });
+
+      setIsDeleteOpen(false);
+      setDeleteTarget(null);
+    } catch (error) {
+      console.error('Failed to delete template:', error);
+      toast.error('Failed to delete template. Please try again.', {
         duration: 2500,
         style: defaultToastStyle,
       });
-      return;
     }
+  };
 
-    const newTemplate = {
-      name: templateName,
-      aiModel: "",
-      style: "",
-      details: "",
-      createdAt: new Date().toISOString(),
-    };
+  // === CREATE NEW TEMPLATE ===
+  const handleCreateTemplate = async () => {
+    if (!newTemplateName.trim()) return;
 
-    const stored = JSON.parse(localStorage.getItem("RenderAI_customTemplates") || "[]");
-    const updated = [...stored, newTemplate];
-    localStorage.setItem("RenderAI_customTemplates", JSON.stringify(updated));
-    setTemplates(updated);
+    try {
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    toast.success(`Template created: ${templateName}`, {
-      duration: 1500,
-      style: defaultToastStyle,
-    });
+      if (authError || !user) {
+        toast.error('Please sign in to create templates', {
+          duration: 2500,
+          style: defaultToastStyle,
+        });
+        return;
+      }
 
-    setIsCreateOpen(false);
-    setNewTemplateName('');
+      const templateName = newTemplateName.trim();
+
+      // Check for duplicate names
+      const { data: existingTemplates, error: checkError } = await supabase
+        .from('templates')
+        .select('id, name')
+        .eq('user_id', user.id)
+        .ilike('name', templateName);
+
+      if (checkError) {
+        console.error('Error checking existing templates:', checkError);
+        throw checkError;
+      }
+
+      if (existingTemplates && existingTemplates.length > 0) {
+        toast.error(`A template named '${templateName}' already exists. Please choose a different name.`, {
+          duration: 2500,
+          style: defaultToastStyle,
+        });
+        return;
+      }
+
+      // Create new template with empty prompt
+      const { data, error } = await supabase
+        .from('templates')
+        .insert({
+          user_id: user.id,
+          name: templateName,
+          prompt: '',
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase insert error:', error);
+        throw error;
+      }
+
+      console.log('Template created in Supabase:', data);
+
+      // Reload templates
+      await loadTemplatesFromSupabase();
+
+      toast.success(`Template created: ${templateName}`, {
+        duration: 1500,
+        style: defaultToastStyle,
+      });
+
+      setIsCreateOpen(false);
+      setNewTemplateName('');
+    } catch (error) {
+      console.error('Failed to create template:', error);
+      toast.error('Failed to create template. Please try again.', {
+        duration: 2500,
+        style: defaultToastStyle,
+      });
+    }
   };
 
   return (
@@ -251,7 +420,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
         <div className="grid md:grid-cols-2 gap-4">
           {templates.map((t, index) => (
             <Card
-              key={t.createdAt || index}
+              key={t.id || index}
               draggable
               onDragStart={(e) => {
                 const templateData = JSON.stringify(t);
@@ -267,16 +436,16 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                   onClick={() => setPreviewTemplate(t)}
                 >
                   <div className="font-semibold text-[var(--rl-text)] truncate">
-                    {t.name || t.title || "Untitled Template"}
+                    {t.name || "Untitled Template"}
                   </div>
                   <div className="relative group mt-1">
                     <pre className="text-sm text-[var(--rl-text-secondary)] line-clamp-3 whitespace-pre-wrap font-sans">
-                      {t.prompt || t.style || t.scenario || t.details || "No details yet."}
+                      {t.prompt || "No content yet."}
                     </pre>
 
                     {/* Tooltip on hover */}
                     <div className="invisible group-hover:visible absolute z-10 bottom-full left-0 mb-2 p-3 bg-black text-white text-xs rounded-lg max-w-md shadow-xl whitespace-pre-wrap">
-                      {t.prompt || t.style || t.scenario || t.details || "No details yet."}
+                      {t.prompt || "No content yet."}
                     </div>
                   </div>
                 </div>
@@ -345,46 +514,20 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
             <>
               <DialogHeader>
                 <DialogTitle className="text-2xl font-semibold text-white">
-                  {previewTemplate.name || previewTemplate.title || "Template"}
+                  {previewTemplate.name || "Template"}
                 </DialogTitle>
                 <p className="text-sm text-gray-400 mt-1">
-                  {previewTemplate.description ||
-                    previewTemplate.style ||
-                    previewTemplate.scenario ||
-                    "No description provided."}
+                  Created: {new Date(previewTemplate.created_at).toLocaleDateString()}
                 </p>
               </DialogHeader>
 
               <div className="mt-5 rounded-xl border border-white/8 bg-black/30 p-5">
-                <div className="grid grid-cols-2 gap-y-2 text-sm text-gray-400">
-                  <div>AI Model:</div>
-                  <div className="text-white">
-                    {previewTemplate.formData?.aiModel ||
-                      previewTemplate.aiModel ||
-                      "—"}
-                  </div>
-
-                  <div>Style:</div>
-                  <div className="text-white">
-                    {previewTemplate.formData?.style ||
-                      previewTemplate.style ||
-                      "—"}
-                  </div>
-
-                  <div>Scenario:</div>
-                  <div className="text-white">
-                    {previewTemplate.scenario || "—"}
-                  </div>
-                </div>
-
-                <div className="mt-4 border-t border-white/8 pt-3">
+                <div className="mt-4">
                   <div className="mb-1 text-sm text-gray-400">
-                    Final Prompt:
+                    Template Content:
                   </div>
                   <p className="leading-relaxed whitespace-pre-line text-white/90">
-                    {previewTemplate.finalPrompt ||
-                      previewTemplate.details ||
-                      "No final prompt generated yet."}
+                    {previewTemplate.prompt || "No content yet."}
                   </p>
                 </div>
               </div>
@@ -409,7 +552,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                   className="rl-btn rl-btn-primary px-6"
                   onClick={() => handleLoadTemplate(previewTemplate)}
                 >
-                  Load Template
+                  Open in Build
                 </button>
               </DialogFooter>
             </>

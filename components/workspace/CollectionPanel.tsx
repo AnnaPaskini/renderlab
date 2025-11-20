@@ -174,7 +174,7 @@ export function CollectionsPanel() {
 		setRenameDraft(collection.title);
 	};
 
-	const handleRenameSubmit = () => {
+	const handleRenameSubmit = async () => {
 		if (!renameTargetId) return;
 		const trimmed = renameDraft.trim();
 		if (!trimmed) return;
@@ -187,7 +187,7 @@ export function CollectionsPanel() {
 		}
 
 		const shouldKeepSelection = selectedCollectionId === renameTargetId;
-		renameCollection(renameTargetId, trimmed);
+		await renameCollection(renameTargetId, trimmed);
 		setRenameTargetId(null);
 		setRenameDraft("");
 
@@ -204,7 +204,7 @@ export function CollectionsPanel() {
 		setDuplicateDraft(`${baseTitle} - Copy`);
 	};
 
-	const handleDuplicateSubmit = () => {
+	const handleDuplicateSubmit = async () => {
 		if (!duplicateTargetId) return;
 		const trimmed = duplicateDraft.trim();
 		if (!trimmed) return;
@@ -212,7 +212,7 @@ export function CollectionsPanel() {
 		// Generate unique name if duplicate exists
 		const uniqueName = generateUniqueCollectionName(trimmed);
 
-		const newId = duplicateCollection(duplicateTargetId, uniqueName);
+		const newId = await duplicateCollection(duplicateTargetId, uniqueName);
 		setDuplicateTargetId(null);
 		setDuplicateDraft("");
 
@@ -227,7 +227,7 @@ export function CollectionsPanel() {
 		if (newId) setSelectedCollectionId(newId);
 	};
 
-	const handleCreateCollection = () => {
+	const handleCreateCollection = async () => {
 		const trimmed = newCollectionTitle.trim();
 		if (!trimmed) return;
 
@@ -238,10 +238,10 @@ export function CollectionsPanel() {
 			return;
 		}
 
-		const newId = createCollection(trimmed);
+		const newId = await createCollection(trimmed);
 		setIsCreateOpen(false);
 		setNewCollectionTitle("");
-		setSelectedCollectionId(newId);
+		if (newId) setSelectedCollectionId(newId);
 
 		toast.success("Collection created!", {
 			description: `"${trimmed}" is ready to use`,
@@ -260,7 +260,7 @@ export function CollectionsPanel() {
 		handleOpenTemplatePicker();
 	};
 
-	const handleAddTemplateToCollection = () => {
+	const handleAddTemplateToCollection = async () => {
 		if (!selectedCollectionId || !templateSelection) return;
 
 		// Check template limit
@@ -272,7 +272,7 @@ export function CollectionsPanel() {
 			return;
 		}
 
-		addTemplate(selectedCollectionId, prepareTemplateForCollection(templateSelection));
+		await addTemplate(selectedCollectionId, prepareTemplateForCollection(templateSelection));
 		setIsTemplatePickerOpen(false);
 
 		toast.success("Template added!", {
@@ -282,7 +282,7 @@ export function CollectionsPanel() {
 		setTemplateSelection(null);
 	};
 
-	const handleTemplateDrop = (event: DragEvent<HTMLDivElement>) => {
+	const handleTemplateDrop = async (event: DragEvent<HTMLDivElement>) => {
 		if (!selectedCollectionId) return;
 		event.preventDefault();
 		setIsDropActive(false);
@@ -302,7 +302,7 @@ export function CollectionsPanel() {
 				return;
 			}
 
-			addTemplate(selectedCollectionId, prepareTemplateForCollection(parsed));
+			await addTemplate(selectedCollectionId, prepareTemplateForCollection(parsed));
 
 			toast.success("Template added!", {
 				description: "Dropped into collection",
@@ -327,18 +327,18 @@ export function CollectionsPanel() {
 		setIsDropActive(false);
 	};
 
-	const handleRemoveTemplate = () => {
+	const handleRemoveTemplate = async () => {
 		if (!selectedCollectionId || !removeTemplateId) return;
-		removeTemplate(selectedCollectionId, removeTemplateId);
+		await removeTemplate(selectedCollectionId, removeTemplateId);
 		setRemoveTemplateId(null);
 
 		toast.success("Template removed from collection");
 	};
 
-	const handleDeleteCollection = () => {
+	const handleDeleteCollection = async () => {
 		if (!deleteTargetId) return;
 		const collection = collections.find(c => c.id === deleteTargetId);
-		deleteCollection(deleteTargetId);
+		await deleteCollection(deleteTargetId);
 		if (selectedCollectionId === deleteTargetId) setSelectedCollectionId(null);
 		setDeleteTargetId(null);
 

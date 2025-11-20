@@ -683,15 +683,37 @@ export function PromptBuilderPanel({
     }
   }, [activeItem]);
 
+  // Load template prompt into editor when coming from Template Page
+  useEffect(() => {
+    if (activeItem.type === 'template' && activeItem.data?.prompt) {
+      setCustomPrompt(activeItem.data.prompt);
+      setEditablePrompt(activeItem.data.prompt);
+    }
+  }, [activeItem]);
+
   const handleSaveTemplate = async () => {
     try {
-      const finalTemplateName = templateName?.trim() || "Untitled Template";
       const supabase = createClient();
 
-      // Get current user
+      // 1. Берём текст именно из editablePrompt
+      const fullPrompt = editablePrompt.trim();
+
+      if (!fullPrompt) {
+        toast.error('Prompt is empty. Please enter or load a prompt before saving.', {
+          duration: 2500,
+          style: { fontSize: "14px" },
+        });
+        return;
+      }
+
+      // 2. Имя темплейта
+      const finalTemplateName = (templateName || '').trim() || 'Untitled template';
+
+      // 3. Получаем юзера
       const { data: { user }, error: authError } = await supabase.auth.getUser();
 
       if (authError || !user) {
+        console.error('Auth error while saving template:', authError);
         toast.error('Please sign in to save templates', {
           duration: 2500,
           style: { fontSize: "14px" },
@@ -699,15 +721,15 @@ export function PromptBuilderPanel({
         return;
       }
 
-      // Check for duplicate names
+      // 4. Проверяем дубликат имени
       const { data: existingTemplates, error: checkError } = await supabase
         .from('templates')
-        .select('name')
+        .select('id, name')
         .eq('user_id', user.id)
         .ilike('name', finalTemplateName);
 
       if (checkError) {
-        console.error('❌ Error checking for duplicates:', checkError);
+        console.error('Error checking existing templates:', checkError);
         throw checkError;
       }
 
@@ -719,14 +741,7 @@ export function PromptBuilderPanel({
         return;
       }
 
-      // Assemble the full prompt before saving
-      const fullPrompt = customPrompt || assemblePrompt();
-
-      console.log("💾 Saving template:");
-      console.log("💾 name:", finalTemplateName);
-      console.log("💾 prompt:", fullPrompt);
-
-      // Simple save - just name and prompt
+      // 5. Сохраняем в таблицу templates
       const { data, error } = await supabase
         .from('templates')
         .insert({
@@ -738,26 +753,32 @@ export function PromptBuilderPanel({
         .single();
 
       if (error) {
-        console.error('❌ Supabase error:', error);
+        console.error('Supabase insert error:', error);
         throw error;
       }
 
-      console.log('✅ Template saved to Supabase:', data);
+      console.log('Template saved to Supabase:', data);
+
+      // 6. Обновляем локальный список шаблонов
+      await loadTemplatesFromSupabase();
+      if (data?.id) {
+        setActiveTemplateId(data.id);
+      }
 
       toast.success(`Template "${finalTemplateName}" saved`, {
         duration: 1500,
         style: { fontSize: "14px" },
       });
 
-      // Reload templates list
-      await loadTemplatesFromSupabase();
-
-      // Close the save dialog
+      // 7. Закрываем диалог
       setIsDialogOpen(false);
-      setTemplateName("");
+      setTemplateName('');
     } catch (error) {
-      console.error('❌ Failed to save template:', error);
-      toast.error('Failed to save template. Please try again.');
+      console.error('Failed to save template:', error);
+      toast.error('Failed to save template. Please try again.', {
+        duration: 2500,
+        style: { fontSize: "14px" },
+      });
     }
   };
 
