@@ -15,13 +15,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useWorkspace } from '@/lib/context/WorkspaceContext';
 import { useCollections } from "@/lib/useCollections";
 import { cn } from "@/lib/utils";
@@ -30,10 +23,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import { ContextIndicator } from './ContextIndicator';
+import { CollectionBrowser } from './prompt-builder/CollectionBrowser';
 import { ModeToggle } from './prompt-builder/ModeToggle';
 import { PromptPreview } from './prompt-builder/PromptPreview';
 import { TemplateBuilder } from './prompt-builder/TemplateBuilder';
-import { CollectionBrowser } from './prompt-builder/CollectionBrowser';
 
 export interface PromptBuilderPanelProps {
   onPromptChange?: (prompt: string) => void;
@@ -1053,7 +1046,7 @@ export function PromptBuilderPanel({
                               </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
-                              className="w-[400px] max-h-[400px] overflow-y-auto bg-[var(--rl-surface)] border border-[var(--rl-border)] rounded-lg shadow-lg"
+                              className="w-[400px] max-h-[400px] overflow-y-auto bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg"
                               align="start"
                             >
                               {templateOptions.map((option) => {
@@ -1061,7 +1054,7 @@ export function PromptBuilderPanel({
                                 return (
                                   <div
                                     key={option.id}
-                                    className="flex items-center justify-between w-full group hover:bg-[var(--rl-surface-hover)] px-3 py-2 cursor-pointer"
+                                    className="flex items-center justify-between w-full group hover:bg-neutral-100 dark:hover:bg-neutral-700 px-3 py-2 cursor-pointer"
                                   >
                                     <div
                                       className="flex-1 min-w-0"
@@ -1070,11 +1063,11 @@ export function PromptBuilderPanel({
                                         setIsTemplateDropdownOpen(false);
                                       }}
                                     >
-                                      <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                                      <div className="font-medium text-neutral-900 dark:text-white truncate">
                                         {template?.name || template?.title || "Untitled template"}
                                       </div>
                                       {(template?.style || template?.scenario) && (
-                                        <div className="text-sm text-gray-600 dark:text-gray-400 truncate mt-0.5">
+                                        <div className="text-sm text-neutral-600 dark:text-neutral-400 truncate mt-0.5">
                                           {template.style || template.scenario}
                                         </div>
                                       )}
@@ -1085,19 +1078,20 @@ export function PromptBuilderPanel({
                                         <button
                                           type="button"
                                           aria-label="Template options"
-                                          className="opacity-0 group-hover:opacity-100 p-1.5 text-[var(--rl-muted)] hover:text-[var(--rl-foreground)] transition-opacity rounded-full hover:bg-[var(--rl-surface-hover)] ml-2"
+                                          className="opacity-0 group-hover:opacity-100 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-opacity rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-700 ml-2"
                                           onClick={(e) => e.stopPropagation()}
                                         >
                                           <IconDotsVertical size={16} stroke={1.5} />
                                         </button>
                                       </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end" className="w-32">
+                                      <DropdownMenuContent align="end" className="w-32 bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700">
                                         <DropdownMenuItem
                                           onSelect={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
                                             handleDuplicateTemplate(template);
                                           }}
+                                          className="text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700"
                                         >
                                           Duplicate
                                         </DropdownMenuItem>
@@ -1107,11 +1101,12 @@ export function PromptBuilderPanel({
                                             e.stopPropagation();
                                             handleRenameTemplate(template);
                                           }}
+                                          className="text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700"
                                         >
                                           Rename
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
-                                          className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
+                                          className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400 hover:bg-neutral-100 dark:hover:bg-neutral-700"
                                           onSelect={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
@@ -1140,7 +1135,7 @@ export function PromptBuilderPanel({
                           </button>
                         </>
                       ) : (
-                        <div className="text-sm text-gray-500 py-2">
+                        <div className="text-sm text-neutral-500 dark:text-neutral-400 py-2">
                           No saved templates found.
                         </div>
                       )}
