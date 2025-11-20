@@ -36,6 +36,14 @@ export function BookmarkSelector({ onPillSelect, disabled }: BookmarkSelectorPro
             "3D model wireframe",
             "oil painting",
         ],
+        "Camera Angle": [
+            "bird's eye view",
+            "ground level",
+            "eye level",
+            "low angle shot",
+            "wide panorama",
+            "close-up detail",
+        ],
     };
 
     return (
@@ -55,7 +63,7 @@ export function BookmarkSelector({ onPillSelect, disabled }: BookmarkSelectorPro
               text-sm font-medium transition-all pb-1
               ${activeBookmark === name
                                 ? "text-purple-600 dark:text-purple-400 border-b-2 border-purple-600 dark:border-purple-400"
-                                : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
+                                : "text-neutral-400 dark:text-neutral-300 hover:text-neutral-600 dark:hover:text-white"
                             }
               ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
             `}
@@ -82,7 +90,8 @@ export function BookmarkSelector({ onPillSelect, disabled }: BookmarkSelectorPro
                                 type="button"
                                 onClick={() => {
                                     onPillSelect(pillText);
-                                    // Pill will disappear due to re-render, creating "dissolve" effect
+                                    // Auto-close bookmark after selection
+                                    setActiveBookmark(null);
                                 }}
                                 initial={{ opacity: 1, scale: 1 }}
                                 whileHover={{ scale: 1.03 }}
@@ -95,7 +104,7 @@ export function BookmarkSelector({ onPillSelect, disabled }: BookmarkSelectorPro
                   hover:bg-neutral-200 dark:hover:bg-neutral-700
                   border border-neutral-300 dark:border-neutral-600
                   rounded-full
-                  text-sm text-neutral-700 dark:text-neutral-300
+                  text-sm text-neutral-700 dark:text-white
                   transition-colors
                   cursor-pointer
                 "
