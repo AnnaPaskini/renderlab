@@ -18,7 +18,7 @@ import { toastConfig } from "@/lib/toast-config";
 
 
 export const metadata = {
-  title: "Everything AI",
+  title: "RenderLab",
   description: "Everything AI platform built on RenderLab template",
   openGraph: {
     images: ["https://ai-saas-template-aceternity.vercel.app/banner.png"],

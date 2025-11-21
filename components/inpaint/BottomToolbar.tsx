@@ -111,8 +111,8 @@ export function BottomToolbar({
                             placeholder="Describe what you want to change..."
                             rows={3}
                             className="flex-1 bg-[#1a1a1a] border border-white/10 rounded-lg text-white text-base 
-                            placeholder:text-purple-400/50 outline-none px-3 py-2 resize-none h-[72px]
-                            focus:border-purple-500/50 transition-colors"
+                            placeholder:text-white/20 outline-none px-3 py-2 resize-none h-[72px]
+                            focus:border-[#ff6b35]/50 transition-colors"
                         />
 
                         {/* Right side buttons */}
@@ -122,7 +122,7 @@ export function BottomToolbar({
                                 <button
                                     onClick={() => paperclipInputRef.current?.click()}
                                     className="w-10 h-10 rounded-lg bg-[#1a1a1a] hover:bg-[#242424] 
-                                    flex items-center justify-center transition-colors text-purple-400/70 hover:text-purple-400"
+                                    flex items-center justify-center transition-colors text-white/40 hover:text-[#ff6b35]"
                                     title="Attach reference image">
                                     <Paperclip size={18} />
                                 </button>
@@ -136,10 +136,10 @@ export function BottomToolbar({
                                 <button
                                     onClick={onGenerate}
                                     disabled={isGenerateDisabled}
-                                    className={`w-10 h-10 rounded-full flex items-center justify-center 
+                                    className={`w-10 h-10 rounded-md flex items-center justify-center 
                                     transition-colors text-white ${isGenerateDisabled
-                                            ? 'bg-purple-500/20 text-purple-400/50 cursor-not-allowed'
-                                            : 'bg-[#ff6b35] hover:bg-[#ff8555]'
+                                            ? 'bg-[#ff6b35]/50 text-white/50 cursor-not-allowed'
+                                            : 'bg-[#ff6b35] hover:bg-[#ff8555] shadow-sm'
                                         }`}
                                 >
                                     {isGenerating ? (
