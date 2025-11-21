@@ -262,24 +262,52 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
     }
   }
 
-  const handleGenerate = async (model: string) => {
-    if (!prompt) {
-      toast.error("Please enter a prompt", { style: defaultToastStyle });
-      return;
-    }
-
+  const handleGenerate = async (model: string, userPrompt: string) => {
     console.log("Model used:", model || "nano-banana");
     console.log("Has reference image:", !!uploadedImage);
     setIsGenerating(true);
 
     try {
+      let finalThumbnailUrl = null;
+
+      // 1. Process Image (if exists) - Create Thumbnail
+      if (uploadedImage) {
+        toast.loading("Processing image...", { id: "processing-image" });
+
+        try {
+          const processResponse = await fetch("/api/process-thumbnail", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: uploadedImage }),
+          });
+
+          if (!processResponse.ok) {
+            throw new Error("Failed to process image thumbnail");
+          }
+
+          const processData = await processResponse.json();
+          finalThumbnailUrl = processData.thumbnailUrl;
+
+          toast.dismiss("processing-image");
+          console.log("✅ Thumbnail created:", finalThumbnailUrl);
+        } catch (err) {
+          toast.dismiss("processing-image");
+          console.error("Thumbnail processing failed:", err);
+          toast.error("Failed to process image. Please try again.");
+          setIsGenerating(false);
+          return;
+        }
+      }
+
+      // 2. Call Generation API
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          prompt,
-          model: model || "nano-banana",
-          imageUrl: uploadedImage || null,
+          prompt: userPrompt,
+          model: model, // ✅ Pass exact model selection
+          imageUrl: uploadedImage || null, // Keep for backward compatibility or metadata if needed
+          thumbnailUrl: finalThumbnailUrl, // ✅ Send the thumbnail URL
         }),
       });
 

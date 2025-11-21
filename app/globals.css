@@ -16,11 +16,11 @@
     /* Vignette effect - darkens edges for depth */
     radial-gradient(ellipse at center,
       transparent 0%,
-      transparent 60%,
-      rgba(0, 0, 0, 0.35) 100%),
+      transparent 40%,
+      rgba(0, 0, 0, 0.8) 100%),
     /* Square grid pattern - subtle purple lines */
-    linear-gradient(rgba(167, 139, 250, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(167, 139, 250, 0.07) 1px, transparent 1px);
+    linear-gradient(rgba(167, 139, 250, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(167, 139, 250, 0.15) 1px, transparent 1px);
   background-size:
     100% 100%,
     /* Vignette covers full screen */

@@ -80,10 +80,10 @@ export function CanvasArea({
         const file = e.dataTransfer.files?.[0];
         if (file) {
             console.log('Dropped file:', file.name, file.type, file.size);
-            const maxSize = 50 * 1024 * 1024; // 50MB
+            const maxSize = 100 * 1024 * 1024; // 100MB
             if (file.size > maxSize) {
                 console.error('Dropped file too large:', file.size, 'max:', maxSize);
-                alert('File size must be less than 50MB');
+                alert('File size must be less than 100MB');
                 return;
             }
             if (file.type.startsWith('image/')) {
@@ -407,7 +407,7 @@ export function CanvasArea({
                         </p>
                         <p className="text-sm text-purple-400/70">or click to upload</p>
                         <p className="text-xs text-purple-400/50 mt-2">
-                            PNG, JPG, WebP • Max 50MB
+                            PNG, JPG, WebP • Max 100MB
                         </p>
                     </div>
 
@@ -419,10 +419,10 @@ export function CanvasArea({
                             const file = e.target.files?.[0];
                             if (file) {
                                 console.log('File selected:', file.name, file.type, file.size);
-                                const maxSize = 50 * 1024 * 1024; // 50MB
+                                const maxSize = 100 * 1024 * 1024; // 100MB
                                 if (file.size > maxSize) {
                                     console.error('File too large:', file.size, 'max:', maxSize);
-                                    alert('File size must be less than 50MB');
+                                    alert('File size must be less than 100MB');
                                     e.target.value = '';
                                     return;
                                 }

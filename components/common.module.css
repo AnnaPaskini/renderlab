@@ -12,28 +12,22 @@
   height: var(--height);
   left: calc(var(--offset) / 2 * -1);
 
-  background: linear-gradient(
-    to right,
-    var(--color),
-    var(--color) 50%,
-    transparent 0,
-    transparent
-  );
+  background: linear-gradient(to right,
+      var(--color),
+      var(--color) 50%,
+      transparent 0,
+      transparent);
   background-size: var(--width) var(--height);
 
   /* Fade out the edges */
-  mask: linear-gradient(
-      to left,
+  mask: linear-gradient(to left,
       var(--background) var(--fade-stop),
-      transparent
-    ),
+      transparent),
     linear-gradient(to right, var(--background) var(--fade-stop), transparent),
     linear-gradient(black, black);
-  -webkit-mask: linear-gradient(
-      to left,
+  -webkit-mask: linear-gradient(to left,
       var(--background) var(--fade-stop),
-      transparent
-    ),
+      transparent),
     linear-gradient(to right, var(--background) var(--fade-stop), transparent),
     linear-gradient(black, black);
   mask-composite: exclude;
@@ -43,7 +37,7 @@
 
 .gridLineHorizontalDark {
   --background: #ffffff;
-  --color: rgba(255, 255, 255, 0.2);
+  --color: rgba(255, 255, 255, 0.3);
   --height: 1px;
   --width: 5px;
   --fade-stop: 90%;
@@ -55,28 +49,22 @@
   height: var(--height);
   left: calc(var(--offset) / 2 * -1);
 
-  background: linear-gradient(
-    to right,
-    var(--color),
-    var(--color) 50%,
-    transparent 0,
-    transparent
-  );
+  background: linear-gradient(to right,
+      var(--color),
+      var(--color) 50%,
+      transparent 0,
+      transparent);
   background-size: var(--width) var(--height);
 
   /* Fade out the edges */
-  mask: linear-gradient(
-      to left,
+  mask: linear-gradient(to left,
       var(--background) var(--fade-stop),
-      transparent
-    ),
+      transparent),
     linear-gradient(to right, var(--background) var(--fade-stop), transparent),
     linear-gradient(black, black);
-  -webkit-mask: linear-gradient(
-      to left,
+  -webkit-mask: linear-gradient(to left,
       var(--background) var(--fade-stop),
-      transparent
-    ),
+      transparent),
     linear-gradient(to right, var(--background) var(--fade-stop), transparent),
     linear-gradient(black, black);
   mask-composite: exclude;
@@ -97,23 +85,19 @@
   width: var(--width);
   top: calc(var(--offset) / 2 * -1);
 
-  background: linear-gradient(
-    to bottom,
-    var(--color),
-    var(--color) 50%,
-    transparent 0,
-    transparent
-  );
+  background: linear-gradient(to bottom,
+      var(--color),
+      var(--color) 50%,
+      transparent 0,
+      transparent);
   background-size: var(--width) var(--height);
 
   mask: linear-gradient(to top, var(--background) var(--fade-stop), transparent),
     linear-gradient(to bottom, var(--background) var(--fade-stop), transparent),
     linear-gradient(black, black);
-  -webkit-mask: linear-gradient(
-      to top,
+  -webkit-mask: linear-gradient(to top,
       var(--background) var(--fade-stop),
-      transparent
-    ),
+      transparent),
     linear-gradient(to bottom, var(--background) var(--fade-stop), transparent),
     linear-gradient(black, black);
   mask-composite: exclude;
@@ -123,7 +107,7 @@
 
 .gridLineVerticalDark {
   --background: #ffffff;
-  --color: rgba(255, 255, 255, 0.2);
+  --color: rgba(255, 255, 255, 0.3);
   --height: 5px;
   --width: 1px;
   --fade-stop: 90%;
@@ -134,23 +118,19 @@
   width: var(--width);
   top: calc(var(--offset) / 2 * -1);
 
-  background: linear-gradient(
-    to bottom,
-    var(--color),
-    var(--color) 50%,
-    transparent 0,
-    transparent
-  );
+  background: linear-gradient(to bottom,
+      var(--color),
+      var(--color) 50%,
+      transparent 0,
+      transparent);
   background-size: var(--width) var(--height);
 
   mask: linear-gradient(to top, var(--background) var(--fade-stop), transparent),
     linear-gradient(to bottom, var(--background) var(--fade-stop), transparent),
     linear-gradient(black, black);
-  -webkit-mask: linear-gradient(
-      to top,
+  -webkit-mask: linear-gradient(to top,
       var(--background) var(--fade-stop),
-      transparent
-    ),
+      transparent),
     linear-gradient(to bottom, var(--background) var(--fade-stop), transparent),
     linear-gradient(black, black);
   mask-composite: exclude;

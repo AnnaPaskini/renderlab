@@ -26,6 +26,7 @@ type TemplateLike = {
 	scenario?: string;
 	details?: string;
 	prompt?: string;
+	model?: string;
 	createdAt?: string;
 	addedAt?: string;
 	source?: string;
@@ -477,7 +478,7 @@ export function CollectionsPanel() {
 							headers: { 'Content-Type': 'application/json' },
 							body: JSON.stringify({
 								prompt: template.prompt || '',
-								model: 'nano-banana',
+								model: template.model || 'nano-banana', // ✅ Use template model
 								imageUrl: uploadedImageUrl, // Use uploaded URL
 							}),
 						});

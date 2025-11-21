@@ -1,28 +1,36 @@
-import { NextResponse } from "next/server";
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '100mb',
+    },
+  },
+};
+
 import { createClient } from "@/lib/supabaseServer";
+import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   console.log('🔵 [UPLOAD] Route called');
-  
+
   try {
     const supabase = await createClient();
     console.log('🔵 [UPLOAD] Supabase client created');
-    
+
     const {
       data: { user },
       error: userError,
     } = await supabase.auth.getUser();
-    
+
     console.log('🔵 [UPLOAD] User:', user?.id, 'Error:', userError);
-    
+
     if (userError || !user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    
+
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
-    
+
     console.log('🔵 [UPLOAD] File received:', file?.name);
-    
+
     if (!file)
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
 
@@ -30,9 +38,9 @@ export async function POST(req: Request) {
     const { data, error } = await supabase.storage
       .from("renderlab-images")
       .upload(fileName, file, { upsert: false });
-    
+
     console.log('🔵 [UPLOAD] Storage upload:', data, 'Error:', error);
-    
+
     if (error) throw error;
 
     const { data: publicUrlData } = supabase.storage
@@ -48,13 +56,13 @@ export async function POST(req: Request) {
       .insert([{ user_id: user.id, name: fileName, url: publicUrl }])
       .select()
       .single();
-    
+
     console.log('🔵 [UPLOAD] DB Insert result - Error:', dbError);
-    
+
     if (dbError) throw dbError;
 
     console.log('✅ [UPLOAD] Success!');
-    
+
     // ✅ Generate thumbnail asynchronously (don't wait)
     if (newImage) {
       fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/generate-thumbnail`, {

@@ -2,6 +2,7 @@ import Replicate from "replicate";
 
 const MODEL_MAP: Record<string, string> = {
   "nano-banana": "google/nano-banana",
+  "nano-banana-pro": "google/nano-banana-pro",
   "seedream4": "bytedance/seedream-4",
   "flux": "black-forest-labs/flux-kontext-pro",
 };
@@ -95,7 +96,7 @@ export async function generateSingle({
       };
     }
 
-    // NANO-BANANA
+    // NANO-BANANA & PRO
     else {
       input = {
         prompt,
@@ -103,6 +104,11 @@ export async function generateSingle({
         aspect_ratio: "match_input_image",
         output_format: "jpg",
       };
+
+      if (model === 'nano-banana-pro') {
+        input.resolution = '4K';
+        input.output_format = 'png';
+      }
     }
 
     console.log("🟣 Final input:", input);

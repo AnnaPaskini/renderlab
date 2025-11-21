@@ -27,7 +27,7 @@ export default function CustomPage() {
           <h1 className="text-4xl font-bold text-white mb-2">
             Custom Assets
           </h1>
-          <p className="text-purple-400/70">
+          <p className="text-neutral-400">
             Manage your templates and collections
           </p>
         </div>

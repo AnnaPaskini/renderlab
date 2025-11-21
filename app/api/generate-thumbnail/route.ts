@@ -1,6 +1,6 @@
+import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import sharp from 'sharp';
-import { createClient } from '@supabase/supabase-js';
 
 // Retry helper with exponential backoff
 async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> {
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
         position: 'center',
         kernel: sharp.kernel.lanczos3 // Better quality scaling
       })
-      .webp({ 
+      .webp({
         quality: 75, // Slightly higher quality
         effort: 4    // Balance between size and encoding speed
       })
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     // Обновляем запись в БД
     const { error: updateError } = await supabase
       .from('images')
-      .update({ thumb_url: publicUrl })
+      .update({ thumbnail_url: publicUrl })
       .eq('id', imageId);
 
     if (updateError) throw updateError;

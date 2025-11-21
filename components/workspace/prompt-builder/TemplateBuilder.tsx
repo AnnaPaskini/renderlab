@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Save } from "lucide-react";
 import { BookmarkSelector } from "./BookmarkSelector";
 import { ModelSelector } from "./ModelSelector";
 
@@ -104,10 +105,11 @@ export function TemplateBuilder({
                 {/* Action Buttons */}
                 <div className="flex w-full gap-3">
                     <Button
-                        variant="ghost"
-                        className="rl-btn-primary flex-1"
+                        variant="outline"
+                        className="flex-1 rounded-xl border-2 border-purple-500/30 bg-purple-500/5 text-purple-400 font-semibold hover:bg-purple-500/10 hover:border-purple-500/50 transition-all"
                         onClick={onSaveTemplate}
                     >
+                        <Save className="w-4 h-4 mr-2" />
                         Save as Template
                     </Button>
                     {isCollectionRun && onCancelCollection && (

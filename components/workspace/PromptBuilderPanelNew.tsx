@@ -31,7 +31,7 @@ import { TemplateBuilder } from './prompt-builder/TemplateBuilder';
 
 export interface PromptBuilderPanelProps {
   onPromptChange?: (prompt: string) => void;
-  onGenerate?: (model: string) => Promise<void>;
+  onGenerate?: (model: string, prompt: string) => Promise<void>;
   isGenerating?: boolean;
   activeTab?: "builder" | "custom";
   onTabChange?: (tab: "builder" | "custom") => void;
@@ -507,6 +507,11 @@ export function PromptBuilderPanel({
 
   // Initial prompt logic - only set when editablePrompt is empty
   useEffect(() => {
+    // Don't override if loading template
+    if (isLoadingTemplateRef.current) {
+      return;
+    }
+
     // Системные фразы, которые можно безопасно перезаписать
     const isSystemPrompt = (text: string) =>
       text.trim() === "" ||
@@ -663,6 +668,19 @@ export function PromptBuilderPanel({
     }
   }, [details, avoidElements, uploadedImage, customPrompt, onPromptChange]);
 
+  // Sync editablePrompt with assembled prompt when not manually edited
+  useEffect(() => {
+    // Don't override if loading template
+    if (isLoadingTemplateRef.current) {
+      return;
+    }
+
+    const assembled = assemblePrompt();
+    if (!editablePrompt.trim() && assembled.trim()) {
+      setEditablePrompt(assembled);
+    }
+  }, [details, avoidElements, uploadedImage]);
+
   // Sync form with WorkspaceContext when temporary item is loaded
   useEffect(() => {
     if (activeItem.type === 'temporary' && activeItem.data) {
@@ -785,8 +803,8 @@ export function PromptBuilderPanel({
   };
 
   const handleGenerateTemplate = async () => {
-    const prompt = editablePrompt.trim();
-    if (!prompt) {
+    const userPrompt = editablePrompt.trim() || assemblePrompt();
+    if (!userPrompt) {
       toast.error("Please enter a prompt or load a template first.");
       return;
     }
@@ -799,7 +817,7 @@ export function PromptBuilderPanel({
     try {
       setGeneratingState(true);
       if (onGenerate) {
-        await onGenerate(aiModel);
+        await onGenerate(aiModel, userPrompt);
       }
     } catch (error) {
       console.error("Template generation failed", error);
@@ -833,7 +851,7 @@ export function PromptBuilderPanel({
       ? collection.templates.map((template: any) => ({
         id: template.id || `template-${Date.now()}`,
         prompt: template.details || template.name || "",
-        model: template.aiModel || "nano-banana",
+        model: template.aiModel || aiModel || "nano-banana",
       }))
       : [];
 

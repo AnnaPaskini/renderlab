@@ -34,9 +34,16 @@ export async function POST(req: Request) {
     const prompt = typeof body?.prompt === "string" ? body.prompt.trim() : "";
     const model = typeof body?.model === "string" ? body.model.trim() : undefined;
 
-    // ✅ Reference image
+    // ✅ Reference image logic
+    // 1. Prefer thumbnailUrl (pre-processed 1024px)
+    // 2. Fallback to imageUrl/image (legacy/direct)
     let referenceImageUrl: string | null = null;
-    if (typeof body?.imageUrl === "string" && body.imageUrl.trim()) {
+    let isThumbnail = false;
+
+    if (typeof body?.thumbnailUrl === "string" && body.thumbnailUrl.trim()) {
+      referenceImageUrl = body.thumbnailUrl.trim();
+      isThumbnail = true;
+    } else if (typeof body?.imageUrl === "string" && body.imageUrl.trim()) {
       referenceImageUrl = body.imageUrl.trim();
     } else if (typeof body?.image === "string" && body.image.trim()) {
       referenceImageUrl = body.image.trim();
@@ -44,13 +51,13 @@ export async function POST(req: Request) {
 
     console.log('📦 Body received:', {
       hasPrompt: !!prompt,
+      hasThumbnail: isThumbnail,
       hasImage: !!referenceImageUrl,
-      imageLength: referenceImageUrl?.length,
       model
     });
 
-    // Handle base64 data URLs - upload to storage first
-    if (referenceImageUrl && referenceImageUrl.startsWith('data:')) {
+    // Handle base64 data URLs - upload to storage first (ONLY if not using pre-uploaded thumbnail)
+    if (!isThumbnail && referenceImageUrl && referenceImageUrl.startsWith('data:')) {
       console.log('⬆️ Starting image upload to Supabase...');
       const uploadStart = Date.now();
       const uploadedUrl = await uploadImageToStorage(referenceImageUrl, user.id, `reference_${Date.now()}.png`);
@@ -65,13 +72,13 @@ export async function POST(req: Request) {
 
     console.log("🔵 [GENERATE] Prompt:", prompt);
     console.log("🔵 [GENERATE] Model:", model || "default");
-    console.log("🔵 [GENERATE] Reference:", referenceImageUrl || "none");
+    console.log("🔵 [GENERATE] Input Image:", referenceImageUrl || "none");
 
     if (!prompt) {
       return NextResponse.json({ error: "prompt is required" }, { status: 400 });
     }
 
-    // ✅ Generate via Replicate
+    // ✅ Generate via Replicate (uses referenceImageUrl which is now the thumbnail if available)
     console.log('🤖 Starting Replicate generation...');
     const genStart = Date.now();
     const result = await generateSingle({
@@ -117,7 +124,7 @@ export async function POST(req: Request) {
     // Generate thumbnail URL using Supabase Transform API
     const thumbnailUrl = `${permanentUrl}?width=512&quality=80&format=webp`;
 
-    // ✅ Save to DB with reference_url and prompt
+    // ✅ Save to DB (Result ONLY, as requested)
     const { data: newImage, error: dbError } = await supabase
       .from("images")
       .insert([
@@ -126,9 +133,9 @@ export async function POST(req: Request) {
           name: imageName,
           prompt: prompt, // ✅ Save the actual prompt text
           url: permanentUrl, // ✅ Use permanent Supabase Storage URL
-          thumbnail_url: thumbnailUrl,
-          reference_url: referenceImageUrl || null,
-          model: model || 'nano-banana', // ✅ Save the AI model used
+          thumbnail_url: thumbnailUrl, // This is the thumbnail of the RESULT, not the input
+          // reference_url: referenceImageUrl || null, // ❌ Do NOT save input image
+          model: model, // ✅ Save the AI model used (no default override)
           created_at: timestamp,
         },
       ])

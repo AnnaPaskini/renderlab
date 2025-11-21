@@ -29,8 +29,8 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
         toast.error("Please upload a JPG, PNG, or WebP image", { style: defaultToastStyle });
         return;
       }
-      if (file.size > 50 * 1024 * 1024) {
-        toast.error("File size should be less than 50MB", { style: defaultToastStyle });
+      if (file.size > 100 * 1024 * 1024) {
+        toast.error("File size should be less than 100MB", { style: defaultToastStyle });
         return;
       }
 
