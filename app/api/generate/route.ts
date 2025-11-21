@@ -1,3 +1,4 @@
+export const maxDuration = 60; // 60 seconds instead of default 10
 import { generateSingle } from "@/lib/generateSingle";
 import { createClient } from "@/lib/supabaseServer";
 import { uploadImageToStorage } from '@/lib/utils/uploadToStorage';
@@ -8,6 +9,8 @@ import { NextResponse } from "next/server";
  * Generates image via Replicate and saves to Supabase DB.
  */
 export async function POST(req: Request) {
+  console.log('📥 API ROUTE START:', new Date().toISOString());
+
   try {
     const contentType = req.headers.get("content-type") || "";
     if (!contentType.includes("application/json")) {
@@ -39,13 +42,21 @@ export async function POST(req: Request) {
       referenceImageUrl = body.image.trim();
     }
 
+    console.log('📦 Body received:', {
+      hasPrompt: !!prompt,
+      hasImage: !!referenceImageUrl,
+      imageLength: referenceImageUrl?.length,
+      model
+    });
+
     // Handle base64 data URLs - upload to storage first
     if (referenceImageUrl && referenceImageUrl.startsWith('data:')) {
-      console.log("🔵 [STORAGE] Uploading base64 reference image to storage");
+      console.log('⬆️ Starting image upload to Supabase...');
+      const uploadStart = Date.now();
       const uploadedUrl = await uploadImageToStorage(referenceImageUrl, user.id, `reference_${Date.now()}.png`);
       if (uploadedUrl) {
         referenceImageUrl = uploadedUrl;
-        console.log("✅ [STORAGE] Reference image uploaded:", uploadedUrl);
+        console.log(`✅ Upload complete in ${Date.now() - uploadStart}ms: ${uploadedUrl}`);
       } else {
         console.error("❌ [STORAGE] Failed to upload reference image");
         return NextResponse.json({ error: "Failed to upload reference image" }, { status: 500 });
@@ -61,11 +72,14 @@ export async function POST(req: Request) {
     }
 
     // ✅ Generate via Replicate
+    console.log('🤖 Starting Replicate generation...');
+    const genStart = Date.now();
     const result = await generateSingle({
       prompt,
       model,
       imageUrl: referenceImageUrl,
     });
+    console.log(`✅ Generation complete in ${Date.now() - genStart}ms`);
 
     if (result.status !== "ok" || !result.url) {
       console.error("❌ [GENERATE] Replicate failed:", result.message);

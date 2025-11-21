@@ -392,7 +392,7 @@ body.actions-open nav {
   /* шаг между точками (меньше = плотнее) */
   --dot-radius: 1.4px;
   /* радиус точки (больше = жирнее) */
-  --dot-alpha: 0.14;
+  --dot-alpha: 0.15;
   /* прозрачность точки (больше = контрастнее) */
 
   background-image: radial-gradient(circle,
@@ -405,57 +405,6 @@ body.actions-open nav {
 
 .dark .dot-grid {
   /* в тёмной теме делаем точки светлее и чуть контрастнее */
-  --dot-alpha: 0.15;
-  background-image: radial-gradient(circle,
-      rgba(255, 255, 255, var(--dot-alpha)) var(--dot-radius),
-      transparent var(--dot-radius));
-}
-
-/* Модификаторы на классы — чтобы не лезть в инлайн каждый раз */
-.dot-grid {
-  --dot-size: 14px;
-  /* шаг между точками: меньше = плотнее */
-  --dot-radius: 1.6px;
-  /* радиус точки: больше = жирнее */
-  --dot-alpha: 0.15;
-  /* контраст: больше = сильнее видно */
-
-  background-image: radial-gradient(circle,
-      rgba(0, 0, 0, var(--dot-alpha)) var(--dot-radius),
-      transparent var(--dot-radius));
-  background-size: var(--dot-size) var(--dot-size);
-  background-position: 0 0;
-  transition: background-color 200ms ease, background-image 200ms ease, background-size 200ms ease;
-}
-
-.dark .dot-grid {
-  --dot-alpha: 0.15;
-  /* в тёмной теме чуть мягче */
-  background-image: radial-gradient(circle,
-      rgba(255, 255, 255, var(--dot-alpha)) var(--dot-radius),
-      transparent var(--dot-radius));
-}
-
-/* =========================
-   Designer Dot Grid Presets
-   ========================= */
-.dot-grid {
-  --dot-size: 18px;
-  /* шаг: меньше = плотнее */
-  --dot-radius: 1.4px;
-  /* радиус точки: больше = жирнее */
-  --dot-alpha: 0.15;
-  /* контраст: больше = заметнее */
-
-  background-image: radial-gradient(circle,
-      rgba(0, 0, 0, var(--dot-alpha)) var(--dot-radius),
-      transparent var(--dot-radius));
-  background-size: var(--dot-size) var(--dot-size);
-  background-position: 0 0;
-  transition: background-color .2s, background-image .2s, background-size .2s;
-}
-
-.dark .dot-grid {
   background-image: radial-gradient(circle,
       rgba(255, 255, 255, var(--dot-alpha)) var(--dot-radius),
       transparent var(--dot-radius));

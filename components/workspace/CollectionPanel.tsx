@@ -16,6 +16,7 @@ import {
 } from "../ui/dropdown-menu";
 import { Input } from "../ui/input";
 import { ActionsPanel } from "./ActionsPanel";
+import { uploadReferenceImageOnce } from "./uploadReferenceImageOnce";
 
 type TemplateLike = {
 	id?: string;
@@ -435,6 +436,21 @@ export function CollectionsPanel() {
 			setIsGenerating(true);
 			setGenerationResults([]);
 
+			// Get user id for upload
+			const supabase = createClient();
+			const { data: { user }, error: authError } = await supabase.auth.getUser();
+			if (authError || !user) {
+				toast.error('User not authenticated');
+				return;
+			}
+
+			// Upload reference image ONCE
+			const uploadedImageUrl = await uploadReferenceImageOnce(referenceImage, user.id);
+			if (!uploadedImageUrl) {
+				toast.error('Failed to upload reference image');
+				return;
+			}
+
 			const templateIds = activeCollection?.templates || [];
 			const templateDetails = allTemplates.filter(t =>
 				templateIds.some(ct => ct.id === t.id)
@@ -451,55 +467,77 @@ export function CollectionsPanel() {
 
 				console.log(`[${i + 1}/${templateDetails.length}] Generating: ${template.name}`);
 
-				try {
-					// Wait for this generation to complete before starting next
-					const response = await fetch('/api/generate', {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({
+
+
+				let retries = 1;
+				let success = false;
+				for (let attempt = 0; attempt <= retries; attempt++) {
+					try {
+						console.log(`⏰ [${i + 1}] START: ${Date.now()} (attempt ${attempt + 1})`);
+						console.log(`📸 Reference image size: ${referenceImage.length} chars`);
+
+						const startTime = Date.now();
+						const response = await fetch('/api/generate', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({
+								prompt: template.prompt || '',
+								model: 'nano-banana',
+								imageUrl: uploadedImageUrl, // Use uploaded URL
+							}),
+						});
+
+						const duration = Date.now() - startTime;
+						console.log(`⏱️ [${i + 1}] Request took: ${duration}ms`);
+
+						if (!response.ok) {
+							const errorText = await response.text();
+							console.error(`❌ [${i + 1}] API ERROR:`, {
+								status: response.status,
+								statusText: response.statusText,
+								body: errorText,
+								duration: `${duration}ms`
+							});
+							throw new Error(`Generation failed: ${response.status}`);
+						}
+
+						const result = await response.json();
+						console.log(`✅ [${i + 1}] SUCCESS in ${duration}ms:`, result);
+
+						const imageUrl = result.output?.imageUrl;
+						if (!imageUrl) {
+							console.error(`No imageUrl in response for ${template.name}:`, result);
+							throw new Error('No image URL in response');
+						}
+
+						// Add to results
+						setGenerationResults(prev => [...prev, {
+							templateName: template.name || 'Untitled',
+							imageUrl: imageUrl,
+							templateId: template.id || '',
 							prompt: template.prompt || '',
-							model: 'nano-banana',
-							image: referenceImage,
-						}),
-					});
+						}]);
 
-					if (!response.ok) {
-						const errorText = await response.text();
-						console.error(`API error for ${template.name}:`, response.status, errorText);
-						throw new Error(`Generation failed: ${response.status}`);
+						successCount++;
+						console.log(`✓ Success [${i + 1}/${templateDetails.length}]: ${template.name}`);
+						toast.success(`Generated ${i + 1}/${templateDetails.length}`);
+
+						// Small delay between generations to avoid rate limits
+						if (i < templateDetails.length - 1) {
+							await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
+						}
+
+						success = true;
+						break; // Success, exit retry loop
+					} catch (error) {
+						if (attempt === retries) {
+							console.error(`✗ Failed [${i + 1}/${templateDetails.length}]: ${template.name}`, error);
+							toast.error(`Failed: ${template.name}`);
+						} else {
+							console.log(`Retry ${attempt + 1}/${retries + 1}...`);
+							await new Promise(r => setTimeout(r, 3000));
+						}
 					}
-
-					const result = await response.json();
-					console.log(`Result for ${template.name}:`, result);
-
-					const imageUrl = result.output?.imageUrl;
-
-					if (!imageUrl) {
-						console.error(`No imageUrl in response for ${template.name}:`, result);
-						throw new Error('No image URL in response');
-					}
-
-					// Add to results
-					setGenerationResults(prev => [...prev, {
-						templateName: template.name || 'Untitled',
-						imageUrl: imageUrl,
-						templateId: template.id || '',
-						prompt: template.prompt || '',
-					}]);
-
-					successCount++;
-					console.log(`✓ Success [${i + 1}/${templateDetails.length}]: ${template.name}`);
-					toast.success(`Generated ${i + 1}/${templateDetails.length}`);
-
-					// Small delay between generations to avoid rate limits
-					if (i < templateDetails.length - 1) {
-						await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
-					}
-
-				} catch (error) {
-					console.error(`✗ Failed [${i + 1}/${templateDetails.length}]: ${template.name}`, error);
-					toast.error(`Failed: ${template.name}`);
-					// Continue with next template even if one fails
 				}
 			}
 

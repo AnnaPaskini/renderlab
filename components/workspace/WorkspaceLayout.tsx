@@ -310,6 +310,7 @@ interface WorkspaceLayoutProps {
   previews?: string[];
   previewImages?: PreviewImage[];
   onRemovePreview?: (id: string) => void;
+  onRefetchPreviewImages?: () => void;
 }
 
 export function WorkspaceLayout({
@@ -320,6 +321,7 @@ export function WorkspaceLayout({
   previews = [],
   previewImages = [],
   onRemovePreview,
+  onRefetchPreviewImages,
 }: WorkspaceLayoutProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
   const previewTimestampsRef = useRef<Map<string, string>>(new Map());

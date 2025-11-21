@@ -150,6 +150,30 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
     };
   }, []); // Empty dependency array - only run once on mount
 
+  // Function to refetch preview images from database
+  const refetchPreviewImages = async () => {
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      const { data: images } = await supabase
+        .from('images')
+        .select('id, thumbnail_url, url, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(200);
+
+      if (images) {
+        setPreviewImages(images);
+        console.log('✅ [Preview] Refetched images:', images.length);
+      }
+    } catch (error) {
+      console.error('❌ [Preview] Failed to refetch images:', error);
+    }
+  };
+
   // Clear reference image handler - preserves prompt and context
   const handleClearReference = () => {
     // Clear only the reference image
@@ -317,6 +341,7 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
       <WorkspaceLayout
         previewImages={previewImages}
         onRemovePreview={handleRemoveFromPreview}
+        onRefetchPreviewImages={refetchPreviewImages}
         leftPanel={
           <div className="space-y-6">
             {/* Upload Zone */}
@@ -384,6 +409,7 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
             onPreviewAdd={(url) => setPreviews((prev) => [...prev, url])}
             uploadedImage={uploadedImage}
             initialAdditionalDetails={additionalDetailsFromUrl}
+            onRefetchPreviewImages={refetchPreviewImages}
           />
         }
         uploadedImage={uploadedImage}

@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { AnimatePresence, motion } from "framer-motion";
 import { BookmarkSelector } from "./BookmarkSelector";
 import { ModelSelector } from "./ModelSelector";
 
@@ -32,7 +31,6 @@ interface TemplateBuilderProps {
     // State
     isGenerating: boolean;
     isCollectionRun: boolean;
-    progressMessage?: string;
 }
 
 export function TemplateBuilder({
@@ -49,7 +47,6 @@ export function TemplateBuilder({
     onCancelCollection,
     isGenerating,
     isCollectionRun,
-    progressMessage,
 }: TemplateBuilderProps) {
     const handlePillSelect = (pillText: string) => {
         console.log('🟢 TemplateBuilder received:', pillText);
@@ -123,23 +120,6 @@ export function TemplateBuilder({
                         </Button>
                     )}
                 </div>
-
-                {/* Progress Indicator */}
-                <AnimatePresence>
-                    {(isGenerating || isCollectionRun) && progressMessage && (
-                        <motion.div
-                            key="collection-progress"
-                            initial={{ opacity: 0, y: 4 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -4 }}
-                            transition={{ duration: 0.25 }}
-                            className="flex items-center gap-2 text-sm font-medium text-neutral-600 dark:text-white"
-                        >
-                            <span className="inline-flex h-2 w-2 flex-shrink-0 rounded-full bg-[var(--rl-accent)] animate-pulse" />
-                            <span>{progressMessage}</span>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
             </div>
         </details>
     );

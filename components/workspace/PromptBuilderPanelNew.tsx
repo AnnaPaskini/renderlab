@@ -38,6 +38,7 @@ export interface PromptBuilderPanelProps {
   onPreviewAdd?: (url: string) => void;
   uploadedImage?: string | null;
   initialAdditionalDetails?: string | null;
+  onRefetchPreviewImages?: () => void;
 }
 
 type TemplateRecord = {
@@ -55,6 +56,7 @@ export function PromptBuilderPanel({
   onPreviewAdd,
   uploadedImage,
   initialAdditionalDetails,
+  onRefetchPreviewImages,
 }: PromptBuilderPanelProps) {
   console.log("🟢 RERENDER Panel, uploadedImage =", uploadedImage);
 
@@ -1124,6 +1126,12 @@ export function PromptBuilderPanel({
       setCollectionProgress(getInitialProgressState());
       setIsCollectionRun(false);
       setGeneratingState(false);
+
+      // Refetch preview images after collection generation completes
+      if (onRefetchPreviewImages) {
+        console.log('🔄 Refetching preview images after collection generation');
+        onRefetchPreviewImages();
+      }
     }
   };
 
@@ -1523,6 +1531,23 @@ export function PromptBuilderPanel({
                   </div>
                 )}
               </div>
+
+              {/* Progress Indicator - Moved here for better visibility */}
+              <AnimatePresence>
+                {(isGenerating || isCollectionRun) && progressMessage && (
+                  <motion.div
+                    key="collection-progress"
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.25 }}
+                    className="flex items-center gap-2 text-sm font-medium text-neutral-600 dark:text-white bg-neutral-100 dark:bg-neutral-800 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700"
+                  >
+                    <span className="inline-flex h-2 w-2 flex-shrink-0 rounded-full bg-[var(--rl-accent)] animate-pulse" />
+                    <span>{progressMessage}</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
 
@@ -1576,7 +1601,6 @@ export function PromptBuilderPanel({
                 onCancelCollection={handleCancelCollection}
                 isGenerating={isGenerating}
                 isCollectionRun={isCollectionRun}
-                progressMessage={progressMessage}
               />
             </div>
           </motion.div>
