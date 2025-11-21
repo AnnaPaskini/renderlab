@@ -101,18 +101,13 @@ function LeonardoDialog({
 				onClick={onClose}
 			/>
 
-			{/* Dialog - Glass Effect with Strong Backdrop */}
+			{/* Dialog - Apple Style */}
 			<div
-				className="rounded-xl p-6 w-full max-w-md relative animate-in zoom-in-95 duration-200 border border-white/[0.08]"
-				style={{
-					background: 'rgba(30, 30, 30, 0.95)',
-					backdropFilter: 'blur(20px) saturate(180%)',
-					boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0, 0, 0, 0.8), 0 32px 96px rgba(0, 0, 0, 0.5)'
-				}}
+				className="rounded-2xl p-8 w-full max-w-md relative animate-in zoom-in-95 duration-200 bg-gray-900/95 backdrop-blur-xl border border-white/10 shadow-2xl"
 			>
-				<h3 className="text-lg font-semibold mb-4 text-white">{title}</h3>
-				<div className="space-y-4">{children}</div>
-				{footer && <div className="mt-6 flex justify-end gap-3">{footer}</div>}
+				<h3 className="text-xl font-semibold mb-6 text-white">{title}</h3>
+				<div className="space-y-6">{children}</div>
+				{footer && <div className="mt-8 flex justify-between gap-3">{footer}</div>}
 			</div>
 		</div>
 	);
@@ -691,7 +686,7 @@ export function CollectionsPanel() {
 							<h2 className="text-lg font-semibold leading-none text-neutral-900 dark:text-neutral-100">
 								{activeCollection?.title || "Untitled Collection"}
 							</h2>
-							<div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+							<div className="text-xs text-purple-400/70 mt-2">
 								{(activeCollection.templates?.length ?? 0)}/5 templates
 							</div>
 						</div>
@@ -719,7 +714,7 @@ export function CollectionsPanel() {
 					</div>
 					<div className="flex-1 space-y-3 overflow-auto pr-1">
 						{(activeCollection.templates?.length ?? 0) === 0 ? (
-							<div className="py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+							<div className="py-10 text-center text-sm text-purple-400/70">
 								{isDropActive ? "Release to add template" : "No templates in this collection yet."}
 							</div>
 						) : (
@@ -731,11 +726,11 @@ export function CollectionsPanel() {
 												{template.name || template.title || "Untitled template"}
 											</div>
 											{template.style || template.scenario ? (
-												<div className="text-sm text-gray-500 dark:text-gray-400">
+												<div className="text-sm text-purple-400/70">
 													{template.style || template.scenario}
 												</div>
 											) : null}
-											<div className="mt-2 text-xs text-gray-400 dark:text-gray-500">
+											<div className="mt-2 text-xs text-purple-400/70">
 												{template.addedAt
 													? `Added ${new Date(template.addedAt).toLocaleDateString()}`
 													: template.createdAt
@@ -787,7 +782,7 @@ export function CollectionsPanel() {
 
 					<div className="grid flex-1 grid-cols-1 gap-4 pr-1 sm:grid-cols-2">
 						{collections.length === 0 ? (
-							<div className="col-span-full py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+							<div className="col-span-full py-12 text-center text-sm text-purple-400/70">
 								Create your first collection to organize templates.
 							</div>
 						) : (
@@ -810,7 +805,7 @@ export function CollectionsPanel() {
 										<div className="truncate font-medium text-gray-900 dark:text-gray-100">
 											{collection.title}
 										</div>
-										<div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+										<div className="mt-1 text-xs text-purple-400/70">
 											{(collection.templates?.length ?? 0)} templates
 										</div>
 									</div>
@@ -845,19 +840,24 @@ export function CollectionsPanel() {
 					</>
 				}
 			>
-				<Input
-					value={newCollectionTitle}
-					onChange={(event) => setNewCollectionTitle(event.target.value)}
-					placeholder="Collection name"
-					className="rl-input"
-					autoFocus
-					onKeyDown={(event) => {
-						if (event.key === "Enter") {
-							event.preventDefault();
-							handleCreateCollection();
-						}
-					}}
-				/>
+				<div className="space-y-2">
+					<label className="text-sm font-medium text-purple-400/70">
+						Collection Name
+					</label>
+					<Input
+						value={newCollectionTitle}
+						onChange={(event) => setNewCollectionTitle(event.target.value)}
+						placeholder="e.g., Summer Campaign"
+						className="w-full px-4 py-3 bg-gray-800/50 border border-white/10 rounded-xl text-white placeholder-purple-400/50 focus:ring-2 focus:ring-purple-500 transition-all duration-200"
+						autoFocus
+						onKeyDown={(event) => {
+							if (event.key === "Enter") {
+								event.preventDefault();
+								handleCreateCollection();
+							}
+						}}
+					/>
+				</div>
 			</LeonardoDialog>
 
 			<LeonardoDialog
@@ -885,19 +885,24 @@ export function CollectionsPanel() {
 					</>
 				}
 			>
-				<Input
-					value={duplicateDraft}
-					onChange={(event) => setDuplicateDraft(event.target.value)}
-					placeholder="New collection name"
-					className="rl-input"
-					autoFocus
-					onKeyDown={(event) => {
-						if (event.key === "Enter") {
-							event.preventDefault();
-							handleDuplicateSubmit();
-						}
-					}}
-				/>
+				<div className="space-y-2">
+					<label className="text-sm font-medium text-purple-400/70">
+						Collection Name
+					</label>
+					<Input
+						value={duplicateDraft}
+						onChange={(event) => setDuplicateDraft(event.target.value)}
+						placeholder="New collection name"
+						className="w-full px-4 py-3 bg-gray-800/50 border border-white/10 rounded-xl text-white placeholder-purple-400/50 focus:ring-2 focus:ring-purple-500 transition-all duration-200"
+						autoFocus
+						onKeyDown={(event) => {
+							if (event.key === "Enter") {
+								event.preventDefault();
+								handleDuplicateSubmit();
+							}
+						}}
+					/>
+				</div>
 			</LeonardoDialog>
 
 			<LeonardoDialog
@@ -911,36 +916,41 @@ export function CollectionsPanel() {
 								setRenameTargetId(null);
 								setRenameDraft("");
 							}}
-							className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800 transition rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
+							className="rl-btn rl-btn-secondary"
 						>
 							Cancel
 						</button>
 						<button
 							onClick={handleRenameSubmit}
 							disabled={!renameDraft.trim() || isCollectionNameExists(renameDraft.trim(), renameTargetId || undefined)}
-							className="rl-btn-primary"
+							className="rl-btn rl-btn-primary"
 						>
 							Rename
 						</button>
 					</>
 				}
 			>
-				<Input
-					value={renameDraft}
-					onChange={(event) => setRenameDraft(event.target.value)}
-					placeholder="New name"
-					className={`rl-input ${renameDraft.trim() && isCollectionNameExists(renameDraft.trim(), renameTargetId || undefined)
-						? "text-red-400 border-red-500/50 focus:border-red-500"
-						: ""
-						}`}
-					autoFocus
-					onKeyDown={(event) => {
-						if (event.key === "Enter") {
-							event.preventDefault();
-							handleRenameSubmit();
-						}
-					}}
-				/>
+				<div className="space-y-2">
+					<label className="text-sm font-medium text-purple-400/70">
+						Collection Name
+					</label>
+					<Input
+						value={renameDraft}
+						onChange={(event) => setRenameDraft(event.target.value)}
+						placeholder="New name"
+						className={`w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white placeholder-purple-400/50 focus:ring-2 focus:ring-purple-500 transition-all duration-200 ${renameDraft.trim() && isCollectionNameExists(renameDraft.trim(), renameTargetId || undefined)
+							? "text-red-400 border-red-500/50 focus:border-red-500"
+							: ""
+							}`}
+						autoFocus
+						onKeyDown={(event) => {
+							if (event.key === "Enter") {
+								event.preventDefault();
+								handleRenameSubmit();
+							}
+						}}
+					/>
+				</div>
 			</LeonardoDialog>
 
 			<LeonardoDialog
@@ -977,7 +987,7 @@ export function CollectionsPanel() {
 					}}
 					className="focus:outline-none"
 				>
-					<p className="text-gray-600 dark:text-gray-300 text-sm">
+					<p className="text-purple-400/70 text-sm">
 						This action cannot be undone. All templates in this collection will be removed.
 					</p>
 				</div>
@@ -1018,7 +1028,7 @@ export function CollectionsPanel() {
 					}}
 					className="focus:outline-none"
 				>
-					<p className="text-gray-600 dark:text-gray-300 text-sm">
+					<p className="text-purple-400/70 text-sm">
 						The template will be removed from this collection only.
 					</p>
 				</div>
@@ -1047,7 +1057,7 @@ export function CollectionsPanel() {
 				}
 			>
 				{templateOptions.length === 0 ? (
-					<div className="py-8 text-center text-sm text-gray-500">
+					<div className="py-8 text-center text-sm text-purple-400/70">
 						No saved templates available.
 					</div>
 				) : (
@@ -1067,12 +1077,12 @@ export function CollectionsPanel() {
 										{template.name || template.title || "Untitled template"}
 									</div>
 									{template.style || template.scenario ? (
-										<div className="text-sm text-gray-200 mt-1">
+										<div className="text-sm text-purple-400/70 mt-1">
 											{template.style || template.scenario}
 										</div>
 									) : null}
 									{template.details ? (
-										<div className="mt-2 line-clamp-2 text-xs text-gray-300">
+										<div className="mt-2 line-clamp-2 text-xs text-purple-400/70">
 											{template.details}
 										</div>
 									) : null}
@@ -1102,9 +1112,9 @@ export function CollectionsPanel() {
 								disabled={isGenerating}
 							/>
 							<label htmlFor="reference-image-upload" className="cursor-pointer">
-								<IconUpload size={48} className="mx-auto mb-3 text-gray-500" />
-								<p className="text-sm text-gray-400 mb-1">Upload reference image</p>
-								<p className="text-xs text-gray-500">Click or drag to upload</p>
+								<IconUpload size={48} className="mx-auto mb-3 text-purple-400/30" />
+								<p className="text-sm text-purple-400/70 mb-1">Upload reference image</p>
+								<p className="text-xs text-purple-400/70">Click or drag to upload</p>
 							</label>
 						</div>
 					) : (
@@ -1128,7 +1138,7 @@ export function CollectionsPanel() {
 					{/* Templates Preview */}
 					{referenceImage && (
 						<div>
-							<p className="text-sm text-gray-400 mb-3">
+							<p className="text-sm text-purple-400/70 mb-3">
 								Templates in collection: <span className="text-white font-medium">{activeCollection?.templates?.length || 0}</span>
 							</p>
 							<div className="space-y-2 max-h-48 overflow-y-auto pr-2">
@@ -1163,7 +1173,7 @@ export function CollectionsPanel() {
 					{isGenerating && (
 						<div className="space-y-2">
 							<div className="flex justify-between text-sm">
-								<span className="text-gray-400">
+								<span className="text-purple-400/70">
 									Generating {currentGenerating}/{activeCollection?.templates?.length || 0}...
 								</span>
 								<span className="text-[#ff6b35] font-medium">
@@ -1184,7 +1194,7 @@ export function CollectionsPanel() {
 					{/* Results Grid */}
 					{generationResults.length > 0 && (
 						<div>
-							<p className="text-sm text-gray-400 mb-3">Generated Images ({generationResults.length})</p>
+							<p className="text-sm text-purple-400/70 mb-3">Generated Images ({generationResults.length})</p>
 							<div className="grid grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-2">
 								{generationResults.map((result, i) => (
 									<div key={i} className="space-y-2">
@@ -1193,7 +1203,7 @@ export function CollectionsPanel() {
 											alt={result.templateName}
 											className="w-full h-32 object-cover rounded-lg border border-neutral-700"
 										/>
-										<p className="text-xs text-gray-400 truncate">{result.templateName}</p>
+										<p className="text-xs text-purple-400/70 truncate">{result.templateName}</p>
 									</div>
 								))}
 							</div>
@@ -1244,7 +1254,7 @@ export function CollectionsPanel() {
 						)}
 
 						{isGenerating && (
-							<div className="flex-1 text-center py-2 text-sm text-gray-400">
+							<div className="flex-1 text-center py-2 text-sm text-purple-400/70">
 								Generation in progress...
 							</div>
 						)}

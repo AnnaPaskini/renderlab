@@ -59,14 +59,12 @@ export default function SubmitPromptPage() {
   }
 
   return (
-    <div
-      className="min-h-screen relative"
-    >
+    <div className="rl-ambient-bg min-h-screen pt-32 pb-12">
       {/* Content - z-index above grid */}
       <div className="relative" style={{ zIndex: 1 }}>
         {/* Header */}
-        <div className="border-b border-white/[0.08]" style={{ background: '#161616' }}>
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="relative z-10 border-b border-white/8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
             <Link
               href="/prompts"
               className="text-sm text-[#ff6b35] hover:text-[#ff8555] mb-4 inline-flex items-center gap-1 transition-colors"
@@ -85,7 +83,7 @@ export default function SubmitPromptPage() {
         </div>
 
         {/* Form */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-12">
           <div
             className="rounded-3xl p-8"
             style={{
@@ -100,33 +98,27 @@ export default function SubmitPromptPage() {
             />
           </div>
 
-          {/* Guidelines Box - Subdued brown tint, not orange */}
-          <div
-            className="mt-6 rounded-xl p-5"
-            style={{
-              background: 'rgba(139, 69, 19, 0.1)',
-              border: '1px solid rgba(139, 69, 19, 0.3)'
-            }}
-          >
-            <h3 className="text-sm font-semibold text-amber-200 mb-3">
+          {/* Guidelines Box - Standard Panel Style */}
+          <div className="mt-6 rounded-xl p-5 bg-[#161616] border border-white/5">
+            <h3 className="text-sm font-semibold text-white mb-3">
               Submission Guidelines
             </h3>
-            <ul className="text-sm text-amber-100/90 space-y-2">
+            <ul className="text-sm text-gray-400 space-y-2">
               <li className="flex items-start gap-2">
-                <span className="text-amber-300 mt-0.5">•</span>
+                <span className="text-gray-500 mt-0.5">•</span>
                 <span>Images must be architectural visualization renders</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-amber-300 mt-0.5">•</span>
+                <span className="text-gray-500 mt-0.5">•</span>
                 <span>Prompts should be clear and descriptive (50-2000 characters)</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-amber-300 mt-0.5">•</span>
+                <span className="text-gray-500 mt-0.5">•</span>
                 <span>Approved prompts appear in the community library</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-amber-300 mt-0.5">•</span>
-                <span>Track your submissions in <Link href="/account" className="underline hover:text-amber-200 transition-colors">Account Settings</Link></span>
+                <span className="text-gray-500 mt-0.5">•</span>
+                <span>Track your submissions in <Link href="/account" className="underline hover:text-white transition-colors">Account Settings</Link></span>
               </li>
             </ul>
           </div>

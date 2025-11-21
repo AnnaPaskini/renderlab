@@ -68,7 +68,7 @@ export function FilterBar({ onFilterChange }: FilterBarProps) {
           value={search}
           onChange={(e) => handleSearchChange(e.target.value)}
           placeholder="Search prompts by title, text, or tags..."
-          className="w-full px-4 py-3 pl-12 bg-[#1a1a1a] border border-white/8 text-white rounded-lg focus:outline-none focus:border-[#ff6b35] focus:ring-2 focus:ring-[#ff6b35]/20 transition-all duration-200 placeholder:text-gray-500"
+          className="w-full px-4 py-3 pl-12 bg-[#1a1a1a] border border-white/8 text-white rounded-lg focus:outline-none focus:border-white/20 focus:ring-2 focus:ring-white/5 transition-all duration-200 placeholder:text-gray-500"
         />
         <svg
           className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"

@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useMemo, useState } from "react";
 
 const templateOptions = [
   { id: "template-hero", label: "Product Hero Spotlight" },
@@ -97,7 +97,7 @@ export function BuildPanel() {
           <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
             Build Your Generator
           </h2>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400">
+          <p className="text-sm text-purple-400/70">
             Choose whether to generate from a single template or an entire collection.
           </p>
         </div>
@@ -121,17 +121,17 @@ export function BuildPanel() {
           </DialogTrigger>
         </div>
 
-        <div className="w-full rounded-xl border border-dashed border-neutral-200 p-4 text-sm text-neutral-500 dark:border-neutral-800 dark:text-neutral-400">
+        <div className="w-full rounded-xl border border-dashed border-purple-500/20 p-4 text-sm text-purple-400/70">
           <div className="space-y-2">
             <div>
-              <span className="font-medium text-neutral-700 dark:text-neutral-200">Selected template:</span>
-              <span className="ml-2 text-neutral-600 dark:text-neutral-300">
+              <span className="font-medium text-gray-200">Selected template:</span>
+              <span className="ml-2 text-purple-400">
                 {activeTemplateLabel ?? "—"}
               </span>
             </div>
             <div>
-              <span className="font-medium text-neutral-700 dark:text-neutral-200">Selected collection:</span>
-              <span className="ml-2 text-neutral-600 dark:text-neutral-300">
+              <span className="font-medium text-gray-200">Selected collection:</span>
+              <span className="ml-2 text-purple-400">
                 {activeCollectionLabel ?? "—"}
               </span>
             </div>
@@ -172,7 +172,7 @@ export function BuildPanel() {
             </SelectContent>
           </Select>
         ) : (
-          <div className="rounded-lg border border-neutral-200 p-4 text-center text-sm text-neutral-500 dark:border-neutral-800 dark:text-neutral-400">
+          <div className="rounded-lg border border-purple-500/20 p-4 text-center text-sm text-purple-400/70">
             No saved {mode === "template" ? "templates" : "collections"} found.
           </div>
         )}

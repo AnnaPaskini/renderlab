@@ -446,7 +446,7 @@ export default function InpaintPage() {
                     </div>
                     <div>
                         <p className="font-semibold text-sm">Saved to History!</p>
-                        <p className="text-xs text-gray-300">
+                        <p className="text-xs text-purple-400/70">
                             View in <a href="/history" className="underline hover:text-white">History page</a>
                         </p>
                     </div>
@@ -619,7 +619,7 @@ export default function InpaintPage() {
                             <div className="absolute left-[112px] top-1/2 -translate-y-1/2 z-50 transition-all duration-200 ease-out animate-fadeIn">
                                 <div className="bg-[#2a2a2a] rounded-xl px-4 py-3 border border-white/10 shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
                                     <div className="flex items-center justify-between mb-3">
-                                        <span className="text-xs font-medium text-gray-400">
+                                        <span className="text-xs font-medium text-purple-400/70">
                                             {activeTool === 'brush' ? 'Brush Size' : 'Eraser Size'}
                                         </span>
                                         <span className="text-sm font-semibold text-white">{brushSize}px</span>
@@ -631,14 +631,14 @@ export default function InpaintPage() {
                                         max="150"
                                         value={brushSize}
                                         onChange={(e) => setBrushSize(Number(e.target.value))}
-                                        className="w-40 h-1.5 bg-gray-700 rounded-full appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400 transition-colors"
+                                        className="w-40 h-1.5 bg-gray-700 rounded-full appearance-none cursor-pointer accent-purple-500 hover:accent-purple-400 transition-colors"
                                     />
 
                                     <div className="flex gap-2 mt-3">
                                         <button
                                             onClick={() => setBrushSize(20)}
                                             className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${brushSize === 20
-                                                ? 'bg-blue-500 text-white'
+                                                ? 'bg-purple-500 text-white'
                                                 : 'bg-[#1a1a1a] text-gray-300 hover:bg-[#242424]'
                                                 }`}
                                         >
@@ -647,7 +647,7 @@ export default function InpaintPage() {
                                         <button
                                             onClick={() => setBrushSize(60)}
                                             className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${brushSize === 60
-                                                ? 'bg-blue-500 text-white'
+                                                ? 'bg-purple-500 text-white'
                                                 : 'bg-[#1a1a1a] text-gray-300 hover:bg-[#242424]'
                                                 }`}
                                         >
@@ -656,7 +656,7 @@ export default function InpaintPage() {
                                         <button
                                             onClick={() => setBrushSize(120)}
                                             className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${brushSize === 120
-                                                ? 'bg-blue-500 text-white'
+                                                ? 'bg-purple-500 text-white'
                                                 : 'bg-[#1a1a1a] text-gray-300 hover:bg-[#242424]'
                                                 }`}
                                         >

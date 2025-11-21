@@ -54,7 +54,7 @@ export const NavBar = () => {
             </Link>
             <Link
               href="/signup"
-              className="px-5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full text-sm font-medium hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-200 hover:scale-105"
+              className="px-5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full text-sm font-medium hover:shadow-lg hover:shadow-orange-500/20 transition-all duration-200"
             >
               Sign Up
             </Link>

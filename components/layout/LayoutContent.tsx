@@ -21,17 +21,6 @@ export const LayoutContent = ({ children }: { children: ReactNode }) => {
     if (showAppNavbar) {
         return (
             <div className="relative min-h-screen bg-transparent">
-                {/* DOT Grid pattern */}
-                <div
-                    className="fixed inset-0 pointer-events-none z-0"
-                    style={{
-                        backgroundImage: 'radial-gradient(circle, rgba(255, 255, 255, 0.25) 1px, transparent 1px)',
-                        backgroundSize: '20px 20px'
-                    }}
-                />
-                {/* Radial gradient overlay - very strong vignette effect */}
-                <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,transparent_30%,rgba(0,0,0,0.85)_100%)] pointer-events-none z-0" />
-
                 {/* Content */}
                 <div className="relative z-10 min-h-screen">
                     {children}

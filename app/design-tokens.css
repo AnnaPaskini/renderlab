@@ -63,12 +63,13 @@
         inset 0 2px 8px rgba(0, 0, 0, 0.6),
         inset 0 0 0 1px rgba(0, 0, 0, 0.5);
 
-    /* Button shadows - orange OK for CTA buttons only */
+    /* Button shadows - Metallic/Silver - Tighter & Sharper */
     --rl-shadow-button-orange:
-        0 4px 12px rgba(255, 107, 53, 0.3);
+        0 0 0 1px rgba(220, 220, 225, 0.4);
 
     --rl-shadow-button-orange-hover:
-        0 6px 20px rgba(255, 107, 53, 0.4);
+        0 0 0 1px rgba(220, 220, 225, 0.6),
+        0 0 4px rgba(220, 220, 225, 0.2);
 
     /* ===== SPACING ===== */
     --rl-space-1: 0.25rem;

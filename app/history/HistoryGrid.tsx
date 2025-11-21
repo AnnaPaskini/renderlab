@@ -63,11 +63,7 @@ export function HistoryGrid({ images }: HistoryGridProps) {
 
     if (images.length === 0) {
         return (
-            <div style={{
-                textAlign: 'center',
-                padding: '100px 20px',
-                color: '#888'
-            }}>
+            <div className="text-center py-24 px-5 text-purple-400/70">
                 <p>No images yet. Start creating in the workspace!</p>
             </div>
         );
@@ -119,9 +115,8 @@ export function HistoryGrid({ images }: HistoryGridProps) {
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    color: '#666',
                                     fontSize: '14px'
-                                }}>
+                                }} className="text-purple-400/70">
                                     No preview available
                                 </div>
                             )}
@@ -192,19 +187,10 @@ export function HistoryGrid({ images }: HistoryGridProps) {
 
                         {/* Info */}
                         <div style={{ padding: '15px' }}>
-                            <p style={{
-                                fontSize: '14px',
-                                color: '#ccc',
-                                marginBottom: '10px',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                display: '-webkit-box',
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: 'vertical'
-                            }}>
+                            <p className="text-sm text-gray-200 mb-2.5 line-clamp-2">
                                 {img.prompt || 'No prompt'}
                             </p>
-                            <p style={{ fontSize: '12px', color: '#666' }}>
+                            <p className="text-xs text-purple-400/70">
                                 {new Date(img.created_at).toLocaleDateString('en-US', {
                                     month: 'short',
                                     day: 'numeric',

@@ -87,7 +87,7 @@ export const MobileNavbar = ({ navItems }: any) => {
             <Button
               as={Link}
               href="/signup"
-              className="aura bg-[#ff6b35] hover:bg-[#ff8555] font-semibold tracking-tight text-white shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 transition-all duration-200 border-0 focus-visible:ring-[#ff6b35] focus:border-[#ff6b35]"
+              className="aura bg-[#ff6b35] hover:bg-[#ff8555] font-semibold tracking-tight text-white shadow-md shadow-orange-500/20 hover:shadow-lg hover:shadow-orange-500/25 transition-all duration-200 border-0 focus-visible:ring-[#ff6b35] focus:border-[#ff6b35]"
             >
               Sign Up
             </Button>
@@ -95,7 +95,7 @@ export const MobileNavbar = ({ navItems }: any) => {
               variant="simple"
               as={Link}
               href="/login"
-              className="aura bg-[#ff6b35] hover:bg-[#ff8555] font-semibold tracking-tight text-white shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 transition-all duration-200 border-0 focus-visible:ring-[#ff6b35] focus:border-[#ff6b35]"
+              className="aura bg-[#ff6b35] hover:bg-[#ff8555] font-semibold tracking-tight text-white shadow-md shadow-orange-500/20 hover:shadow-lg hover:shadow-orange-500/25 transition-all duration-200 border-0 focus-visible:ring-[#ff6b35] focus:border-[#ff6b35]"
             >
               Login
             </Button>

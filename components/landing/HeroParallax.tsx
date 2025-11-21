@@ -27,19 +27,7 @@ export function HeroParallax() {
         className="absolute inset-0 bg-gradient-to-b from-[var(--rl-surface)] to-[var(--rl-bg)]"
       />
 
-      {/* Mid layer - dot pattern */}
-      <motion.div
-        style={{ y: yMid }}
-        className="absolute inset-0 opacity-40"
-      >
-        <div
-          className="w-full h-full bg-center bg-repeat"
-          style={{
-            backgroundImage: `radial-gradient(circle, var(--rl-border) 1px, transparent 1px)`,
-            backgroundSize: '24px 24px',
-          }}
-        />
-      </motion.div>
+      {/* Mid layer - dot pattern - REMOVED */}
 
       {/* Foreground content */}
       <motion.div

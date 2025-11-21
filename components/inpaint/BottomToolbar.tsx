@@ -111,8 +111,8 @@ export function BottomToolbar({
                             placeholder="Describe what you want to change..."
                             rows={3}
                             className="flex-1 bg-[#1a1a1a] border border-white/10 rounded-lg text-white text-base 
-                            placeholder:text-gray-500 outline-none px-3 py-2 resize-none h-[72px]
-                            focus:border-white/20 transition-colors"
+                            placeholder:text-purple-400/50 outline-none px-3 py-2 resize-none h-[72px]
+                            focus:border-purple-500/50 transition-colors"
                         />
 
                         {/* Right side buttons */}
@@ -122,7 +122,7 @@ export function BottomToolbar({
                                 <button
                                     onClick={() => paperclipInputRef.current?.click()}
                                     className="w-10 h-10 rounded-lg bg-[#1a1a1a] hover:bg-[#242424] 
-                                    flex items-center justify-center transition-colors text-gray-400 hover:text-white"
+                                    flex items-center justify-center transition-colors text-purple-400/70 hover:text-purple-400"
                                     title="Attach reference image">
                                     <Paperclip size={18} />
                                 </button>
@@ -138,7 +138,7 @@ export function BottomToolbar({
                                     disabled={isGenerateDisabled}
                                     className={`w-10 h-10 rounded-full flex items-center justify-center 
                                     transition-colors text-white ${isGenerateDisabled
-                                            ? 'bg-gray-700 cursor-not-allowed'
+                                            ? 'bg-purple-500/20 text-purple-400/50 cursor-not-allowed'
                                             : 'bg-[#ff6b35] hover:bg-[#ff8555]'
                                         }`}
                                 >

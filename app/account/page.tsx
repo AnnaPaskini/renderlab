@@ -121,9 +121,25 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="rl-ambient-bg min-h-screen pt-20">
+    <div className="rl-ambient-bg min-h-screen pt-32 pb-12">
+      {/* Header */}
+      <div className="relative z-10 border-b border-white/8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-white">
+              {activeTab === 'profile' ? 'Account Settings' : 'My Prompts'}
+            </h1>
+            <p className="text-gray-400 mt-2">
+              {activeTab === 'profile'
+                ? 'Manage your account and preferences'
+                : "Discover and manage all prompts you've submitted to the RenderLab community."}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Tabs */}
-      <div className="rl-bg-elevated border-b rl-border-visible">
+      <div className="border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex gap-8">
             <button
@@ -143,22 +159,9 @@ export default function AccountPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-12">
         {activeTab === 'profile' && (
           <>
-            {/* Profile Header */}
-            <div className="pt-10 pb-6">
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
-                Account Settings
-              </h1>
-
-              <p className="text-neutral-300 max-w-2xl mb-8">
-                Manage your account and preferences
-              </p>
-
-              <div className="w-full h-px bg-white/5 mb-10" />
-            </div>
-
             <div className="rl-card p-10">
               <h2 className="text-xl font-bold text-white mb-8">Profile Information</h2>
 
@@ -191,19 +194,6 @@ export default function AccountPage() {
 
         {activeTab === 'prompts' && (
           <>
-            {/* My Prompts Header */}
-            <div className="pt-10 pb-6">
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
-                My Prompts
-              </h1>
-
-              <p className="text-neutral-300 max-w-2xl mb-8">
-                Discover and manage all prompts you've submitted to the RenderLab community.
-              </p>
-
-              <div className="w-full h-px bg-white/5 mb-10" />
-            </div>
-
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
               <div className="rl-card p-6">
@@ -244,14 +234,14 @@ export default function AccountPage() {
             {filteredPrompts.length === 0 ? (
               <div className="rl-card text-center p-16">
                 <div className="mb-4">
-                  <svg className="w-16 h-16 mx-auto text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-16 h-16 mx-auto text-purple-400/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-2">
                   No prompts yet
                 </h3>
-                <p className="text-gray-400 mb-4">
+                <p className="text-purple-400/70 mb-4">
                   Start sharing your best prompts with the community
                 </p>
                 <button

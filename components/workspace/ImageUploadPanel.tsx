@@ -105,7 +105,7 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
           onDrop={handleDrop}
           className={clsx(
             "relative mx-auto flex min-h-[360px] max-h-[60vh] w-full max-w-full flex-col items-center justify-center overflow-hidden rounded-2xl transition-all duration-300 p-16 sm:max-h-[65vh] lg:max-h-[70vh] cursor-pointer border-2 border-dashed",
-            isDragActive ? "bg-[#2a2a2a] border-white/20 shadow-[0_0_0_2px_rgba(255,107,53,0.3),0_0_30px_rgba(255,107,53,0.2),0_0_60px_rgba(255,107,53,0.1)]" : "bg-[#262626] border-white/12 hover:bg-[#2a2a2a] hover:border-white/20 hover:shadow-[0_0_0_2px_rgba(255,107,53,0.2),0_0_20px_rgba(255,107,53,0.15),0_0_40px_rgba(255,107,53,0.08)]"
+            isDragActive ? "bg-[#2a2a2a] border-white/20 shadow-[0_0_0_1px_rgba(220,220,225,0.6),0_0_4px_rgba(220,220,225,0.2)]" : "bg-[#262626] border-white/12 hover:bg-[#2a2a2a] hover:border-white/20 hover:shadow-[0_0_0_1px_rgba(220,220,225,0.4),0_0_2px_rgba(220,220,225,0.1)]"
           )}
         >
           <label className="relative z-20 flex flex-col items-center justify-center cursor-pointer text-center w-full">
@@ -142,7 +142,7 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
           onDrop={handleDrop}
           className={clsx(
             "relative mx-auto flex min-h-[360px] max-h-[60vh] w-full max-w-full items-center justify-center overflow-hidden rounded-2xl transition-all duration-300 p-6 sm:max-h-[65vh] lg:max-h-[70vh] cursor-pointer border-2 border-dashed",
-            isDragActive ? "bg-[#2a2a2a] border-white/20 shadow-[0_0_0_2px_rgba(255,107,53,0.3),0_0_30px_rgba(255,107,53,0.2),0_0_60px_rgba(255,107,53,0.1)]" : "bg-[#262626] border-white/12 hover:bg-[#2a2a2a] hover:border-white/20 hover:shadow-[0_0_0_2px_rgba(255,107,53,0.2),0_0_20px_rgba(255,107,53,0.15),0_0_40px_rgba(255,107,53,0.08)]"
+            isDragActive ? "bg-[#2a2a2a] border-white/20 shadow-[0_0_0_1px_rgba(220,220,225,0.6),0_0_4px_rgba(220,220,225,0.2)]" : "bg-[#262626] border-white/12 hover:bg-[#2a2a2a] hover:border-white/20 hover:shadow-[0_0_0_1px_rgba(220,220,225,0.4),0_0_2px_rgba(220,220,225,0.1)]"
           )}
         >
           <div className="relative z-10 flex items-center justify-center w-full h-full">

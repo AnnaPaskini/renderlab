@@ -394,19 +394,19 @@ export function CanvasArea({
                 <div className={clsx(
                     "absolute inset-0 flex items-center justify-center cursor-pointer",
                     "border-2 border-dashed rounded-2xl transition-all duration-300",
-                    isDragActive ? "bg-black/50 border-white/20 shadow-[0_0_0_2px_rgba(255,107,53,0.3),0_0_30px_rgba(255,107,53,0.2),0_0_60px_rgba(255,107,53,0.1)]" : "bg-black/50 border-white/12 hover:bg-black/60 hover:border-white/20 hover:shadow-[0_0_0_2px_rgba(255,107,53,0.2),0_0_20px_rgba(255,107,53,0.15),0_0_40px_rgba(255,107,53,0.08)]"
+                    isDragActive ? "bg-black/50 border-white/20 shadow-[0_0_0_1px_rgba(220,220,225,0.6),0_0_4px_rgba(220,220,225,0.2)]" : "bg-black/50 border-white/12 hover:bg-black/60 hover:border-white/20 hover:shadow-[0_0_0_1px_rgba(220,220,225,0.4),0_0_2px_rgba(220,220,225,0.1)]"
                 )}>
                     <div className="text-center pointer-events-none">
                         <div className="mb-4">
-                            <svg className="w-16 h-16 mx-auto text-gray-600 group-hover:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-16 h-16 mx-auto text-purple-400/30 group-hover:text-purple-400/50 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                             </svg>
                         </div>
                         <p className="text-xl font-medium text-white mb-2">
                             Drag & Drop your image
                         </p>
-                        <p className="text-sm text-gray-400">or click to upload</p>
-                        <p className="text-xs text-gray-500 mt-2">
+                        <p className="text-sm text-purple-400/70">or click to upload</p>
+                        <p className="text-xs text-purple-400/50 mt-2">
                             PNG, JPG, WebP • Max 50MB
                         </p>
                     </div>
@@ -512,7 +512,7 @@ export function CanvasArea({
                                 borderRadius: '50%',
                                 // Kyle spec: 1px white stroke, semi-transparent
                                 border: activeTool === 'eraser'
-                                    ? '1px solid rgba(173, 216, 230, 0.9)' // light blue for eraser
+                                    ? '1px solid rgba(192, 132, 252, 0.9)' // purple for eraser
                                     : '1px solid rgba(255, 255, 255, 0.7)', // white for brush
                                 backgroundColor: 'transparent'
                             }}

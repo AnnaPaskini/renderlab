@@ -163,7 +163,7 @@ export function SubmitPromptForm({ onSuccess, onCancel }: SubmitPromptFormProps)
             <p className="text-sm text-red-400">{errors.title}</p>
           </div>
         ) : (
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-gray-400 mt-1 tabular-nums">
             {formData.title.length}/100 characters
           </p>
         )}
@@ -199,7 +199,7 @@ export function SubmitPromptForm({ onSuccess, onCancel }: SubmitPromptFormProps)
             <p className="text-sm text-red-400">{errors.prompt}</p>
           </div>
         ) : (
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-gray-400 mt-1 tabular-nums">
             {formData.prompt.length}/2000 characters
           </p>
         )}
@@ -260,7 +260,7 @@ export function SubmitPromptForm({ onSuccess, onCancel }: SubmitPromptFormProps)
         <button
           type="submit"
           disabled={submitting || !formData.image_url}
-          className="flex-1 px-6 py-3 bg-[#ff6b35] text-white rounded-lg hover:bg-[#ff8555] disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 transition-all duration-200"
+          className="flex-1 px-6 py-3 bg-[#ff6b35] text-white rounded-lg hover:bg-[#ff8555] disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-md shadow-orange-500/20 hover:shadow-lg hover:shadow-orange-500/25 transition-all duration-200"
         >
           {submitting ? 'Submitting...' : 'Submit for Review'}
         </button>

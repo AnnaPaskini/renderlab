@@ -22,7 +22,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Input } from "../ui/input";
 
 type PromptTemplatesProps = {
   activeTab?: "builder" | "custom";
@@ -46,6 +45,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
   // Create template state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newTemplateName, setNewTemplateName] = useState("");
+  const [newTemplatePrompt, setNewTemplatePrompt] = useState("");
 
   // === LOAD TEMPLATES FROM SUPABASE ===
   const loadTemplatesFromSupabase = async () => {
@@ -346,6 +346,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
       }
 
       const templateName = newTemplateName.trim();
+      const templatePrompt = newTemplatePrompt.trim();
 
       // Check for duplicate names
       const { data: existingTemplates, error: checkError } = await supabase
@@ -367,13 +368,13 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
         return;
       }
 
-      // Create new template with empty prompt
+      // Create new template with prompt
       const { data, error } = await supabase
         .from('templates')
         .insert({
           user_id: user.id,
           name: templateName,
-          prompt: '',
+          prompt: templatePrompt,
         })
         .select()
         .single();
@@ -395,6 +396,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
       setIsCreateOpen(false);
       setNewTemplateName('');
+      setNewTemplatePrompt('');
     } catch (error) {
       console.error('Failed to create template:', error);
       toast.error('Failed to create template. Please try again.', {
@@ -415,7 +417,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
       {/* Templates */}
       {templates.length === 0 ? (
-        <p className="text-sm text-gray-500">No templates saved yet.</p>
+        <p className="text-sm text-purple-400/70">No templates saved yet.</p>
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
           {templates.map((t, index) => (
@@ -516,14 +518,14 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                 <DialogTitle className="text-2xl font-semibold text-white">
                   {previewTemplate.name || "Template"}
                 </DialogTitle>
-                <p className="text-sm text-gray-400 mt-1">
+                <p className="text-sm text-purple-400/70 mt-1">
                   Created: {new Date(previewTemplate.created_at).toLocaleDateString()}
                 </p>
               </DialogHeader>
 
               <div className="mt-5 rounded-xl border border-white/8 bg-black/30 p-5">
                 <div className="mt-4">
-                  <div className="mb-1 text-sm text-gray-400">
+                  <div className="mb-1 text-sm text-purple-400/70">
                     Template Content:
                   </div>
                   <p className="leading-relaxed whitespace-pre-line text-white/90">
@@ -563,25 +565,24 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
       {/* Rename Template Dialog */}
       <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
         <DialogContent
-          className="rounded-xl text-rl-text w-full max-w-md border border-white/[0.08]"
-          style={{
-            background: 'rgba(30, 30, 30, 0.95)',
-            backdropFilter: 'blur(20px) saturate(180%)',
-            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0, 0, 0, 0.8), 0 32px 96px rgba(0, 0, 0, 0.5)'
-          }}
+          className="max-w-md w-full rounded-2xl bg-gray-900/95 backdrop-blur-xl border border-white/10 shadow-2xl p-8"
         >
-          <DialogHeader>
+          <DialogHeader className="mb-6">
             <DialogTitle className="text-xl font-semibold text-white">
               Rename Template
             </DialogTitle>
           </DialogHeader>
 
-          <div className="mt-4">
-            <Input
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-purple-400/70">
+              Template Name
+            </label>
+            <input
+              type="text"
               value={renameDraft}
               onChange={(e) => setRenameDraft(e.target.value)}
               placeholder="Enter new name..."
-              className="rl-input w-full"
+              className="w-full px-4 py-3 bg-gray-800/50 border border-white/10 rounded-xl text-white placeholder-purple-400/50 focus:ring-2 focus:ring-purple-500 transition-all duration-200"
               autoFocus
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
@@ -595,7 +596,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
             />
           </div>
 
-          <DialogFooter className="mt-6 flex justify-end gap-3">
+          <DialogFooter className="mt-8 flex justify-between gap-3">
             <button
               className="rl-btn rl-btn-secondary px-6"
               onClick={() => {
@@ -619,26 +620,21 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
       {/* Delete Template Dialog */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent
-          className="rounded-xl text-rl-text w-full max-w-md border border-white/[0.08]"
-          style={{
-            background: 'rgba(30, 30, 30, 0.95)',
-            backdropFilter: 'blur(20px) saturate(180%)',
-            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0, 0, 0, 0.8), 0 32px 96px rgba(0, 0, 0, 0.5)'
-          }}
+          className="max-w-md w-full rounded-2xl bg-gray-900/95 backdrop-blur-xl border border-white/10 shadow-2xl p-8"
         >
-          <DialogHeader>
+          <DialogHeader className="mb-6">
             <DialogTitle className="text-xl font-semibold text-white">
               Delete Template?
             </DialogTitle>
           </DialogHeader>
 
-          <div className="mt-4">
-            <p className="text-sm text-gray-400">
+          <div className="space-y-4">
+            <p className="text-sm text-purple-400/70">
               Are you sure you want to delete "<strong className="text-white">{deleteTarget?.name || deleteTarget?.title || 'this template'}</strong>"? This action cannot be undone.
             </p>
           </div>
 
-          <DialogFooter className="mt-6 flex justify-end gap-3">
+          <DialogFooter className="mt-8 flex justify-between gap-3">
             <button
               className="rl-btn rl-btn-secondary px-6"
               onClick={() => setIsDeleteOpen(false)}
@@ -658,44 +654,61 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
       {/* Create New Template Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent
-          className="rounded-xl text-rl-text w-full max-w-md border border-white/[0.08]"
-          style={{
-            background: 'rgba(30, 30, 30, 0.95)',
-            backdropFilter: 'blur(20px) saturate(180%)',
-            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0, 0, 0, 0.8), 0 32px 96px rgba(0, 0, 0, 0.5)'
-          }}
+          className="max-w-md w-full rounded-2xl bg-[#1a1a1a] border border-white/10 shadow-2xl p-8"
         >
-          <DialogHeader>
+          <DialogHeader className="mb-6">
             <DialogTitle className="text-xl font-semibold text-white">
-              Create New Template
+              New Template
             </DialogTitle>
           </DialogHeader>
 
-          <div className="mt-4">
-            <Input
-              value={newTemplateName}
-              onChange={(e) => setNewTemplateName(e.target.value)}
-              placeholder="Enter template name..."
-              className="rl-input w-full"
-              autoFocus
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  handleCreateTemplate();
-                } else if (event.key === "Escape") {
-                  event.preventDefault();
-                  setIsCreateOpen(false);
-                }
-              }}
-            />
+          <div className="space-y-6">
+            {/* Template Name */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-purple-400/70">
+                Template Name
+              </label>
+              <input
+                type="text"
+                value={newTemplateName}
+                onChange={(e) => setNewTemplateName(e.target.value)}
+                placeholder="e.g., Summer bird view"
+                className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white placeholder-purple-400/50 focus:ring-2 focus:ring-purple-500 transition-all duration-200"
+                autoFocus
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    handleCreateTemplate();
+                  } else if (event.key === "Escape") {
+                    event.preventDefault();
+                    setIsCreateOpen(false);
+                  }
+                }}
+              />
+            </div>
+
+            {/* Prompt */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-purple-400/70">
+                Prompt
+              </label>
+              <textarea
+                rows={6}
+                value={newTemplatePrompt}
+                onChange={(e) => setNewTemplatePrompt(e.target.value)}
+                placeholder="Describe the style and transformation you want..."
+                className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white placeholder-purple-400/50 focus:ring-2 focus:ring-purple-500 transition-all duration-200 resize-none"
+              />
+            </div>
           </div>
 
-          <DialogFooter className="mt-6 flex justify-end gap-3">
+          <DialogFooter className="mt-8 flex justify-between gap-3">
             <button
               className="rl-btn rl-btn-secondary px-6"
               onClick={() => {
                 setIsCreateOpen(false);
                 setNewTemplateName("");
+                setNewTemplatePrompt("");
               }}
             >
               Cancel
@@ -705,7 +718,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
               onClick={handleCreateTemplate}
               disabled={!newTemplateName.trim()}
             >
-              Create
+              Create Template
             </button>
           </DialogFooter>
         </DialogContent>

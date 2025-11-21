@@ -1,22 +1,10 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { Z } from "@/lib/z-layer-guide";
 import { motion } from "framer-motion";
 import { useId } from "react";
 
 export const Background = () => {
-  return (
-    <div className={`absolute inset-0 h-full w-full pointer-events-none z-[${Z.BASE}]`}>
-      <div className="absolute inset-0 h-full w-full bg-white dark:bg-black pointer-events-none [mask-image:radial-gradient(ellipse_at_center,transparent,white)]" />
-      {Array.from({ length: 6 }).map((_, index) => (
-        <div className="flex" key={"grid-column" + index}>
-          {Array.from({ length: 10 }).map((_, index) => (
-            <GridBlock key={`grid-row` + index} />
-          ))}
-        </div>
-      ))}
-    </div>
-  );
+  return null;
 };
 
 const GridBlock = () => {

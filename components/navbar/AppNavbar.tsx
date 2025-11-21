@@ -102,7 +102,7 @@ export const AppNavbar = () => {
                         <div className="relative dropdown-container">
                             <button
                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-sm font-semibold hover:shadow-lg hover:shadow-orange-500/30 transition-all hover:scale-105 focus:outline-none"
+                                className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-sm font-semibold hover:shadow-lg hover:shadow-orange-500/20 transition-all focus:outline-none"
                             >
                                 A
                             </button>

@@ -27,31 +27,25 @@ export default function CustomPage() {
           <h1 className="text-4xl font-bold text-white mb-2">
             Custom Assets
           </h1>
-          <p className="text-gray-400">
+          <p className="text-purple-400/70">
             Manage your templates and collections
           </p>
         </div>
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="mb-8 bg-transparent border-b border-white/10 p-0 h-auto">
+          <TabsList className="flex justify-start gap-4 mb-8 bg-transparent p-0 h-auto border-0">
             <TabsTrigger
               value="templates"
-              className="relative px-1 py-3 text-sm font-medium transition-colors duration-200 bg-transparent border-0 shadow-none data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:shadow-none text-neutral-400 hover:text-white data-[state=active]:hover:text-white rounded-none"
+              className="bg-[#262626] text-white px-8 py-3.5 rounded-xl font-medium border border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.3)] transition-all duration-200 hover:bg-[#2d2d2d] hover:border-white/15 hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] data-[state=active]:bg-[#333] data-[state=active]:border-white/20 data-[state=active]:text-white data-[state=active]:shadow-md"
             >
               Templates
-              {activeTab === "templates" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-orange-600" />
-              )}
             </TabsTrigger>
             <TabsTrigger
               value="collections"
-              className="relative px-1 py-3 text-sm font-medium transition-colors duration-200 bg-transparent border-0 shadow-none data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:shadow-none text-neutral-400 hover:text-white data-[state=active]:hover:text-white rounded-none"
+              className="bg-[#262626] text-white px-8 py-3.5 rounded-xl font-medium border border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.3)] transition-all duration-200 hover:bg-[#2d2d2d] hover:border-white/15 hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] data-[state=active]:bg-[#333] data-[state=active]:border-white/20 data-[state=active]:text-white data-[state=active]:shadow-md"
             >
               Collections
-              {activeTab === "collections" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-orange-600" />
-              )}
             </TabsTrigger>
           </TabsList>
 

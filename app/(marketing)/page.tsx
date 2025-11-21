@@ -135,10 +135,8 @@ export default function Home() {
   ];
 
   return (
-    <div className="relative bg-black">
-      {/* Global Grid Pattern */}
-      <div className="fixed inset-0 bg-grid-white/[0.02] pointer-events-none" />
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,black_100%)] pointer-events-none" />
+    <div className="relative bg-transparent">
+      {/* Global Grid Pattern - REMOVED */}
 
       {/* Hero Parallax */}
       <section
@@ -215,7 +213,6 @@ export default function Home() {
 
       {/* Testimonials */}
       <section className="relative py-32">
-        <div className="absolute inset-0 bg-grid-white/[0.02]" />
         <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-orange-500/5 rounded-full blur-[120px]" />
 

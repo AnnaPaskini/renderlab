@@ -1270,7 +1270,7 @@ export function PromptBuilderPanel({
             <div className="flex items-start justify-between">
               <div>
                 <h2 className="text-xl font-semibold text-rl-text">{getPageTitle()}</h2>
-                <p className="text-sm text-gray-400 mt-1">{getPageSubtitle()}</p>
+                <p className="text-sm text-purple-400/70 mt-1">{getPageSubtitle()}</p>
               </div>
               <button
                 onClick={() => {
@@ -1294,7 +1294,7 @@ export function PromptBuilderPanel({
                     toast.success('All cleared');
                   }
                 }}
-                className="text-sm text-gray-400 hover:text-white transition-colors"
+                className="text-sm text-purple-400/70 hover:text-purple-300 transition-colors"
               >
                 Clear All
               </button>
@@ -1342,7 +1342,7 @@ export function PromptBuilderPanel({
                 boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 20px 56px rgba(0, 0, 0, 0.3)'
               }}
             >
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">
+              <h3 className="text-xs font-semibold text-purple-400/70 uppercase tracking-wide mb-4">
                 Quick Load
               </h3>
 
@@ -1406,7 +1406,8 @@ export function PromptBuilderPanel({
                                 return (
                                   <div
                                     key={option.id}
-                                    className="flex items-center justify-between w-full group hover:bg-neutral-100 dark:hover:bg-neutral-700 px-3 py-2 cursor-pointer"
+                                    className={`flex items-center justify-between w-full group hover:bg-neutral-100 dark:hover:bg-neutral-700 px-3 py-2 cursor-pointer ${option.id === activeTemplateId ? 'border-2 border-purple-500 bg-purple-50 dark:bg-purple-900/20' : ''
+                                      }`}
                                   >
                                     <div
                                       className="flex-1 min-w-0"
@@ -1419,7 +1420,7 @@ export function PromptBuilderPanel({
                                         {template?.name || template?.title || "Untitled template"}
                                       </div>
                                       {(template?.style || template?.scenario) && (
-                                        <div className="text-sm text-neutral-600 dark:text-neutral-400 truncate mt-0.5">
+                                        <div className="text-sm text-purple-400/70 truncate mt-0.5">
                                           {template.style || template.scenario}
                                         </div>
                                       )}
@@ -1430,7 +1431,7 @@ export function PromptBuilderPanel({
                                         <button
                                           type="button"
                                           aria-label="Template options"
-                                          className="opacity-0 group-hover:opacity-100 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-opacity rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-700 ml-2"
+                                          className="opacity-0 group-hover:opacity-100 p-1.5 text-purple-400/70 hover:text-purple-400 transition-opacity rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-700 ml-2"
                                           onClick={(e) => e.stopPropagation()}
                                         >
                                           <IconDotsVertical size={16} stroke={1.5} />
@@ -1487,7 +1488,7 @@ export function PromptBuilderPanel({
                           </button>
                         </>
                       ) : (
-                        <div className="text-sm text-neutral-500 dark:text-neutral-400 py-2">
+                        <div className="text-sm text-purple-400/70 py-2">
                           {(() => {
                             console.log('🔴 No templates found - templateOptions.length:', templateOptions.length);
                             console.log('🔴 Raw templates state:', templates);
@@ -1518,14 +1519,14 @@ export function PromptBuilderPanel({
 
                 {/* Loaded Status Display */}
                 {activeMode === "template" && activeTemplateId && templateLookup.get(activeTemplateId) && (
-                  <div className="text-sm text-green-400 flex items-center gap-1">
+                  <div className="text-sm text-purple-400 flex items-center gap-1">
                     <span>✓</span>
                     <span>Loaded: "{templateLookup.get(activeTemplateId)?.templateName}"</span>
                   </div>
                 )}
 
                 {activeMode === "collection" && selectedCollection && (
-                  <div className="text-sm text-green-400 flex items-center gap-1">
+                  <div className="text-sm text-purple-400 flex items-center gap-1">
                     <span>✓</span>
                     <span>Loaded: "{selectedCollection.title}" ({(selectedCollection.templates || []).length} prompts)</span>
                   </div>

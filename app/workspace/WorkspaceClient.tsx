@@ -375,7 +375,7 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
                     }
                   }}
                   placeholder="https://example.com/image.jpg"
-                  className="flex-1 px-3 py-2 text-sm border border-white/8 rounded-lg bg-[#141414] focus:ring-2 focus:ring-[#ff6b35] focus:ring-opacity-50 focus:border-[#ff6b35] outline-none transition-all text-white placeholder:text-gray-500"
+                  className="flex-1 px-3 py-2 text-sm border border-white/8 rounded-lg bg-[#141414] focus:ring-2 focus:ring-[#ff6b35] focus:ring-opacity-50 focus:border-[#ff6b35] outline-none transition-all text-white placeholder:text-purple-400/50"
                   disabled={isValidatingUrl}
                 />
 

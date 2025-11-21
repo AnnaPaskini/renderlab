@@ -42,17 +42,23 @@ export default async function HistoryPage() {
     console.log('✅ Loaded images:', images.length);
 
     return (
-        <div className="min-h-screen text-white pt-32 pb-12 px-5">
+        <div className="rl-ambient-bg min-h-screen pt-32 pb-12">
             {/* Header */}
-            <div className="max-w-7xl mx-auto mb-10">
-                <h1 className="text-3xl font-bold mb-2.5">History</h1>
-                <p className="text-gray-500">
-                    {images.length} images loaded
-                </p>
+            <div className="relative z-10 border-b border-white/8">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+                    <div>
+                        <h1 className="text-3xl font-bold text-white">History</h1>
+                        <p className="text-gray-400 mt-2">
+                            Images are stored for 14 days. Please download any generations you wish to keep.
+                        </p>
+                    </div>
+                </div>
             </div>
 
             {/* Images Grid (Client Component) */}
-            <HistoryGrid images={images} />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-12">
+                <HistoryGrid images={images} />
+            </div>
         </div>
     );
 }

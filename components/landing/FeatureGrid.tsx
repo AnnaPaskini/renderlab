@@ -28,15 +28,7 @@ const features = [
 export function FeatureGrid() {
   return (
     <section className="py-24 bg-[var(--rl-surface)] text-[var(--rl-text)] relative overflow-hidden">
-      {/* Subtle background pattern */}
-      <div 
-        className="absolute inset-0 opacity-5"
-        style={{
-          backgroundImage: `radial-gradient(circle, var(--rl-accent) 1px, transparent 1px)`,
-          backgroundSize: '32px 32px',
-        }}
-      />
-      
+
       <div className="max-w-6xl mx-auto px-6 text-center relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

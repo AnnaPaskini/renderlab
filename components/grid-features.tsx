@@ -63,7 +63,6 @@ export const GridFeatures = () => {
   return (
     <section className="relative py-20">
       <div className="absolute inset-0 overflow-hidden opacity-40">
-        <div className="absolute inset-0 bg-grid-white/[0.02]" />
         <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
       </div>
 
