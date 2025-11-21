@@ -1,22 +1,69 @@
 "use client";
-import { useState } from "react";
-import { Heading } from "./heading";
-import { Subheading } from "./subheading";
 import { cn } from "@/lib/utils";
-import { InViewDiv } from "./in-view-div";
-import { useMemo } from "react";
-import { TestimonialColumnContainer } from "./testimonial-column-container";
 import Image from "next/image";
+import { useMemo } from "react";
+import { InViewDiv } from "./in-view-div";
+import { TestimonialColumnContainer } from "./testimonial-column-container";
 
 export const Testimonials = () => {
   return (
-    <div className="relative z-20 py-10 md:py-40">
-      <Heading as="h2">Loved by people all over the universe</Heading>
-      <Subheading className="text-center max-w-lg mx-auto">
-        Every AI is used by millions of people around the globe.Our APIs have
-        fan bases and people fight for us over twitter.
-      </Subheading>
-      <TestimonialGrid />
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Testimonial 1 */}
+      <div className="bg-gray-900/50 shadow-lg shadow-black/20 rounded-xl p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-orange-500" />
+          <div>
+            <div className="font-semibold text-white">Architecture Studio</div>
+            <div className="text-sm text-gray-400">Senior Architect</div>
+          </div>
+        </div>
+        <p className="text-gray-300 text-sm leading-relaxed">
+          "Cut our rendering time by 70%. Client presentations now include multiple style variations in minutes instead of days."
+        </p>
+        <div className="mt-4 flex gap-1">
+          {[...Array(5)].map((_, i) => (
+            <span key={i} className="text-orange-400">★</span>
+          ))}
+        </div>
+      </div>
+
+      {/* Testimonial 2 */}
+      <div className="bg-gray-900/50 shadow-lg shadow-black/20 rounded-xl p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-purple-500" />
+          <div>
+            <div className="font-semibold text-white">Visualization Specialist</div>
+            <div className="text-sm text-gray-400">Freelance Designer</div>
+          </div>
+        </div>
+        <p className="text-gray-300 text-sm leading-relaxed">
+          "Game-changer for my workflow. I can now offer clients 10+ style options for every project. Increased my revenue by 40%."
+        </p>
+        <div className="mt-4 flex gap-1">
+          {[...Array(5)].map((_, i) => (
+            <span key={i} className="text-orange-400">★</span>
+          ))}
+        </div>
+      </div>
+
+      {/* Testimonial 3 */}
+      <div className="bg-gray-900/50 shadow-lg shadow-black/20 rounded-xl p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-orange-500" />
+          <div>
+            <div className="font-semibold text-white">Design Firm</div>
+            <div className="text-sm text-gray-400">Principal</div>
+          </div>
+        </div>
+        <p className="text-gray-300 text-sm leading-relaxed">
+          "Perfect for rapid prototyping. We can test different aesthetics instantly. Clients love seeing multiple options before final render."
+        </p>
+        <div className="mt-4 flex gap-1">
+          {[...Array(5)].map((_, i) => (
+            <span key={i} className="text-orange-400">★</span>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
@@ -32,7 +79,7 @@ const testimonials = [
   {
     name: "Manu Arora",
     quote:
-      "What a fantastic AI Every AI is, I just love it. It has completely transformed the way I approach problems and develop solutions.",
+      "What a fantastic tool RenderLab is, I just love it. It has completely transformed the way I approach problems and develop solutions.",
     src: "https://i.pravatar.cc/150?img=1",
     designation: "Tech Innovator & Entrepreneur",
   },

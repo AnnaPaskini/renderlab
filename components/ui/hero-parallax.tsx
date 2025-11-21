@@ -60,7 +60,7 @@ export const HeroParallax = ({
       className="h-[180vh] py-20 overflow-hidden antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d]"
     >
       <div
-        className="absolute top-0 left-0 w-full h-[650px] bg-gradient-to-b from-black/95 via-black/70 to-transparent pointer-events-none z-[5]"
+        className="absolute bottom-0 left-0 w-full h-[400px] bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent pointer-events-none z-[20]"
       />
       <div className="relative z-[30]">
         <HeroHeader />
@@ -155,18 +155,170 @@ export const ProductCard = ({
 };
 export const HeroHeader = () => {
   return (
-    <div className="max-w-7xl relative mx-auto py-20 md:py-32 px-4 w-full left-0 top-0">
-      <h1 className="text-3xl md:text-7xl font-bold text-white leading-tight tracking-tight">
-        Transform Your <br />
-        <span className="bg-gradient-to-r from-white via-neutral-100 to-neutral-300 bg-clip-text text-transparent">
-          Architectural Renders
-        </span>
-      </h1>
+    <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden px-6 pt-40 pb-40">
 
-      <p className="max-w-[540px] text-base md:text-lg mt-6 text-neutral-300 font-light leading-relaxed opacity-75">
-        Professional visualization tools for architects and designers.
-        Enhance your renders with AI-powered templates in seconds.
-      </p>
-    </div>
+      {/* Content */}
+      <div className="relative z-10 text-center max-w-6xl mx-auto">
+
+        {/* Subtle highlight under headline */}
+        <div
+          className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[600px] h-[200px] bg-white blur-[80px] pointer-events-none mix-blend-overlay"
+          style={{ opacity: 0.04 }}
+        />
+
+        {/* Top Label - Small, Premium Context */}
+        <p
+          style={{
+            fontSize: '13px',
+            fontWeight: 400,
+            textTransform: 'uppercase',
+            color: 'rgba(255, 255, 255, 0.4)',
+            letterSpacing: '2px',
+            marginBottom: '32px',
+            opacity: 1
+          }}
+        >
+          The new way to create architectural visuals
+        </p>
+
+        {/* Headline - Stop Subscribing (Thin, With Period) */}
+        <h1
+          style={{
+            fontSize: 'clamp(48px, 8vw, 84px)',
+            fontWeight: 300,
+            letterSpacing: '-1.5px',
+            color: 'rgba(255, 255, 255, 0.95)',
+            lineHeight: 1,
+            marginBottom: '16px',
+            opacity: 1
+          }}
+        >
+          Stop Subscribing.
+        </h1>
+
+        {/* Headline - Start Rendering (Bold, Orange Gradient) */}
+        <h1
+          style={{
+            fontSize: 'clamp(44px, 7.5vw, 76px)',
+            fontWeight: 600,
+            letterSpacing: '-1px',
+            color: 'white',
+            lineHeight: 1,
+            marginBottom: '80px',
+            opacity: 1
+          }}
+        >
+          Start <span
+            style={{
+              background: 'linear-gradient(135deg, #F97316 0%, #FB923C 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              fontWeight: 700
+            }}
+          >
+            Rendering
+          </span>.
+        </h1>
+
+        {/* Features - Value Proposition (Vertical List) */}
+        <div
+          className="flex flex-col items-center gap-3"
+          style={{
+            marginBottom: '56px',
+            fontSize: '18px',
+            fontWeight: 400,
+            color: 'rgba(255, 255, 255, 0.5)',
+            letterSpacing: '0.3px',
+            opacity: 1
+          }}
+        >
+          <p>Architects share templates.</p>
+          <p>You render world-class visuals in seconds.</p>
+          <p>Just pay for what you need.</p>
+        </div>
+
+        {/* Buttons - Premium Orange + Glass */}
+        <div
+          style={{
+            display: 'flex',
+            gap: '20px',
+            justifyContent: 'center',
+            marginBottom: '32px',
+            opacity: 1
+          }}
+        >
+          <Link href="/workspace">
+            <button
+              style={{
+                padding: '18px 40px',
+                fontSize: '17px',
+                fontWeight: 500,
+                color: 'white',
+                background: 'linear-gradient(135deg, #F97316 0%, #FB923C 100%)',
+                border: 'none',
+                borderRadius: '14px',
+                boxShadow: '0 8px 24px rgba(249, 115, 22, 0.25)',
+                transition: 'all 0.3s ease',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(249, 115, 22, 0.35)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(249, 115, 22, 0.25)';
+              }}
+            >
+              Start Free Trial
+            </button>
+          </Link>
+
+          <button
+            style={{
+              padding: '18px 40px',
+              fontSize: '17px',
+              fontWeight: 500,
+              color: 'rgba(255, 255, 255, 0.9)',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1.5px solid rgba(255, 255, 255, 0.12)',
+              borderRadius: '14px',
+              backdropFilter: 'blur(12px)',
+              transition: 'all 0.3s ease',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)';
+            }}
+          >
+            Watch Demo
+          </button>
+        </div>
+
+        {/* Trust signals - Subtle */}
+        <p
+          style={{
+            fontSize: '13px',
+            fontWeight: 400,
+            color: 'rgba(255, 255, 255, 0.35)',
+            letterSpacing: '0.2px',
+            opacity: 1
+          }}
+        >
+          5 free renders • No credit card required •{' '}
+          <span style={{ color: 'rgba(167, 139, 250, 0.7)', fontWeight: 500 }}>
+            $0.90 per render
+          </span>
+        </p>
+
+      </div>
+
+    </section>
   );
 };

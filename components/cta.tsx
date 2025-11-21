@@ -1,34 +1,22 @@
 "use client";
 import Link from "next/link";
-import Balancer from "react-wrap-balancer";
-import { Button } from "./button";
 export const CTA = () => {
   return (
-    <section className="py-60 w-full  overflow-hidden relative z-30">
-      <div className="bg-white dark:bg-black">
-        <div className="mx-auto w-full relative z-20 sm:max-w-[40rem]  md:max-w-[48rem] lg:max-w-[64rem] xl:max-w-[80rem] bg-gradient-to-br from-slate-800 dark:from-neutral-900 to-gray-900 sm:rounded-2xl">
-          <div className="relative -mx-6   sm:mx-0 sm:rounded-2xl overflow-hidden px-6  md:px-8 ">
-
-            <div className="relative px-6 pb-14 pt-20 sm:px-10 sm:pb-20 lg:px-[4.5rem]">
-              <h2 className="  text-center text-balance mx-auto text-3xl md:text-5xl font-semibold tracking-[-0.015em] text-white">
-                Ready to signup and join the waitlist?
-              </h2>
-              <p className="mt-4 max-w-[26rem] text-center mx-auto  text-base/6 text-neutral-200">
-                <Balancer>
-                  Get instant access to our state of the art project and join
-                  the waitlist.
-                </Balancer>
-              </p>
-
-              <div className="relative z-10 mx-auto flex justify-center mt-6">
-                <Link href="/workspace">
-                  <Button>Join Waitlist</Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <div className="text-center max-w-2xl mx-auto space-y-6 py-20">
+      <h2 className="text-4xl font-bold text-white">
+        Ready to Transform Your Renders?
+      </h2>
+      <p className="text-xl text-gray-300">
+        Join thousands of architects creating stunning visualizations in seconds.
+      </p>
+      <Link href="/workspace" className="inline-block">
+        <button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-lg font-semibold px-12 py-4 rounded-xl transition-all duration-200 hover:scale-105 shadow-2xl shadow-orange-500/30">
+          Start Free Trial
+        </button>
+      </Link>
+      <p className="text-sm text-gray-500">
+        5 free renders • No credit card required • Cancel anytime
+      </p>
+    </div>
   );
 };

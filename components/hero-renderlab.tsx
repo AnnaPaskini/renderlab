@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Button } from "@/components/button";
+import { motion } from "framer-motion";
 import { HiArrowRight } from "react-icons/hi";
 
 export function Hero() {
@@ -23,7 +23,7 @@ export function Hero() {
           </h1>
 
           <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl mx-auto mb-12">
-            AI-powered templates for architects. Edit and download in seconds.
+            RenderLab-powered templates for architects. Edit and download in seconds.
             <br />
             Pay what you use.
           </p>

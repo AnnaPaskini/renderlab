@@ -1,47 +1,27 @@
 "use client";
 
-import { motion } from "framer-motion";
-import Image from "next/image";
-
-const logos = [
-  { name: "adobe", file: "adobe.png" },
-  { name: "autodesk-dark", file: "autodesk-dark.png" },
-  { name: "autodesk-logo-2-dark", file: "autodesk-logo-2-dark.png" },
-  { name: "behance", file: "behance.png" },
-  { name: "google-original-wordmark", file: "google-original-wordmark.png" },
-  { name: "google-original", file: "google-original.png" },
-  { name: "lumion", file: "lumion.png" },
-  { name: "sketchup", file: "sketchup.png" },
-  { name: "vercel", file: "vercel.png" },
-  { name: "enscape", file: "enscape.jpeg" },
-];
 
 export function Companies() {
   return (
     <section className="py-12 text-center">
-      <h3 className="text-sm font-semibold text-[var(--rl-text-secondary)] mb-12">
-        Trusted by companies worldwide
-      </h3>
-
-      <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
-        {logos.map((logo, index) => (
-          <motion.div
-            key={logo.name}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: index * 0.1 }}
-            className="flex items-center justify-center"
-          >
-            <Image
-              src={`/logos/${logo.file}`}
-              alt={logo.name}
-              width={120}
-              height={32}
-              className="h-[32px] w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
-              priority
-            />
-          </motion.div>
-        ))}
+      <div className="text-center space-y-4">
+        <div className="text-purple-400 text-sm font-medium uppercase tracking-wide">
+          Trusted by Architectural Professionals
+        </div>
+        <div className="flex justify-center gap-12 text-white/60">
+          <div className="text-center">
+            <div className="text-3xl font-bold text-white">50,000+</div>
+            <div className="text-sm">Renders Created</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-white">10,000+</div>
+            <div className="text-sm">Architects & Designers</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-white">50+</div>
+            <div className="text-sm">Countries Worldwide</div>
+          </div>
+        </div>
       </div>
     </section>
   );
