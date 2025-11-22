@@ -3,6 +3,7 @@
 import { ImageUploadPanel } from "@/components/workspace/ImageUploadPanel";
 import { PromptBuilderPanel } from "@/components/workspace/PromptBuilderPanelNew";
 import { WorkspaceLayout } from "@/components/workspace/WorkspaceLayout";
+import { createClientThumbnail } from "@/core/thumbnail/createClientThumbnail";
 import { useWorkspace } from "@/lib/context/WorkspaceContext";
 import { createClient } from "@/lib/supabaseBrowser";
 import { defaultToastStyle } from "@/lib/toast-config";
@@ -26,6 +27,7 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
   const searchParams = useSearchParams();
   const { activeItem, loadTemporary } = useWorkspace();
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [prompt, setPrompt] = useState("");
   const [previews, setPreviews] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -83,7 +85,6 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
   useEffect(() => {
     if (activeItem.type === 'temporary' && activeItem.data?.reference_url) {
       setUploadedImage(activeItem.data.reference_url);
-      console.log('✅ [Workspace] Loaded temporary reference image:', activeItem.data.reference_url);
     }
   }, [activeItem]);
 
@@ -97,11 +98,8 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
-        console.log('⚠️ [Realtime] No user found, skipping subscription');
         return;
       }
-
-      console.log('🔴 [Realtime] Setting up subscription for user:', user.id);
 
       // Create channel and subscribe to INSERT events
       channel = supabase
@@ -115,8 +113,6 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
             filter: `user_id=eq.${user.id}`
           },
           (payload) => {
-            console.log('🔴 [Realtime] New image inserted:', payload);
-
             const newImage = payload.new as PreviewImage;
 
             // Prepend new image to preview strip (most recent first)
@@ -135,7 +131,6 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
           }
         )
         .subscribe((status) => {
-          console.log('🔴 [Realtime] Subscription status:', status);
         });
     };
 
@@ -144,7 +139,6 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
     // Cleanup: Unsubscribe when component unmounts
     return () => {
       if (channel) {
-        console.log('🔴 [Realtime] Cleaning up subscription');
         supabase.removeChannel(channel);
       }
     };
@@ -167,7 +161,6 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
 
       if (images) {
         setPreviewImages(images);
-        console.log('✅ [Preview] Refetched images:', images.length);
       }
     } catch (error) {
       console.error('❌ [Preview] Failed to refetch images:', error);
@@ -187,8 +180,6 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
         border: 'none'
       }
     });
-
-    console.log('✅ [Workspace] Reference cleared, prompt preserved');
   };
 
   // Handle removing image from preview strip
@@ -263,41 +254,45 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
   }
 
   const handleGenerate = async (model: string, userPrompt: string) => {
-    console.log("Model used:", model || "nano-banana");
-    console.log("Has reference image:", !!uploadedImage);
     setIsGenerating(true);
 
     try {
-      let finalThumbnailUrl = null;
+      let thumbBlob: Blob | null = null;
 
-      // 1. Process Image (if exists) - Create Thumbnail
-      if (uploadedImage) {
-        toast.loading("Processing image...", { id: "processing-image" });
-
+      if (uploadedFile) {
         try {
-          const processResponse = await fetch("/api/process-thumbnail", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ image: uploadedImage }),
-          });
-
-          if (!processResponse.ok) {
-            throw new Error("Failed to process image thumbnail");
-          }
-
-          const processData = await processResponse.json();
-          finalThumbnailUrl = processData.thumbnailUrl;
-
-          toast.dismiss("processing-image");
-          console.log("✅ Thumbnail created:", finalThumbnailUrl);
+          thumbBlob = await createClientThumbnail(uploadedFile);
         } catch (err) {
-          toast.dismiss("processing-image");
-          console.error("Thumbnail processing failed:", err);
-          toast.error("Failed to process image. Please try again.");
-          setIsGenerating(false);
-          return;
+          console.error("Thumbnail generation failed:", err);
         }
       }
+
+      // ==== CLIENT THUMBNAIL UPLOAD TEST (DO NOT CHANGE ANYTHING ABOVE OR BELOW) ====
+      if (uploadedFile && thumbBlob) {
+        try {
+          // create supabase client
+          const supabase = createClient();
+
+          // simple file name for now
+          const fileName = `test_thumb_${Date.now()}.webp`;
+
+          // upload to workspace/test/ directory
+          const { data, error } = await supabase.storage
+            .from("renderlab-images")
+            .upload(`workspace/test/${fileName}`, thumbBlob, {
+              contentType: "image/webp",
+              upsert: false,
+            });
+
+          if (error) {
+            console.error("Client thumbnail upload FAILED:", error);
+          } else {
+          }
+        } catch (err) {
+          console.error("Unexpected client thumbnail upload error:", err);
+        }
+      }
+      // ==== END TEST BLOCK ====
 
       // 2. Call Generation API
       const response = await fetch("/api/generate", {
@@ -307,7 +302,7 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
           prompt: userPrompt,
           model: model, // ✅ Pass exact model selection
           imageUrl: uploadedImage || null, // Keep for backward compatibility or metadata if needed
-          thumbnailUrl: finalThumbnailUrl, // ✅ Send the thumbnail URL
+          thumbnailUrl: null, // ✅ Send the thumbnail URL
         }),
       });
 
@@ -330,8 +325,6 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
         console.error("Failed to parse JSON:", rawBody);
         throw new Error("Server returned invalid JSON");
       }
-
-      console.log("API response:", data);
 
       if (data?.status === "succeeded" && data?.output?.imageUrl) {
         const nextImage = data.output.imageUrl;
@@ -377,6 +370,7 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
               image={uploadedImage}
               onImageChange={setUploadedImage}
               onClearImage={handleClearReference}
+              onFileChange={setUploadedFile}
             />
 
             {/* URL Input - separate section */}

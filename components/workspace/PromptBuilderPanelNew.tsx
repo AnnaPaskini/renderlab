@@ -58,7 +58,6 @@ export function PromptBuilderPanel({
   initialAdditionalDetails,
   onRefetchPreviewImages,
 }: PromptBuilderPanelProps) {
-  console.log("🟢 RERENDER Panel, uploadedImage =", uploadedImage);
 
   const [internalIsGenerating, setInternalIsGenerating] = useState(false);
   const [internalActiveTab, setInternalActiveTab] = useState<"builder" | "custom">(
@@ -125,11 +124,6 @@ export function PromptBuilderPanel({
   const [selectedCollection, setSelectedCollection] = useState<any>(null);
   const collectionPreviewSetRef = useRef<Set<string>>(new Set());
 
-  // Debug templates state changes
-  useEffect(() => {
-    console.log('🔄 Templates state changed:', templates);
-    console.log('🔄 Templates count:', templates?.length);
-  }, [templates]);
   const getInitialProgressState = () => ({ total: 0, succeeded: 0, failed: 0, active: false });
   const [collectionProgress, setCollectionProgress] = useState(getInitialProgressState);
   const [isCollectionRun, setIsCollectionRun] = useState(false);
@@ -158,9 +152,6 @@ export function PromptBuilderPanel({
   };
 
   const { options: templateOptions, lookup: templateLookup } = useMemo(() => {
-    console.log('🔵 Computing templateOptions from templates:', templates);
-    console.log('🔵 Templates length:', templates?.length);
-
     const map = new Map<string, TemplateRecord>();
     const options: { id: string; label: string }[] = [];
 
@@ -173,27 +164,6 @@ export function PromptBuilderPanel({
     // Filter function to exclude collection-generated templates
     const isOriginalTemplate = (template: any) => {
       const name = template?.name || template?.title || '';
-      console.log('🔵 Checking template:', name);
-
-      // Exclude collection-generated templates
-      if (name.includes(' • ')) {
-        console.log('🔵 Excluding (contains •):', name);
-        return false;
-      }
-      if (name.includes(' - Copy')) {
-        console.log('🔵 Excluding (contains - Copy):', name);
-        return false;
-      }
-      if (/^\d+$/.test(name)) {
-        console.log('🔵 Excluding (pure number):', name);
-        return false;
-      }
-      if (/^\d+ • \d+$/.test(name)) {
-        console.log('🔵 Excluding (number • number):', name);
-        return false;
-      }
-
-      console.log('🔵 Including template:', name);
       return true;
     };
 
@@ -235,12 +205,8 @@ export function PromptBuilderPanel({
     templates
       .filter(isOriginalTemplate)
       .forEach((template, index) => {
-        console.log('🔵 Registering template:', template.name);
         registerTemplate(template, { fallbackIndex: index });
       });
-
-    console.log('🔵 Final templateOptions:', options);
-    console.log('🔵 Options count:', options.length);
 
     return { options, lookup: map };
   }, [collections, templates]);
@@ -304,12 +270,9 @@ export function PromptBuilderPanel({
       const { data: { user }, error: authError } = await supabase.auth.getUser();
 
       if (authError || !user) {
-        console.log('⚠️ No user logged in, skipping template load');
         setTemplates([]);
         return;
       }
-
-      console.log('📥 Loading templates from Supabase for user:', user.id);
 
       const { data, error } = await supabase
         .from('templates')
@@ -322,9 +285,6 @@ export function PromptBuilderPanel({
         throw error;
       }
 
-      console.log('✅ Loaded templates from Supabase:', data);
-      console.log('✅ Templates count:', data?.length);
-      console.log('✅ First template structure:', data?.[0]);
       setTemplates(data || []);
       setTemplateRenderKey(prev => prev + 1); // Force re-render
     } catch (error) {
@@ -464,7 +424,6 @@ export function PromptBuilderPanel({
         setAiModel(template.aiModel || "");
         setStyle(template.style || "");
         setDetails(template.details || ""); // Only use raw details, never finalPrompt (assembled)
-        console.log("🔄 Builder updated from storage:", template);
       }
     };
 
@@ -479,16 +438,12 @@ export function PromptBuilderPanel({
       try {
         const template = JSON.parse(activeTemplate);
 
-        console.log("🔵 Loading template:", template);
-        console.log("🔵 Template.prompt:", template.prompt);
-
         isLoadingTemplateRef.current = true;
 
         // Simple load - just set the prompt text
         if (template?.prompt) {
           setCustomPrompt(template.prompt);
           setEditablePrompt(template.prompt); // Also load into editable textarea
-          console.log("✅ Loaded prompt into workspace:", template.prompt);
         }
 
         // Reset flag after a short delay to allow state updates
@@ -496,7 +451,6 @@ export function PromptBuilderPanel({
           isLoadingTemplateRef.current = false;
         }, 100);
 
-        console.log("✅ Template loaded successfully");
         localStorage.removeItem("RenderAI_activeTemplate");
       } catch (error) {
         console.error("❌ Error loading template:", error);
@@ -520,16 +474,13 @@ export function PromptBuilderPanel({
 
     // Если текущий editablePrompt НЕ системный — не трогаем
     if (!isSystemPrompt(editablePrompt)) {
-      console.log("🟡 User-custom text detected — keeping it.");
       return;
     }
 
     // Если системный — обновляем в зависимости от картинки
     if (uploadedImage) {
-      console.log("🟣 Setting: Transform the reference image.");
       setEditablePrompt("Transform the reference image.");
     } else {
-      console.log("🔵 Setting: Create a new image.");
       setEditablePrompt("Create a new image.");
     }
   }, [uploadedImage]);
@@ -691,14 +642,11 @@ export function PromptBuilderPanel({
       // Load assembled prompt into customPrompt instead of details
       if (activeItem.data.prompt) {
         setCustomPrompt(activeItem.data.prompt);
-        console.log('✅ [PromptBuilder] Loaded assembled prompt into customPrompt:', activeItem.data.prompt);
       }
 
       // Note: Reference image (uploadedImage) is managed by parent component (workspace/page.tsx)
       // The parent needs to handle activeItem.data.reference_url
       if (activeItem.data.reference_url) {
-        console.log('📸 [PromptBuilder] Reference image URL available:', activeItem.data.reference_url);
-        console.log('⚠️ [PromptBuilder] Parent component should update uploadedImage prop');
       }
     }
   }, [activeItem]);
@@ -777,8 +725,6 @@ export function PromptBuilderPanel({
         throw error;
       }
 
-      console.log('Template saved to Supabase:', data);
-
       // 6. Обновляем локальный список шаблонов
       await loadTemplatesFromSupabase();
       if (data?.id) {
@@ -809,11 +755,6 @@ export function PromptBuilderPanel({
       return;
     }
 
-    console.log("[stream] generating template", {
-      tab: currentTab,
-      model: aiModel,
-    });
-
     try {
       setGeneratingState(true);
       if (onGenerate) {
@@ -842,10 +783,6 @@ export function PromptBuilderPanel({
       toast.error("No collection selected.");
       return;
     }
-
-    // ✅ ДОБАВЬ ЭТО:
-    console.log("Collection structure:", JSON.stringify(collection, null, 2));
-    console.log("First template:", JSON.stringify(collection.templates?.[0], null, 2));
 
     const templatesPayload = Array.isArray(collection.templates)
       ? collection.templates.map((template: any) => ({
@@ -882,11 +819,6 @@ export function PromptBuilderPanel({
       });
       collectionPreviewSetRef.current.clear();
 
-      console.log("[stream] starting collection generation", {
-        collectionId: collection.id,
-        total: totalItems,
-      });
-
       // Конвертируем uploadedImage (data URI) в public URL
       let publicImageUrl = null;
       if (uploadedImage && uploadedImage.startsWith('data:')) {
@@ -901,7 +833,6 @@ export function PromptBuilderPanel({
 
         const uploadData = await uploadRes.json();
         publicImageUrl = uploadData.output?.publicUrl || null;
-        console.log('✅ Uploaded reference image:', publicImageUrl);
       }
 
       const response = await fetch("/api/generate/collection", {
@@ -916,7 +847,6 @@ export function PromptBuilderPanel({
       });
 
       const contentType = response.headers.get("content-type") ?? "unknown";
-      console.log("Collection response status:", response.status, "Content-Type:", contentType);
 
       if (!response.ok) {
         toast.error(`Collection generation failed: ${response.status}`);
@@ -947,7 +877,6 @@ export function PromptBuilderPanel({
             continue;
           }
 
-          console.log(`[stream] chunk: ${value.length} bytes`);
           buffer += decoder.decode(value, { stream: true });
 
           const parts = buffer.split("\n");
@@ -958,7 +887,6 @@ export function PromptBuilderPanel({
 
             try {
               const event = JSON.parse(line);
-              console.log("[stream] event:", event);
 
               if (event.type === "start") {
                 totalItems = typeof event.total === "number" ? event.total : totalItems;
@@ -983,17 +911,14 @@ export function PromptBuilderPanel({
                   }));
 
                   if (typeof event.url === "string" && event.url) {
-                    console.log("✅ [PREVIEW] Adding image to UI:", event.url);
                     if (!collectionPreviewSetRef.current.has(event.url)) {
                       collectionPreviewSetRef.current.add(event.url);
                       if (onPreviewAdd) {
                         onPreviewAdd(event.url);
-                        console.log("✅ [PREVIEW] Called onPreviewAdd with:", event.url);
                       } else {
                         console.warn("⚠️ [PREVIEW] onPreviewAdd is not defined");
                       }
                     } else {
-                      console.log("⚠️ [PREVIEW] Image already in set, skipping");
                     }
                   } else {
                     console.warn("⚠️ [PREVIEW] No URL in event:", event);
@@ -1019,7 +944,6 @@ export function PromptBuilderPanel({
                 }
 
                 if (typeof event.index === "number") {
-                  console.log(`[stream] progress: item ${event.index + 1} of ${totalItems}`);
                 }
               }
 
@@ -1038,7 +962,6 @@ export function PromptBuilderPanel({
         if (trailing) {
           try {
             const event = JSON.parse(trailing);
-            console.log("[stream] event (trailing):", event);
 
             if (event.type === "start") {
               totalItems = typeof event.total === "number" ? event.total : totalItems;
@@ -1059,12 +982,10 @@ export function PromptBuilderPanel({
                   succeeded: prev.succeeded + 1,
                 }));
                 if (typeof event.url === "string" && event.url) {
-                  console.log("✅ [PREVIEW/TRAILING] Adding image to UI:", event.url);
                   if (!collectionPreviewSetRef.current.has(event.url)) {
                     collectionPreviewSetRef.current.add(event.url);
                     if (onPreviewAdd) {
                       onPreviewAdd(event.url);
-                      console.log("✅ [PREVIEW/TRAILING] Called onPreviewAdd with:", event.url);
                     }
                   }
                 }
@@ -1094,7 +1015,6 @@ export function PromptBuilderPanel({
         }
       } catch (streamError) {
         if (streamError instanceof DOMException && streamError.name === "AbortError") {
-          console.log("Collection stream aborted by user");
           toast("Generation canceled by user.");
         } else {
           console.error("Stream reading failed:", streamError);
@@ -1119,20 +1039,16 @@ export function PromptBuilderPanel({
               ? finalEvent.errors
               : failedCount;
 
-        console.log(`[stream] done: ${succeeded} succeeded, ${failed} failed`);
-
         if (failed > 0) {
           toast(`Collection completed with ${failed} failure${failed === 1 ? "" : "s"}.`);
         } else {
           toast.success(`Collection completed: ${succeeded} succeeded, 0 failed.`);
         }
       } else {
-        console.log("Collection stream completed without a terminal event.");
         toast("Collection generation finalized.");
       }
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") {
-        console.log("Collection fetch aborted by user");
         toast("Generation canceled by user.");
       } else {
         console.error("Collection generation failed", error);
@@ -1147,7 +1063,6 @@ export function PromptBuilderPanel({
 
       // Refetch preview images after collection generation completes
       if (onRefetchPreviewImages) {
-        console.log('🔄 Refetching preview images after collection generation');
         onRefetchPreviewImages();
       }
     }
@@ -1379,25 +1294,20 @@ export function PromptBuilderPanel({
                   {activeMode === "template" ? (
                     <>
                       {(() => {
-                        console.log('🎯 Template mode active, templateOptions.length:', templateOptions.length);
-                        console.log('🎯 templateOptions:', templateOptions);
                         return null;
                       })()}
                       {templateOptions.length > 0 ? (
                         <>
-                          {console.log('✅ Showing dropdown, templateOptions.length:', templateOptions.length)}
                           <DropdownMenu
                             key={`template-dropdown-${templateRenderKey}`}
                             open={isTemplateDropdownOpen}
                             onOpenChange={(open) => {
-                              console.log('🎯 Dropdown onOpenChange:', open);
                               setIsTemplateDropdownOpen(open);
                             }}
                           >
                             <DropdownMenuTrigger asChild>
                               <button
                                 className={cn(selectTriggerClass, "flex-[7] flex items-center justify-between")}
-                                onClick={() => console.log('🎯 Dropdown trigger clicked')}
                               >
                                 <span className="truncate">
                                   {activeTemplateId
@@ -1413,14 +1323,10 @@ export function PromptBuilderPanel({
                               align="start"
                             >
                               {(() => {
-                                console.log('🎯 DropdownMenuContent rendering, templateOptions:', templateOptions);
-                                console.log('🎯 templateOptions.length:', templateOptions.length);
                                 return null;
                               })()}
                               {templateOptions.map((option) => {
-                                console.log('🔵 Rendering template option:', option);
                                 const template = templateLookup.get(option.id)?.template;
-                                console.log('🔵 Template data:', template);
                                 return (
                                   <div
                                     key={option.id}
@@ -1508,8 +1414,6 @@ export function PromptBuilderPanel({
                       ) : (
                         <div className="text-sm text-purple-400/70 py-2">
                           {(() => {
-                            console.log('🔴 No templates found - templateOptions.length:', templateOptions.length);
-                            console.log('🔴 Raw templates state:', templates);
                             return "No saved templates found.";
                           })()}
                         </div>
@@ -1608,7 +1512,6 @@ export function PromptBuilderPanel({
                 }}
                 avoidElements={avoidElements}
                 onAvoidElementsChange={(value) => {
-                  console.log('📥 PromptBuilder received avoid elements:', value);
                   setAvoidElements(value);
                   if (!isLoadingTemplateRef.current) {
                     setCustomPrompt(''); // Clear manual edits when avoid elements change

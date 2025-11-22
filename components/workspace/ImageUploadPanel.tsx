@@ -11,9 +11,10 @@ interface ImageUploadPanelProps {
   onImageChange: (image: string | null) => void;
   image: string | null;
   onClearImage?: () => void;
+  onFileChange?: (file: File) => void;
 }
 
-export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUploadPanelProps) {
+export function ImageUploadPanel({ image, onImageChange, onClearImage, onFileChange }: ImageUploadPanelProps) {
   const [isDragActive, setIsDragActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -34,6 +35,7 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage }: ImageUp
         return;
       }
 
+      onFileChange?.(file);
       setIsLoading(true);
       const reader = new FileReader();
       reader.onload = (event) => {
