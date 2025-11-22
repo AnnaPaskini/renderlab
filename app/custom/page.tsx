@@ -37,13 +37,13 @@ export default function CustomPage() {
           <TabsList className="flex justify-start gap-4 mb-8 bg-transparent p-0 h-auto border-0">
             <TabsTrigger
               value="templates"
-              className="bg-[#262626] text-white px-8 py-3.5 rounded-xl font-medium border border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.3)] transition-all duration-200 hover:bg-[#2d2d2d] hover:border-white/15 hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] data-[state=active]:bg-[#333] data-[state=active]:border-white/20 data-[state=active]:text-white data-[state=active]:shadow-md"
+              className="bg-[#262626] text-white px-8 py-3.5 rounded-xl font-medium border border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.3)] transition-all duration-200 hover:bg-[#2d2d2d] hover:border-white/15 hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] data-[state=active]:border-b-2 data-[state=active]:border-[--rl-accent] data-[state=active]:text-white data-[state=active]:shadow-md"
             >
               Templates
             </TabsTrigger>
             <TabsTrigger
               value="collections"
-              className="bg-[#262626] text-white px-8 py-3.5 rounded-xl font-medium border border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.3)] transition-all duration-200 hover:bg-[#2d2d2d] hover:border-white/15 hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] data-[state=active]:bg-[#333] data-[state=active]:border-white/20 data-[state=active]:text-white data-[state=active]:shadow-md"
+              className="bg-[#262626] text-white px-8 py-3.5 rounded-xl font-medium border border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.3)] transition-all duration-200 hover:bg-[#2d2d2d] hover:border-white/15 hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] data-[state=active]:border-b-2 data-[state=active]:border-[--rl-accent] data-[state=active]:text-white data-[state=active]:shadow-md"
             >
               Collections
             </TabsTrigger>

@@ -1,5 +1,10 @@
-import { createClient } from '@/lib/supabaseServer';
-import { redirect } from 'next/navigation';
+'use client';
+
+import { createClient } from '@/lib/supabaseBrowser';
+import { defaultToastStyle } from '@/lib/toast-config';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { HistoryGrid } from './HistoryGrid';
 
 interface HistoryImage {
@@ -10,36 +15,95 @@ interface HistoryImage {
     created_at: string;
 }
 
-export default async function HistoryPage() {
-    console.time('⏱️ SERVER: Load History');
+const PAGE_SIZE = 20;
 
-    const supabase = await createClient();
+export default function HistoryPage() {
+    const router = useRouter();
+    const [items, setItems] = useState<HistoryImage[]>([]);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // Check authentication
+    useEffect(() => {
+        const checkAuth = async () => {
+            const supabase = createClient();
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-        console.error('❌ Not authenticated');
-        redirect('/login');
+            if (authError || !user) {
+                console.error('❌ Not authenticated');
+                router.push('/login');
+                return;
+            }
+
+            setIsAuthenticated(true);
+        };
+
+        checkAuth();
+    }, [router]);
+
+    // Load page function
+    const loadPage = async (nextPage: number) => {
+        setIsLoading(true);
+        try {
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) {
+                router.push('/login');
+                return;
+            }
+
+            const from = nextPage * PAGE_SIZE;
+            const to = from + PAGE_SIZE - 1;
+
+            const { data, error } = await supabase
+                .from('images')
+                .select('id, thumbnail_url, url, prompt, created_at')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false })
+                .range(from, to);
+
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                if (nextPage === 0) setItems([]);
+                setHasMore(false);
+                return;
+            }
+
+            if (nextPage === 0) {
+                setItems(data);
+            } else {
+                setItems(prev => [...prev, ...data]);
+            }
+
+            if (data.length < PAGE_SIZE) {
+                setHasMore(false);
+            }
+
+            setPage(nextPage);
+        } catch (error) {
+            console.error('Failed to load history page:', error);
+            toast.error('Failed to load history. Please try again.', {
+                style: defaultToastStyle,
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Initial load
+    useEffect(() => {
+        if (isAuthenticated) {
+            loadPage(0);
+        }
+    }, [isAuthenticated]);
+
+    if (!isAuthenticated) {
+        return null;
     }
-
-    // Fetch user's images (server-side, ONE database call)
-    const { data, error } = await supabase
-        .from('images')
-        .select('id, thumbnail_url, url, prompt, created_at')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-    console.timeEnd('⏱️ SERVER: Load History');
-
-    if (error) {
-        console.error('❌ Error loading images:', error);
-    }
-
-    const images: HistoryImage[] = data || [];
-
-    console.log('✅ Loaded images:', images.length);
 
     return (
         <div className="rl-ambient-bg min-h-screen pt-32 pb-12">
@@ -57,7 +121,23 @@ export default async function HistoryPage() {
 
             {/* Images Grid (Client Component) */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-12">
-                <HistoryGrid images={images} />
+                <HistoryGrid
+                    images={items}
+                    onDelete={(imageId) => setItems(prev => prev.filter(img => img.id !== imageId))}
+                />
+
+                {/* Load More Button */}
+                {hasMore && (
+                    <div className="flex justify-center mt-8">
+                        <button
+                            className="rl-btn rl-btn-secondary disabled:opacity-50"
+                            disabled={isLoading}
+                            onClick={() => loadPage(page + 1)}
+                        >
+                            {isLoading ? 'Loading...' : 'Load more'}
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

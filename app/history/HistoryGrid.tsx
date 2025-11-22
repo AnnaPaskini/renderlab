@@ -1,8 +1,16 @@
 'use client';
 
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import ImagePreviewModal from '@/components/workspace/ImagePreviewModal';
 import { AnimatePresence } from 'framer-motion';
-import { Eye } from 'lucide-react';
+import { Eye, MoreVertical, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -17,12 +25,15 @@ interface HistoryImage {
 
 interface HistoryGridProps {
     images: HistoryImage[];
+    onDelete?: (imageId: string) => void;
 }
 
-export function HistoryGrid({ images }: HistoryGridProps) {
+export function HistoryGrid({ images, onDelete }: HistoryGridProps) {
     const router = useRouter();
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
     const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [imageToDelete, setImageToDelete] = useState<HistoryImage | null>(null);
 
     const handleDownload = async (img: HistoryImage) => {
         try {
@@ -58,6 +69,37 @@ export function HistoryGrid({ images }: HistoryGridProps) {
         const safeUrl = fullUrl + (fullUrl.includes('?') ? '&download=1' : '?download=1');
         // Redirect: /inpaint?image=<encodeURIComponent(fullUrl)>
         router.push(`/inpaint?image=${encodeURIComponent(safeUrl)}`);
+        setOpenMenuId(null);
+    };
+
+    const handleDeleteImage = async (img: HistoryImage) => {
+        try {
+            const response = await fetch(`/api/images/${img.id}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete image');
+            }
+
+            toast.success('Image deleted from history');
+            setDeleteDialogOpen(false);
+            setImageToDelete(null);
+            setOpenMenuId(null);
+
+            // Update UI immediately
+            if (onDelete) {
+                onDelete(img.id);
+            }
+        } catch (error) {
+            console.error('Delete failed:', error);
+            toast.error('Failed to delete image');
+        }
+    };
+
+    const openDeleteDialog = (img: HistoryImage) => {
+        setImageToDelete(img);
+        setDeleteDialogOpen(true);
         setOpenMenuId(null);
     };
 
@@ -122,24 +164,17 @@ export function HistoryGrid({ images }: HistoryGridProps) {
                             )}
 
                             {/* 3-dot menu */}
-                            <div className="absolute top-2 right-2">
-                                <button
-                                    onClick={() => setOpenMenuId(openMenuId === img.id ? null : img.id)}
-                                    className="p-2 rounded-lg hover:bg-black/50 transition-colors"
-                                    style={{
-                                        background: 'rgba(0, 0, 0, 0.5)',
-                                        backdropFilter: 'blur(8px)',
-                                        border: '1px solid rgba(255, 255, 255, 0.1)'
-                                    }}
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <circle cx="12" cy="12" r="1" />
-                                        <circle cx="12" cy="5" r="1" />
-                                        <circle cx="12" cy="19" r="1" />
-                                    </svg>
-                                </button>
+                            <button
+                                onClick={() => setOpenMenuId(openMenuId === img.id ? null : img.id)}
+                                className="absolute top-3 right-3 flex items-center justify-center w-10 h-10 bg-gray-500/60 backdrop-blur-sm rounded-xl text-white hover:bg-gray-500/70 transition"
+                            >
+                                <MoreVertical className="w-5 h-5 text-white" />
+                            </button>
+                            <div className="absolute top-2 right-2" style={{ pointerEvents: 'none', visibility: 'hidden' }}>
 
-                                {/* Dropdown Menu */}
+                            </div>
+                            {/* Dropdown Menu */}
+                            <div className="absolute top-12 right-3">
                                 {openMenuId === img.id && (
                                     <div
                                         className="absolute right-0 mt-2 rounded-lg overflow-hidden shadow-xl z-10"
@@ -180,6 +215,14 @@ export function HistoryGrid({ images }: HistoryGridProps) {
                                             <Eye size={16} />
                                             Edit (Inpaint)
                                         </button>
+                                        <button
+                                            onClick={() => openDeleteDialog(img)}
+                                            className="w-full px-4 py-2.5 text-left text-sm hover:bg-red-500/10 transition-colors flex items-center gap-2"
+                                            style={{ color: '#ef4444' }}
+                                        >
+                                            <Trash2 size={16} />
+                                            Delete from History
+                                        </button>
                                     </div>
                                 )}
                             </div>
@@ -214,6 +257,33 @@ export function HistoryGrid({ images }: HistoryGridProps) {
                     />
                 )}
             </AnimatePresence>
+
+            {/* Delete Confirmation Modal */}
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <DialogContent className="sm:max-w-[425px] border border-white/10 shadow-xl backdrop-blur-md bg-[#101014]">
+                    <DialogHeader>
+                        <DialogTitle>Delete from History</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete this image from your History?
+                            This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <button
+                            onClick={() => setDeleteDialogOpen(false)}
+                            className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={() => imageToDelete && handleDeleteImage(imageToDelete)}
+                            className="px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                        >
+                            Delete
+                        </button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

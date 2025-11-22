@@ -185,16 +185,6 @@ export function ActionsPanel({ onDuplicate, onRename, onSave, onAddTemplate, onD
                       Delete Collection
                     </button>
                   )}
-
-                  <button
-                    onClick={() => {
-                      onBack();
-                      closePanel();
-                    }}
-                    className="w-full px-4 py-3 bg-[#1a1a1a] hover:bg-[#202020] text-white font-medium rounded-lg transition-all duration-200 border-0"
-                  >
-                    ← Back to Collections
-                  </button>
                 </div>
 
 

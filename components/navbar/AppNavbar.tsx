@@ -29,23 +29,16 @@ export const AppNavbar = () => {
     const [email, setEmail] = useState<string | null>(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-    // Close dropdown when clicking outside
+    // Load user email
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            const target = event.target as Element;
-            if (!target.closest('.dropdown-container')) {
-                setIsDropdownOpen(false);
+        async function fetchUser() {
+            const { data, error } = await supabase.auth.getUser();
+            if (!error && data?.user?.email) {
+                setEmail(data.user.email);
             }
-        };
-
-        if (isDropdownOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
         }
-
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [isDropdownOpen]);
+        fetchUser();
+    }, [supabase]);
 
     // Logout handler
     const handleLogout = async () => {
@@ -104,7 +97,10 @@ export const AppNavbar = () => {
                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                 className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-sm font-semibold hover:shadow-lg hover:shadow-orange-500/20 transition-all focus:outline-none"
                             >
-                                A
+                                {email ? (() => {
+                                    const username = email.split("@")[0] || "U";
+                                    return username.charAt(0).toUpperCase();
+                                })() : "A"}
                             </button>
                             {isDropdownOpen && (
                                 <div className="absolute right-0 top-[60px] w-64 rounded-2xl backdrop-blur-xl bg-neutral-900/95 border border-white/10 shadow-2xl shadow-black/50 p-2 z-50">

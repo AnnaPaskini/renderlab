@@ -684,15 +684,18 @@ export function CollectionsPanel() {
 					onDragLeave={handleDragLeave}
 					onDragEnd={handleDragEnd}
 				>
-					<div className="flex items-center justify-between border-b border-neutral-200 pb-3 mb-6 dark:border-neutral-800">
-						<div>
-							<h2 className="text-lg font-semibold leading-none text-neutral-900 dark:text-neutral-100">
-								{activeCollection?.title || "Untitled Collection"}
-							</h2>
-							<div className="text-xs text-purple-400/70 mt-2">
+					<div className="flex items-center justify-between px-4 py-3">
+						<button onClick={closeDetailView} className="text-sm opacity-70 hover:opacity-100">
+							← Back
+						</button>
+
+						<div className="text-center flex-1">
+							<h2 className="text-lg font-medium">{activeCollection?.title || "Untitled Collection"}</h2>
+							<p className="text-xs opacity-60">
 								{(activeCollection.templates?.length ?? 0)}/5 templates
-							</div>
+							</p>
 						</div>
+
 						<ActionsPanel
 							onDuplicate={() => {
 								if (activeCollection) {
@@ -715,6 +718,7 @@ export function CollectionsPanel() {
 							onGenerate={handleOpenGenerationDialog}
 						/>
 					</div>
+
 					<div className="flex-1 space-y-3 overflow-auto pr-1">
 						{(activeCollection.templates?.length ?? 0) === 0 ? (
 							<div className="py-10 text-center text-sm text-purple-400/70">

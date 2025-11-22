@@ -117,9 +117,12 @@ export function CanvasArea({
         const img = new Image();
         img.crossOrigin = 'anonymous';  // Fix CORS for canvas export
         img.onload = () => {
-            const imageCanvas = imageCanvasRef.current!;
-            const maskCanvas = maskCanvasRef.current!;
-            const drawCanvas = drawCanvasRef.current!;
+            const imageCanvas = imageCanvasRef.current;
+            const maskCanvas = maskCanvasRef.current;
+            const drawCanvas = drawCanvasRef.current;
+
+            // Null guard: check if canvas refs are still valid
+            if (!imageCanvas || !maskCanvas || !drawCanvas) return;
 
             // Вычисляем размер canvas с сохранением aspect ratio
             const MAX_SIZE = 1024;
