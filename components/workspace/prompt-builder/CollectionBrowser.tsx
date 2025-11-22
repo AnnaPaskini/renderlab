@@ -59,21 +59,21 @@ export function CollectionBrowser({
                             </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
-                            className="w-[400px] max-h-[400px] overflow-y-auto bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg"
+                            className="w-[400px] max-h-[400px] overflow-y-auto bg-[var(--rl-panel)] text-[var(--rl-text)] border-[var(--rl-border)] rounded-lg shadow-lg"
                             align="start"
                         >
                             {collectionOptions.map((option) => {
                                 return (
                                     <div
                                         key={option.id}
-                                        className="flex items-center justify-between w-full group hover:bg-neutral-100 dark:hover:bg-neutral-700 px-3 py-2 cursor-pointer"
+                                        className="flex items-center justify-between w-full group hover:bg-[var(--rl-panel-hover)] px-3 py-2 cursor-pointer"
                                         onClick={() => {
                                             onCollectionIdChange(option.id);
                                             setIsCollectionDropdownOpen(false);
                                         }}
                                     >
                                         <div className="flex-1 min-w-0">
-                                            <div className="font-medium text-neutral-900 dark:text-white truncate">
+                                            <div className="font-medium text-[var(--rl-text)] truncate">
                                                 {option.label}
                                             </div>
                                         </div>

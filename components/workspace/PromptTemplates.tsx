@@ -4,6 +4,7 @@ import { useWorkspace } from "@/lib/context/WorkspaceContext";
 import { createClient } from "@/lib/supabaseBrowser";
 import { defaultToastStyle } from "@/lib/toast-config";
 import { IconDotsVertical } from "@tabler/icons-react";
+import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -14,7 +15,7 @@ import {
   DialogContent,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "../ui/dialog";
 import {
   DropdownMenu,
@@ -34,6 +35,8 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
   const [templates, setTemplates] = useState<any[]>([]);
   const [previewTemplate, setPreviewTemplate] = useState<any | null>(null);
+  const [editableContent, setEditableContent] = useState("");
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
 
   // Three-dot menu state
   const [renameTarget, setRenameTarget] = useState<any | null>(null);
@@ -96,6 +99,13 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     }
   }, [activeTab]);
 
+  // === SET EDITABLE CONTENT WHEN TEMPLATE OPENS ===
+  useEffect(() => {
+    if (previewTemplate) {
+      setEditableContent(previewTemplate.prompt || "");
+    }
+  }, [previewTemplate]);
+
   // === HANDLE LOAD TEMPLATE ===
   const handleLoadTemplate = (template: any) => {
     if (!template) return;
@@ -126,6 +136,112 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
       style: { fontSize: "13px" },
     });
     if (setActiveTab) setActiveTab("custom");
+  };
+
+  // === HANDLE CLOSE ===
+  const handleClose = () => {
+    if (editableContent !== (previewTemplate?.prompt || "")) {
+      setShowSaveConfirm(true);
+    } else {
+      setPreviewTemplate(null);
+    }
+  };
+
+  // === HANDLE CANCEL CLOSE ===
+  const handleCancelClose = () => {
+    setShowSaveConfirm(false);
+  };
+
+  // === HANDLE SAVE TEMPLATE ===
+  const handleSaveTemplate = async (silent = false) => {
+    if (!previewTemplate) return false;
+
+    // Validate template ID
+    if (!previewTemplate.id) {
+      console.error('❌ Template ID missing:', previewTemplate);
+      if (!silent) {
+        toast.error('Template ID missing - cannot save', {
+          style: defaultToastStyle,
+        });
+      }
+      return false;
+    }
+
+    console.log('💾 Saving template with ID:', previewTemplate.id);
+
+    // Normalize ID to ASCII hyphens (replace EN DASH / EM DASH with regular hyphen)
+    const cleanId = (previewTemplate.id || "")
+      .replace(/[\u2012\u2013\u2014\u2015]/g, "-")
+      .trim();
+
+    // Clean prompt before save
+    const normalizedPrompt = editableContent
+      .replace(/\s+/g, " ")
+      .trim();
+
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('templates')
+        .update({
+          prompt: normalizedPrompt
+        })
+        .eq('id', cleanId)
+        .select();
+
+      if (error) {
+        console.error('❌ Supabase update error:', error);
+        throw error;
+      }
+
+      console.log('✅ Template saved successfully:', data);
+
+      if (!silent) {
+        toast.success('Template saved!', {
+          style: defaultToastStyle,
+        });
+
+        setPreviewTemplate(null);
+        setShowSaveConfirm(false);
+        loadTemplatesFromSupabase();
+      } else {
+        toast.success('Template saved!', {
+          style: defaultToastStyle,
+        });
+        // Update the preview template with the new prompt for immediate use
+        setPreviewTemplate((prev: any) => prev ? { ...prev, prompt: normalizedPrompt } : null);
+      }
+      return true;
+    } catch (error) {
+      console.error('Failed to update template:', error);
+      if (!silent) {
+        toast.error('Failed to update template', {
+          style: defaultToastStyle,
+        });
+      }
+      return false;
+    }
+  };
+
+  // === HANDLE OPEN IN BUILD ===
+  const handleOpenInBuild = async () => {
+    // если без изменений — сразу открываем
+    if (editableContent === previewTemplate.prompt) {
+      return handleLoadTemplate(previewTemplate);
+    }
+
+    // если есть изменения — сначала сохранить
+    const saved = await handleSaveTemplate(true); // true = silent mode
+
+    if (saved) {
+      handleLoadTemplate(previewTemplate);
+    }
+  };
+
+  // === HANDLE DISCARD CHANGES ===
+  const handleDiscardChanges = () => {
+    setShowSaveConfirm(false);
+    setPreviewTemplate(null);
   };
 
   // === THREE-DOT MENU HANDLERS ===
@@ -444,11 +560,6 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                     <pre className="text-sm text-[var(--rl-text-secondary)] line-clamp-3 whitespace-pre-wrap font-sans">
                       {t.prompt || "No content yet."}
                     </pre>
-
-                    {/* Tooltip on hover */}
-                    <div className="invisible group-hover:visible absolute z-10 bottom-full left-0 mb-2 p-3 bg-black text-white text-xs rounded-lg max-w-md shadow-xl whitespace-pre-wrap">
-                      {t.prompt || "No content yet."}
-                    </div>
                   </div>
                 </div>
 
@@ -465,8 +576,9 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                       <IconDotsVertical size={16} stroke={1.5} />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent>
+                  <DropdownMenuContent className="bg-[var(--rl-panel)] text-[var(--rl-text)]">
                     <DropdownMenuItem
+                      className="hover:bg-[var(--rl-panel-hover)]"
                       onSelect={(event) => {
                         event.preventDefault();
                         event.stopPropagation();
@@ -476,6 +588,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                       Duplicate
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      className="hover:bg-[var(--rl-panel-hover)]"
                       onSelect={(event) => {
                         event.preventDefault();
                         event.stopPropagation();
@@ -485,7 +598,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                       Rename
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
+                      className="text-[var(--rl-error)] hover:bg-[var(--rl-panel-hover)] focus:text-[var(--rl-error)]"
                       onSelect={(event) => {
                         event.preventDefault();
                         event.stopPropagation();
@@ -514,49 +627,78 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
         >
           {previewTemplate && (
             <>
-              <DialogHeader>
+              <DialogHeader className="flex flex-row items-center justify-between">
                 <DialogTitle className="text-2xl font-semibold text-white">
                   {previewTemplate.name || "Template"}
                 </DialogTitle>
-                <p className="text-sm text-purple-400/70 mt-1">
-                  Created: {new Date(previewTemplate.created_at).toLocaleDateString()}
-                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClose}
+                  className="h-6 w-6 p-0 hover:bg-[var(--rl-panel-hover)] text-[var(--rl-text)]"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </DialogHeader>
 
+              {/* TEXTAREA */}
               <div className="mt-5 rounded-xl border border-white/8 bg-black/30 p-5">
-                <div className="mt-4">
-                  <div className="mb-1 text-sm text-purple-400/70">
-                    Template Content:
-                  </div>
-                  <p className="leading-relaxed whitespace-pre-line text-white/90">
-                    {previewTemplate.prompt || "No content yet."}
-                  </p>
-                </div>
+                <textarea
+                  value={editableContent}
+                  onChange={(e) => setEditableContent(e.target.value)}
+                  className="w-full min-h-[200px] max-h-[290px] overflow-y-auto whitespace-pre-wrap break-words rounded-xl bg-[var(--rl-input)] text-[var(--rl-text)] p-4 outline-none focus:ring-2 focus:ring-[var(--rl-primary)]"
+                  placeholder="Enter template content..."
+                />
               </div>
 
-              <DialogFooter className="mt-6 flex justify-end gap-3">
-                <button
-                  className="rl-btn bg-red-600 hover:bg-red-700 text-white px-6 transition-all"
+              {/* INLINE-SAVE SLOT — FIXED PLACE */}
+              <div className="mt-4 mb-2">
+                {showSaveConfirm && (
+                  <div className="rounded-lg border border-white/10 bg-[#1d1d1f] p-4">
+                    <p className="text-sm text-[var(--rl-text)] mb-3">You have unsaved changes. What would you like to do?</p>
+                    <div className="flex gap-3 justify-end">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleDiscardChanges}
+                        className="px-4 py-2 text-sm"
+                      >
+                        Discard
+                      </Button>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => handleSaveTemplate()}
+                        className="px-4 py-2 text-sm bg-orange-600 hover:bg-orange-700"
+                      >
+                        Save
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* FOOTER BUTTONS — FIXED, NEVER MOVING */}
+              <div className="flex justify-between items-center mt-6">
+                <Button
+                  variant="secondary"
                   onClick={() => {
                     setPreviewTemplate(null);
                     openDeleteDialog(previewTemplate);
                   }}
+                  className="px-6"
                 >
                   Delete
-                </button>
-                <button
-                  className="rl-btn rl-btn-secondary px-6"
-                  onClick={handleCancel}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="rl-btn rl-btn-primary px-6"
-                  onClick={() => handleLoadTemplate(previewTemplate)}
+                </Button>
+
+                <Button
+                  variant="default"
+                  onClick={handleOpenInBuild}
+                  className="px-6 bg-orange-600 hover:bg-orange-700"
                 >
                   Open in Build
-                </button>
-              </DialogFooter>
+                </Button>
+              </div>
             </>
           )}
         </DialogContent>

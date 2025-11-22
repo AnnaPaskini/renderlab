@@ -639,8 +639,9 @@ export function CollectionsPanel() {
 					<IconDotsVertical size={16} stroke={1.5} />
 				</button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent>
+			<DropdownMenuContent className="bg-[var(--rl-panel)] text-[var(--rl-text)] border-[var(--rl-border)]">
 				<DropdownMenuItem
+					className="hover:bg-[var(--rl-panel-hover)]"
 					onSelect={(event) => {
 						event.preventDefault();
 						openDuplicateDialog(collection);
@@ -649,6 +650,7 @@ export function CollectionsPanel() {
 					Duplicate
 				</DropdownMenuItem>
 				<DropdownMenuItem
+					className="hover:bg-[var(--rl-panel-hover)]"
 					onSelect={(event) => {
 						event.preventDefault();
 						event.stopPropagation();
@@ -658,7 +660,7 @@ export function CollectionsPanel() {
 					Rename
 				</DropdownMenuItem>
 				<DropdownMenuItem
-					className="text-red-600 focus:text-red-600"
+					className="text-[var(--rl-error)] hover:bg-[var(--rl-panel-hover)] focus:text-[var(--rl-error)]"
 					onSelect={(event) => {
 						event.preventDefault();
 						event.stopPropagation();
@@ -750,9 +752,9 @@ export function CollectionsPanel() {
 													<IconDotsVertical size={16} stroke={1.5} />
 												</button>
 											</DropdownMenuTrigger>
-											<DropdownMenuContent align="end">
+											<DropdownMenuContent align="end" className="bg-[var(--rl-panel)] text-[var(--rl-text)] border-[var(--rl-border)]">
 												<DropdownMenuItem
-													className="text-red-600 focus:text-red-600"
+													className="text-[var(--rl-error)] hover:bg-[var(--rl-panel-hover)] focus:text-[var(--rl-error)]"
 													onSelect={(event) => {
 														event.preventDefault();
 														event.stopPropagation();

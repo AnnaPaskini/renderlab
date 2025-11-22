@@ -1319,7 +1319,7 @@ export function PromptBuilderPanel({
                               </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
-                              className="w-[400px] max-h-[400px] overflow-y-auto bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg"
+                              className="w-[400px] max-h-[400px] overflow-y-auto bg-[var(--rl-panel)] text-[var(--rl-text)] border-[var(--rl-border)] rounded-lg shadow-lg"
                               align="start"
                             >
                               {(() => {
@@ -1330,7 +1330,7 @@ export function PromptBuilderPanel({
                                 return (
                                   <div
                                     key={option.id}
-                                    className={`flex items-center justify-between w-full group hover:bg-neutral-100 dark:hover:bg-neutral-700 px-3 py-2 cursor-pointer ${option.id === activeTemplateId ? 'border-2 border-purple-500 bg-purple-50 dark:bg-purple-900/20' : ''
+                                    className={`flex items-center justify-between w-full group hover:bg-[var(--rl-panel-hover)] px-3 py-2 cursor-pointer ${option.id === activeTemplateId ? 'border-2 border-purple-500 bg-purple-50 dark:bg-purple-900/20' : ''
                                       }`}
                                   >
                                     <div
@@ -1361,14 +1361,14 @@ export function PromptBuilderPanel({
                                           <IconDotsVertical size={16} stroke={1.5} />
                                         </button>
                                       </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end" className="w-32 bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700">
+                                      <DropdownMenuContent align="end" className="w-32 bg-[var(--rl-panel)] text-[var(--rl-text)] border-[var(--rl-border)]">
                                         <DropdownMenuItem
                                           onSelect={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
                                             handleDuplicateTemplate(template);
                                           }}
-                                          className="text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                                          className="hover:bg-[var(--rl-panel-hover)]"
                                         >
                                           Duplicate
                                         </DropdownMenuItem>
@@ -1378,12 +1378,12 @@ export function PromptBuilderPanel({
                                             e.stopPropagation();
                                             handleRenameTemplate(template);
                                           }}
-                                          className="text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                                          className="hover:bg-[var(--rl-panel-hover)]"
                                         >
                                           Rename
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
-                                          className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400 hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                                          className="text-[var(--rl-error)] hover:bg-[var(--rl-panel-hover)] focus:text-[var(--rl-error)]"
                                           onSelect={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
