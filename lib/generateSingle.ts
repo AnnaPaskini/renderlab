@@ -59,53 +59,81 @@ export async function generateSingle({
       auth: process.env.REPLICATE_API_TOKEN,
     });
 
-    const selectedModel = MODEL_MAP[model || "nano-banana"];
+    // Ensure model is valid, fallback to nano-banana
+    const safeModel = model && MODEL_MAP[model] ? model : "nano-banana";
+    const selectedModel = MODEL_MAP[safeModel];
 
-    console.log("🟣 Model:", selectedModel);
+    if (!selectedModel) {
+      console.error("❌ Invalid model:", safeModel);
+      return {
+        status: "error",
+        message: `Invalid model: ${safeModel}`,
+      };
+    }
+
+    console.log("🟣 Model:", safeModel, "→", selectedModel);
     console.log("🟣 Prompt:", prompt.slice(0, 100));
     console.log("🟣 Has reference:", !!imageUrl);
 
     // ======================================
-    // MODEL-SPECIFIC INPUT
+    // MODEL-SPECIFIC INPUT (UNIFIED)
     // ======================================
     let input: Record<string, any> = {};
 
-    // FLUX
-    if (model === "flux") {
+    // FLUX: Uses input_image as single URL string
+    if (safeModel === "flux") {
       input = {
         prompt,
-        input_image: imageUrl || null,
-        aspect_ratio: "match_input_image",
         output_format: "jpg",
         safety_tolerance: 2,
         prompt_upsampling: false,
       };
+
+      // Add reference image if provided
+      if (imageUrl) {
+        input.input_image = imageUrl;
+        input.aspect_ratio = "match_input_image";
+      }
     }
 
-    // SEEDREAM4
-    else if (model === "seedream4") {
+    // SEEDREAM4: Uses image_input as URL array
+    else if (safeModel === "seedream4") {
       input = {
         prompt,
-        image_input: imageUrl ? [imageUrl] : [],
         size: "2K",
         width: 2048,
         height: 2048,
-        aspect_ratio: imageUrl ? "match_input_image" : "4:3",
         enhance_prompt: true,
         sequential_image_generation: "disabled",
       };
+
+      // Add reference image if provided
+      if (imageUrl) {
+        input.image_input = [imageUrl];
+        input.aspect_ratio = "match_input_image";
+      } else {
+        input.image_input = [];
+        input.aspect_ratio = "4:3";
+      }
     }
 
-    // NANO-BANANA & PRO
+    // NANO-BANANA & PRO: Use image_input as URL array
     else {
       input = {
         prompt,
-        image_input: imageUrl ? [imageUrl] : [],
-        aspect_ratio: "match_input_image",
         output_format: "jpg",
       };
 
-      if (model === 'nano-banana-pro') {
+      // Add reference image if provided
+      if (imageUrl) {
+        input.image_input = [imageUrl];
+        input.aspect_ratio = "match_input_image";
+      } else {
+        input.image_input = [];
+      }
+
+      // Pro-specific settings
+      if (safeModel === 'nano-banana-pro') {
         input.resolution = '4K';
         input.output_format = 'png';
       }
@@ -124,6 +152,14 @@ export async function generateSingle({
     // ======================================
     const finalUrl = await extractUrlFromOutput(output);
     console.log("🟣 Final URL extracted:", finalUrl);
+
+    if (!finalUrl) {
+      console.error("❌ [generateSingle] Failed to extract URL from output");
+      return {
+        status: "error",
+        message: "Failed to extract image URL from generation output",
+      };
+    }
 
     return {
       status: "ok",

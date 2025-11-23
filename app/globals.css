@@ -485,3 +485,66 @@ body.actions-open nav {
 .aura-glow {
   animation: auraPulse 4s ease-in-out infinite;
 }
+
+/* Skeleton loading animation */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  height: 100%;
+  width: 150%;
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.18) 50%,
+      rgba(255, 255, 255, 0) 100%);
+  animation: skeleton-wave 1.4s infinite;
+}
+
+@keyframes skeleton-wave {
+  0% {
+    left: -150%;
+  }
+
+  100% {
+    left: 150%;
+  }
+}
+
+/* RenderLab Skeleton - Clean thin orange border */
+.rl-skeleton {
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 122, 69, 0.35);
+  /* тонкая RL-orange */
+  overflow: hidden;
+}
+
+.rl-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.06) 50%,
+      rgba(255, 255, 255, 0) 100%);
+  transform: translateX(-100%);
+  animation: rl-wave 1.8s ease-in-out infinite;
+}
+
+@keyframes rl-wave {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
