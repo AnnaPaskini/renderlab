@@ -185,9 +185,9 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage, onFileCha
           animate={{ opacity: 1 }}
           className="mt-2 flex items-center justify-center gap-2 text-sm font-medium text-rl-text-secondary"
         >
-          <div className="w-2 h-2 bg-[#ff6b35] rounded-full animate-pulse" />
-          <div className="w-2 h-2 bg-[#ff6b35] rounded-full animate-pulse delay-100" />
-          <div className="w-2 h-2 bg-[#ff6b35] rounded-full animate-pulse delay-200" />
+          <div className="rl-skeleton" style={{ width: '8px', height: '8px' }} />
+          <div className="rl-skeleton" style={{ width: '8px', height: '8px' }} />
+          <div className="rl-skeleton" style={{ width: '8px', height: '8px' }} />
           <span className="text-sm">Loading image...</span>
         </motion.div>
       )}

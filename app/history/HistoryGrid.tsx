@@ -218,7 +218,7 @@ export function HistoryGrid({ images, onDelete }: HistoryGridProps) {
                                         <button
                                             onClick={() => openDeleteDialog(img)}
                                             className="w-full px-4 py-2.5 text-left text-sm hover:bg-red-500/10 transition-colors flex items-center gap-2"
-                                            style={{ color: '#ef4444' }}
+                                            style={{ color: '#ee6161ff' }}
                                         >
                                             <Trash2 size={16} />
                                             Delete from History

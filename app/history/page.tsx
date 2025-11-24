@@ -24,6 +24,7 @@ export default function HistoryPage() {
     const [hasMore, setHasMore] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [showSkeleton, setShowSkeleton] = useState(false);
 
     // Check authentication
     useEffect(() => {
@@ -97,7 +98,11 @@ export default function HistoryPage() {
     // Initial load
     useEffect(() => {
         if (isAuthenticated) {
-            loadPage(0);
+            const timer = setTimeout(() => setShowSkeleton(true), 150);
+            loadPage(0).finally(() => {
+                clearTimeout(timer);
+                setShowSkeleton(false);
+            });
         }
     }, [isAuthenticated]);
 
@@ -121,10 +126,20 @@ export default function HistoryPage() {
 
             {/* Images Grid (Client Component) */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-12">
-                <HistoryGrid
-                    images={items}
-                    onDelete={(imageId) => setItems(prev => prev.filter(img => img.id !== imageId))}
-                />
+                {showSkeleton && items.length === 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                        {[...Array(12)].map((_, i) => (
+                            <div key={i} className="rl-skeleton" style={{ aspectRatio: '1 / 1' }} />
+                        ))}
+                    </div>
+                ) : (
+                    <HistoryGrid
+                        images={items}
+                        onDelete={(imageId) =>
+                            setItems(prev => prev.filter(img => img.id !== imageId))
+                        }
+                    />
+                )}
 
                 {/* Load More Button */}
                 {hasMore && (

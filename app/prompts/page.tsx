@@ -89,7 +89,7 @@ export default function PromptsLibraryPage() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="aspect-[3/4] bg-[#1a1a1a] rounded-xl animate-pulse border border-white/5" />
+              <div key={i} className="rl-skeleton" style={{ aspectRatio: '3/4' }} />
             ))}
           </div>
         ) : prompts.length === 0 ? (

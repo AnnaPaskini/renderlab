@@ -105,16 +105,13 @@ export async function generateSingle({
         height: 2048,
         enhance_prompt: true,
         sequential_image_generation: "disabled",
+        ...(imageUrl ? {
+          image_input: [imageUrl],
+          aspect_ratio: "match_input_image"
+        } : {
+          aspect_ratio: "4:3"
+        })
       };
-
-      // Add reference image if provided
-      if (imageUrl) {
-        input.image_input = [imageUrl];
-        input.aspect_ratio = "match_input_image";
-      } else {
-        input.image_input = [];
-        input.aspect_ratio = "4:3";
-      }
     }
 
     // NANO-BANANA & PRO: Use image_input as URL array
@@ -122,15 +119,11 @@ export async function generateSingle({
       input = {
         prompt,
         output_format: "jpg",
+        ...(imageUrl && {
+          image_input: [imageUrl],
+          aspect_ratio: "match_input_image"
+        })
       };
-
-      // Add reference image if provided
-      if (imageUrl) {
-        input.image_input = [imageUrl];
-        input.aspect_ratio = "match_input_image";
-      } else {
-        input.image_input = [];
-      }
 
       // Pro-specific settings
       if (safeModel === 'nano-banana-pro') {

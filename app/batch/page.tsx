@@ -327,8 +327,15 @@ export default function BatchStudioPage() {
                         const line = parts[i].trim();
                         if (!line) continue;
 
+                        let data = null;
                         try {
-                            const data = JSON.parse(line);
+                            data = JSON.parse(line);
+                        } catch (err) {
+                            console.warn("Bad client chunk skipped");
+                            continue;
+                        }
+
+                        try {
 
                             if (data.type === 'progress') {
                                 console.log('🔵 [PROGRESS]', data);
@@ -375,8 +382,8 @@ export default function BatchStudioPage() {
                                 await reader.cancel();
                                 break;
                             }
-                        } catch (parseError) {
-                            console.warn('⚠️ Skipping malformed line:', line);
+                        } catch (processingError) {
+                            console.warn('Error processing batch event:', processingError);
                         }
                     }
 
@@ -386,38 +393,47 @@ export default function BatchStudioPage() {
                 // Trailing buffer
                 const trailing = buffer.trim();
                 if (trailing) {
+                    let data = null;
                     try {
-                        const data = JSON.parse(trailing);
+                        data = JSON.parse(trailing);
+                    } catch (err) {
+                        console.warn("Bad client chunk skipped");
+                        data = null;
+                    }
 
-                        if (data.type === 'complete') {
-                            console.log('✅ [COMPLETE] (from trailing buffer)', data);
+                    if (data) {
+                        try {
 
-                            const validResults = data.results.filter((result: any) => {
-                                if (!result.templateId || !result.templateName || !result.imageUrl) {
-                                    console.warn('⚠️ Invalid image data, skipping:', result);
-                                    return false;
-                                }
-                                return true;
-                            });
+                            if (data.type === 'complete') {
+                                console.log('✅ [COMPLETE] (from trailing buffer)', data);
 
-                            setGeneratedResults(validResults);
+                                const validResults = data.results.filter((result: any) => {
+                                    if (!result.templateId || !result.templateName || !result.imageUrl) {
+                                        console.warn('⚠️ Invalid image data, skipping:', result);
+                                        return false;
+                                    }
+                                    return true;
+                                });
 
-                            const allIds = new Set<string>(
-                                validResults.map((r: GeneratedResult) => r.templateId),
-                            );
-                            setSelectedImages(allIds);
+                                setGeneratedResults(validResults);
 
-                            toast.success(`Batch complete! ${validResults.length} images generated`);
-                            if (fakeInterval) clearInterval(fakeInterval);
-                            setProgress(100);
+                                const allIds = new Set<string>(
+                                    validResults.map((r: GeneratedResult) => r.templateId),
+                                );
+                                setSelectedImages(allIds);
 
-                            setTimeout(() => {
-                                setIsGenerating(false);
-                                setProgress(0);
-                            }, 600);
+                                toast.success(`Batch complete! ${validResults.length} images generated`);
+                                if (fakeInterval) clearInterval(fakeInterval);
+                                setProgress(100);
+
+                                setTimeout(() => {
+                                    setIsGenerating(false);
+                                    setProgress(0);
+                                }, 600);
+                            }
+                        } catch (processingError) {
+                            console.warn('Error processing trailing batch event:', processingError);
                         }
-                    } catch (parseError) {
-                        console.warn('⚠️ Skipping malformed trailing data:', trailing);
                     }
                 }
             } finally {
@@ -566,9 +582,9 @@ export default function BatchStudioPage() {
                                 {isLoadingCollections ? (
                                     <div className="flex items-center justify-center p-8">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 bg-[--rl-accent] rounded-full animate-pulse" />
-                                            <div className="w-2 h-2 bg-[--rl-accent] rounded-full animate-pulse delay-100" />
-                                            <div className="w-2 h-2 bg-[--rl-accent] rounded-full animate-pulse delay-200" />
+                                            <div className="rl-skeleton" style={{ width: '8px', height: '8px' }} />
+                                            <div className="rl-skeleton" style={{ width: '8px', height: '8px' }} />
+                                            <div className="rl-skeleton" style={{ width: '8px', height: '8px' }} />
                                             <span className="text-sm text-neutral-400 ml-2">Loading collections...</span>
                                         </div>
                                     </div>
@@ -692,7 +708,7 @@ export default function BatchStudioPage() {
                                                         )}
                                                         {status === 'generating' && (
                                                             <>
-                                                                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
+                                                                <div className="rl-skeleton" style={{ width: '8px', height: '8px' }} />
                                                                 <span className="text-xs text-orange-500">Generating...</span>
                                                             </>
                                                         )}
@@ -730,12 +746,7 @@ export default function BatchStudioPage() {
                     {/* Generate Collection Button */}
                     <div className="mt-8 flex flex-col items-center gap-4">
                         {(() => {
-                            const canGenerate =
-                                referenceImage &&
-                                uploadedFile &&
-                                selectedCollection &&
-                                selectedCollection.templates &&
-                                selectedCollection.templates.length > 0;
+                            const canGenerate = Boolean(referenceImage && uploadedFile && selectedCollection && selectedCollection.templates?.length);
 
                             let helperText = '';
                             if (!referenceImage || !uploadedFile) {
@@ -748,53 +759,51 @@ export default function BatchStudioPage() {
 
                             return (
                                 <>
-                                    {!isGenerating ? (
-                                        <button
-                                            ref={generateBtnRef}
-                                            onClick={handleGenerate}
-                                            disabled={!canGenerate || isUploading}
-                                            className={`w-full max-w-md py-4 px-8 text-lg font-semibold flex items-center justify-center gap-3 rounded-xl group ${canGenerate
-                                                ? 'text-white'
-                                                : 'bg-[rgba(255,255,255,0.06)] text-[rgba(255,255,255,0.3)] cursor-not-allowed'
-                                                }`}
-                                            style={
-                                                canGenerate
-                                                    ? {
-                                                        background: 'linear-gradient(180deg, #FF8050 0%, #FF6340 100%)',
-                                                        boxShadow:
-                                                            '0 4px 12px rgba(0,0,0,0.32), 0 2px 8px rgba(255,98,64,0.30)',
-                                                        transition:
-                                                            'transform 0.15s ease-out, box-shadow 0.2s ease-out, background 0.2s ease-out',
-                                                        transform: 'translateY(0)',
-                                                    }
-                                                    : undefined
+                                    <button
+                                        ref={generateBtnRef}
+                                        onClick={handleGenerate}
+                                        disabled={!canGenerate || isGenerating || isUploading}
+                                        className={`w-full max-w-md py-4 px-8 text-lg font-semibold flex items-center justify-center gap-3 rounded-xl group ${canGenerate && !isGenerating && !isUploading
+                                            ? 'text-white'
+                                            : 'bg-[rgba(255,255,255,0.10)] text-[rgba(255,255,255,0.45)] border border-[rgba(255,255,255,0.12)] shadow-[inset_0_0_6px_rgba(0,0,0,0.25)] cursor-not-allowed'
+                                            }`}
+                                        style={
+                                            canGenerate && !isGenerating && !isUploading
+                                                ? {
+                                                    background: 'linear-gradient(180deg, #FF8050 0%, #FF6340 100%)',
+                                                    boxShadow:
+                                                        '0 4px 12px rgba(0,0,0,0.32), 0 2px 8px rgba(255,98,64,0.30)',
+                                                    transition:
+                                                        'transform 0.15s ease-out, box-shadow 0.2s ease-out, background 0.2s ease-out',
+                                                    transform: 'translateY(0)',
+                                                }
+                                                : undefined
+                                        }
+                                        onMouseEnter={(e) => {
+                                            if (canGenerate && !isGenerating && !isUploading) {
+                                                e.currentTarget.style.background =
+                                                    'linear-gradient(180deg, #FF6E3A 0%, #FF3E1F 100%)';
+                                                e.currentTarget.style.boxShadow =
+                                                    '0 4px 12px rgba(0,0,0,0.32), 0 0 6px rgba(255,120,70,0.35), inset 0 1px 1px rgba(255,255,255,0.22)';
+                                                e.currentTarget.style.transform = 'translateY(-2px)';
                                             }
-                                            onMouseEnter={(e) => {
-                                                if (canGenerate) {
-                                                    e.currentTarget.style.background =
-                                                        'linear-gradient(180deg, #FF6E3A 0%, #FF3E1F 100%)';
-                                                    e.currentTarget.style.boxShadow =
-                                                        '0 4px 12px rgba(0,0,0,0.32), 0 0 6px rgba(255,120,70,0.35), inset 0 1px 1px rgba(255,255,255,0.22)';
-                                                    e.currentTarget.style.transform = 'translateY(-2px)';
-                                                }
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                if (canGenerate) {
-                                                    e.currentTarget.style.background =
-                                                        'linear-gradient(180deg, #FF8050 0%, #FF6340 100%)';
-                                                    e.currentTarget.style.boxShadow =
-                                                        '0 4px 12px rgba(0,0,0,0.32), 0 2px 8px rgba(255,98,64,0.30)';
-                                                    e.currentTarget.style.transform = 'translateY(0)';
-                                                }
-                                            }}
-                                        >
-                                            <Sparkles className="w-5 h-5" />
-                                            {isUploading ? 'Uploading...' : 'Generate Collection'}
-                                        </button>
-                                    ) : null}
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (canGenerate && !isGenerating && !isUploading) {
+                                                e.currentTarget.style.background =
+                                                    'linear-gradient(180deg, #FF8050 0%, #FF6340 100%)';
+                                                e.currentTarget.style.boxShadow =
+                                                    '0 4px 12px rgba(0,0,0,0.32), 0 2px 8px rgba(255,98,64,0.30)';
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                            }
+                                        }}
+                                    >
+                                        <Sparkles className="w-5 h-5" />
+                                        {isGenerating ? 'Generating...' : isUploading ? 'Uploading...' : 'Generate Collection'}
+                                    </button>
 
                                     {helperText && (
-                                        <p className="text-sm text-gray-400 text-center max-w-md">{helperText}</p>
+                                        <p className="text-sm text-[var(--rl-accent)] text-center max-w-md">{helperText}</p>
                                     )}
                                 </>
                             );
@@ -808,7 +817,7 @@ export default function BatchStudioPage() {
                                 className="h-full transition-[width] duration-300"
                                 style={{
                                     width: `${progress}%`,
-                                    backgroundColor: "var(--rl-orange)"
+                                    background: "linear-gradient(180deg, #FF8050 0%, #FF6340 100%)"
                                 }}
                             />
                         </div>

@@ -885,9 +885,15 @@ export function PromptBuilderPanel({
             const line = parts[i].trim();
             if (!line) continue;
 
+            let event = null;
             try {
-              const event = JSON.parse(line);
+              event = JSON.parse(line);
+            } catch (err) {
+              console.warn("Bad client chunk skipped");
+              continue;
+            }
 
+            try {
               if (event.type === "start") {
                 totalItems = typeof event.total === "number" ? event.total : totalItems;
                 succeededCount = 0;
@@ -950,8 +956,8 @@ export function PromptBuilderPanel({
               if (event.type === "done") {
                 finalEvent = event;
               }
-            } catch (parseError) {
-              console.warn("Skipping malformed line:", line);
+            } catch (processingError) {
+              console.warn("Error processing event:", processingError);
             }
           }
 
@@ -960,57 +966,66 @@ export function PromptBuilderPanel({
 
         const trailing = buffer.trim();
         if (trailing) {
+          let event = null;
           try {
-            const event = JSON.parse(trailing);
+            event = JSON.parse(trailing);
+          } catch (err) {
+            console.warn("Bad client chunk skipped");
+            event = null;
+          }
 
-            if (event.type === "start") {
-              totalItems = typeof event.total === "number" ? event.total : totalItems;
-              succeededCount = 0;
-              failedCount = 0;
-              setCollectionProgress({
-                total: totalItems,
-                succeeded: 0,
-                failed: 0,
-                active: true,
-              });
-              collectionPreviewSetRef.current.clear();
-            } else if (event.type === "progress") {
-              if (event.status === "ok") {
-                succeededCount += 1;
-                setCollectionProgress((prev) => ({
-                  ...prev,
-                  succeeded: prev.succeeded + 1,
-                }));
-                if (typeof event.url === "string" && event.url) {
-                  if (!collectionPreviewSetRef.current.has(event.url)) {
-                    collectionPreviewSetRef.current.add(event.url);
-                    if (onPreviewAdd) {
-                      onPreviewAdd(event.url);
+          if (event) {
+            try {
+
+              if (event.type === "start") {
+                totalItems = typeof event.total === "number" ? event.total : totalItems;
+                succeededCount = 0;
+                failedCount = 0;
+                setCollectionProgress({
+                  total: totalItems,
+                  succeeded: 0,
+                  failed: 0,
+                  active: true,
+                });
+                collectionPreviewSetRef.current.clear();
+              } else if (event.type === "progress") {
+                if (event.status === "ok") {
+                  succeededCount += 1;
+                  setCollectionProgress((prev) => ({
+                    ...prev,
+                    succeeded: prev.succeeded + 1,
+                  }));
+                  if (typeof event.url === "string" && event.url) {
+                    if (!collectionPreviewSetRef.current.has(event.url)) {
+                      collectionPreviewSetRef.current.add(event.url);
+                      if (onPreviewAdd) {
+                        onPreviewAdd(event.url);
+                      }
                     }
                   }
+                } else if (event.status === "error") {
+                  failedCount += 1;
+                  setCollectionProgress((prev) => ({
+                    ...prev,
+                    failed: prev.failed + 1,
+                  }));
+                  if (!sawAuthError && event.httpStatus === 401) {
+                    sawAuthError = true;
+                    toast.error("Missing Replicate API token. Please configure REPLICATE_API_TOKEN.");
+                  } else if (!sawErrorToast) {
+                    sawErrorToast = true;
+                    toast.error("One or more templates failed to generate.");
+                  }
+                  if (event.error) {
+                    console.warn("Collection item failed:", event.error);
+                  }
                 }
-              } else if (event.status === "error") {
-                failedCount += 1;
-                setCollectionProgress((prev) => ({
-                  ...prev,
-                  failed: prev.failed + 1,
-                }));
-                if (!sawAuthError && event.httpStatus === 401) {
-                  sawAuthError = true;
-                  toast.error("Missing Replicate API token. Please configure REPLICATE_API_TOKEN.");
-                } else if (!sawErrorToast) {
-                  sawErrorToast = true;
-                  toast.error("One or more templates failed to generate.");
-                }
-                if (event.error) {
-                  console.warn("Collection item failed:", event.error);
-                }
+              } else if (event.type === "done") {
+                finalEvent = event;
               }
-            } else if (event.type === "done") {
-              finalEvent = event;
+            } catch (processingError) {
+              console.warn("Error processing trailing event:", processingError);
             }
-          } catch (parseError) {
-            console.warn("Skipping malformed trailing line:", trailing);
           }
         }
       } catch (streamError) {
@@ -1466,7 +1481,7 @@ export function PromptBuilderPanel({
                     transition={{ duration: 0.25 }}
                     className="flex items-center gap-2 text-sm font-medium text-neutral-600 dark:text-white bg-neutral-100 dark:bg-neutral-800 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700"
                   >
-                    <span className="inline-flex h-2 w-2 flex-shrink-0 rounded-full bg-[var(--rl-accent)] animate-pulse" />
+                    <span className="rl-skeleton" style={{ width: '8px', height: '8px' }} />
                     <span>{progressMessage}</span>
                   </motion.div>
                 )}
