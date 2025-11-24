@@ -1,7 +1,14 @@
 "use client";
 
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { createClient } from "@/lib/supabaseBrowser";
-import { FileText, LogOut, PenLine, Settings } from "lucide-react";
+import { ChevronDown, FileText, LogOut, PenLine, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -47,14 +54,9 @@ export const AppNavbar = () => {
         setIsDropdownOpen(false);
     };
 
-    const navItems = [
-        { name: "Workspace", href: "/workspace" },
-        { name: "Inpaint", href: "/inpaint" },
-        { name: "Templates", href: "/custom" },
-        { name: "Collections", href: "/custom" },
-        { name: "History", href: "/history" },
-        { name: "Prompts Library", href: "/prompts" },
-    ];
+    // Check if current page is a Studio page
+    const studioPages = ['/workspace', '/batch', '/inpaint', '/templates', '/collections', '/custom'];
+    const isStudioActive = studioPages.some(page => pathname?.startsWith(page));
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-gradient-to-b from-black/75 via-black/70 to-black/65 border-b border-white/[0.15] shadow-[0_1px_3px_0_rgba(255,255,255,0.12),0_-1px_2px_0_rgba(255,255,255,0.06),inset_0_1px_1px_0_rgba(255,255,255,0.08)]">
@@ -72,21 +74,79 @@ export const AppNavbar = () => {
 
                     {/* Navigation Tabs */}
                     <div className="flex items-center space-x-6">
-                        {navItems.map((item) => (
-                            <Link
-                                key={item.name}
-                                href={item.href}
-                                className={`relative px-1 py-2 text-sm font-medium transition-colors duration-200 ${pathname === item.href
-                                    ? "text-white"
-                                    : "text-neutral-400 hover:text-white"
-                                    }`}
-                            >
-                                {item.name}
-                                {pathname === item.href && (
-                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-orange-600" />
-                                )}
-                            </Link>
-                        ))}
+                        {/* Studio Dropdown */}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button
+                                    className={`relative px-1 py-2 text-sm font-medium transition-colors duration-200 flex items-center gap-1 ${isStudioActive
+                                        ? "text-white"
+                                        : "text-neutral-400 hover:text-white"
+                                        }`}
+                                >
+                                    Studio
+                                    <ChevronDown className="w-3.5 h-3.5" />
+                                    {isStudioActive && (
+                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-orange-600" />
+                                    )}
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start" className="w-48 mt-3 z-[60]">
+                                <Link href="/workspace">
+                                    <DropdownMenuItem className="cursor-pointer">
+                                        Workspace
+                                    </DropdownMenuItem>
+                                </Link>
+                                <Link href="/batch">
+                                    <DropdownMenuItem className="cursor-pointer">
+                                        Batch Studio
+                                    </DropdownMenuItem>
+                                </Link>
+                                <Link href="/inpaint">
+                                    <DropdownMenuItem className="cursor-pointer">
+                                        InPaint
+                                    </DropdownMenuItem>
+                                </Link>
+                                <DropdownMenuSeparator />
+                                <Link href="/templates">
+                                    <DropdownMenuItem className="cursor-pointer">
+                                        My Templates
+                                    </DropdownMenuItem>
+                                </Link>
+                                <Link href="/collections">
+                                    <DropdownMenuItem className="cursor-pointer">
+                                        My Collections
+                                    </DropdownMenuItem>
+                                </Link>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        {/* Explore */}
+                        <Link
+                            href="/prompts"
+                            className={`relative px-1 py-2 text-sm font-medium transition-colors duration-200 ${pathname === '/prompts'
+                                ? "text-white"
+                                : "text-neutral-400 hover:text-white"
+                                }`}
+                        >
+                            Explore
+                            {pathname === '/prompts' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-orange-600" />
+                            )}
+                        </Link>
+
+                        {/* History */}
+                        <Link
+                            href="/history"
+                            className={`relative px-1 py-2 text-sm font-medium transition-colors duration-200 ${pathname === '/history'
+                                ? "text-white"
+                                : "text-neutral-400 hover:text-white"
+                                }`}
+                        >
+                            History
+                            {pathname === '/history' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-orange-600" />
+                            )}
+                        </Link>
                     </div>
 
                     {/* User Menu */}

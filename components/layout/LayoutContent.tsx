@@ -15,7 +15,8 @@ export const LayoutContent = ({ children }: { children: ReactNode }) => {
         pathname.startsWith("/account") ||
         pathname.startsWith("/inpaint") ||
         pathname.startsWith("/templates") ||
-        pathname.startsWith("/collections");
+        pathname.startsWith("/collections") ||
+        pathname.startsWith("/batch");
 
     // Internal pages get grid background
     if (showAppNavbar) {

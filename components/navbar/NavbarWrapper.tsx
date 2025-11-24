@@ -21,7 +21,8 @@ export const NavbarWrapper = () => {
         pathname.startsWith("/account") ||
         pathname.startsWith("/inpaint") ||
         pathname.startsWith("/templates") ||
-        pathname.startsWith("/collections");
+        pathname.startsWith("/collections") ||
+        pathname.startsWith("/batch");
 
     return (
         <>
