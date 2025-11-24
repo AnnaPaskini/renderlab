@@ -2,7 +2,7 @@
 'use client';
 
 import { useWorkspace } from '@/lib/context/WorkspaceContext';
-import { Clock, FileText, FolderOpen, X } from 'lucide-react';
+import { Clock, FileText, X } from 'lucide-react';
 
 interface ContextIndicatorProps {
   uploadedImage?: string | null;
@@ -21,8 +21,6 @@ export function ContextIndicator({ uploadedImage }: ContextIndicatorProps = {}) 
     switch (activeItem.type) {
       case 'template':
         return <FileText size={16} />;
-      case 'collection':
-        return <FolderOpen size={16} />;
       case 'temporary':
         return <Clock size={16} />;
     }
@@ -44,8 +42,6 @@ export function ContextIndicator({ uploadedImage }: ContextIndicatorProps = {}) 
     switch (activeItem.type) {
       case 'template':
         return `Template: ${activeItem.data.name}`;
-      case 'collection':
-        return `Collection: ${activeItem.data.name} (${activeItem.data.template_count} templates)`;
     }
   };
 
@@ -65,8 +61,6 @@ export function ContextIndicator({ uploadedImage }: ContextIndicatorProps = {}) 
     // Existing colors
     switch (activeItem.type) {
       case 'template':
-        return 'bg-[#ff6b35]/10 text-[#ff6b35] border-[#ff6b35]/20';
-      case 'collection':
         return 'bg-[#ff6b35]/10 text-[#ff6b35] border-[#ff6b35]/20';
     }
   };

@@ -12,21 +12,17 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useWorkspace } from '@/lib/context/WorkspaceContext';
 import { createClient } from "@/lib/supabaseBrowser";
-import { useCollections } from "@/lib/useCollections";
 import { cn } from "@/lib/utils";
-import { IconChevronDown, IconDotsVertical } from "@tabler/icons-react";
+import { IconChevronDown } from "@tabler/icons-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import { ContextIndicator } from './ContextIndicator';
-import { CollectionBrowser } from './prompt-builder/CollectionBrowser';
-import { ModeToggle } from './prompt-builder/ModeToggle';
 import { TemplateBuilder } from './prompt-builder/TemplateBuilder';
 
 export interface PromptBuilderPanelProps {
@@ -91,15 +87,12 @@ export function PromptBuilderPanel({
   };
 
   // WorkspaceContext integration
-  const { activeItem, loadTemplate, loadCollection, clear } = useWorkspace();
+  const { activeItem, loadTemplate, clear } = useWorkspace();
 
   // Dynamic page title based on activeItem
   const getPageTitle = () => {
     if (activeItem.type === 'template') {
       return `Editing: ${activeItem.data.name}`;
-    }
-    if (activeItem.type === 'collection') {
-      return `Editing Collection: ${activeItem.data.name}`;
     }
     if (activeItem.type === 'temporary') {
       return 'Editing from History';
@@ -114,19 +107,10 @@ export function PromptBuilderPanel({
     return 'Make your changes and generate new variations.';
   };
 
-  // Collection and template state
-  const { collections } = useCollections();
+  // Template state
   const [templates, setTemplates] = useState<any[]>([]);
   const [templateRenderKey, setTemplateRenderKey] = useState(0);
-  const [activeCollectionId, setActiveCollectionId] = useState<string | null>(null);
   const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
-  const [activeMode, setActiveMode] = useState<"template" | "collection">("template");
-  const [selectedCollection, setSelectedCollection] = useState<any>(null);
-  const collectionPreviewSetRef = useRef<Set<string>>(new Set());
-
-  const getInitialProgressState = () => ({ total: 0, succeeded: 0, failed: 0, active: false });
-  const [collectionProgress, setCollectionProgress] = useState(getInitialProgressState);
-  const [isCollectionRun, setIsCollectionRun] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Template management state
@@ -136,6 +120,7 @@ export function PromptBuilderPanel({
   const [deleteTemplateTarget, setDeleteTemplateTarget] = useState<any | null>(null);
   const [isDeleteTemplateOpen, setIsDeleteTemplateOpen] = useState(false);
   const [isTemplateDropdownOpen, setIsTemplateDropdownOpen] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const selectTriggerClass =
     "h-12 w-full rounded-xl border border-rl-glass-border bg-rl-panel px-3 text-left text-sm font-medium text-rl-text  shadow-[0_2px_10px_rgba(0,0,0,0.05)] transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6b35]";
@@ -161,15 +146,13 @@ export function PromptBuilderPanel({
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "") || "template";
 
-    // Filter function to exclude collection-generated templates
     const isOriginalTemplate = (template: any) => {
-      const name = template?.name || template?.title || '';
       return true;
     };
 
     const registerTemplate = (
       template: any,
-      context: { collectionTitle?: string; fallbackIndex: number },
+      context: { fallbackIndex: number },
     ) => {
       if (!template) return;
 
@@ -179,9 +162,7 @@ export function PromptBuilderPanel({
         template?.formData?.name ||
         template?.metadata?.title ||
         `Template ${options.length + 1}`;
-      const displayLabel = context.collectionTitle
-        ? `${rawName} • ${context.collectionTitle}`
-        : rawName;
+      const displayLabel = rawName;
       const baseId =
         template?.id ||
         template?.createdAt ||
@@ -201,7 +182,7 @@ export function PromptBuilderPanel({
       options.push({ id: uniqueId, label: displayLabel });
     };
 
-    // Only register original templates (not collection-generated ones)
+    // Register all templates
     templates
       .filter(isOriginalTemplate)
       .forEach((template, index) => {
@@ -209,16 +190,7 @@ export function PromptBuilderPanel({
       });
 
     return { options, lookup: map };
-  }, [collections, templates]);
-
-  const collectionOptions = useMemo(
-    () =>
-      collections.map((collection) => ({
-        id: collection.id,
-        label: collection.title?.trim() || "Untitled Collection",
-      })),
-    [collections],
-  );
+  }, [templates]);
 
   useEffect(() => {
     if (activeTemplateId && !templateOptions.some((option) => option.id === activeTemplateId)) {
@@ -226,35 +198,8 @@ export function PromptBuilderPanel({
     }
   }, [activeTemplateId, templateOptions]);
 
-  useEffect(() => {
-    if (!activeCollectionId) {
-      setSelectedCollection(null);
-      return;
-    }
-
-    const match = collections.find((collection) => collection.id === activeCollectionId);
-
-    if (!match) {
-      setActiveCollectionId(null);
-      setSelectedCollection(null);
-      return;
-    }
-
-    if (selectedCollection?.id !== match.id) {
-      setSelectedCollection(match);
-    }
-  }, [activeCollectionId, collections, selectedCollection?.id]);
-
   const currentTab = activeTab ?? internalActiveTab;
   const isTabControlled = typeof activeTab !== "undefined";
-  const hasCollectionSelection = Boolean(activeCollectionId || selectedCollection);
-  const processedCount = collectionProgress.succeeded + collectionProgress.failed;
-  const showCollectionProgress = isCollectionRun && collectionProgress.active;
-  const progressMessage = showCollectionProgress
-    ? `Processing ${processedCount} / ${collectionProgress.total}…`
-    : isCollectionRun
-      ? "Preparing collection..."
-      : "Processing...";
 
   const handleTabChange = (tab: "builder" | "custom") => {
     if (!isTabControlled) {
@@ -306,13 +251,8 @@ export function PromptBuilderPanel({
 
   useEffect(() => {
     if (currentTab === "builder") {
-      setSelectedCollection(null);
-      setActiveCollectionId(null);
       setDetails("");
       setCustomPrompt(""); // Clear manual edits when switching tabs
-      collectionPreviewSetRef.current.clear();
-      setCollectionProgress(getInitialProgressState());
-      setIsCollectionRun(false);
       abortControllerRef.current?.abort();
     }
   }, [currentTab]);
@@ -322,53 +262,6 @@ export function PromptBuilderPanel({
       abortControllerRef.current?.abort();
     };
   }, []);
-
-  const handleModeChange = (value: string) => {
-    if (value === "template" || value === "collection") {
-      // Clear WorkspaceContext when switching tabs
-      clear();
-
-      setActiveMode(value);
-      if (value === "template") {
-        setActiveCollectionId(null);
-        setSelectedCollection(null);
-        setAvoidItems([]); // Clear avoid items when switching modes
-        collectionPreviewSetRef.current.clear();
-        setCollectionProgress(getInitialProgressState());
-        setIsCollectionRun(false);
-        abortControllerRef.current?.abort();
-      } else {
-        setActiveTemplateId(null);
-        setAvoidItems([]); // Clear avoid items when switching modes
-      }
-    }
-  };
-
-  // Handler for collection change
-  const handleCollectionChange = (id: string) => {
-    setActiveCollectionId(id);
-    const collection = collections.find((item) => item.id === id) ?? null;
-    setSelectedCollection(collection);
-
-    // Update WorkspaceContext
-    if (collection) {
-      // Transform localStorage Collection to match DB CollectionWithTemplates format
-      const collectionWithCount = {
-        id: collection.id,
-        user_id: '', // localStorage collections don't have user_id
-        name: collection.title || 'Unnamed Collection', // title -> name
-        created_at: collection.createdAt || new Date().toISOString(), // createdAt -> created_at
-        updated_at: collection.createdAt || new Date().toISOString(),
-        templates: collection.templates || [],
-        template_count: (collection.templates || []).length
-      };
-
-      loadCollection(collectionWithCount as any);
-    }
-
-    collectionPreviewSetRef.current.clear();
-    setCollectionProgress(getInitialProgressState());
-  };
 
   // Handler for template change
   const handleTemplateChange = (id: string) => {
@@ -768,321 +661,6 @@ export function PromptBuilderPanel({
     }
   };
 
-  const handleCancelCollection = () => {
-    abortControllerRef.current?.abort();
-  };
-
-  const handleGenerateCollection = async () => {
-    const collection =
-      selectedCollection ||
-      (activeCollectionId
-        ? collections.find((c) => c.id === activeCollectionId)
-        : null);
-
-    if (!collection) {
-      toast.error("No collection selected.");
-      return;
-    }
-
-    const templatesPayload = Array.isArray(collection.templates)
-      ? collection.templates.map((template: any) => ({
-        id: template.id || `template-${Date.now()}`,
-        prompt: template.details || template.name || "",
-        model: template.aiModel || aiModel || "nano-banana",
-      }))
-      : [];
-
-    if (!templatesPayload.length) {
-      toast.error("Selected collection has no templates.");
-      return;
-    }
-
-    abortControllerRef.current?.abort();
-
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
-
-    let totalItems = templatesPayload.length;
-    let succeededCount = 0;
-    let failedCount = 0;
-    let sawAuthError = false;
-    let sawErrorToast = false;
-
-    try {
-      setGeneratingState(true);
-      setIsCollectionRun(true);
-      setCollectionProgress({
-        total: totalItems,
-        succeeded: 0,
-        failed: 0,
-        active: true,
-      });
-      collectionPreviewSetRef.current.clear();
-
-      // Конвертируем uploadedImage (data URI) в public URL
-      let publicImageUrl = null;
-      if (uploadedImage && uploadedImage.startsWith('data:')) {
-        const blob = await fetch(uploadedImage).then(r => r.blob());
-        const formData = new FormData();
-        formData.append('file', blob, 'reference.png');
-
-        const uploadRes = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        const uploadData = await uploadRes.json();
-        publicImageUrl = uploadData.output?.publicUrl || null;
-      }
-
-      const response = await fetch("/api/generate/collection", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          templates: templatesPayload,
-          collectionName: collection.name || "Untitled Collection",
-          baseImage: publicImageUrl || uploadedImage || null, // ✅ Используем public URL
-        }),
-        signal: abortController.signal,
-      });
-
-      const contentType = response.headers.get("content-type") ?? "unknown";
-
-      if (!response.ok) {
-        toast.error(`Collection generation failed: ${response.status}`);
-        return;
-      }
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder("utf-8");
-      let buffer = "";
-      let finalEvent: Record<string, any> | null = null;
-
-      if (!reader) {
-        console.error("Collection response body did not provide a reader");
-        toast.error("Server did not provide a readable stream.");
-        return;
-      }
-
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-
-          if (done) {
-            buffer += decoder.decode();
-            break;
-          }
-
-          if (!value) {
-            continue;
-          }
-
-          buffer += decoder.decode(value, { stream: true });
-
-          const parts = buffer.split("\n");
-
-          for (let i = 0; i < parts.length - 1; i++) {
-            const line = parts[i].trim();
-            if (!line) continue;
-
-            let event = null;
-            try {
-              event = JSON.parse(line);
-            } catch (err) {
-              console.warn("Bad client chunk skipped");
-              continue;
-            }
-
-            try {
-              if (event.type === "start") {
-                totalItems = typeof event.total === "number" ? event.total : totalItems;
-                succeededCount = 0;
-                failedCount = 0;
-                setCollectionProgress({
-                  total: totalItems,
-                  succeeded: 0,
-                  failed: 0,
-                  active: true,
-                });
-                collectionPreviewSetRef.current.clear();
-                continue;
-              }
-
-              if (event.type === "progress") {
-                if (event.status === "ok") {
-                  succeededCount += 1;
-                  setCollectionProgress((prev) => ({
-                    ...prev,
-                    succeeded: prev.succeeded + 1,
-                  }));
-
-                  if (typeof event.url === "string" && event.url) {
-                    if (!collectionPreviewSetRef.current.has(event.url)) {
-                      collectionPreviewSetRef.current.add(event.url);
-                      if (onPreviewAdd) {
-                        onPreviewAdd(event.url);
-                      } else {
-                        console.warn("⚠️ [PREVIEW] onPreviewAdd is not defined");
-                      }
-                    } else {
-                    }
-                  } else {
-                    console.warn("⚠️ [PREVIEW] No URL in event:", event);
-                  }
-                } else if (event.status === "error") {
-                  failedCount += 1;
-                  setCollectionProgress((prev) => ({
-                    ...prev,
-                    failed: prev.failed + 1,
-                  }));
-
-                  if (!sawAuthError && event.httpStatus === 401) {
-                    sawAuthError = true;
-                    toast.error("Missing Replicate API token. Please configure REPLICATE_API_TOKEN.");
-                  } else if (!sawErrorToast) {
-                    sawErrorToast = true;
-                    toast.error("One or more templates failed to generate.");
-                  }
-
-                  if (event.error) {
-                    console.warn("Collection item failed:", event.error);
-                  }
-                }
-
-                if (typeof event.index === "number") {
-                }
-              }
-
-              if (event.type === "done") {
-                finalEvent = event;
-              }
-            } catch (processingError) {
-              console.warn("Error processing event:", processingError);
-            }
-          }
-
-          buffer = parts[parts.length - 1];
-        }
-
-        const trailing = buffer.trim();
-        if (trailing) {
-          let event = null;
-          try {
-            event = JSON.parse(trailing);
-          } catch (err) {
-            console.warn("Bad client chunk skipped");
-            event = null;
-          }
-
-          if (event) {
-            try {
-
-              if (event.type === "start") {
-                totalItems = typeof event.total === "number" ? event.total : totalItems;
-                succeededCount = 0;
-                failedCount = 0;
-                setCollectionProgress({
-                  total: totalItems,
-                  succeeded: 0,
-                  failed: 0,
-                  active: true,
-                });
-                collectionPreviewSetRef.current.clear();
-              } else if (event.type === "progress") {
-                if (event.status === "ok") {
-                  succeededCount += 1;
-                  setCollectionProgress((prev) => ({
-                    ...prev,
-                    succeeded: prev.succeeded + 1,
-                  }));
-                  if (typeof event.url === "string" && event.url) {
-                    if (!collectionPreviewSetRef.current.has(event.url)) {
-                      collectionPreviewSetRef.current.add(event.url);
-                      if (onPreviewAdd) {
-                        onPreviewAdd(event.url);
-                      }
-                    }
-                  }
-                } else if (event.status === "error") {
-                  failedCount += 1;
-                  setCollectionProgress((prev) => ({
-                    ...prev,
-                    failed: prev.failed + 1,
-                  }));
-                  if (!sawAuthError && event.httpStatus === 401) {
-                    sawAuthError = true;
-                    toast.error("Missing Replicate API token. Please configure REPLICATE_API_TOKEN.");
-                  } else if (!sawErrorToast) {
-                    sawErrorToast = true;
-                    toast.error("One or more templates failed to generate.");
-                  }
-                  if (event.error) {
-                    console.warn("Collection item failed:", event.error);
-                  }
-                }
-              } else if (event.type === "done") {
-                finalEvent = event;
-              }
-            } catch (processingError) {
-              console.warn("Error processing trailing event:", processingError);
-            }
-          }
-        }
-      } catch (streamError) {
-        if (streamError instanceof DOMException && streamError.name === "AbortError") {
-          toast("Generation canceled by user.");
-        } else {
-          console.error("Stream reading failed:", streamError);
-          toast.error("Collection generation failed during stream read.");
-        }
-        return;
-      } finally {
-        reader.releaseLock();
-      }
-
-      if (finalEvent) {
-        const succeeded =
-          typeof finalEvent.succeeded === "number"
-            ? finalEvent.succeeded
-            : typeof finalEvent.completed === "number"
-              ? finalEvent.completed
-              : succeededCount;
-        const failed =
-          typeof finalEvent.failed === "number"
-            ? finalEvent.failed
-            : typeof finalEvent.errors === "number"
-              ? finalEvent.errors
-              : failedCount;
-
-        if (failed > 0) {
-          toast(`Collection completed with ${failed} failure${failed === 1 ? "" : "s"}.`);
-        } else {
-          toast.success(`Collection completed: ${succeeded} succeeded, 0 failed.`);
-        }
-      } else {
-        toast("Collection generation finalized.");
-      }
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") {
-        toast("Generation canceled by user.");
-      } else {
-        console.error("Collection generation failed", error);
-        toast.error("Collection generation failed. Check console for details.");
-      }
-    } finally {
-      abortControllerRef.current = null;
-      collectionPreviewSetRef.current.clear();
-      setCollectionProgress(getInitialProgressState());
-      setIsCollectionRun(false);
-      setGeneratingState(false);
-
-      // Refetch preview images after collection generation completes
-      if (onRefetchPreviewImages) {
-        onRefetchPreviewImages();
-      }
-    }
-  };
-
   // Template management handlers
   const readTemplatesFromStorage = async () => {
     try {
@@ -1221,27 +799,7 @@ export function PromptBuilderPanel({
                 <p className="text-sm text-purple-400/70 mt-1">{getPageSubtitle()}</p>
               </div>
               <button
-                onClick={() => {
-                  if (window.confirm('Clear all settings and reset prompt builder?')) {
-                    setAiModel("nano-banana");
-                    setDetails('');
-                    setCustomPrompt(''); // Clear manual edits
-                    setStyle('');
-                    setAvoidElements('');
-                    setAvoidItems([]); // Clear avoid items
-                    setActiveTemplateId(null);
-                    setActiveCollectionId(null);
-                    setSelectedCollection(null);
-                    setActiveMode("template");
-                    setCollectionProgress(getInitialProgressState());
-                    setIsCollectionRun(false);
-                    abortControllerRef.current?.abort();
-                    abortControllerRef.current = null;
-                    clear();
-                    setEditablePrompt("");  // Clear editable prompt
-                    toast.success('All cleared');
-                  }
-                }}
+                onClick={() => setShowClearConfirm(true)}
                 className="text-sm text-purple-400/70 hover:text-purple-300 transition-colors"
               >
                 Clear All
@@ -1256,7 +814,7 @@ export function PromptBuilderPanel({
             {/* Main Generate Button */}
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
-                key={hasCollectionSelection ? "collection-btn" : "template-btn"}
+                key="template-btn"
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
@@ -1266,18 +824,12 @@ export function PromptBuilderPanel({
                   variant="ghost"
                   className={cn(
                     "rl-btn-primary w-full py-4 text-base font-semibold",
-                    ((isGenerating || isCollectionRun) || (hasCollectionSelection && !uploadedImage)) && "opacity-60 cursor-not-allowed",
+                    isGenerating && "opacity-60 cursor-not-allowed",
                   )}
-                  onClick={hasCollectionSelection ? handleGenerateCollection : handleGenerateTemplate}
-                  disabled={(isGenerating || isCollectionRun) || (hasCollectionSelection && !uploadedImage)}
+                  onClick={handleGenerateTemplate}
+                  disabled={isGenerating}
                 >
-                  {hasCollectionSelection
-                    ? isCollectionRun
-                      ? "Generating Collection..."
-                      : "Generate Collection"
-                    : isGenerating
-                      ? "Generating..."
-                      : "Generate"}
+                  {isGenerating ? "Generating..." : "Generate"}
                 </Button>
               </motion.div>
             </AnimatePresence>
@@ -1294,198 +846,104 @@ export function PromptBuilderPanel({
                 Quick Load
               </h3>
 
-              {/* Mode Toggle */}
-              <div className="mb-4">
-                <ModeToggle
-                  mode={activeMode}
-                  onChange={handleModeChange}
-                  disabled={isGenerating}
-                />
-              </div>
-
               {/* Unified Dropdown + Load Button */}
               <div className="flex flex-col gap-4">
                 <div className="flex gap-2">
-                  {activeMode === "template" ? (
-                    <>
-                      {(() => {
-                        return null;
-                      })()}
-                      {templateOptions.length > 0 ? (
-                        <>
-                          <DropdownMenu
-                            key={`template-dropdown-${templateRenderKey}`}
-                            open={isTemplateDropdownOpen}
-                            onOpenChange={(open) => {
-                              setIsTemplateDropdownOpen(open);
-                            }}
-                          >
-                            <DropdownMenuTrigger asChild>
-                              <button
-                                className={cn(selectTriggerClass, "flex-[7] flex items-center justify-between")}
-                              >
-                                <span className="truncate">
-                                  {activeTemplateId
-                                    ? templateOptions.find(opt => opt.id === activeTemplateId)?.label || "Select template"
-                                    : "Select template"
-                                  }
-                                </span>
-                                <IconChevronDown size={16} className="ml-2 flex-shrink-0" />
-                              </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              className="w-[400px] max-h-[400px] overflow-y-auto bg-[var(--rl-panel)] text-[var(--rl-text)] border-[var(--rl-border)] rounded-lg shadow-lg"
-                              align="start"
+                  <>
+                    {(() => {
+                      return null;
+                    })()}
+                    {templateOptions.length > 0 ? (
+                      <>
+                        <DropdownMenu
+                          key={`template-dropdown-${templateRenderKey}`}
+                          open={isTemplateDropdownOpen}
+                          onOpenChange={(open) => {
+                            setIsTemplateDropdownOpen(open);
+                          }}
+                        >
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              className={cn(selectTriggerClass, "flex-[7] flex items-center justify-between")}
                             >
-                              {(() => {
-                                return null;
-                              })()}
-                              {templateOptions.map((option) => {
-                                const template = templateLookup.get(option.id)?.template;
-                                return (
-                                  <div
-                                    key={option.id}
-                                    className={`flex items-center justify-between w-full group hover:bg-[var(--rl-panel-hover)] px-3 py-2 cursor-pointer ${option.id === activeTemplateId ? 'border-2 border-purple-500 bg-purple-50 dark:bg-purple-900/20' : ''
-                                      }`}
-                                  >
-                                    <div
-                                      className="flex-1 min-w-0"
-                                      onClick={() => {
-                                        setActiveTemplateId(option.id);
-                                        setIsTemplateDropdownOpen(false);
-                                      }}
-                                    >
-                                      <div className="font-medium text-neutral-900 dark:text-white truncate">
-                                        {template?.name || template?.title || "Untitled template"}
-                                      </div>
-                                      {(template?.style || template?.scenario) && (
-                                        <div className="text-sm text-purple-400/70 truncate mt-0.5">
-                                          {template.style || template.scenario}
-                                        </div>
-                                      )}
-                                    </div>
-
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                        <button
-                                          type="button"
-                                          aria-label="Template options"
-                                          className="opacity-0 group-hover:opacity-100 p-1.5 text-purple-400/70 hover:text-purple-400 transition-opacity rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-700 ml-2"
-                                          onClick={(e) => e.stopPropagation()}
-                                        >
-                                          <IconDotsVertical size={16} stroke={1.5} />
-                                        </button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end" className="w-32 bg-[var(--rl-panel)] text-[var(--rl-text)] border-[var(--rl-border)]">
-                                        <DropdownMenuItem
-                                          onSelect={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            handleDuplicateTemplate(template);
-                                          }}
-                                          className="hover:bg-[var(--rl-panel-hover)]"
-                                        >
-                                          Duplicate
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                          onSelect={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            handleRenameTemplate(template);
-                                          }}
-                                          className="hover:bg-[var(--rl-panel-hover)]"
-                                        >
-                                          Rename
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                          className="text-[var(--rl-error)] hover:bg-[var(--rl-panel-hover)] focus:text-[var(--rl-error)]"
-                                          onSelect={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            handleDeleteTemplate(template);
-                                          }}
-                                        >
-                                          Delete
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
-                                  </div>
-                                );
-                              })}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                          <button
-                            onClick={() => {
-                              if (activeTemplateId) {
-                                handleTemplateChange(activeTemplateId);
-                              }
-                            }}
-                            disabled={!activeTemplateId}
-                            className="flex-[3] rl-btn rl-btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                              <span className="truncate">
+                                {activeTemplateId
+                                  ? templateOptions.find(opt => opt.id === activeTemplateId)?.label || "Select template"
+                                  : "Select template"
+                                }
+                              </span>
+                              <IconChevronDown size={16} className="ml-2 flex-shrink-0" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            className="w-[400px] max-h-[400px] overflow-y-auto bg-[var(--rl-panel)] text-[var(--rl-text)] border-[var(--rl-border)] rounded-lg shadow-lg"
+                            align="start"
                           >
-                            Load
-                          </button>
-                        </>
-                      ) : (
-                        <div className="text-sm text-purple-400/70 py-2">
-                          {(() => {
-                            return "No saved templates found.";
-                          })()}
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <CollectionBrowser
-                      collectionOptions={collectionOptions}
-                      activeCollectionId={activeCollectionId}
-                      selectedCollection={selectedCollection}
-                      uploadedImage={uploadedImage}
-                      onCollectionIdChange={setActiveCollectionId}
-                      onLoadCollection={handleCollectionChange}
-                      selectTriggerClass={selectTriggerClass}
-                    />
-                  )}
+                            {(() => {
+                              return null;
+                            })()}
+                            {templateOptions.map((option) => {
+                              const template = templateLookup.get(option.id)?.template;
+                              return (
+                                <div
+                                  key={option.id}
+                                  className={`flex items-center justify-between w-full group hover:bg-[var(--rl-panel-hover)] px-3 py-2 cursor-pointer ${option.id === activeTemplateId ? 'border-2 border-purple-500 bg-purple-50 dark:bg-purple-900/20' : ''
+                                    }`}
+                                >
+                                  <div
+                                    className="flex-1 min-w-0"
+                                    onClick={() => {
+                                      setActiveTemplateId(option.id);
+                                      setIsTemplateDropdownOpen(false);
+                                    }}
+                                  >
+                                    <div className="font-medium text-neutral-900 dark:text-white truncate">
+                                      {template?.name || template?.title || "Untitled template"}
+                                    </div>
+                                    {(template?.style || template?.scenario) && (
+                                      <div className="text-sm text-purple-400/70 truncate mt-0.5">
+                                        {template.style || template.scenario}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        <button
+                          onClick={() => {
+                            if (activeTemplateId) {
+                              handleTemplateChange(activeTemplateId);
+                            }
+                          }}
+                          disabled={!activeTemplateId}
+                          className="flex-[3] rl-btn rl-btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Load
+                        </button>
+                      </>
+                    ) : (
+                      <div className="text-sm text-purple-400/70 py-2">
+                        {(() => {
+                          return "No saved templates found.";
+                        })()}
+                      </div>
+                    )}
+                  </>
+
                 </div>
 
-                {/* Collection Warning */}
-                {activeMode === "collection" && !uploadedImage && (
-                  <p className="text-xs text-orange-400 flex items-center gap-1">
-                    <span>⚠</span> Upload reference image first
-                  </p>
-                )}
-
                 {/* Loaded Status Display */}
-                {activeMode === "template" && activeTemplateId && templateLookup.get(activeTemplateId) && (
+                {activeTemplateId && templateLookup.get(activeTemplateId) && (
                   <div className="text-sm text-purple-400 flex items-center gap-1">
                     <span>✓</span>
                     <span>Loaded: "{templateLookup.get(activeTemplateId)?.templateName}"</span>
                   </div>
                 )}
-
-                {activeMode === "collection" && selectedCollection && (
-                  <div className="text-sm text-purple-400 flex items-center gap-1">
-                    <span>✓</span>
-                    <span>Loaded: "{selectedCollection.title}" ({(selectedCollection.templates || []).length} prompts)</span>
-                  </div>
-                )}
               </div>
 
-              {/* Progress Indicator - Moved here for better visibility */}
-              <AnimatePresence>
-                {(isGenerating || isCollectionRun) && progressMessage && (
-                  <motion.div
-                    key="collection-progress"
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    transition={{ duration: 0.25 }}
-                    className="flex items-center gap-2 text-sm font-medium text-neutral-600 dark:text-white bg-neutral-100 dark:bg-neutral-800 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700"
-                  >
-                    <span className="rl-skeleton" style={{ width: '8px', height: '8px' }} />
-                    <span>{progressMessage}</span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+
             </div>
 
 
@@ -1535,9 +993,7 @@ export function PromptBuilderPanel({
                 onAvoidClick={handleAvoidClick}
                 uploadedImage={uploadedImage}
                 onSaveTemplate={() => setIsDialogOpen(true)}
-                onCancelCollection={handleCancelCollection}
                 isGenerating={isGenerating}
-                isCollectionRun={isCollectionRun}
               />
             </div>
           </motion.div>
@@ -1662,6 +1118,51 @@ export function PromptBuilderPanel({
               onClick={handleDeleteTemplateConfirm}
             >
               Delete
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clear All Confirm Dialog */}
+      <Dialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+        <DialogContent
+          className="rounded-xl text-rl-text w-full max-w-md border border-white/[0.08]"
+        >
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold text-rl-text">
+              Clear all settings?
+            </DialogTitle>
+            <DialogDescription>
+              This will reset the prompt builder to its default state. All current settings will be lost.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter className="mt-6 flex justify-end gap-3">
+            <button
+              className="rl-btn rl-btn-secondary px-6"
+              onClick={() => setShowClearConfirm(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="rl-btn bg-red-600 hover:bg-red-700 text-white px-6 transition-all"
+              onClick={() => {
+                setAiModel("nano-banana");
+                setDetails('');
+                setCustomPrompt(''); // Clear manual edits
+                setStyle('');
+                setAvoidElements('');
+                setAvoidItems([]); // Clear avoid items
+                setActiveTemplateId(null);
+                abortControllerRef.current?.abort();
+                abortControllerRef.current = null;
+                clear();
+                setEditablePrompt("");  // Clear editable prompt
+                setShowClearConfirm(false);
+                toast.success('All cleared');
+              }}
+            >
+              Clear All
             </button>
           </DialogFooter>
         </DialogContent>

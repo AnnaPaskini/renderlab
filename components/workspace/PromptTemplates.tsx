@@ -539,23 +539,12 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
           {templates.map((t, index) => (
             <Card
               key={t.id || index}
-              draggable
-              onDragStart={(e) => {
-                const templateData = JSON.stringify(t);
-                e.dataTransfer.setData("template", templateData);
-                e.dataTransfer.effectAllowed = "copy";
-              }}
-              className="rl-card cursor-grab select-none transition-transform duration-200 hover:-translate-y-1"
-              title="Drag to add to collection"
+              className="rl-card cursor-pointer select-none transition-transform duration-200 hover:-translate-y-1"
+              onClick={() => setPreviewTemplate(t)}
             >
               <div className="flex items-start justify-between gap-3">
-                <div
-                  className="min-w-0 flex-1 cursor-pointer"
-                  onClick={() => setPreviewTemplate(t)}
-                >
-                  <div className="font-semibold text-[var(--rl-text)] truncate">
-                    {t.name || "Untitled Template"}
-                  </div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold text-[var(--rl-text)] truncate">{t.name || "Untitled Template"}</div>
                   <div className="relative group mt-1">
                     <pre className="text-sm text-[var(--rl-text-secondary)] line-clamp-3 whitespace-pre-wrap font-sans">
                       {t.prompt || "No content yet."}

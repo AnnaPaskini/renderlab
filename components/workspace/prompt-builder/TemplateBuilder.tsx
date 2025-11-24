@@ -27,11 +27,9 @@ interface TemplateBuilderProps {
 
     // Actions
     onSaveTemplate: () => void;
-    onCancelCollection?: () => void;
 
     // State
     isGenerating: boolean;
-    isCollectionRun: boolean;
 }
 
 export function TemplateBuilder({
@@ -45,9 +43,7 @@ export function TemplateBuilder({
     onAvoidClick,
     uploadedImage,
     onSaveTemplate,
-    onCancelCollection,
     isGenerating,
-    isCollectionRun,
 }: TemplateBuilderProps) {
     const handlePillSelect = (pillText: string) => {
         console.log('🟢 TemplateBuilder received:', pillText);
@@ -112,15 +108,6 @@ export function TemplateBuilder({
                         <Save className="w-4 h-4 mr-2" />
                         Save as Template
                     </Button>
-                    {isCollectionRun && onCancelCollection && (
-                        <Button
-                            variant="outline"
-                            className="flex-1 rounded-2xl border border-amber-400 bg-amber-50/95 text-sm font-semibold text-amber-700 transition-all duration-200 hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 dark:border-amber-500 dark:bg-amber-500/10 dark:text-amber-200"
-                            onClick={onCancelCollection}
-                        >
-                            Cancel
-                        </Button>
-                    )}
                 </div>
             </div>
         </details>
