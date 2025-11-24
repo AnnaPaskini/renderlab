@@ -49,14 +49,21 @@ export function ImageUpload({ onUploadComplete, currentImage }: ImageUploadProps
         throw new Error('You must be logged in to upload images');
       }
 
-      // Generate unique filename
-      const fileExt = file.name.split('.').pop()?.toLowerCase();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      // MIME validation
+      if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
+        throw new Error(`Unsupported file type: ${file.type}. Only PNG, JPEG, and WebP are allowed.`);
+      }
+
+      // Generate unique filename with proper extension
+      const fileExt = file.type === 'image/jpeg' ? 'jpg' : file.type === 'image/webp' ? 'webp' : 'png';
+      const timestamp = Date.now();
+      const fileName = `${timestamp}.${fileExt}`;
+      const filePath = `${user.id}/prompts/${fileName}`;
 
       // Upload to Supabase Storage
       const { data, error } = await supabase.storage
         .from('prompt-images')
-        .upload(fileName, file, {
+        .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false
         });

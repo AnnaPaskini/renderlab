@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     // Get authenticated user or fallback to 'public'
     const { data: { user } } = await supabase.auth.getUser();
     const userId = user?.id ?? 'public';
-    const path = `thumbs/${userId}/${imageId}.webp`;
+    const path = `${userId}/history/thumbs/${imageId}.webp`;
 
     // Fetch оригинальное изображение
     const imageResponse = await fetch(imageUrl);

@@ -273,20 +273,25 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
           // create supabase client
           const supabase = createClient();
 
-          // simple file name for now
-          const fileName = `test_thumb_${Date.now()}.webp`;
-
-          // upload to workspace/test/ directory
-          const { data, error } = await supabase.storage
-            .from("renderlab-images")
-            .upload(`workspace/test/${fileName}`, thumbBlob, {
-              contentType: "image/webp",
-              upsert: false,
-            });
-
-          if (error) {
-            console.error("Client thumbnail upload FAILED:", error);
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) {
+            console.error("Client thumbnail upload FAILED: No user");
           } else {
+            // simple file name for now
+            const fileName = `test_thumb_${Date.now()}.webp`;
+            const filePath = `${user.id}/workspace/${fileName}`;
+
+            // upload to workspace directory
+            const { data, error } = await supabase.storage
+              .from("renderlab-images")
+              .upload(filePath, thumbBlob, {
+                contentType: "image/webp",
+                upsert: false,
+              });
+
+            if (error) {
+              console.error("Client thumbnail upload FAILED:", error);
+            }
           }
         } catch (err) {
           console.error("Unexpected client thumbnail upload error:", err);

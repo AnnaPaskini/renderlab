@@ -11,7 +11,7 @@ export async function uploadReferenceImageOnce(referenceImage: string, userId: s
     try {
         // Use a unique filename
         const fileName = `reference_${Date.now()}.png`;
-        const url = await uploadImageToStorage(referenceImage, userId, fileName);
+        const url = await uploadImageToStorage(referenceImage, userId, 'workspace', fileName);
         return url;
     } catch (error) {
         console.error('Failed to upload reference image once:', error);

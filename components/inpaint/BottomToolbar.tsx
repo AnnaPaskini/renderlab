@@ -40,11 +40,20 @@ export function BottomToolbar({
                     return;
                 }
 
-                const fileName = `${user.id}/reference_${Date.now()}_${file.name}`;
+                // MIME validation
+                if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
+                    console.error('❌ Unsupported file type:', file.type);
+                    return;
+                }
+
+                const timestamp = Date.now();
+                const fileExt = file.type === 'image/jpeg' ? 'jpg' : file.type === 'image/webp' ? 'webp' : 'png';
+                const fileName = `reference_${timestamp}.${fileExt}`;
+                const filePath = `${user.id}/inpaint/${fileName}`;
 
                 const { data, error } = await supabase.storage
                     .from('renderlab-images')
-                    .upload(fileName, file, {
+                    .upload(filePath, file, {
                         contentType: file.type,
                         upsert: false
                     });
@@ -53,7 +62,7 @@ export function BottomToolbar({
 
                 const { data: { publicUrl } } = supabase.storage
                     .from('renderlab-images')
-                    .getPublicUrl(fileName);
+                    .getPublicUrl(filePath);
 
                 console.log('📸 Reference uploaded to Supabase:', publicUrl);
 

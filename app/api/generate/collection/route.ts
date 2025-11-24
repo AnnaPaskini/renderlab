@@ -202,6 +202,7 @@ export async function POST(req: Request) {
                   const permanentUrl = await uploadImageToStorage(
                     replicateUrl,
                     user.id,
+                    'history',
                     `collection_${collectionId || 'temp'}_${Date.now()}_${index}.png`
                   );
 

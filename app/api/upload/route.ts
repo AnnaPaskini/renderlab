@@ -34,10 +34,22 @@ export async function POST(req: Request) {
     if (!file)
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
 
-    const fileName = `${Date.now()}_${file.name}`;
+    // MIME validation
+    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
+      return NextResponse.json(
+        { error: `Unsupported file type: ${file.type}. Only PNG, JPEG, and WebP are allowed.` },
+        { status: 400 }
+      );
+    }
+
+    const timestamp = Date.now();
+    const fileExt = file.type === 'image/jpeg' ? 'jpg' : file.type === 'image/webp' ? 'webp' : 'png';
+    const fileName = `${timestamp}.${fileExt}`;
+    const filePath = `${user.id}/history/${fileName}`;
+    
     const { data, error } = await supabase.storage
       .from("renderlab-images")
-      .upload(fileName, file, { upsert: false });
+      .upload(filePath, file, { upsert: false });
 
     console.log('🔵 [UPLOAD] Storage upload:', data, 'Error:', error);
 
@@ -45,7 +57,7 @@ export async function POST(req: Request) {
 
     const { data: publicUrlData } = supabase.storage
       .from("renderlab-images")
-      .getPublicUrl(fileName);
+      .getPublicUrl(filePath);
     const publicUrl = publicUrlData?.publicUrl;
 
     console.log('🔵 [UPLOAD] Public URL:', publicUrl);

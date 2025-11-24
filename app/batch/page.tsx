@@ -230,6 +230,7 @@ export default function BatchStudioPage() {
             const uploadedImageUrl = await uploadImageToStorage(
                 uploadedFile,
                 user.id,
+                'batch',
                 `batch-reference-${Date.now()}.png`,
             );
 

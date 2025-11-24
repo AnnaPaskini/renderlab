@@ -1,17 +1,21 @@
 import { supabase } from '@/lib/supabase';
+import { randomUUID } from 'crypto';
+
+type UploadContext = 'workspace' | 'batch' | 'inpaint' | 'history';
 
 /**
- * Upload image to Supabase Storage
- * UPDATED: Now supports URL, Blob, and File inputs
+ * Upload image to Supabase Storage with structured paths and MIME validation
  * 
  * @param source - Image source (URL string, Blob, or File)
  * @param userId - User ID for folder structure
- * @param fileName - Optional custom filename
+ * @param context - Upload context: 'workspace' | 'batch' | 'inpaint' | 'history'
+ * @param fileName - Optional custom filename (will use UUID if not provided)
  * @returns Public URL of uploaded image, or null on error
  */
 export async function uploadImageToStorage(
   source: string | URL | Blob | File,
   userId: string,
+  context: UploadContext,
   fileName?: string
 ): Promise<string | null> {
   try {
@@ -22,10 +26,17 @@ export async function uploadImageToStorage(
     if (source instanceof Blob) {
       // ✅ Already a Blob or File
       blob = source;
-      // Try to determine extension from MIME type
-      if (blob.type) {
-        extension = blob.type.split('/')[1] || 'png';
+      
+      // Strict MIME validation
+      if (!["image/png", "image/jpeg", "image/webp"].includes(blob.type)) {
+        throw new Error(`Unsupported file type: ${blob.type}. Only PNG, JPEG, and WebP are allowed.`);
       }
+      
+      // Determine extension from MIME type
+      if (blob.type === 'image/jpeg') extension = 'jpg';
+      else if (blob.type === 'image/webp') extension = 'webp';
+      else extension = 'png';
+      
     } else if (typeof source === 'string' || source instanceof URL) {
       // ✅ URL - download first
       const urlString = source instanceof URL ? source.href : source;
@@ -38,22 +49,30 @@ export async function uploadImageToStorage(
       }
 
       blob = await response.blob();
-      // Extract extension from URL
-      extension = urlString.split('.').pop()?.split('?')[0] || 'png';
+      
+      // Strict MIME validation for downloaded content
+      if (!["image/png", "image/jpeg", "image/webp"].includes(blob.type)) {
+        throw new Error(`Unsupported file type: ${blob.type}. Only PNG, JPEG, and WebP are allowed.`);
+      }
+      
+      // Determine extension from MIME type
+      if (blob.type === 'image/jpeg') extension = 'jpg';
+      else if (blob.type === 'image/webp') extension = 'webp';
+      else extension = 'png';
+      
     } else {
-      console.error('Invalaid source type for uploadImageToStorage');
+      console.error('Invalid source type for uploadImageToStorage');
       return null;
     }
 
-    // 2. Generate unique filename
-    const timestamp = Date.now();
-    const randomId = Math.random().toString(36).substring(7);
-    const finalFileName = fileName || `${timestamp}_${randomId}.${extension}`;
+    // 2. Generate unique filename with UUID
+    const uuid = randomUUID();
+    const finalFileName = fileName || `${uuid}.${extension}`;
 
-    // 3. Upload to Supabase Storage
-    // Folder structure: userId/filename.png
-    const filePath = `${userId}/${finalFileName}`;
+    // 3. Create structured file path: {userId}/{context}/{fileName}
+    const filePath = `${userId}/${context}/${finalFileName}`;
 
+    // 4. Upload to Supabase Storage
     const { data, error } = await supabase.storage
       .from('renderlab-images')
       .upload(filePath, blob, {
@@ -67,12 +86,12 @@ export async function uploadImageToStorage(
       throw error;
     }
 
-    // 4. Get public URL
+    // 5. Get public URL
     const { data: { publicUrl } } = supabase.storage
       .from('renderlab-images')
       .getPublicUrl(filePath);
 
-    console.log('Image uploaded successfully:', publicUrl);
+    console.log('✅ Image uploaded successfully:', publicUrl);
     return publicUrl;
 
   } catch (error) {

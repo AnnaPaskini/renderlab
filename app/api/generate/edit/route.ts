@@ -95,6 +95,7 @@ export async function POST(req: Request) {
       permanentUrl = await uploadImageToStorage(
         replicateUrl,
         user.id,
+        'history',
         `edited_${Date.now()}.png`
       );
 

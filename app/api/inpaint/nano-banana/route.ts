@@ -170,11 +170,12 @@ export async function POST(request: NextRequest) {
         // ✅ Upload result to Supabase
         const supabase = await createClient();
         const timestamp = Date.now();
-        const fileName = `${userId}/inpaint_${timestamp}.jpg`;
+        const fileName = `inpaint_${timestamp}.jpg`;
+        const filePath = `${userId}/inpaint/${fileName}`;
 
         const { data: uploadData, error: uploadError } = await supabase.storage
             .from('renderlab-images')
-            .upload(fileName, resizedBuffer, {
+            .upload(filePath, resizedBuffer, {
                 contentType: 'image/jpeg',
                 upsert: false
             });
@@ -186,7 +187,7 @@ export async function POST(request: NextRequest) {
 
         const { data: { publicUrl } } = supabase.storage
             .from('renderlab-images')
-            .getPublicUrl(fileName);
+            .getPublicUrl(filePath);
 
         // ✅ Save to database
         const { data: dbData, error: dbError } = await supabase
