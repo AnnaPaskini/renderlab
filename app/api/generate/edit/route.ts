@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabaseServer";
 import { uploadImageToStorage } from '@/lib/utils/uploadToStorage';
+import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
@@ -128,7 +128,7 @@ export async function POST(req: Request) {
         console.error("[EDIT] DB Error:", dbError);
       } else {
         console.log("[EDIT] Successfully saved to DB with reference_url:", referenceUrl);
-        
+
         // ✅ Generate thumbnail asynchronously (don't wait)
         if (newImage) {
           fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/generate-thumbnail`, {

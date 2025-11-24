@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     const fileExt = file.type === 'image/jpeg' ? 'jpg' : file.type === 'image/webp' ? 'webp' : 'png';
     const fileName = `${timestamp}.${fileExt}`;
     const filePath = `${user.id}/history/${fileName}`;
-    
+
     const { data, error } = await supabase.storage
       .from("renderlab-images")
       .upload(filePath, file, { upsert: false });

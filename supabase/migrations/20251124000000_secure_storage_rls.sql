@@ -49,12 +49,6 @@ UPDATE storage.buckets
 SET public = false
 WHERE id = 'renderlab-images';
 
--- =====================================================
--- 4. ENSURE RLS IS ENABLED
--- =====================================================
-
--- Enable RLS on storage.objects table
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 
 -- =====================================================
 -- NOTES:

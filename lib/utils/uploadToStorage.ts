@@ -26,17 +26,17 @@ export async function uploadImageToStorage(
     if (source instanceof Blob) {
       // ✅ Already a Blob or File
       blob = source;
-      
+
       // Strict MIME validation
       if (!["image/png", "image/jpeg", "image/webp"].includes(blob.type)) {
         throw new Error(`Unsupported file type: ${blob.type}. Only PNG, JPEG, and WebP are allowed.`);
       }
-      
+
       // Determine extension from MIME type
       if (blob.type === 'image/jpeg') extension = 'jpg';
       else if (blob.type === 'image/webp') extension = 'webp';
       else extension = 'png';
-      
+
     } else if (typeof source === 'string' || source instanceof URL) {
       // ✅ URL - download first
       const urlString = source instanceof URL ? source.href : source;
@@ -49,17 +49,17 @@ export async function uploadImageToStorage(
       }
 
       blob = await response.blob();
-      
+
       // Strict MIME validation for downloaded content
       if (!["image/png", "image/jpeg", "image/webp"].includes(blob.type)) {
         throw new Error(`Unsupported file type: ${blob.type}. Only PNG, JPEG, and WebP are allowed.`);
       }
-      
+
       // Determine extension from MIME type
       if (blob.type === 'image/jpeg') extension = 'jpg';
       else if (blob.type === 'image/webp') extension = 'webp';
       else extension = 'png';
-      
+
     } else {
       console.error('Invalid source type for uploadImageToStorage');
       return null;
