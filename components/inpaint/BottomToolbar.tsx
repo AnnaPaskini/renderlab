@@ -32,7 +32,8 @@ export function BottomToolbar({
         if (file && file.type.startsWith('image/')) {
             try {
                 // Upload to Supabase instead of using data URL
-                const { supabase } = await import('@/lib/supabase');
+                const { createClient } = await import('@/lib/supabaseBrowser');
+                const supabase = createClient();
 
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) {
@@ -52,7 +53,7 @@ export function BottomToolbar({
                 const filePath = `${user.id}/inpaint/${fileName}`;
 
                 const { data, error } = await supabase.storage
-                    .from('renderlab-images')
+                    .from('renderlab-images-v2')
                     .upload(filePath, file, {
                         contentType: file.type,
                         upsert: false
@@ -60,15 +61,17 @@ export function BottomToolbar({
 
                 if (error) throw error;
 
-                const { data: { publicUrl } } = supabase.storage
-                    .from('renderlab-images')
-                    .getPublicUrl(filePath);
+                const { data: signedData, error: signedError } = await supabase.storage
+                    .from('renderlab-images-v2')
+                    .createSignedUrl(filePath, 3600); // 1 hour
 
-                console.log('📸 Reference uploaded to Supabase:', publicUrl);
+                if (signedError) throw signedError;
+
+                console.log('📸 Reference uploaded to Supabase:', signedData.signedUrl);
 
                 // ✅ IMPORTANT: Call parent callback to update state
                 if (onReferenceImageChange) {
-                    onReferenceImageChange(publicUrl);
+                    onReferenceImageChange(signedData.signedUrl);
                 }
 
             } catch (error) {

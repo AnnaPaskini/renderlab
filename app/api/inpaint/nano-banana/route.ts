@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
         const filePath = `${userId}/inpaint/${fileName}`;
 
         const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('renderlab-images')
+            .from('renderlab-images-v2')
             .upload(filePath, resizedBuffer, {
                 contentType: 'image/jpeg',
                 upsert: false
@@ -185,9 +185,14 @@ export async function POST(request: NextRequest) {
             throw uploadError;
         }
 
-        const { data: { publicUrl } } = supabase.storage
-            .from('renderlab-images')
-            .getPublicUrl(filePath);
+        const { data: signedData, error: signedError } = await supabase.storage
+            .from('renderlab-images-v2')
+            .createSignedUrl(filePath, 3600); // 1 hour
+
+        if (signedError) {
+            console.error('❌ Signed URL error:', signedError);
+            throw signedError;
+        }
 
         // ✅ Save to database
         const { data: dbData, error: dbError } = await supabase
@@ -195,7 +200,7 @@ export async function POST(request: NextRequest) {
             .insert({
                 user_id: userId,
                 base_image_url: imageUrl,
-                result_image_url: publicUrl,
+                result_image_url: signedData.signedUrl,
                 mask_bounds: maskBounds,
                 user_prompt: userPrompt,
                 reference_urls: referenceUrls,
@@ -210,11 +215,11 @@ export async function POST(request: NextRequest) {
         }
 
         const totalTime = Date.now() - startTime;
-        console.log(`✅ Inpaint complete in ${totalTime}ms:`, publicUrl);
+        console.log(`✅ Inpaint complete in ${totalTime}ms:`, signedData.signedUrl);
 
         return NextResponse.json({
             success: true,
-            url: publicUrl,
+            url: signedData.signedUrl,
             editId: dbData?.id,
             processingTimeMs: totalTime,
             approach: 'full-image-with-actual-mask'

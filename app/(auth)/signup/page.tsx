@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createClient } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabaseBrowser";
 import type { Session } from "@supabase/supabase-js";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";

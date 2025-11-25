@@ -283,7 +283,7 @@ export function WorkspaceClient({ initialPreviewImages }: WorkspaceClientProps) 
 
             // upload to workspace directory
             const { data, error } = await supabase.storage
-              .from("renderlab-images")
+              .from("renderlab-images-v2")
               .upload(filePath, thumbBlob, {
                 contentType: "image/webp",
                 upsert: false,

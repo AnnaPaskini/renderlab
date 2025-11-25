@@ -1,0 +1,156 @@
+diff --git a/lib/generateSingle.ts b/lib/generateSingle.ts
+index 8cf8c59..dd23b1a 100644
+--- a/lib/generateSingle.ts
++++ b/lib/generateSingle.ts
+@@ -13,17 +13,17 @@ const MODEL_MAP: Record<string, string> = {
+ async function extractUrlFromOutput(output: any): Promise<string | null> {
+   if (!output) return null;
+ 
+-  // 1. Array of strings (Nano-Banana, Flux)
++  // 1. Array of strings (Flux, Nano-Banana)
+   if (Array.isArray(output) && typeof output[0] === "string") {
+     return output[0];
+   }
+ 
+-  // 2. Object with .url() method (Seedream4, Flux)
++  // 2. Object with .url() method (Seedream, Flux)
+   if (typeof output?.url === "function") {
+     return await output.url();
+   }
+ 
+-  // 3. Array of objects (Seedream can return ReadableStream items)
++  // 3. Array of objects (Seedream stream mode)
+   if (Array.isArray(output)) {
+     for (const item of output) {
+       if (typeof item?.url === "function") return await item.url();
+@@ -31,7 +31,7 @@ async function extractUrlFromOutput(output: any): Promise<string | null> {
+     }
+   }
+ 
+-  // 4. Async iterator (Seedream)
++  // 4. Async iterator
+   if (Symbol.asyncIterator in output) {
+     for await (const item of output as any) {
+       if (typeof item?.url === "function") return await item.url();
+@@ -59,77 +59,87 @@ export async function generateSingle({
+       auth: process.env.REPLICATE_API_TOKEN,
+     });
+ 
+-    const selectedModel = MODEL_MAP[model || "nano-banana"];
++    // Ensure model is valid
++    const safeModel = model && MODEL_MAP[model] ? model : "nano-banana";
++    const selectedModel = MODEL_MAP[safeModel];
+ 
+-    console.log("🟣 Model:", selectedModel);
++    console.log("🟣 Model:", safeModel, "→", selectedModel);
+     console.log("🟣 Prompt:", prompt.slice(0, 100));
+     console.log("🟣 Has reference:", !!imageUrl);
+ 
+-    // ======================================
+-    // MODEL-SPECIFIC INPUT
+-    // ======================================
+     let input: Record<string, any> = {};
+ 
+-    // FLUX
+-    if (model === "flux") {
++    // ======================================
++    // FLUX — input_image as string
++    // ======================================
++    if (safeModel === "flux") {
+       input = {
+         prompt,
+-        input_image: imageUrl || null,
+-        aspect_ratio: "match_input_image",
+         output_format: "jpg",
+         safety_tolerance: 2,
+         prompt_upsampling: false,
+       };
++
++      if (imageUrl) {
++        input.input_image = imageUrl;
++      }
+     }
+ 
+-    // SEEDREAM4
+-    else if (model === "seedream4") {
++    // ======================================
++    // SEEDREAM4 — ONLY aspect_ratio + image_input
++    // ======================================
++    else if (safeModel === "seedream4") {
+       input = {
+         prompt,
+-        image_input: imageUrl ? [imageUrl] : [],
+-        size: "2K",
+-        width: 2048,
+-        height: 2048,
+-        aspect_ratio: imageUrl ? "match_input_image" : "4:3",
+-        enhance_prompt: true,
+-        sequential_image_generation: "disabled",
++        aspect_ratio: imageUrl ? "match_input_image" : "1:1",
+       };
++
++      if (imageUrl) {
++        input.image_input = [imageUrl];
++      }
+     }
+ 
+-    // NANO-BANANA & PRO
++    // ======================================
++    // NANO BANANA & PRO — Simple & strict
++    // ======================================
+     else {
+       input = {
+         prompt,
+-        image_input: imageUrl ? [imageUrl] : [],
+-        aspect_ratio: "match_input_image",
+-        output_format: "jpg",
++        output_format: safeModel === "nano-banana-pro" ? "png" : "jpg",
+       };
+ 
+-      if (model === 'nano-banana-pro') {
+-        input.resolution = '4K';
+-        input.output_format = 'png';
++      if (imageUrl) {
++        input.image_input = [imageUrl];
++        input.aspect_ratio = "match_input_image";
++      } else {
++        input.aspect_ratio = "1:1"; // safe default
+       }
+     }
+ 
+-    console.log("🟣 Final input:", input);
++    // ======================================================
++    // 🔥 UNIVERSAL FIX: enforce exactly ONE reference image
++    // ======================================================
++    if (Array.isArray(input.image_input)) {
++      input.image_input = input.image_input.filter(Boolean).slice(0, 1);
++    }
++
++    console.log("🟣 Sanitized input:", input);
+ 
+     // ======================================
+     // RUN REPLICATE
+     // ======================================
+     const output = await replicate.run(selectedModel as any, { input });
++
+     console.log("🟣 Raw output:", output);
+ 
+-    // ======================================
+-    // EXTRACT FINAL URL (handles streams)
+-    // ======================================
+     const finalUrl = await extractUrlFromOutput(output);
+-    console.log("🟣 Final URL extracted:", finalUrl);
+ 
+-    return {
+-      status: "ok",
+-      url: finalUrl,
+-    };
++    if (!finalUrl) {
++      console.error("❌ Could not extract URL");
++      return { status: "error", message: "Failed to extract image URL" };
++    }
+ 
++    return { status: "ok", url: finalUrl };
+   } catch (error: any) {
+     console.error("❌ [generateSingle] Error:", error);
+     return {

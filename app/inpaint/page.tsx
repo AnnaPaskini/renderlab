@@ -4,7 +4,7 @@ import { BottomToolbar } from '@/components/inpaint/BottomToolbar';
 import { CanvasArea } from '@/components/inpaint/CanvasArea';
 import { ResultView } from '@/components/inpaint/ResultView';
 import { Tooltip } from '@/components/ui/Tooltip';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabaseBrowser';
 import { extractMaskBounds } from '@/lib/utils/inpaint/maskExtractor';
 import { uploadImageToStorage } from '@/lib/utils/uploadToStorage';
 import {
@@ -215,6 +215,7 @@ export default function InpaintPage() {
             console.log('🚀 Starting inpaint generation...');
 
             // 1. Get user
+            const supabase = createClient();
             const { data: { user }, error: authError } = await supabase.auth.getUser();
 
             if (authError || !user) {

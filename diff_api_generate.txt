@@ -1,0 +1,285 @@
+diff --git a/app/api/generate/route.ts b/app/api/generate/route.ts
+index 10aca7e..01a89e4 100644
+--- a/app/api/generate/route.ts
++++ b/app/api/generate/route.ts
+@@ -1,17 +1,23 @@
+-export const maxDuration = 60; // 60 seconds instead of default 10
++export const maxDuration = 60;
++
+ import { generateSingle } from "@/lib/generateSingle";
+ import { createClient } from "@/lib/supabaseServer";
+-import { uploadImageToStorage } from '@/lib/utils/uploadToStorage';
++import { uploadImageToStorage } from "@/lib/utils/uploadToStorage";
+ import { NextResponse } from "next/server";
+ 
+ /**
+- * CREATE endpoint with optional reference image support.
+- * Generates image via Replicate and saves to Supabase DB.
++ * CLEAN, STABLE, PRODUCTION-READY GENERATION ROUTE
++ * Uses thumbnail > original > base64 logic safely
++ * Ensures only valid parameters pass to generateSingle
+  */
+ export async function POST(req: Request) {
+-  console.log('📥 API ROUTE START:', new Date().toISOString());
++  const timestamp = new Date().toISOString();
++  console.log(`📥 /api/generate @ ${timestamp}`);
+ 
+   try {
++    // ---------------------------------------------------
++    // CONTENT-TYPE VALIDATION
++    // ---------------------------------------------------
+     const contentType = req.headers.get("content-type") || "";
+     if (!contentType.includes("application/json")) {
+       return NextResponse.json(
+@@ -20,150 +26,168 @@ export async function POST(req: Request) {
+       );
+     }
+ 
++    // ---------------------------------------------------
++    // AUTH
++    // ---------------------------------------------------
+     const supabase = await createClient();
+-    const {
+-      data: { user },
+-      error: userError,
+-    } = await supabase.auth.getUser();
++    const { data: { user }, error: userError } = await supabase.auth.getUser();
+ 
+     if (userError || !user) {
+       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+     }
+ 
++    // ---------------------------------------------------
++    // PARSE BODY
++    // ---------------------------------------------------
+     const body = await req.json().catch(() => ({}));
+-    const prompt = typeof body?.prompt === "string" ? body.prompt.trim() : "";
+-    const model = typeof body?.model === "string" ? body.model.trim() : undefined;
+ 
+-    // ✅ Reference image logic
+-    // 1. Prefer thumbnailUrl (pre-processed 1024px)
+-    // 2. Fallback to imageUrl/image (legacy/direct)
++    const prompt =
++      typeof body?.prompt === "string" ? body.prompt.trim() : "";
++    const model =
++      typeof body?.model === "string" ? body.model.trim() : undefined;
++
++    if (!prompt) {
++      return NextResponse.json(
++        { error: "Prompt is required" },
++        { status: 400 }
++      );
++    }
++
++    // ---------------------------------------------------
++    // REFERENCE IMAGE PRIORITY:
++    // 1) thumbnailUrl  (preferred)
++    // 2) imageUrl      (fallback)
++    // 3) image base64  (upload to Supabase)
++    // ---------------------------------------------------
+     let referenceImageUrl: string | null = null;
+-    let isThumbnail = false;
++    let usedThumbnail = false;
+ 
+     if (typeof body?.thumbnailUrl === "string" && body.thumbnailUrl.trim()) {
+       referenceImageUrl = body.thumbnailUrl.trim();
+-      isThumbnail = true;
++      usedThumbnail = true;
+     } else if (typeof body?.imageUrl === "string" && body.imageUrl.trim()) {
+       referenceImageUrl = body.imageUrl.trim();
+     } else if (typeof body?.image === "string" && body.image.trim()) {
+       referenceImageUrl = body.image.trim();
+     }
+ 
+-    console.log('📦 Body received:', {
+-      hasPrompt: !!prompt,
+-      hasThumbnail: isThumbnail,
+-      hasImage: !!referenceImageUrl,
+-      model
+-    });
++    // ---------------------------------------------------
++    // HANDLE BASE64 → UPLOAD (only if not using thumbnail)
++    // ---------------------------------------------------
++    if (!usedThumbnail &&
++      referenceImageUrl &&
++      referenceImageUrl.startsWith("data:")) {
++      console.log("⬆️ Uploading base64 reference image...");
++      const uploaded = await uploadImageToStorage(
++        referenceImageUrl,
++        user.id,
++        "workspace",
++        `reference_${Date.now()}.png`
++      );
+ 
+-    // Handle base64 data URLs - upload to storage first (ONLY if not using pre-uploaded thumbnail)
+-    if (!isThumbnail && referenceImageUrl && referenceImageUrl.startsWith('data:')) {
+-      console.log('⬆️ Starting image upload to Supabase...');
+-      const uploadStart = Date.now();
+-      const uploadedUrl = await uploadImageToStorage(referenceImageUrl, user.id, `reference_${Date.now()}.png`);
+-      if (uploadedUrl) {
+-        referenceImageUrl = uploadedUrl;
+-        console.log(`✅ Upload complete in ${Date.now() - uploadStart}ms: ${uploadedUrl}`);
+-      } else {
+-        console.error("❌ [STORAGE] Failed to upload reference image");
+-        return NextResponse.json({ error: "Failed to upload reference image" }, { status: 500 });
++      if (!uploaded) {
++        return NextResponse.json(
++          { error: "Failed to upload reference image" },
++          { status: 500 }
++        );
+       }
++      referenceImageUrl = uploaded;
+     }
+ 
+-    console.log("🔵 [GENERATE] Prompt:", prompt);
+-    console.log("🔵 [GENERATE] Model:", model || "default");
+-    console.log("🔵 [GENERATE] Input Image:", referenceImageUrl || "none");
++    console.log("🔵 GENERATE:", {
++      model: model || "default",
++      hasRef: !!referenceImageUrl,
++      thumbnailUsed: usedThumbnail,
++    });
+ 
+-    if (!prompt) {
+-      return NextResponse.json({ error: "prompt is required" }, { status: 400 });
+-    }
++    // ---------------------------------------------------
++    // GENERATION CALL
++    // ---------------------------------------------------
++    const t0 = Date.now();
+ 
+-    // ✅ Generate via Replicate (uses referenceImageUrl which is now the thumbnail if available)
+-    console.log('🤖 Starting Replicate generation...');
+-    const genStart = Date.now();
+     const result = await generateSingle({
+       prompt,
+       model,
+       imageUrl: referenceImageUrl,
+     });
+-    console.log(`✅ Generation complete in ${Date.now() - genStart}ms`);
++
++    console.log(`🟣 Replicate finished in ${Date.now() - t0}ms`);
+ 
+     if (result.status !== "ok" || !result.url) {
+-      console.error("❌ [GENERATE] Replicate failed:", result.message);
+       return NextResponse.json(
+         { error: result.message || "Generation failed" },
+         { status: 500 }
+       );
+     }
+ 
++    // ---------------------------------------------------
++    // STORE GENERATION RESULT IN SUPABASE
++    // ---------------------------------------------------
+     const replicateUrl = result.url;
+-    const timestamp = new Date().toISOString();
+     const imageName = `generated_${Date.now()}_${prompt
+       .slice(0, 30)
+       .replace(/\s+/g, "_")}`;
+ 
+-    // Upload to permanent storage
+-    console.log("🔵 [STORAGE] Uploading to Supabase Storage:", replicateUrl);
+-    const permanentUrl = await uploadImageToStorage(
++    console.log("🔵 Uploading final image to STORAGE:", replicateUrl);
++
++    const finalUrl = await uploadImageToStorage(
+       replicateUrl,
+       user.id,
++      "history",
+       `generated_${Date.now()}.png`
+     );
+ 
+-    if (!permanentUrl) {
+-      console.error("❌ [STORAGE] Failed to upload image to storage");
++    if (!finalUrl) {
+       return NextResponse.json(
+-        { error: "Failed to upload image to storage" },
++        { error: "Failed to store generated image" },
+         { status: 500 }
+       );
+     }
+ 
+-    console.log("✅ [STORAGE] Uploaded successfully:", permanentUrl);
+-    console.log("🔵 [DB INSERT] referenceImageUrl =", referenceImageUrl);
+-
+-    // Generate thumbnail URL using Supabase Transform API
+-    const thumbnailUrl = `${permanentUrl}?width=512&quality=80&format=webp`;
++    const thumbnailUrl = `${finalUrl}?width=512&quality=80&format=webp`;
+ 
+-    // ✅ Save to DB (Result ONLY, as requested)
+     const { data: newImage, error: dbError } = await supabase
+       .from("images")
+       .insert([
+         {
+           user_id: user.id,
+           name: imageName,
+-          prompt: prompt, // ✅ Save the actual prompt text
+-          url: permanentUrl, // ✅ Use permanent Supabase Storage URL
+-          thumbnail_url: thumbnailUrl, // This is the thumbnail of the RESULT, not the input
+-          // reference_url: referenceImageUrl || null, // ❌ Do NOT save input image
+-          model: model, // ✅ Save the AI model used (no default override)
++          prompt,
++          url: finalUrl,
++          thumbnail_url: thumbnailUrl,
++          model: model,
+           created_at: timestamp,
+         },
+       ])
+       .select()
+       .single();
+ 
+-    if (dbError) {
+-      console.error("❌ [DB ERROR]", dbError);
+-    } else {
+-      console.log("✅ [DB SAVED] Image + Reference URL inserted");
++    if (dbError) console.error("❌ DB ERROR:", dbError);
+ 
+-      // ✅ Generate thumbnail asynchronously (don't wait)
+-      if (newImage) {
+-        fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/generate-thumbnail`, {
+-          method: 'POST',
+-          headers: { 'Content-Type': 'application/json' },
++    // Kick off thumbnail generation asynchronously
++    if (newImage) {
++      fetch(
++        `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/generate-thumbnail`,
++        {
++          method: "POST",
++          headers: { "Content-Type": "application/json" },
+           body: JSON.stringify({
+-            imageUrl: permanentUrl,
+-            imageId: newImage.id
+-          })
+-        }).catch(err => console.error('❌ Thumbnail generation failed:', err));
+-      }
++            imageUrl: finalUrl,
++            imageId: newImage.id,
++          }),
++        }
++      ).catch((err) =>
++        console.error("❌ Thumbnail generation failed:", err)
++      );
+     }
+ 
++    // ---------------------------------------------------
++    // SUCCESS RESPONSE
++    // ---------------------------------------------------
+     return NextResponse.json({
+       id: `gen-${Date.now()}`,
+       status: "succeeded",
+-      output: { imageUrl: permanentUrl },
++      output: { imageUrl: finalUrl },
+       meta: {
+         model: model || "google/nano-banana",
+         promptLength: prompt.length,
+@@ -171,8 +195,9 @@ export async function POST(req: Request) {
+         generatedAt: timestamp,
+       },
+     });
++
+   } catch (err: any) {
+-    console.error("❌ [GENERATE ERROR]", err);
++    console.error("❌ API ERROR:", err);
+     return NextResponse.json(
+       { error: err?.message || "Generate failed" },
+       { status: 500 }

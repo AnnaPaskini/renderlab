@@ -148,7 +148,7 @@ const file = formData.get("file") as File;
 
 // Upload directly to Supabase Storage
 await supabase.storage
-  .from("renderlab-images")
+  .from("renderlab-images-v2")
   .upload(fileName, file, { upsert: false });
 ```
 
@@ -247,7 +247,7 @@ return NextResponse.json({ success: true, output: permanentUrl });
 **Process:**
 1. Download original image from URL
 2. Resize to 400x400 WebP (75% quality)
-3. Upload to `renderlab-images/thumbs/{userId}/{imageId}.webp`
+3. Upload to `renderlab-images-v2/thumbs/{userId}/{imageId}.webp`
 4. Update DB record with `thumb_url`
 
 **Code:**
@@ -272,21 +272,21 @@ export async function POST(request: NextRequest) {
   // Upload to storage
   const path = `thumbs/${userId}/${imageId}.webp`;
   await supabase.storage
-    .from('renderlab-images')
+    .from('renderlab-images-v2')
     .upload(path, thumbnailBuffer, {
       contentType: 'image/webp',
       upsert: true
     });
 
-  // Get public URL
-  const { data: { publicUrl } } = supabase.storage
-    .from('renderlab-images')
-    .getPublicUrl(path);
+  // Get signed URL
+  const { data: signedData } = await supabase.storage
+    .from('renderlab-images-v2')
+    .createSignedUrl(path, 3600);
 
   // Update DB record
   await supabase
     .from('images')
-    .update({ thumb_url: publicUrl })
+    .update({ thumb_url: signedData.signedUrl })
     .eq('id', imageId);
 }
 ```
@@ -296,7 +296,7 @@ export async function POST(request: NextRequest) {
 ### Storage Structure
 
 ```
-renderlab-images/
+renderlab-images-v2/
 ├── {userId}/
 │   ├── generated_1731567890123.png      (full image)
 │   ├── edited_1731567891234.png
@@ -378,14 +378,14 @@ const file = formData.get("file") as File;
 
 const fileName = `${Date.now()}_${file.name}`;
 const { data } = await supabase.storage
-  .from("renderlab-images")
+  .from("renderlab-images-v2")
   .upload(`${userId}/${fileName}`, file);
 
-const { data: { publicUrl } } = supabase.storage
-  .from("renderlab-images")
-  .getPublicUrl(`${userId}/${fileName}`);
+const { data: signedData } = await supabase.storage
+  .from("renderlab-images-v2")
+  .createSignedUrl(`${userId}/${fileName}`, 3600);
 
-// ✅ publicUrl = "https://{supabase-url}/storage/v1/object/public/renderlab-images/{userId}/{fileName}"
+// ✅ signedUrl = "https://{supabase-url}/storage/v1/object/sign/renderlab-images-v2/{userId}/{fileName}?token=..."
 ```
 
 ---
@@ -414,7 +414,7 @@ const permanentUrl = await uploadImageToStorage(
   `generated_${Date.now()}.png`
 );
 
-// ✅ permanentUrl = "https://{supabase-url}/storage/v1/object/public/renderlab-images/{userId}/generated_1731567890123.png"
+// ✅ permanentUrl = "https://{supabase-url}/storage/v1/object/sign/renderlab-images-v2/{userId}/generated_1731567890123.png?token=..."
 ```
 
 ---
@@ -443,20 +443,20 @@ export async function uploadImageToStorage(
   // 3. Upload to Supabase Storage
   const filePath = `${userId}/${finalFileName}`;
   const { data, error } = await supabase.storage
-    .from('renderlab-images')
+    .from('renderlab-images-v2')
     .upload(filePath, blob, {
       contentType: blob.type,
       cacheControl: '3600',
       upsert: false
     });
   
-  // 4. Get permanent public URL
-  const { data: { publicUrl } } = supabase.storage
-    .from('renderlab-images')
-    .getPublicUrl(filePath);
+  // 4. Get permanent signed URL
+  const { data: signedData } = await supabase.storage
+    .from('renderlab-images-v2')
+    .createSignedUrl(filePath, 3600);
   
-  return publicUrl;
-  // ✅ Returns: "https://{supabase-url}/storage/v1/object/public/renderlab-images/{userId}/{fileName}"
+  return signedData.signedUrl;
+  // ✅ Returns: "https://{supabase-url}/storage/v1/object/sign/renderlab-images-v2/{userId}/{fileName}?token=..."
 }
 ```
 

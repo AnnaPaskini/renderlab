@@ -1,5 +1,4 @@
-import { supabase } from '@/lib/supabase';
-import { randomUUID } from 'crypto';
+import { createClient } from '@/lib/supabaseBrowser';
 
 type UploadContext = 'workspace' | 'batch' | 'inpaint' | 'history';
 
@@ -66,15 +65,21 @@ export async function uploadImageToStorage(
     }
 
     // 2. Generate unique filename with UUID
-    const uuid = randomUUID();
+    const uuid = (() => {
+      if (typeof crypto !== "undefined" && crypto.randomUUID) {
+        return crypto.randomUUID();
+      }
+      return Math.random().toString(36).slice(2) + Date.now().toString(36);
+    })();
     const finalFileName = fileName || `${uuid}.${extension}`;
 
     // 3. Create structured file path: {userId}/{context}/{fileName}
     const filePath = `${userId}/${context}/${finalFileName}`;
 
     // 4. Upload to Supabase Storage
+    const supabase = createClient();
     const { data, error } = await supabase.storage
-      .from('renderlab-images')
+      .from('renderlab-images-v2')
       .upload(filePath, blob, {
         contentType: blob.type || 'image/png',
         cacheControl: '3600',
@@ -86,13 +91,18 @@ export async function uploadImageToStorage(
       throw error;
     }
 
-    // 5. Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('renderlab-images')
-      .getPublicUrl(filePath);
+    // 5. Get signed URL
+    const { data: signedData, error: signedError } = await supabase.storage
+      .from('renderlab-images-v2')
+      .createSignedUrl(filePath, 3600); // 1 hour
 
-    console.log('✅ Image uploaded successfully:', publicUrl);
-    return publicUrl;
+    if (signedError) {
+      console.error('Signed URL error:', signedError);
+      throw signedError;
+    }
+
+    console.log('✅ Image uploaded successfully:', signedData.signedUrl);
+    return signedData.signedUrl;
 
   } catch (error) {
     console.error('Failed to upload image to storage:', error);
@@ -107,17 +117,18 @@ export async function uploadImageToStorage(
  */
 export async function deleteImageFromStorage(url: string): Promise<boolean> {
   try {
-    // Extract file path from Supabase URL
-    const urlParts = url.split('/storage/v1/object/public/renderlab-images/');
+    // Extract file path from Supabase signed URL
+    const urlParts = url.split('/storage/v1/object/sign/renderlab-images-v2/');
     if (urlParts.length < 2) {
-      console.warn('Not a valid storage URL, skipping deletion:', url);
+      console.warn('Not a valid storage signed URL, skipping deletion:', url);
       return false;
     }
 
-    const filePath = urlParts[1];
+    const filePath = urlParts[1].split('?')[0];
+    const supabase = createClient();
 
     const { error } = await supabase.storage
-      .from('renderlab-images')
+      .from('renderlab-images-v2')
       .remove([filePath]);
 
     if (error) throw error;

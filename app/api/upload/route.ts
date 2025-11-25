@@ -48,24 +48,27 @@ export async function POST(req: Request) {
     const filePath = `${user.id}/history/${fileName}`;
 
     const { data, error } = await supabase.storage
-      .from("renderlab-images")
+      .from("renderlab-images-v2")
       .upload(filePath, file, { upsert: false });
 
     console.log('🔵 [UPLOAD] Storage upload:', data, 'Error:', error);
 
     if (error) throw error;
 
-    const { data: publicUrlData } = supabase.storage
-      .from("renderlab-images")
-      .getPublicUrl(filePath);
-    const publicUrl = publicUrlData?.publicUrl;
+    const { data: signedData, error: signedError } = await supabase.storage
+      .from("renderlab-images-v2")
+      .createSignedUrl(filePath, 3600); // 1 hour
 
-    console.log('🔵 [UPLOAD] Public URL:', publicUrl);
-    console.log('🔵 [UPLOAD] Inserting into DB:', { user_id: user.id, name: fileName, url: publicUrl });
+    if (signedError) throw signedError;
+
+    const signedUrl = signedData.signedUrl;
+
+    console.log('🔵 [UPLOAD] Signed URL:', signedUrl);
+    console.log('🔵 [UPLOAD] Inserting into DB:', { user_id: user.id, name: fileName, url: signedUrl });
 
     const { data: newImage, error: dbError } = await supabase
       .from("images")
-      .insert([{ user_id: user.id, name: fileName, url: publicUrl }])
+      .insert([{ user_id: user.id, name: fileName, url: signedUrl }])
       .select()
       .single();
 
@@ -81,7 +84,7 @@ export async function POST(req: Request) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          imageUrl: publicUrl,
+          imageUrl: signedUrl,
           imageId: newImage.id
         })
       }).catch(err => console.error('❌ Thumbnail generation failed:', err));
@@ -89,7 +92,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       status: "succeeded",
-      output: { publicUrl },
+      output: { publicUrl: signedUrl },
     });
   } catch (err: any) {
     console.error("❌ [UPLOAD] error:", err);

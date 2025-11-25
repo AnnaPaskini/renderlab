@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     // Upload with retry logic (3 attempts)
     await retry(async () => {
       const { error: uploadError } = await supabase.storage
-        .from('renderlab-images')
+        .from('renderlab-images-v2')
         .upload(path, thumbnailBuffer, {
           contentType: 'image/webp',
           upsert: true
@@ -65,22 +65,24 @@ export async function POST(request: NextRequest) {
       if (uploadError) throw uploadError;
     });
 
-    // Получаем публичный URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('renderlab-images')
-      .getPublicUrl(path);
+    // Получаем signed URL
+    const { data: signedData, error: signedError } = await supabase.storage
+      .from('renderlab-images-v2')
+      .createSignedUrl(path, 3600); // 1 hour
+
+    if (signedError) throw signedError;
 
     // Обновляем запись в БД
     const { error: updateError } = await supabase
       .from('images')
-      .update({ thumbnail_url: publicUrl })
+      .update({ thumbnail_url: signedData.signedUrl })
       .eq('id', imageId);
 
     if (updateError) throw updateError;
 
     return NextResponse.json({
       success: true,
-      thumbUrl: publicUrl
+      thumbUrl: signedData.signedUrl
     });
 
   } catch (error: any) {

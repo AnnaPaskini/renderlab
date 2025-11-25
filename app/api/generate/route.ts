@@ -123,7 +123,7 @@ export async function POST(req: Request) {
     console.log("🔵 [DB INSERT] referenceImageUrl =", referenceImageUrl);
 
     // Generate thumbnail URL using Supabase Transform API
-    const thumbnailUrl = `${permanentUrl}?width=512&quality=80&format=webp`;
+    // const thumbnailUrl = `${permanentUrl}?width=512&quality=80&format=webp`;
 
     // ✅ Save to DB (Result ONLY, as requested)
     const { data: newImage, error: dbError } = await supabase
@@ -134,7 +134,7 @@ export async function POST(req: Request) {
           name: imageName,
           prompt: prompt, // ✅ Save the actual prompt text
           url: permanentUrl, // ✅ Use permanent Supabase Storage URL
-          thumbnail_url: thumbnailUrl, // This is the thumbnail of the RESULT, not the input
+          thumbnail_url: null, // Will be set by generate-thumbnail
           // reference_url: referenceImageUrl || null, // ❌ Do NOT save input image
           model: model, // ✅ Save the AI model used (no default override)
           created_at: timestamp,

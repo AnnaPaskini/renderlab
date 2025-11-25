@@ -133,9 +133,9 @@ export function HistoryGrid({ images, onDelete }: HistoryGridProps) {
                     >
                         {/* Image */}
                         <div style={{ position: 'relative' }}>
-                            {img.thumbnail_url ? (
+                            {(img.thumbnail_url || img.url) ? (
                                 <img
-                                    src={img.thumbnail_url}
+                                    src={img.thumbnail_url || img.url}
                                     alt={img.prompt || 'Generated image'}
                                     loading="lazy"
                                     decoding="async"

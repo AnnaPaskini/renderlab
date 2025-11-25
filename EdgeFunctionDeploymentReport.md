@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
     // 3. Upload to thumbnails/ folder
     const path = `thumbnails/${imageId}.jpg`
     const upload = await supabase.storage
-      .from('renderlab-images')
+      .from('renderlab-images-v2')
       .upload(path, originalBlob, {
         contentType: 'image/jpeg',
         upsert: true
@@ -95,15 +95,15 @@ Deno.serve(async (req) => {
       )
     }
 
-    // 4. Get public URL
-    const { data: publicUrl } = supabase.storage
-      .from('renderlab-images')
-      .getPublicUrl(path)
+    // 4. Get signed URL
+    const { data: signedData } = await supabase.storage
+      .from('renderlab-images-v2')
+      .createSignedUrl(path, 3600)
 
     // 5. Update database with thumbnail URL
     const { error: updateError } = await supabase
       .from('images')
-      .update({ thumbnail_url: publicUrl.publicUrl })
+      .update({ thumbnail_url: signedData.signedUrl })
       .eq('id', imageId)
 
     if (updateError) {
@@ -218,7 +218,7 @@ POST https://cgufwwnovnzrrvnrntbo.supabase.co/functions/v1/generate-thumbnail
 ```json
 {
   "success": true,
-  "thumbnailUrl": "https://cgufwwnovnzrrvnrntbo.supabase.co/storage/v1/object/public/renderlab-images/thumbnails/{imageId}.jpg",
+  "thumbnailUrl": "https://cgufwwnovnzrrvnrntbo.supabase.co/storage/v1/object/sign/renderlab-images-v2/thumbnails/{imageId}.jpg?token=...",
   "imageId": "uuid-of-image-record"
 }
 ```
@@ -301,7 +301,7 @@ curl -X POST \
 
 ### Expected Behavior
 1. ✅ Downloads image from `imageUrl`
-2. ✅ Uploads to `renderlab-images/thumbnails/{imageId}.jpg`
+2. ✅ Uploads to `renderlab-images-v2/thumbnails/{imageId}.jpg`
 3. ✅ Updates database record with thumbnail URL
 4. ✅ Returns JSON with success status and URL
 
@@ -361,7 +361,7 @@ supabase/
 
 ### Integration ✅
 - [x] Function accepts `imageUrl` and `imageId`
-- [x] Function uploads to `renderlab-images` bucket
+- [x] Function uploads to `renderlab-images-v2` bucket
 - [x] Function updates database with thumbnail URL
 - [x] Function returns proper JSON responses
 - [x] Error handling implemented

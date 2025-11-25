@@ -369,7 +369,7 @@ WHERE thumbnail_url LIKE '%?width=512&quality=80&format=webp';
 ### CDN Verification
 ```bash
 # Test thumbnail URL directly
-curl -I "https://{project}.supabase.co/storage/v1/object/public/renderlab-images/{path}?width=512&quality=80&format=webp"
+curl -I "https://{project}.supabase.co/storage/v1/object/sign/renderlab-images-v2/{path}?token=..."
 
 # Should return:
 # Content-Type: image/webp

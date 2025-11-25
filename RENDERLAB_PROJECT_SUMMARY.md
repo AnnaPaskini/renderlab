@@ -49,7 +49,7 @@ CREATE INDEX idx_images_hidden_preview ON images(user_id, hidden_from_preview, c
 ```
 
 **Key Points:**
-- `url`: Permanent storage URL in format: `https://{supabase-url}/storage/v1/object/public/renderlab-images/{userId}/{filename}`
+- `url`: Permanent storage URL in format: `https://{supabase-url}/storage/v1/object/sign/renderlab-images-v2/{userId}/{filename}?token=...`
 - `reference_url`: Stores the reference image used for img2img generation (NULL for text-only)
 - `hidden_from_preview`: Added for filtering preview images from history
 - No `width`, `height`, or `metadata` columns yet (potential additions for inpainting)
@@ -185,12 +185,12 @@ CREATE OR REPLACE FUNCTION get_user_history_grouped(
 
 ### Supabase Storage Buckets
 
-#### **`renderlab-images`** (Main image bucket)
-- **Type:** Public bucket
-- **Access:** Public read, authenticated write
+#### **`renderlab-images-v2`** (Main image bucket)
+- **Type:** Private bucket with RLS
+- **Access:** Authenticated read/write via RLS policies
 - **Folder Structure:**
   ```
-  renderlab-images/
+  renderlab-images-v2/
   ├── {userId}/
   │   ├── generated_{timestamp}_{randomId}.png
   │   ├── edited_{timestamp}.png
@@ -200,13 +200,13 @@ CREATE OR REPLACE FUNCTION get_user_history_grouped(
 
 **URL Format:**
 ```
-https://{SUPABASE_URL}/storage/v1/object/public/renderlab-images/{userId}/{filename}
+https://{SUPABASE_URL}/storage/v1/object/sign/renderlab-images-v2/{userId}/{filename}?token=...
 ```
 
 **Upload Process:**
 1. Generate unique filename: `{timestamp}_{randomId}.{extension}`
 2. Upload to path: `{userId}/{filename}`
-3. Get public URL via `supabase.storage.from('renderlab-images').getPublicUrl(filePath)`
+3. Get signed URL via `supabase.storage.from('renderlab-images-v2').createSignedUrl(filePath, 3600)`
 
 ---
 

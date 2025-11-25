@@ -146,9 +146,9 @@ export function WorkspacePreviewStrip({ images, onRemoveFromView }: WorkspacePre
             onMouseLeave={() => setHoveredIndex(null)}
           >
             {/* Thumbnail */}
-            {img.thumbnail_url ? (
+            {(img.thumbnail_url || img.url) ? (
               <img
-                src={img.thumbnail_url}
+                src={img.thumbnail_url || img.url}
                 alt=""
                 loading="lazy"
                 decoding="async"

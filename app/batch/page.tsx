@@ -1,5 +1,6 @@
 'use client';
 
+import { ErrorCard } from '@/components/batch/ErrorCard';
 import { ImagePreviewModal } from '@/components/common/ImagePreviewModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -253,20 +254,22 @@ export default function BatchStudioPage() {
             setGeneratedResults([]);
             setSelectedImages(new Set());
 
-            // Имитация прогресса
+            // Smooth progress to 80%, then freeze until completion
             let current = 0;
-            const speed = 0.35; // скорость заполнения (можно менять)
+            const speed = 0.25; // slower initial speed for smoother progression
 
             const interval = setInterval(() => {
-                // увеличиваем постепенно, но замедляем в конце
-                current += (1 - current) * speed;
+                // Smooth progression to 80%
+                current += (0.8 - current) * speed;
                 setProgress(current * 100);
 
-                // останавливаем на 95%, последние 5% — после API ответа
-                if (current > 0.95) {
+                // Stop at 80%, wait for real completion
+                if (current > 0.79) {
                     clearInterval(interval);
                 }
-            }, 300);
+            }, 100);
+
+            setFakeInterval(interval);
 
             setFakeInterval(interval);
 
@@ -346,9 +349,39 @@ export default function BatchStudioPage() {
                                     [data.templateId]: data.status,
                                 }));
 
-                                if (data.status === 'done') {
+                                if (data.status === 'done' && data.imageUrl) {
+                                    // Find template data
+                                    const template = templatesPayload.find(t => t.id === data.templateId);
+
+                                    // Add result incrementally
+                                    const result: GeneratedResult = {
+                                        templateId: data.templateId,
+                                        templateName: data.templateName,
+                                        imageUrl: data.imageUrl,
+                                        prompt: template?.prompt || '',
+                                        model: template?.model || selectedModel,
+                                        saved: false, // Will be updated if saved
+                                        imageRecordId: undefined,
+                                    };
+
+                                    setGeneratedResults(prev => [...prev, result]);
+                                    setSelectedImages(prev => new Set([...prev, data.templateId]));
                                     toast.success(`✓ ${data.templateName}`);
                                 } else if (data.status === 'error') {
+                                    // Find template data
+                                    const template = templatesPayload.find(t => t.id === data.templateId);
+
+                                    // Add error result for failed templates
+                                    const errorResult: GeneratedResult = {
+                                        templateId: data.templateId,
+                                        templateName: data.templateName,
+                                        imageUrl: '', // No image for errors
+                                        prompt: template?.prompt || '',
+                                        model: template?.model || selectedModel,
+                                        saved: false,
+                                    };
+
+                                    setGeneratedResults(prev => [...prev, errorResult]);
                                     toast.error(`✗ ${data.templateName}: ${data.error || 'Failed'}`);
                                 }
                             }
@@ -356,29 +389,17 @@ export default function BatchStudioPage() {
                             if (data.type === 'complete') {
                                 console.log('✅ [COMPLETE]', data);
 
-                                const validResults = data.results.filter((result: any) => {
-                                    if (!result.templateId || !result.templateName || !result.imageUrl) {
-                                        console.warn('⚠️ Invalid image data, skipping:', result);
-                                        return false;
-                                    }
-                                    return true;
-                                });
+                                // Results are already added incrementally, just update final status
+                                const successCount = generatedResults.filter(r => r.imageUrl).length;
+                                toast.success(`Batch complete! ${successCount} images generated`);
 
-                                setGeneratedResults(validResults);
-
-                                const allIds = new Set<string>(
-                                    validResults.map((r: GeneratedResult) => r.templateId),
-                                );
-                                setSelectedImages(allIds);
-
-                                toast.success(`Batch complete! ${validResults.length} images generated`);
-
-                                if (fakeInterval) clearInterval(fakeInterval);
+                                // Smooth transition from 80% to 100%
                                 setProgress(100);
 
                                 setTimeout(() => {
                                     setIsGenerating(false);
                                     setProgress(0);
+                                    setFakeInterval(null);
                                 }, 600);
                                 await reader.cancel();
                                 break;
@@ -424,12 +445,13 @@ export default function BatchStudioPage() {
                                 setSelectedImages(allIds);
 
                                 toast.success(`Batch complete! ${validResults.length} images generated`);
-                                if (fakeInterval) clearInterval(fakeInterval);
+                                // Smooth transition to 100%
                                 setProgress(100);
 
                                 setTimeout(() => {
                                     setIsGenerating(false);
                                     setProgress(0);
+                                    setFakeInterval(null);
                                 }, 600);
                             }
                         } catch (processingError) {
@@ -673,26 +695,8 @@ export default function BatchStudioPage() {
                                                 }`}
                                         >
                                             <div className="flex flex-col items-center text-center space-y-3">
-                                                <div
-                                                    className={`w-8 h-8 rounded-full flex items-center justify-center ${status === 'generating'
-                                                        ? 'bg-orange-500/20'
-                                                        : status === 'done'
-                                                            ? 'bg-green-500/20'
-                                                            : status === 'error'
-                                                                ? 'bg-red-500/20'
-                                                                : 'bg-gray-500/20'
-                                                        }`}
-                                                >
-                                                    <FileText
-                                                        className={`w-4 h-4 ${status === 'generating'
-                                                            ? 'text-orange-500'
-                                                            : status === 'done'
-                                                                ? 'text-green-500'
-                                                                : status === 'error'
-                                                                    ? 'text-red-500'
-                                                                    : 'text-gray-400'
-                                                            }`}
-                                                    />
+                                                <div className="w-8 h-8 rounded-full bg-[#1e1e1e] flex items-center justify-center">
+                                                    <FileText className="w-5 h-5 text-gray-400" />
                                                 </div>
                                                 <div className="space-y-1">
                                                     <h3 className="font-medium text-white text-sm">
@@ -803,6 +807,16 @@ export default function BatchStudioPage() {
                                         {isGenerating ? 'Generating...' : isUploading ? 'Uploading...' : 'Generate Collection'}
                                     </button>
 
+                                    {/* Cancel Button */}
+                                    {isGenerating && (
+                                        <button
+                                            onClick={handleStop}
+                                            className="px-6 py-3 bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 text-red-400 rounded-lg font-medium transition-all duration-200"
+                                        >
+                                            Cancel Generation
+                                        </button>
+                                    )}
+
                                     {helperText && (
                                         <p className="text-sm text-[var(--rl-accent)] text-center max-w-md">{helperText}</p>
                                     )}
@@ -815,7 +829,7 @@ export default function BatchStudioPage() {
                     {isGenerating && (
                         <div className="w-full h-1 bg-neutral-900 rounded overflow-hidden">
                             <div
-                                className="h-full transition-[width] duration-300"
+                                className="h-full transition-[width] duration-500 ease-out"
                                 style={{
                                     width: `${progress}%`,
                                     background: "linear-gradient(180deg, #FF8050 0%, #FF6340 100%)"
@@ -928,48 +942,61 @@ interface ResultCardProps {
 }
 
 function ResultCard({ result, isSelected, onToggle, onImageClick }: ResultCardProps) {
-    if (!result || !result.imageUrl || !result.templateName) {
+    if (!result || !result.templateName) {
         return null;
     }
 
+    const hasImage = !!result.imageUrl;
+
     return (
         <Card
-            className="relative overflow-hidden group cursor-pointer transition-transform hover:scale-[1.02]"
-            onClick={onToggle}
+            className={`relative group transition-transform ${hasImage
+                ? 'overflow-hidden cursor-pointer hover:scale-[1.02]'
+                : 'border-red-500/30 bg-[#18181b] shadow-[0_0_20px_rgba(255,0,0,0.08)]'
+                }`}
+            onClick={hasImage ? onToggle : undefined}
         >
-            {/* Checkbox */}
-            <div className="absolute top-3 left-3 z-10">
-                <div
-                    className={`
-          w-6 h-6 rounded border-2 flex items-center justify-center transition-all
-          ${isSelected
-                            ? 'bg-gray-500 border-gray-500'
-                            : 'bg-black/50 border-white/30 group-hover:border-white/50'
-                        }
-        `}
-                >
-                    {isSelected && <Check className="w-4 h-4 text-white" />}
+            {/* Checkbox - only for successful results */}
+            {hasImage && (
+                <div className="absolute top-3 left-3 z-10">
+                    <div
+                        className={`
+              w-6 h-6 rounded border-2 flex items-center justify-center transition-all
+              ${isSelected
+                                ? 'bg-gray-500 border-gray-500'
+                                : 'bg-black/50 border-white/30 group-hover:border-white/50'
+                            }
+            `}
+                    >
+                        {isSelected && <Check className="w-4 h-4 text-white" />}
+                    </div>
                 </div>
-            </div>
+            )}
 
-            {/* Image */}
-            <img
-                src={result.imageUrl}
-                alt={result.templateName}
-                className="w-full aspect-square object-cover"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    onImageClick(result.imageUrl);
-                }}
-            />
+            {/* Image or Error Card */}
+            {hasImage ? (
+                <img
+                    src={result.imageUrl}
+                    alt={result.templateName}
+                    className="w-full aspect-square object-cover"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onImageClick(result.imageUrl);
+                    }}
+                />
+            ) : (
+                <ErrorCard />
+            )}
 
-            {/* Overlay with info */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                <p className="text-sm font-medium text-white">{result.templateName}</p>
-            </div>
+            {/* Overlay with info - only for successful results */}
+            {hasImage && (
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                    <p className="text-sm font-medium text-white">{result.templateName}</p>
+                </div>
+            )}
 
-            {/* Selected overlay */}
-            {isSelected && (
+            {/* Selected overlay - only for successful results */}
+            {isSelected && hasImage && (
                 <div className="absolute inset-0 border-4 border-orange-500/50 pointer-events-none" />
             )}
         </Card>

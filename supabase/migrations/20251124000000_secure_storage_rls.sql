@@ -1,6 +1,6 @@
 -- Migration: Secure Storage with Row Level Security
 -- Date: 2025-11-24
--- Description: Implement structured storage paths and RLS policies for renderlab-images bucket
+-- Description: Implement structured storage paths and RLS policies for renderlab-images-v2 bucket
 
 -- =====================================================
 -- 1. DROP EXISTING POLICIES (if any)
@@ -19,7 +19,7 @@ DROP POLICY IF EXISTS "Anyone can read images" ON storage.objects;
 CREATE POLICY "Users can read their own images"
 ON storage.objects FOR SELECT
 USING (
-    bucket_id = 'renderlab-images'
+    bucket_id = 'renderlab-images-v2'
     AND (storage.foldername(name))[1] = auth.uid()::text
 );
 
@@ -28,7 +28,7 @@ USING (
 CREATE POLICY "Users can upload only into their own folder"
 ON storage.objects FOR INSERT
 WITH CHECK (
-    bucket_id = 'renderlab-images'
+    bucket_id = 'renderlab-images-v2'
     AND (storage.foldername(name))[1] = auth.uid()::text
 );
 
@@ -36,7 +36,7 @@ WITH CHECK (
 CREATE POLICY "Users can delete their own images"
 ON storage.objects FOR DELETE
 USING (
-    bucket_id = 'renderlab-images'
+    bucket_id = 'renderlab-images-v2'
     AND (storage.foldername(name))[1] = auth.uid()::text
 );
 
@@ -47,7 +47,7 @@ USING (
 -- Update bucket to be private (RLS enforced)
 UPDATE storage.buckets
 SET public = false
-WHERE id = 'renderlab-images';
+WHERE id = 'renderlab-images-v2';
 
 
 -- =====================================================

@@ -11,9 +11,8 @@ import "./renderlab-theme.css"; // 4. Custom overrides
 import { LayoutContent } from "@/components/layout/LayoutContent";
 import { NavbarWrapper } from "@/components/navbar/NavbarWrapper";
 import { SupabaseAuthProvider } from "@/components/providers/SupabaseAuthProvider";
-import { Toaster } from "@/components/ui/sonner";
+import { RenderLabToaster } from "@/components/ui/RenderLabToaster";
 import { WorkspaceProvider } from "@/lib/context/WorkspaceContext";
-import { toastConfig } from "@/lib/toast-config";
 
 
 
@@ -56,10 +55,7 @@ export default async function RootLayout({
                 <LayoutContent>
                   {children}
                 </LayoutContent>
-                <Toaster
-                  position="bottom-right"
-                  toastOptions={toastConfig}
-                />
+                <RenderLabToaster />
               </WorkspaceProvider>
             </SupabaseAuthProvider>
           </ViewTransitions>
