@@ -172,19 +172,31 @@ export function CanvasArea({
     const getCanvasCoordinates = (e: React.MouseEvent, canvas: HTMLCanvasElement) => {
         const rect = canvas.getBoundingClientRect();
 
-        // Get mouse position relative to displayed canvas
-        const displayX = e.clientX - rect.left;
-        const displayY = e.clientY - rect.top;
+        // real sizes
+        const realWidth = canvas.width;
+        const realHeight = canvas.height;
 
-        // Scale coordinates to match internal canvas coordinate system (1024x1024)
-        // The canvas is displayed with object-contain, so we need to scale
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
+        // displayed sizes from rect
+        const displayWidth = rect.width;
+        const displayHeight = rect.height;
 
-        return {
-            x: displayX * scaleX,
-            y: displayY * scaleY
-        };
+        // compute scale by contain logic
+        const scale = Math.min(displayWidth / realWidth, displayHeight / realHeight);
+
+        // compute padding (letterboxing)
+        const offsetX = (displayWidth - realWidth * scale) / 2;
+        const offsetY = (displayHeight - realHeight * scale) / 2;
+
+        // proper coordinates
+        const x = (e.clientX - rect.left - offsetX) / scale;
+        const y = (e.clientY - rect.top - offsetY) / scale;
+
+        // guard against drawing outside canvas
+        if (x < 0 || y < 0 || x > realWidth || y > realHeight) {
+            return null;
+        }
+
+        return { x, y };
     };
 
     const drawBrushStroke = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, lastX?: number, lastY?: number) => {
@@ -238,6 +250,7 @@ export function CanvasArea({
         onDrawingStart?.();
 
         const coords = getCanvasCoordinates(e, maskCanvasRef.current);
+        if (!coords) return; // Outside canvas bounds (letterbox area)
 
         if (activeTool === 'lasso') {
             // Start lasso path
@@ -264,6 +277,7 @@ export function CanvasArea({
         if (!isDrawingRef.current || !maskCanvasRef.current || !activeTool) return;
 
         const coords = getCanvasCoordinates(e, maskCanvasRef.current);
+        if (!coords) return; // Outside canvas bounds (letterbox area)
 
         const ctx = maskCanvasRef.current.getContext('2d');
         if (!ctx) return;
@@ -367,8 +381,16 @@ export function CanvasArea({
         setGlobalCursorPos({ x: e.clientX, y: e.clientY });
 
         if (maskCanvasRef.current) {
-            const coords = getCanvasCoordinates(e, maskCanvasRef.current);
-            setCursorPos(coords);
+            // Use canvas coordinates for both drawing AND cursor display
+            // This ensures cursor is exactly where the brush draws
+            const canvasCoords = getCanvasCoordinates(e, maskCanvasRef.current);
+
+            if (canvasCoords) {
+                setCursorPos(canvasCoords);
+            } else {
+                // Cursor in letterbox area - hide cursor
+                setCursorPos(null);
+            }
         }
 
         // Only call draw if we're actively drawing
@@ -482,7 +504,7 @@ export function CanvasArea({
                     {/* Mask Overlay Canvas */}
                     <canvas
                         ref={maskCanvasRef}
-                        className="absolute inset-0 pointer-events-none"
+                        className="absolute inset-0 w-full h-full object-contain pointer-events-none"
                         style={{
                             opacity: showMask ? 0.7 : 0,
                             transition: 'opacity 0.2s'
@@ -492,7 +514,7 @@ export function CanvasArea({
                     {/* Interactive Drawing Canvas */}
                     <canvas
                         ref={drawCanvasRef}
-                        className="absolute inset-0 cursor-crosshair"
+                        className="absolute inset-0 w-full h-full object-contain cursor-crosshair"
                         style={{
                             cursor: activeTool ? 'none' : 'default'
                         }}
@@ -503,24 +525,48 @@ export function CanvasArea({
                     />
 
                     {/* Custom Cursor - Kyle spec: brush/eraser on canvas, lasso fixed globally */}
-                    {cursorPos && (activeTool === 'brush' || activeTool === 'eraser') && (
-                        <div
-                            className="absolute pointer-events-none"
-                            style={{
-                                left: cursorPos.x,
-                                top: cursorPos.y,
-                                transform: 'translate(-50%, -50%)',
-                                width: brushSize,
-                                height: brushSize,
-                                borderRadius: '50%',
-                                // Kyle spec: 1px white stroke, semi-transparent
-                                border: activeTool === 'eraser'
-                                    ? '1px solid rgba(192, 132, 252, 0.9)' // purple for eraser
-                                    : '1px solid rgba(255, 255, 255, 0.7)', // white for brush
-                                backgroundColor: 'transparent'
-                            }}
-                        />
-                    )}
+                    {cursorPos && (activeTool === 'brush' || activeTool === 'eraser') && maskCanvasRef.current && (() => {
+                        const canvas = maskCanvasRef.current;
+                        const rect = canvas.getBoundingClientRect();
+
+                        // real sizes
+                        const realWidth = canvas.width;
+                        const realHeight = canvas.height;
+
+                        // displayed sizes
+                        const displayWidth = rect.width;
+                        const displayHeight = rect.height;
+
+                        // compute scale by contain logic
+                        const scale = Math.min(displayWidth / realWidth, displayHeight / realHeight);
+
+                        // compute padding (letterboxing)
+                        const offsetX = (displayWidth - realWidth * scale) / 2;
+                        const offsetY = (displayHeight - realHeight * scale) / 2;
+
+                        // Convert canvas coordinates to display coordinates
+                        const displayX = rect.left + offsetX + cursorPos.x * scale;
+                        const displayY = rect.top + offsetY + cursorPos.y * scale;
+
+                        return (
+                            <div
+                                className="fixed pointer-events-none z-50"
+                                style={{
+                                    left: displayX,
+                                    top: displayY,
+                                    transform: 'translate(-50%, -50%)',
+                                    width: brushSize * scale,
+                                    height: brushSize * scale,
+                                    borderRadius: '50%',
+                                    border:
+                                        activeTool === 'eraser'
+                                            ? '1px solid rgba(192, 132, 252, 0.9)' // purple for eraser
+                                            : '1px solid rgba(255, 255, 255, 0.7)', // white for brush
+                                    backgroundColor: 'transparent'
+                                }}
+                            />
+                        );
+                    })()}
                 </div>
             )}
 
