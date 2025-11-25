@@ -257,7 +257,7 @@ export default function InpaintPage() {
 
             // 4. Extract mask bounds (Sharp will process mask in-memory)
             console.log('📐 Extracting mask bounds...');
-            const maskBounds = extractMaskBounds(maskCanvasRef.current);
+            const maskBounds = await extractMaskBounds(maskCanvasRef.current);
             console.log('✅ Mask bounds:', maskBounds);
 
             if (!maskBounds) {

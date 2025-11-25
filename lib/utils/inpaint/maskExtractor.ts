@@ -7,11 +7,38 @@ import type { MaskBounds } from '@/lib/constants/inpaint';
  * @param canvas - HTML Canvas element with mask drawn
  * @returns MaskBounds object with x, y, width, height, imageWidth, imageHeight
  */
-export function extractMaskBounds(canvas: HTMLCanvasElement): MaskBounds {
+export async function extractMaskBounds(canvas: HTMLCanvasElement): Promise<MaskBounds | null> {
     const ctx = canvas.getContext('2d');
     if (!ctx) {
         throw new Error('Cannot get canvas context');
     }
+
+    // Utility — маленький sleep
+    const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+
+    // 1) Ждём, пока React реально отрисует маску
+    await delay(120);
+
+    let bounds = computeBounds(canvas);
+
+    // 2) Если маска пуста → повторяем один раз
+    if (!bounds) {
+        await delay(120);
+        bounds = computeBounds(canvas);
+    }
+
+    // 3) Если всё ещё пусто → возвращаем null (не бросаем ошибку)
+    return bounds;
+}
+
+/**
+ * Compute bounds from canvas mask data
+ * @param canvas - HTML Canvas element
+ * @returns MaskBounds or null if no colored pixels found
+ */
+function computeBounds(canvas: HTMLCanvasElement): MaskBounds | null {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
 
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const { data, width, height } = imageData;
@@ -55,15 +82,8 @@ export function extractMaskBounds(canvas: HTMLCanvasElement): MaskBounds {
     console.log('Bounds:', { minX, minY, maxX, maxY });
 
     if (!hasContent) {
-        console.error('❌ No colored pixels found in mask canvas!');
-        return {
-            x: 0,
-            y: 0,
-            width: canvas.width,
-            height: canvas.height,
-            imageWidth: canvas.width,
-            imageHeight: canvas.height
-        };
+        console.log('⚠️ No colored pixels found in mask canvas (returning null)');
+        return null;
     }
 
     return {
