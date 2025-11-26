@@ -189,13 +189,6 @@ function CategoryPillHeader({
     >
       {label}
       {hasSelection && <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />}
-      <IconChevronDown
-        size={12}
-        className={cn(
-          "opacity-60 transition-transform duration-200",
-          isOpen && "rotate-180"
-        )}
-      />
     </button>
   );
 }

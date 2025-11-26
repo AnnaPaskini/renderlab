@@ -550,7 +550,7 @@ export default function InpaintPage() {
             : 'text-gray-400 hover:text-white hover:bg-[#1a1a1a]'}`;
 
     return (
-        <div className="min-h-screen pt-32 pb-8 px-8">
+        <div className="min-h-screen pt-40 pb-8 px-8">
             <div className="relative w-full max-w-7xl mx-auto">
                 <div className="relative flex items-center justify-center gap-8 mb-8">
                     <div className="flex-shrink-0">
@@ -665,7 +665,7 @@ export default function InpaintPage() {
                         )}
 
                         {showBrushPanel && (
-                            <div className="absolute left-[112px] top-1/2 -translate-y-1/2 z-50 transition-all duration-200 ease-out animate-fadeIn">
+                            <div className="absolute left-[-220px] top-1/2 -translate-y-1/2 z-50 transition-all duration-200 ease-out animate-fadeIn">
                                 <div className="bg-[#2a2a2a] rounded-xl px-4 py-3 border border-white/10 shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
                                     <div className="flex items-center justify-between mb-3">
                                         <span className="text-xs font-medium text-purple-400/70">
