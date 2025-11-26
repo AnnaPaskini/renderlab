@@ -92,18 +92,13 @@ export async function uploadImageToStorage(
       throw error;
     }
 
-    // 5. Get signed URL
-    const { data: signedData, error: signedError } = await supabase.storage
+    // 5. Get public URL
+    const { data: publicData } = supabase.storage
       .from('renderlab-images-v2')
-      .createSignedUrl(filePath, 3600); // 1 hour
+      .getPublicUrl(filePath);
 
-    if (signedError) {
-      console.error('Signed URL error:', signedError);
-      throw signedError;
-    }
-
-    console.log('✅ Image uploaded successfully:', signedData.signedUrl);
-    return signedData.signedUrl;
+    console.log('✅ Image uploaded successfully:', publicData.publicUrl);
+    return publicData.publicUrl;
 
   } catch (error) {
     console.error('Failed to upload image to storage:', error);

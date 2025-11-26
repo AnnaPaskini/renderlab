@@ -65,24 +65,22 @@ export async function POST(request: NextRequest) {
       if (uploadError) throw uploadError;
     });
 
-    // Получаем signed URL
-    const { data: signedData, error: signedError } = await supabase.storage
+    // Получаем public URL
+    const { data: publicData } = supabase.storage
       .from('renderlab-images-v2')
-      .createSignedUrl(path, 3600); // 1 hour
-
-    if (signedError) throw signedError;
+      .getPublicUrl(path);
 
     // Обновляем запись в БД
     const { error: updateError } = await supabase
       .from('images')
-      .update({ thumbnail_url: signedData.signedUrl })
+      .update({ thumbnail_url: publicData.publicUrl })
       .eq('id', imageId);
 
     if (updateError) throw updateError;
 
     return NextResponse.json({
       success: true,
-      thumbUrl: signedData.signedUrl
+      thumbUrl: publicData.publicUrl
     });
 
   } catch (error: any) {
