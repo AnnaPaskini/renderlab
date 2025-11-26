@@ -431,12 +431,61 @@ export default function InpaintPage() {
     const handleSendToHistory = async () => {
         if (!resultImage) return;
 
-        // Show loading state
         toast.loading('Saving to history...', { id: 'save-history' });
 
         try {
-            // The image is already in storage, just need to mark it as saved
-            // FIX #5: Only save when explicitly clicked
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) {
+                throw new Error('User not authenticated');
+            }
+
+            // 1. Upload result image to permanent storage (history folder)
+            const permanentUrl = await uploadImageToStorage(
+                supabase,
+                resultImage,  // это signed URL из inpaint результата
+                user.id,
+                'history',
+                `inpaint_${Date.now()}.png`
+            );
+
+            if (!permanentUrl) {
+                throw new Error('Failed to upload image');
+            }
+
+            // 2. Save to database
+            const { data: newImage, error: dbError } = await supabase
+                .from('images')
+                .insert({
+                    user_id: user.id,
+                    name: `inpaint_${Date.now()}`,
+                    prompt: inpaintPrompt || 'Inpaint edit',
+                    url: permanentUrl,
+                    thumbnail_url: null,
+                    model: 'gemini-inpaint',
+                    created_at: new Date().toISOString()
+                })
+                .select()
+                .single();
+
+            if (dbError) {
+                console.error('DB error:', dbError);
+                throw dbError;
+            }
+
+            // 3. Generate thumbnail asynchronously
+            if (newImage) {
+                fetch('/api/generate-thumbnail', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        imageUrl: permanentUrl,
+                        imageId: newImage.id
+                    })
+                }).catch(err => console.error('Thumbnail generation failed:', err));
+            }
+
             toast.dismiss('save-history');
 
             // Show success toast
@@ -468,12 +517,11 @@ export default function InpaintPage() {
                 }
             );
 
-            setIsSaved(true); // Mark as saved
-            setIsSaveButtonPulsing(false); // Stop pulsing since it's saved
-
-            // Don't clear everything - just close result view
+            setIsSaved(true);
+            setIsSaveButtonPulsing(false);
             setShowResult(false);
-        } catch (error) {
+
+        } catch (error: any) {
             toast.dismiss('save-history');
             console.error('Save failed:', error);
             toast.error('Failed to save to history');
