@@ -231,7 +231,6 @@ export default function InpaintPage() {
 
             // 3. Upload base image to Supabase (mask processed in-memory by Sharp)
             console.log('☁️ Uploading base image to Supabase...');
-            const supabase = createClient();
             const imageUrl = await uploadImageToStorage(supabase, imageBlob, user.id, 'inpaint', `inpaint_base_${Date.now()}.png`);
 
             if (!imageUrl) {
