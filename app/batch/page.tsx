@@ -776,11 +776,11 @@ export default function BatchStudioPage() {
                                         style={
                                             canGenerate && !isGenerating && !isUploading
                                                 ? {
-                                                    background: 'linear-gradient(180deg, #FF8050 0%, #FF6340 100%)',
+                                                    background: 'linear-gradient(180deg, #FF7038 0%, #E84F23 100%)',
                                                     boxShadow:
-                                                        '0 4px 12px rgba(0,0,0,0.32), 0 2px 8px rgba(255,98,64,0.30)',
+                                                        '0 4px 12px rgba(0,0,0,0.35), 0 2px 8px rgba(255,98,64,0.30)',
                                                     transition:
-                                                        'transform 0.15s ease-out, box-shadow 0.2s ease-out, background 0.2s ease-out',
+                                                        'transform 0.15s ease-out, box-shadow 0.25s ease-out, background 0.25s ease-out',
                                                     transform: 'translateY(0)',
                                                 }
                                                 : undefined
@@ -788,18 +788,18 @@ export default function BatchStudioPage() {
                                         onMouseEnter={(e) => {
                                             if (canGenerate && !isGenerating && !isUploading) {
                                                 e.currentTarget.style.background =
-                                                    'linear-gradient(180deg, #FF6E3A 0%, #FF3E1F 100%)';
+                                                    'linear-gradient(180deg, #FF8652 0%, #FF6430 100%)';
                                                 e.currentTarget.style.boxShadow =
-                                                    '0 4px 12px rgba(0,0,0,0.32), 0 0 6px rgba(255,120,70,0.35), inset 0 1px 1px rgba(255,255,255,0.22)';
+                                                    '0 4px 12px rgba(0,0,0,0.32), 0 6px 12px rgba(255,120,70,0.30), inset 0 1px 1px rgba(255,255,255,0.22)';
                                                 e.currentTarget.style.transform = 'translateY(-2px)';
                                             }
                                         }}
                                         onMouseLeave={(e) => {
                                             if (canGenerate && !isGenerating && !isUploading) {
                                                 e.currentTarget.style.background =
-                                                    'linear-gradient(180deg, #FF8050 0%, #FF6340 100%)';
+                                                    'linear-gradient(180deg, #FF7038 0%, #E84F23 100%)';
                                                 e.currentTarget.style.boxShadow =
-                                                    '0 4px 12px rgba(0,0,0,0.32), 0 2px 8px rgba(255,98,64,0.30)';
+                                                    '0 4px 12px rgba(0,0,0,0.35), 0 2px 8px rgba(255,98,64,0.30)';
                                                 e.currentTarget.style.transform = 'translateY(0)';
                                             }
                                         }}

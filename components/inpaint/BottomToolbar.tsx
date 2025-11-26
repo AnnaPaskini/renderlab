@@ -149,10 +149,29 @@ export function BottomToolbar({
                                     onClick={onGenerate}
                                     disabled={isGenerateDisabled}
                                     className={`w-10 h-10 rounded-md flex items-center justify-center 
-                                    transition-colors text-white ${isGenerateDisabled
-                                            ? 'bg-[#ff6b35]/50 text-white/50 cursor-not-allowed'
-                                            : 'bg-[#ff6b35] hover:bg-[#ff8555] shadow-sm'
+                                    transition-all text-white ${isGenerateDisabled
+                                            ? 'bg-[rgba(255,255,255,0.10)] text-[rgba(255,255,255,0.45)] border border-[rgba(255,255,255,0.12)] cursor-not-allowed opacity-50'
+                                            : 'shadow-sm'
                                         }`}
+                                    style={!isGenerateDisabled ? {
+                                        background: 'linear-gradient(180deg, #FF7038 0%, #E84F23 100%)',
+                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(255, 98, 64, 0.30)',
+                                        transition: 'transform 0.15s ease-out, box-shadow 0.25s ease-out, background 0.25s ease-out'
+                                    } : undefined}
+                                    onMouseEnter={(e) => {
+                                        if (!isGenerateDisabled) {
+                                            e.currentTarget.style.background = 'linear-gradient(180deg, #FF8652 0%, #FF6430 100%)';
+                                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.32), 0 6px 12px rgba(255, 120, 70, 0.30), inset 0 1px 1px rgba(255, 255, 255, 0.22)';
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (!isGenerateDisabled) {
+                                            e.currentTarget.style.background = 'linear-gradient(180deg, #FF7038 0%, #E84F23 100%)';
+                                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(255, 98, 64, 0.30)';
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                        }
+                                    }}
                                 >
                                     {isGenerating ? (
                                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

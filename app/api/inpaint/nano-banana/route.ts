@@ -64,10 +64,26 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // ✅ STEP 1: Get full original image
-        console.log('[Step 1/5] Fetching image...');
-        const fullImageBase64 = await urlToBase64(imageUrl);
-        console.log(`✅ Full image: ${Math.round(fullImageBase64.length * 0.75 / 1024)}KB`);
+        // ✅ STEP 1: Get original image AND RESIZE to match mask/canvas size
+        console.log('[Step 1/5] Fetching and resizing image to match mask...');
+        const imageResponse = await fetch(imageUrl);
+        if (!imageResponse.ok) {
+            throw new Error(`Failed to fetch image: ${imageResponse.status}`);
+        }
+        const imageArrayBuffer = await imageResponse.arrayBuffer();
+        const imageBuffer = Buffer.from(imageArrayBuffer);
+
+        // Resize to match mask/canvas dimensions (critical for coordinate alignment!)
+        const resizedImageBuffer = await sharp(imageBuffer)
+            .resize(width, height, {
+                fit: 'fill',
+                position: 'center'
+            })
+            .jpeg({ quality: 95 })
+            .toBuffer();
+
+        const fullImageBase64 = resizedImageBuffer.toString('base64');
+        console.log(`✅ Image resized to ${width}x${height} (${Math.round(resizedImageBuffer.length / 1024)}KB)`);
 
         // ✅ STEP 2: Convert user's red mask to black/white
         console.log('[Step 2] Converting mask (RED → BLACK/WHITE)...');

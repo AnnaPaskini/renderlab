@@ -78,7 +78,7 @@ export const AppNavbar = () => {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <button
-                                    className={`relative px-1 py-2 text-sm font-medium transition-colors duration-200 flex items-center gap-1 ${isStudioActive
+                                    className={`relative px-1 py-2 text-sm font-medium transition-colors duration-200 flex items-center gap-1 focus:outline-none focus-visible:outline-none ${isStudioActive
                                         ? "text-white"
                                         : "text-neutral-400 hover:text-white"
                                         }`}
@@ -123,7 +123,7 @@ export const AppNavbar = () => {
                         {/* Explore */}
                         <Link
                             href="/prompts"
-                            className={`relative px-1 py-2 text-sm font-medium transition-colors duration-200 ${pathname === '/prompts'
+                            className={`relative px-1 py-2 text-sm font-medium transition-colors duration-200 focus:outline-none focus-visible:outline-none ${pathname === '/prompts'
                                 ? "text-white"
                                 : "text-neutral-400 hover:text-white"
                                 }`}
@@ -137,7 +137,7 @@ export const AppNavbar = () => {
                         {/* History */}
                         <Link
                             href="/history"
-                            className={`relative px-1 py-2 text-sm font-medium transition-colors duration-200 ${pathname === '/history'
+                            className={`relative px-1 py-2 text-sm font-medium transition-colors duration-200 focus:outline-none focus-visible:outline-none ${pathname === '/history'
                                 ? "text-white"
                                 : "text-neutral-400 hover:text-white"
                                 }`}

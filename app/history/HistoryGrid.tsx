@@ -21,6 +21,7 @@ interface HistoryImage {
     url: string;
     prompt: string;
     created_at: string;
+    model?: string;
 }
 
 interface HistoryGridProps {
@@ -160,6 +161,32 @@ export function HistoryGrid({ images, onDelete }: HistoryGridProps) {
                                     fontSize: '14px'
                                 }} className="text-purple-400/70">
                                     No preview available
+                                </div>
+                            )}
+
+                            {/* Date Badge - bottom left */}
+                            <div className="absolute bottom-1.5 left-1.5 bg-black/80 text-white text-[10px] font-medium px-1.5 py-0.5 rounded">
+                                {new Date(img.created_at).toLocaleDateString('en-US', {
+                                    day: 'numeric',
+                                    month: 'short',
+                                    year: '2-digit'
+                                })}
+                            </div>
+
+                            {/* Model Badge - bottom right (if available) */}
+                            {img.model && (
+                                <div
+                                    className="absolute bottom-1.5 right-1.5 text-white text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+                                    style={{
+                                        background: '#FF6A2A',
+                                        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.25)',
+                                        maxWidth: 'calc(50% - 8px)',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis'
+                                    }}
+                                >
+                                    {img.model}
                                 </div>
                             )}
 
