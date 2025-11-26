@@ -1,3 +1,4 @@
+import { createClient } from '@/lib/supabaseBrowser';
 import { uploadImageToStorage } from '../../lib/utils/uploadToStorage';
 
 /**
@@ -9,9 +10,10 @@ import { uploadImageToStorage } from '../../lib/utils/uploadToStorage';
 export async function uploadReferenceImageOnce(referenceImage: string, userId: string): Promise<string | null> {
     if (!referenceImage) return null;
     try {
+        const supabase = createClient();
         // Use a unique filename
         const fileName = `reference_${Date.now()}.png`;
-        const url = await uploadImageToStorage(referenceImage, userId, 'workspace', fileName);
+        const url = await uploadImageToStorage(supabase, referenceImage, userId, 'workspace', fileName);
         return url;
     } catch (error) {
         console.error('Failed to upload reference image once:', error);

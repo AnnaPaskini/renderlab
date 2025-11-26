@@ -231,7 +231,8 @@ export default function InpaintPage() {
 
             // 3. Upload base image to Supabase (mask processed in-memory by Sharp)
             console.log('☁️ Uploading base image to Supabase...');
-            const imageUrl = await uploadImageToStorage(imageBlob, user.id, 'inpaint', `inpaint_base_${Date.now()}.png`);
+            const supabase = createClient();
+            const imageUrl = await uploadImageToStorage(supabase, imageBlob, user.id, 'inpaint', `inpaint_base_${Date.now()}.png`);
 
             if (!imageUrl) {
                 throw new Error('Failed to upload base image');
@@ -247,7 +248,7 @@ export default function InpaintPage() {
                 }, 'image/png');
             });
 
-            const maskUrl = await uploadImageToStorage(maskBlob, user.id, 'inpaint', `inpaint_mask_${Date.now()}.png`);
+            const maskUrl = await uploadImageToStorage(supabase, maskBlob, user.id, 'inpaint', `inpaint_mask_${Date.now()}.png`);
 
             if (!maskUrl) {
                 throw new Error('Failed to upload mask image');

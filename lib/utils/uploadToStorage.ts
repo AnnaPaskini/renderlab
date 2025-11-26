@@ -1,10 +1,11 @@
-import { createClient } from '@/lib/supabaseBrowser';
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 type UploadContext = 'workspace' | 'batch' | 'inpaint' | 'history';
 
 /**
  * Upload image to Supabase Storage with structured paths and MIME validation
  * 
+ * @param supabase - Supabase client (server or browser)
  * @param source - Image source (URL string, Blob, or File)
  * @param userId - User ID for folder structure
  * @param context - Upload context: 'workspace' | 'batch' | 'inpaint' | 'history'
@@ -12,6 +13,7 @@ type UploadContext = 'workspace' | 'batch' | 'inpaint' | 'history';
  * @returns Public URL of uploaded image, or null on error
  */
 export async function uploadImageToStorage(
+  supabase: SupabaseClient,
   source: string | URL | Blob | File,
   userId: string,
   context: UploadContext,
@@ -77,7 +79,6 @@ export async function uploadImageToStorage(
     const filePath = `${userId}/${context}/${finalFileName}`;
 
     // 4. Upload to Supabase Storage
-    const supabase = createClient();
     const { data, error } = await supabase.storage
       .from('renderlab-images-v2')
       .upload(filePath, blob, {
@@ -112,10 +113,11 @@ export async function uploadImageToStorage(
 
 /**
  * Delete image from Supabase Storage
+ * @param supabase - Supabase client
  * @param url - Supabase Storage URL
  * @returns Success boolean
  */
-export async function deleteImageFromStorage(url: string): Promise<boolean> {
+export async function deleteImageFromStorage(supabase: SupabaseClient, url: string): Promise<boolean> {
   try {
     // Extract file path from Supabase signed URL
     const urlParts = url.split('/storage/v1/object/sign/renderlab-images-v2/');
@@ -125,7 +127,6 @@ export async function deleteImageFromStorage(url: string): Promise<boolean> {
     }
 
     const filePath = urlParts[1].split('?')[0];
-    const supabase = createClient();
 
     const { error } = await supabase.storage
       .from('renderlab-images-v2')

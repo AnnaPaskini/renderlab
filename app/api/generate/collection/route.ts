@@ -200,6 +200,7 @@ export async function POST(req: Request) {
                   // Upload to permanent storage
                   console.log(`🔵 [STORAGE] Uploading image #${index} to Supabase Storage:`, replicateUrl);
                   const permanentUrl = await uploadImageToStorage(
+                    supabase,
                     replicateUrl,
                     user.id,
                     'history',

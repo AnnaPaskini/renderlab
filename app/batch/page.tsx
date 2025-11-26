@@ -229,6 +229,7 @@ export default function BatchStudioPage() {
             // Step 1: Upload reference image to Supabase Storage
             console.log('🔵 [UPLOAD] Starting reference image upload...');
             const uploadedImageUrl = await uploadImageToStorage(
+                supabase,
                 uploadedFile,
                 user.id,
                 'batch',

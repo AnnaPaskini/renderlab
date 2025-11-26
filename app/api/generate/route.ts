@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     if (!isThumbnail && referenceImageUrl && referenceImageUrl.startsWith('data:')) {
       console.log('⬆️ Starting image upload to Supabase...');
       const uploadStart = Date.now();
-      const uploadedUrl = await uploadImageToStorage(referenceImageUrl, user.id, 'workspace', `reference_${Date.now()}.png`);
+      const uploadedUrl = await uploadImageToStorage(supabase, referenceImageUrl, user.id, 'workspace', `reference_${Date.now()}.png`);
       if (uploadedUrl) {
         referenceImageUrl = uploadedUrl;
         console.log(`✅ Upload complete in ${Date.now() - uploadStart}ms: ${uploadedUrl}`);
@@ -105,6 +105,7 @@ export async function POST(req: Request) {
     // Upload to permanent storage
     console.log("🔵 [STORAGE] Uploading to Supabase Storage:", replicateUrl);
     const permanentUrl = await uploadImageToStorage(
+      supabase,
       replicateUrl,
       user.id,
       'history',
