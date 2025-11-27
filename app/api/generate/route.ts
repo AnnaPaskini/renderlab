@@ -49,6 +49,43 @@ export async function POST(req: Request) {
       referenceImageUrl = body.image.trim();
     }
 
+    // ✅ Style reference images array (up to 4, separate from main input)
+    let styleReferenceUrls: string[] = [];
+    if (Array.isArray(body?.referenceUrls)) {
+      for (const refUrl of body.referenceUrls) {
+        if (typeof refUrl === "string" && refUrl.trim()) {
+          let url = refUrl.trim();
+          // Handle base64 if needed
+          if (url.startsWith('data:')) {
+            const uploadedUrl = await uploadImageToStorage(
+              supabase,
+              url,
+              user.id,
+              'workspace',
+              `style_ref_${Date.now()}_${Math.random().toString(36).slice(2)}.png`
+            );
+            if (uploadedUrl) url = uploadedUrl;
+          }
+          styleReferenceUrls.push(url);
+        }
+      }
+    }
+    // Backwards compatibility: single referenceUrl
+    else if (typeof body?.referenceUrl === "string" && body.referenceUrl.trim()) {
+      let url = body.referenceUrl.trim();
+      if (url.startsWith('data:')) {
+        const uploadedUrl = await uploadImageToStorage(
+          supabase,
+          url,
+          user.id,
+          'workspace',
+          `style_ref_${Date.now()}.png`
+        );
+        if (uploadedUrl) url = uploadedUrl;
+      }
+      styleReferenceUrls.push(url);
+    }
+
     console.log('📦 Body received:', {
       hasPrompt: !!prompt,
       hasThumbnail: isThumbnail,
@@ -73,6 +110,7 @@ export async function POST(req: Request) {
     console.log("🔵 [GENERATE] Prompt:", prompt);
     console.log("🔵 [GENERATE] Model:", model || "default");
     console.log("🔵 [GENERATE] Input Image:", referenceImageUrl || "none");
+    console.log("🔵 [GENERATE] Style References:", styleReferenceUrls.length);
 
     if (!prompt) {
       return NextResponse.json({ error: "prompt is required" }, { status: 400 });
@@ -85,6 +123,7 @@ export async function POST(req: Request) {
       prompt,
       model,
       imageUrl: referenceImageUrl,
+      styleReferenceUrls,
     });
     console.log(`✅ Generation complete in ${Date.now() - genStart}ms`);
 

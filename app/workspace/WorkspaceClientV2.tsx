@@ -290,6 +290,7 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
   // Image states
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [styleReferences, setStyleReferences] = useState<string[]>([]);
   const [imageUrl, setImageUrl] = useState("");
   const [isValidatingUrl, setIsValidatingUrl] = useState(false);
 
@@ -747,6 +748,7 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
           prompt: finalPrompt,
           model: aiModel,
           imageUrl: uploadedImage || null,
+          referenceUrls: styleReferences,
           thumbnailUrl: null,
         }),
       });
@@ -814,6 +816,10 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
             onClearImage={handleClearReference}
             onFileChange={setUploadedFile}
           />
+          {/* Orange label under base image */}
+          {uploadedImage && (
+            <p className="text-xs mt-2 text-center" style={{ color: '#ff6b35' }}>#1</p>
+          )}
         </div>
 
         {/* ================================================================ */}
@@ -895,11 +901,69 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
 
           {/* Character counter */}
           <div className="flex justify-between mt-1 px-1">
-            <span className="text-xs text-gray-500">Max 2000 characters</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500">Max 2000 characters</span>
+              {/* Prompt hint for using @img1/@img2 */}
+              {(uploadedImage || styleReferences.length > 0) && (
+                <span className="text-xs text-white/40">
+                  Use <span style={{ color: '#ff6b35' }}>#1</span> and <span style={{ color: '#ff6b35' }}>#2</span> in your prompt
+                </span>
+              )}
+            </div>
             <span className={cn("text-xs", promptText.length > 1800 ? "text-orange-400" : "text-gray-500")}>
               {promptText.length}/2000
             </span>
           </div>
+
+          {/* Style References - up to 4, not for flux */}
+          {aiModel !== "flux" && (
+            <div className="flex items-center gap-2 mt-4">
+              <span className="text-sm text-white/60">Style refs:</span>
+
+              {/* Existing references with orange label below */}
+              {styleReferences.map((ref, index) => (
+                <div key={index} className="flex flex-col items-center">
+                  <div className="relative group">
+                    <img src={ref} className="w-14 h-14 object-cover rounded-lg border border-white/10" alt={`Style ref ${index + 1}`} />
+                    <button
+                      onClick={() => setStyleReferences(prev => prev.filter((_, i) => i !== index))}
+                      className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-black/80 border border-white/20 rounded-full text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <span className="text-[10px] mt-1" style={{ color: '#ff6b35' }}>#{index + 2}</span>
+                </div>
+              ))}
+
+              {/* Add button (if < 4) */}
+              {styleReferences.length < 4 && (
+                <label className="flex items-center justify-center w-14 h-14 border border-dashed border-white/20 rounded-lg cursor-pointer hover:border-white/40 hover:bg-white/5 transition-all">
+                  <span className="text-lg text-white/30">+</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file && styleReferences.length < 4) {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                          setStyleReferences(prev => [...prev, ev.target?.result as string]);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                </label>
+              )}
+
+              {/* Counter */}
+              {styleReferences.length > 0 && (
+                <span className="text-xs text-white/40 ml-1">{styleReferences.length}/4</span>
+              )}
+            </div>
+          )}
 
           {loadedTemplateName && (
             <p className="mt-2 text-xs text-violet-400">

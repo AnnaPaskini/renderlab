@@ -49,12 +49,22 @@ export async function generateSingle({
   prompt,
   model,
   imageUrl,
+  styleReferenceUrls = [],
 }: {
   prompt: string;
   model?: string;
   imageUrl?: string | null;
+  styleReferenceUrls?: string[];
 }) {
   try {
+    // Convert user-friendly #1, #2 to @img1, @img2
+    let processedPrompt = prompt
+      .replace(/#1\b/g, '@img1')
+      .replace(/#2\b/g, '@img2')
+      .replace(/#3\b/g, '@img3')
+      .replace(/#4\b/g, '@img4')
+      .replace(/#5\b/g, '@img5');
+
     const replicate = new Replicate({
       auth: process.env.REPLICATE_API_TOKEN,
     });
@@ -72,8 +82,9 @@ export async function generateSingle({
     }
 
     console.log("🟣 Model:", safeModel, "→", selectedModel);
-    console.log("🟣 Prompt:", prompt.slice(0, 100));
+    console.log("🟣 Prompt:", processedPrompt.slice(0, 100));
     console.log("🟣 Has reference:", !!imageUrl);
+    console.log("🟣 Style references count:", styleReferenceUrls.length);
 
     // ======================================
     // MODEL-SPECIFIC INPUT (UNIFIED)
@@ -83,7 +94,7 @@ export async function generateSingle({
     // FLUX: Uses input_image as single URL string
     if (safeModel === "flux") {
       input = {
-        prompt,
+        prompt: processedPrompt,
         output_format: "jpg",
         safety_tolerance: 2,
         prompt_upsampling: false,
@@ -98,15 +109,30 @@ export async function generateSingle({
 
     // SEEDREAM4: Uses image_input as URL array
     else if (safeModel === "seedream4") {
+      const imageInputs: string[] = [];
+      if (imageUrl) imageInputs.push(imageUrl);
+      // Add all style references (up to 4)
+      imageInputs.push(...styleReferenceUrls);
+
+      // Enhance prompt with @img references
+      let finalPrompt = processedPrompt;
+      if (imageUrl && styleReferenceUrls.length > 0) {
+        const refLabels = styleReferenceUrls.map((_, i) => `@img${i + 2}`).join(', ');
+        finalPrompt = `@img1 is the base image. ${refLabels} ${styleReferenceUrls.length > 1 ? 'are reference images' : 'is a reference image'}. 
+
+Task: ${processedPrompt}
+
+Apply elements or style from ${refLabels} to @img1 as described.`;
+      } else if (imageUrl) {
+        finalPrompt = `Edit @img1: ${processedPrompt}`;
+      }
+
       input = {
-        prompt,
+        prompt: finalPrompt,
         size: "2K",
-        width: 2048,
-        height: 2048,
         enhance_prompt: true,
-        sequential_image_generation: "disabled",
-        ...(imageUrl ? {
-          image_input: [imageUrl],
+        ...(imageInputs.length > 0 ? {
+          image_input: imageInputs,
           aspect_ratio: "match_input_image"
         } : {
           aspect_ratio: "4:3"
@@ -114,13 +140,32 @@ export async function generateSingle({
       };
     }
 
-    // NANO-BANANA & PRO: Use image_input as URL array
+    // NANO-BANANA & PRO: Use image_input as URL array (supports multiple images)
     else {
+      // Build image_input array with base image and style references (up to 4)
+      const imageInputs: string[] = [];
+      if (imageUrl) imageInputs.push(imageUrl);
+      // Add all style references
+      imageInputs.push(...styleReferenceUrls);
+
+      // Enhance prompt with @img references for multi-image understanding
+      let finalPrompt = processedPrompt;
+      if (imageUrl && styleReferenceUrls.length > 0) {
+        const refLabels = styleReferenceUrls.map((_, i) => `@img${i + 2}`).join(', ');
+        finalPrompt = `@img1 is the base image. ${refLabels} ${styleReferenceUrls.length > 1 ? 'are reference images' : 'is a reference image'}. 
+
+Task: ${processedPrompt}
+
+Apply elements or style from ${refLabels} to @img1 as described.`;
+      } else if (imageUrl) {
+        finalPrompt = `Edit @img1: ${processedPrompt}`;
+      }
+
       input = {
-        prompt,
+        prompt: finalPrompt,
         output_format: "jpg",
-        ...(imageUrl && {
-          image_input: [imageUrl],
+        ...(imageInputs.length > 0 && {
+          image_input: imageInputs,
           aspect_ratio: "match_input_image"
         })
       };
