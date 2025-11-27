@@ -57,9 +57,9 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        if (referenceUrls.length > 3) {
+        if (referenceUrls.length > 4) {
             return NextResponse.json(
-                { error: 'Maximum 3 reference images allowed' },
+                { error: 'Maximum 4 reference images allowed' },
                 { status: 400 }
             );
         }
