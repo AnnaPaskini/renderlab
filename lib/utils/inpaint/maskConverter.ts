@@ -20,8 +20,14 @@ export async function convertRedMaskToBlackWhite(
     maskUrl: string
 ): Promise<string> {
     try {
+        console.log('[Mask] Fetching from URL:', maskUrl);
+        
         // Fetch mask image
         const response = await fetch(maskUrl);
+        console.log('[Mask] Fetch response status:', response.status);
+        console.log('[Mask] Content-Type:', response.headers.get('content-type'));
+        console.log('[Mask] Content-Length:', response.headers.get('content-length'));
+        
         if (!response.ok) {
             throw new Error(`Failed to fetch mask: ${response.status}`);
         }
@@ -34,6 +40,16 @@ export async function convertRedMaskToBlackWhite(
             .ensureAlpha() // Make sure we have alpha channel
             .raw()
             .toBuffer({ resolveWithObject: true });
+
+        // Debug: log first few pixels to see what colors we're getting
+        console.log('[Mask Debug] First 10 pixels (RGBA):');
+        for (let i = 0; i < Math.min(40, data.length); i += 4) {
+            console.log(`  Pixel ${i/4}: R=${data[i]}, G=${data[i+1]}, B=${data[i+2]}, A=${data[i+3]}`);
+        }
+
+        // Also log a pixel from the middle of the image
+        const middlePixel = Math.floor(data.length / 2 / 4) * 4;
+        console.log(`[Mask Debug] Middle pixel: R=${data[middlePixel]}, G=${data[middlePixel+1]}, B=${data[middlePixel+2]}, A=${data[middlePixel+3]}`);
 
         // Create new buffer for black/white mask
         const outputData = Buffer.alloc(info.width * info.height * 4);
@@ -106,7 +122,9 @@ export async function convertRedMaskToBlackWhite(
  */
 export function buildBlackWhiteMaskPrompt(
     userPrompt: string,
-    referenceCount: number = 0
+    referenceCount: number = 0,
+    maskBounds?: { x: number; y: number; width: number; height: number },
+    imageSize?: { width: number; height: number }
 ): string {
     let prompt = `You are an expert image editor specializing in seamless inpainting.\n\n`;
 
@@ -121,6 +139,25 @@ export function buildBlackWhiteMaskPrompt(
         prompt += `   - IMPORTANT: Extract the subject/object/style from reference image(s)\n`;
         prompt += `   - Recreate the referenced element in the white mask area\n`;
         prompt += `   - Match colors, textures, and details from the reference\n`;
+    }
+
+    // Add mask location information if available
+    if (maskBounds && imageSize) {
+        const leftPercent = (maskBounds.x / imageSize.width) * 100;
+        const topPercent = (maskBounds.y / imageSize.height) * 100;
+        const widthPercent = (maskBounds.width / imageSize.width) * 100;
+        const heightPercent = (maskBounds.height / imageSize.height) * 100;
+
+        // Determine semantic location
+        const horizontal = leftPercent < 33 ? 'left' : leftPercent > 66 ? 'right' : 'center';
+        const vertical = topPercent < 33 ? 'upper' : topPercent > 66 ? 'lower' : 'middle';
+        const semanticLocation = `${vertical}-${horizontal}`;
+
+        prompt += `\nMASK LOCATION (where to place new content):\n`;
+        prompt += `- POSITION: ${semanticLocation} area of the image\n`;
+        prompt += `- COORDINATES: x=${Math.round(maskBounds.x)}, y=${Math.round(maskBounds.y)}\n`;
+        prompt += `- SIZE: ${Math.round(maskBounds.width)}x${Math.round(maskBounds.height)} pixels (${Math.round(widthPercent)}% x ${Math.round(heightPercent)}% of image)\n`;
+        prompt += `- IMPORTANT: Place the new content EXACTLY in the ${semanticLocation} region, matching the white mask area\n`;
     }
 
     prompt += `\n═══════════════════════════════════════════\n`;

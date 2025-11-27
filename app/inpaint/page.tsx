@@ -248,6 +248,25 @@ export default function InpaintPage() {
                 }, 'image/png');
             });
 
+            // DEBUG: Check mask blob size
+            console.log('[DEBUG] maskBlob size:', maskBlob.size, 'bytes');
+            if (maskBlob.size < 1000) {
+                console.warn('[DEBUG] WARNING: Mask blob is very small, might be empty!');
+            }
+
+            // DEBUG: Check canvas pixels directly
+            const debugCtx = maskCanvasRef.current?.getContext('2d');
+            if (debugCtx && maskCanvasRef.current) {
+                const imgData = debugCtx.getImageData(0, 0, maskCanvasRef.current.width, maskCanvasRef.current.height);
+                let redPixels = 0;
+                for (let i = 0; i < imgData.data.length; i += 4) {
+                    if (imgData.data[i] > 100 && imgData.data[i] > imgData.data[i+1] + 50) {
+                        redPixels++;
+                    }
+                }
+                console.log('[DEBUG] Red pixels in maskCanvas:', redPixels);
+            }
+
             const maskUrl = await uploadImageToStorage(supabase, maskBlob, user.id, 'inpaint', `inpaint_mask_${Date.now()}.png`);
 
             if (!maskUrl) {

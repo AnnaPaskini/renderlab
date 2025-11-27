@@ -18,7 +18,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import sharp from 'sharp';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent';
 
 interface RequestBody {
     userId: string;
@@ -57,9 +57,9 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        if (referenceUrls.length > 4) {
+        if (referenceUrls.length > 3) {
             return NextResponse.json(
-                { error: 'Maximum 4 reference images allowed' },
+                { error: 'Maximum 3 reference images allowed' },
                 { status: 400 }
             );
         }
@@ -94,7 +94,9 @@ export async function POST(request: NextRequest) {
         console.log('[Step 3] Building mask-based prompt...');
         const smartPrompt = buildBlackWhiteMaskPrompt(
             userPrompt,
-            referenceUrls.length
+            referenceUrls.length,
+            maskBounds,
+            { width, height }
         );
 
         console.log('📝 SMART PROMPT:');
@@ -220,7 +222,7 @@ export async function POST(request: NextRequest) {
                 mask_bounds: maskBounds,
                 user_prompt: userPrompt,
                 reference_urls: referenceUrls,
-                model: 'gemini-3-pro-image-preview',
+                model: 'gemini-2.5-flash-image-v3-actual-mask',
                 processing_time_ms: Date.now() - startTime
             })
             .select()
