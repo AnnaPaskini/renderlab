@@ -938,24 +938,27 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
 
               {/* Add button (if < 4) */}
               {styleReferences.length < 4 && (
-                <label className="flex items-center justify-center w-14 h-14 border border-dashed border-white/20 rounded-lg cursor-pointer hover:border-white/40 hover:bg-white/5 transition-all">
-                  <span className="text-lg text-white/30">+</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file && styleReferences.length < 4) {
-                        const reader = new FileReader();
-                        reader.onload = (ev) => {
-                          setStyleReferences(prev => [...prev, ev.target?.result as string]);
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                    }}
-                  />
-                </label>
+                <div className="flex flex-col items-center">
+                  <label className="flex items-center justify-center w-14 h-14 border border-dashed border-white/20 rounded-lg cursor-pointer hover:border-white/40 hover:bg-white/5 transition-all">
+                    <span className="text-lg text-white/30">+</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file && styleReferences.length < 4) {
+                          const reader = new FileReader();
+                          reader.onload = (ev) => {
+                            setStyleReferences(prev => [...prev, ev.target?.result as string]);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </label>
+                  <span className="text-[10px] mt-1 invisible">@img</span>
+                </div>
               )}
 
               {/* Counter */}
