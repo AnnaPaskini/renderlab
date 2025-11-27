@@ -46,6 +46,7 @@ export default function InpaintPage() {
     const [showResult, setShowResult] = useState(false);
     const [isSaved, setIsSaved] = useState(false); // Track if result is saved to history
     const [isSaveButtonPulsing, setIsSaveButtonPulsing] = useState(false); // Pulse animation for Save button
+    const [showSaveHint, setShowSaveHint] = useState(false); // Show hint to save after generation
 
     // Drawing state for panel visibility
     const [isDrawing, setIsDrawing] = useState(false);
@@ -336,11 +337,7 @@ export default function InpaintPage() {
                 setShowResult(true);
                 setIsSaved(false); // Mark as not saved yet
                 setIsSaveButtonPulsing(true); // Trigger pulse animation
-
-                // Stop pulsing after 3 seconds
-                setTimeout(() => {
-                    setIsSaveButtonPulsing(false);
-                }, 3000);
+                setShowSaveHint(true); // Show save hint
 
                 // ✅ Show success notification with processing time
                 toast(
@@ -519,6 +516,7 @@ export default function InpaintPage() {
 
             setIsSaved(true);
             setIsSaveButtonPulsing(false);
+            setShowSaveHint(false); // Hide hint after saving
             setShowResult(false);
 
         } catch (error: any) {
@@ -536,6 +534,7 @@ export default function InpaintPage() {
         setReferenceImage(null);
         setActiveTool(null);
         setIsSaveButtonPulsing(false); // Reset pulse when clearing
+        setShowSaveHint(false); // Hide hint when clearing
         handleClearMask();
     };
 
@@ -748,7 +747,7 @@ export default function InpaintPage() {
                                     <Save size={20} />
                                     {/* Pulsing indicator for unsaved */}
                                     {resultImage && !isSaved && (
-                                        <div className={`absolute -top-1 -right-1 w-3 h-3 bg-[#ff6b35] rounded-full ring-2 ring-black ${isSaveButtonPulsing ? 'animate-pulse' : ''}`} />
+                                        <div className={`absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full ring-2 ring-black ${showSaveHint ? 'animate-pulse' : ''}`} />
                                     )}
                                 </button>
                             </Tooltip>
@@ -765,6 +764,13 @@ export default function InpaintPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Save Hint */}
+                {showSaveHint && (
+                    <p className="text-center text-sm mb-4 flex items-center justify-center gap-1" style={{ color: '#ff6b35' }}>
+                        Edits are not saved automatically. Click <Save size={14} className="inline" /> to save to History.
+                    </p>
+                )}
 
                 <div className="w-full">
                     <BottomToolbar

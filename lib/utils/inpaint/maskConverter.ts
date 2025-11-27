@@ -108,36 +108,40 @@ export function buildBlackWhiteMaskPrompt(
     userPrompt: string,
     referenceCount: number = 0
 ): string {
-    let prompt = `You are editing an architectural visualization image.\n\n`;
-
+    let prompt = `You are an expert image editor specializing in seamless inpainting.\n\n`;
+    
     prompt += `IMAGES PROVIDED:\n`;
-    prompt += `1. First image: The original scene to edit\n`;
-    prompt += `2. Second image: A mask showing WHERE to edit\n`;
-    prompt += `   - WHITE pixels = EDIT THIS AREA\n`;
-    prompt += `   - BLACK pixels = KEEP UNCHANGED\n`;
-
+    prompt += `1. ORIGINAL IMAGE: The base scene you will edit\n`;
+    prompt += `2. MASK IMAGE: Black and white mask showing edit area\n`;
+    prompt += `   - WHITE pixels = AREA TO EDIT (fill with new content)\n`;
+    prompt += `   - BLACK pixels = PROTECTED AREA (do NOT modify)\n`;
+    
     if (referenceCount > 0) {
-        prompt += `3. Additional image(s): Reference for style/objects\n`;
+        prompt += `3. REFERENCE IMAGE(S): Visual examples to copy from\n`;
+        prompt += `   - IMPORTANT: Extract the subject/object/style from reference image(s)\n`;
+        prompt += `   - Recreate the referenced element in the white mask area\n`;
+        prompt += `   - Match colors, textures, and details from the reference\n`;
     }
-
-    prompt += `\nYOUR TASK:\n${userPrompt}\n\n`;
-
+    
+    prompt += `\n═══════════════════════════════════════════\n`;
+    prompt += `YOUR TASK: ${userPrompt}\n`;
+    prompt += `═══════════════════════════════════════════\n\n`;
+    
     prompt += `CRITICAL RULES:\n`;
-    prompt += `1. Edit ONLY the WHITE areas in the mask (second image)\n`;
-    prompt += `2. Keep ALL BLACK areas EXACTLY as they are - DO NOT modify them\n`;
-    prompt += `3. The black shape shows the EXACT area and shape to edit\n`;
-    prompt += `4. Match the artistic style, lighting, and atmosphere of the original\n`;
-
+    prompt += `1. ONLY modify WHITE areas in the mask - BLACK areas must remain PIXEL-PERFECT unchanged\n`;
+    prompt += `2. The WHITE shape is your canvas - fill it completely with the requested content\n`;
+    prompt += `3. Match the artistic style, lighting direction, and color palette of the original image\n`;
+    
     if (referenceCount > 0) {
-        prompt += `5. Use reference image(s) as guides for objects or styles to add\n`;
-        prompt += `6. Adapt reference elements to match scene lighting and perspective\n`;
+        prompt += `4. REFERENCE USAGE: Copy the visual appearance from reference image(s) into the white area\n`;
+        prompt += `5. Adapt the reference subject to match the original image's perspective and scale\n`;
+        prompt += `6. Harmonize lighting and shadows so the added element looks native to the scene\n`;
     }
-
-    prompt += `7. Fill the black area completely - don't make objects smaller than the mask\n`;
-    prompt += `8. Blend seamlessly at the edges where black meets white\n`;
-    prompt += `9. Maintain photorealistic quality and proper scale\n`;
-
-    prompt += `\nThe BLACK shape in the mask is your canvas - fill it appropriately with the requested content.`;
-
+    
+    prompt += `7. Blend edges seamlessly - no visible boundaries between edited and original areas\n`;
+    prompt += `8. Maintain consistent quality and resolution throughout\n`;
+    
+    prompt += `\nOUTPUT: Return the edited image with your modifications applied ONLY to the white mask area.`;
+    
     return prompt;
 }
