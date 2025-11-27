@@ -18,7 +18,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import sharp from 'sharp';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent';
 
 interface RequestBody {
     userId: string;
@@ -220,7 +220,7 @@ export async function POST(request: NextRequest) {
                 mask_bounds: maskBounds,
                 user_prompt: userPrompt,
                 reference_urls: referenceUrls,
-                model: 'gemini-2.5-flash-image-v3-actual-mask',
+                model: 'gemini-3-pro-image-preview',
                 processing_time_ms: Date.now() - startTime
             })
             .select()
