@@ -20,14 +20,8 @@ export async function convertRedMaskToBlackWhite(
     maskUrl: string
 ): Promise<string> {
     try {
-        console.log('[Mask] Fetching from URL:', maskUrl);
-        
         // Fetch mask image
         const response = await fetch(maskUrl);
-        console.log('[Mask] Fetch response status:', response.status);
-        console.log('[Mask] Content-Type:', response.headers.get('content-type'));
-        console.log('[Mask] Content-Length:', response.headers.get('content-length'));
-        
         if (!response.ok) {
             throw new Error(`Failed to fetch mask: ${response.status}`);
         }
@@ -40,16 +34,6 @@ export async function convertRedMaskToBlackWhite(
             .ensureAlpha() // Make sure we have alpha channel
             .raw()
             .toBuffer({ resolveWithObject: true });
-
-        // Debug: log first few pixels to see what colors we're getting
-        console.log('[Mask Debug] First 10 pixels (RGBA):');
-        for (let i = 0; i < Math.min(40, data.length); i += 4) {
-            console.log(`  Pixel ${i/4}: R=${data[i]}, G=${data[i+1]}, B=${data[i+2]}, A=${data[i+3]}`);
-        }
-
-        // Also log a pixel from the middle of the image
-        const middlePixel = Math.floor(data.length / 2 / 4) * 4;
-        console.log(`[Mask Debug] Middle pixel: R=${data[middlePixel]}, G=${data[middlePixel+1]}, B=${data[middlePixel+2]}, A=${data[middlePixel+3]}`);
 
         // Create new buffer for black/white mask
         const outputData = Buffer.alloc(info.width * info.height * 4);
