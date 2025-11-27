@@ -41,6 +41,7 @@ export function CanvasArea({
     const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
     const [globalCursorPos, setGlobalCursorPos] = useState<{ x: number; y: number } | null>(null); // Kyle spec: for fixed lasso icon
     const [canvasSize, setCanvasSize] = useState({ width: 1024, height: 1024 });
+    const [canvasDimensions, setCanvasDimensions] = useState<{ width: number; height: number } | null>(null);
 
     // For smooth brush strokes
     const lastPointRef = useRef<{ x: number; y: number } | null>(null);
@@ -162,6 +163,8 @@ export function CanvasArea({
 
             // Сохраняем размеры для отправки на API
             setCanvasSize({ width, height });
+            // Save dimensions for container aspect ratio
+            setCanvasDimensions({ width: Math.round(width), height: Math.round(height) });
             if (onCanvasSizeChange) {
                 onCanvasSizeChange({ width, height });
             }
@@ -460,7 +463,14 @@ export function CanvasArea({
 
             {/* Canvas Stack - Fill the container */}
             {image && (
-                <div className="relative w-full h-full dot-grid rounded-lg overflow-hidden border border-white/10">
+                <div
+                    className="relative dot-grid rounded-lg overflow-hidden border border-white/10 mx-auto"
+                    style={canvasDimensions ? {
+                        width: '100%',
+                        maxWidth: canvasDimensions.width,
+                        aspectRatio: `${canvasDimensions.width} / ${canvasDimensions.height}`
+                    } : { width: '100%', height: '100%' }}
+                >
                     {/* ANNA FIX: Circular close icon (28-32px glass style) */}
                     <button
                         onClick={onRemoveImage}
@@ -476,7 +486,7 @@ export function CanvasArea({
                     {/* Base Image Canvas */}
                     <canvas
                         ref={imageCanvasRef}
-                        className="absolute inset-0 w-full h-full object-contain"
+                        className="absolute inset-0 w-full h-full"
                     />
 
                     {/* Mask Overlay Canvas */}

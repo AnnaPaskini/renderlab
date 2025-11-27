@@ -58,17 +58,17 @@ export async function convertRedMaskToBlackWhite(
             );
 
             if (isRedMask) {
-                // Make it BLACK (edit area)
-                outputData[i] = 0;       // R = 0
-                outputData[i + 1] = 0;   // G = 0
-                outputData[i + 2] = 0;   // B = 0
-                outputData[i + 3] = 255; // A = opaque
-                redPixelCount++;
-            } else {
-                // Make it WHITE (keep unchanged)
+                // Make it WHITE (edit area)
                 outputData[i] = 255;     // R = 255
                 outputData[i + 1] = 255; // G = 255
                 outputData[i + 2] = 255; // B = 255
+                outputData[i + 3] = 255; // A = opaque
+                redPixelCount++;
+            } else {
+                // Make it BLACK (keep unchanged)
+                outputData[i] = 0;       // R = 0
+                outputData[i + 1] = 0;   // G = 0
+                outputData[i + 2] = 0;   // B = 0
                 outputData[i + 3] = 255; // A = opaque
                 whitePixelCount++;
             }
@@ -113,8 +113,8 @@ export function buildBlackWhiteMaskPrompt(
     prompt += `IMAGES PROVIDED:\n`;
     prompt += `1. First image: The original scene to edit\n`;
     prompt += `2. Second image: A mask showing WHERE to edit\n`;
-    prompt += `   - BLACK pixels = EDIT THIS AREA\n`;
-    prompt += `   - WHITE pixels = KEEP UNCHANGED\n`;
+    prompt += `   - WHITE pixels = EDIT THIS AREA\n`;
+    prompt += `   - BLACK pixels = KEEP UNCHANGED\n`;
 
     if (referenceCount > 0) {
         prompt += `3. Additional image(s): Reference for style/objects\n`;
@@ -123,8 +123,8 @@ export function buildBlackWhiteMaskPrompt(
     prompt += `\nYOUR TASK:\n${userPrompt}\n\n`;
 
     prompt += `CRITICAL RULES:\n`;
-    prompt += `1. Edit ONLY the BLACK areas in the mask (second image)\n`;
-    prompt += `2. Keep ALL WHITE areas EXACTLY as they are - DO NOT modify them\n`;
+    prompt += `1. Edit ONLY the WHITE areas in the mask (second image)\n`;
+    prompt += `2. Keep ALL BLACK areas EXACTLY as they are - DO NOT modify them\n`;
     prompt += `3. The black shape shows the EXACT area and shape to edit\n`;
     prompt += `4. Match the artistic style, lighting, and atmosphere of the original\n`;
 
