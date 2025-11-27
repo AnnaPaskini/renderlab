@@ -1,34 +1,38 @@
-import { createClient } from '@/lib/supabaseServer';
-import { redirect } from 'next/navigation';
-import { WorkspaceClient } from './WorkspaceClient';
+import { createClient } from "@/lib/supabaseServer";
+import { redirect } from "next/navigation";
+import { WorkspaceClientV2 } from "./WorkspaceClientV2";
 
-interface PreviewImage {
+interface HistoryImage {
   id: string;
   thumbnail_url: string | null;
   url: string;
   created_at: string;
+  model?: string;
 }
 
-export default async function WorkspacePage() {
+export default async function WorkspaceV2Page() {
   const supabase = await createClient();
 
-  // Get current user
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  // Auth check
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    console.error('❌ Not authenticated');
-    redirect('/login');
+    console.error("❌ Not authenticated");
+    redirect("/login");
   }
 
-  // Load preview strip data from server
-  const { data: previewImages } = await supabase
-    .from('images')
-    .select('id, thumbnail_url, url, created_at')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
+  // Load history images
+  const { data: historyImages } = await supabase
+    .from("images")
+    .select("id, thumbnail_url, url, created_at, model")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
     .limit(200);
 
-  const images: PreviewImage[] = previewImages || [];
+  const images: HistoryImage[] = historyImages || [];
 
-  return <WorkspaceClient initialPreviewImages={images} />;
+  return <WorkspaceClientV2 initialHistoryImages={images} />;
 }

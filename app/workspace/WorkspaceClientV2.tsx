@@ -718,6 +718,17 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
       const data = rawBody ? JSON.parse(rawBody) : null;
 
       if (data?.status === "succeeded" && data?.output?.imageUrl) {
+        // Сразу добавляем в начало History (не ждём Realtime)
+        const newImage: PreviewImage = {
+          id: `temp-${Date.now()}`,
+          url: data.output.imageUrl,
+          thumbnail_url: data.output.imageUrl,
+          created_at: new Date().toISOString(),
+          model: aiModel,
+        };
+
+        setHistoryImages((prev) => [newImage, ...prev]);
+
         toast.success(
           uploadedImage ? "Generated from reference" : "Generated from prompt",
           { style: defaultToastStyle }
