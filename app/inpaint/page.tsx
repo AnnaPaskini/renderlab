@@ -33,7 +33,7 @@ export default function InpaintPage() {
     const [inpaintPrompt, setInpaintPrompt] = useState('');
     const [showMask, setShowMask] = useState(true);
     const [hasMask, setHasMask] = useState(false); // Kyle spec: track if mask exists
-    const [referenceImage, setReferenceImage] = useState<string | null>(null); // ANNA FIX: reference image
+    const [referenceImages, setReferenceImages] = useState<string[]>([]); // ANNA FIX: reference images (up to 4)
     const [visualReference, setVisualReference] = useState<string | null>(null); // ANNA FIX: visual tab reference
 
     // ANNA FIX: Force re-render for undo/redo button states
@@ -213,26 +213,28 @@ export default function InpaintPage() {
             return;
         }
 
-        // Check aspect ratio mismatch with reference image
-        if (referenceImage && !pendingGeneration) {
-            try {
-                const refImg = new window.Image();
-                refImg.src = referenceImage;
-                await new Promise((resolve, reject) => {
-                    refImg.onload = resolve;
-                    refImg.onerror = reject;
-                });
-
-                const refAspect = refImg.width / refImg.height;
-                const originalAspect = canvasSize.width / canvasSize.height;
-
-                if (Math.abs(refAspect - originalAspect) > 0.1) {
-                    setShowAspectWarning(true);
-                    return; // Stop here, wait for user confirmation
+        // Check aspect ratio mismatch with ANY reference image
+        if (referenceImages.length > 0 && !pendingGeneration) {
+            const originalAspect = canvasSize.width / canvasSize.height;
+            
+            for (const refUrl of referenceImages) {
+                try {
+                    const refImg = new window.Image();
+                    refImg.src = refUrl;
+                    await new Promise((resolve, reject) => {
+                        refImg.onload = resolve;
+                        refImg.onerror = reject;
+                    });
+                    
+                    const refAspect = refImg.width / refImg.height;
+                    
+                    if (Math.abs(refAspect - originalAspect) > 0.1) {
+                        setShowAspectWarning(true);
+                        return; // Stop, wait for user confirmation
+                    }
+                } catch (e) {
+                    console.warn('Could not check reference image aspect ratio');
                 }
-            } catch (err) {
-                console.warn('Failed to check reference image aspect ratio:', err);
-                // Continue anyway if we can't load reference
             }
         }
 
@@ -316,7 +318,7 @@ export default function InpaintPage() {
             console.log('═══════════════════════════════════════════\n');
 
             // ✅ BUILD OPTIMIZED REQUEST PAYLOAD
-            console.log('🎨 Reference image in state:', referenceImage);
+            console.log('🎨 Reference images in state:', referenceImages);
 
             const requestPayload = {
                 userId: user.id,                    // ✅ Required by backend
@@ -324,7 +326,7 @@ export default function InpaintPage() {
                 maskUrl: maskUrl,                   // ✅ V3: Actual mask PNG with user-drawn shape
                 maskBounds: maskBounds,             // ✅ Extracted mask bounds
                 userPrompt: inpaintPrompt.trim(),   // ✅ User's instruction
-                referenceUrls: referenceImage ? [referenceImage] : [],  // ✅ Reference images (0-3)
+                referenceUrls: referenceImages,     // ✅ Reference images (0-4)
                 width: canvasSize.width,            // ✅ Canvas width for aspect ratio
                 height: canvasSize.height           // ✅ Canvas height for aspect ratio
             };
@@ -345,10 +347,6 @@ export default function InpaintPage() {
             });
 
             const result = await response.json();
-
-            if (result.warning) {
-                toast.warning(result.warning);
-            }
 
             if (!response.ok) {
                 throw new Error(result.error || 'API request failed');
@@ -371,14 +369,17 @@ export default function InpaintPage() {
                 setIsSaveButtonPulsing(true); // Trigger pulse animation
                 setShowSaveHint(true); // Show save hint
 
-                // ✅ Show success notification with processing time
+                // ✅ Show single toast - include warning if present
                 toast(
                     <div className="flex items-start gap-3">
                         <div className="flex-shrink-0 mt-0.5">
-                            💡
+                            {result.warning ? '⚠️' : '💡'}
                         </div>
                         <div>
                             <p className="font-semibold text-sm">Result Ready!</p>
+                            {result.warning && (
+                                <p className="text-xs text-amber-400 mt-1">{result.warning}</p>
+                            )}
                             <p className="text-xs text-gray-300 mt-1">
                                 Generated in {Math.round(result.processingTimeMs / 1000)}s •
                                 Click <span className="font-medium text-white">"Save to History"</span> to keep this image
@@ -386,12 +387,12 @@ export default function InpaintPage() {
                         </div>
                     </div>,
                     {
-                        duration: 6000,  // 6 seconds - long enough to read
+                        duration: result.warning ? 8000 : 6000,  // Longer if warning
                         position: 'top-center',
                         style: {
                             background: '#2a2a2a',
                             color: 'white',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            border: result.warning ? '1px solid rgba(251, 191, 36, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
                             borderRadius: '12px',
                             padding: '16px',
                             boxShadow: '0 8px 24px rgba(0, 0, 0, 0.6)',
@@ -563,7 +564,7 @@ export default function InpaintPage() {
         setImage(null);
         setResultImage(null);
         setInpaintPrompt('');
-        setReferenceImage(null);
+        setReferenceImages([]);
         setActiveTool(null);
         setIsSaveButtonPulsing(false); // Reset pulse when clearing
         setShowSaveHint(false); // Hide hint when clearing
@@ -811,8 +812,9 @@ export default function InpaintPage() {
                         hasMask={hasMask}
                         onGenerate={handleGenerate}
                         isGenerating={isGenerating}
-                        referenceImage={referenceImage}
-                        onReferenceImageChange={setReferenceImage}
+                        referenceImages={referenceImages}
+                        onReferenceImagesChange={setReferenceImages}
+                        maxReferenceImages={4}
                     />
                 </div>
             </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { Tooltip } from '@/components/ui/Tooltip';
-import { ArrowUp, Paperclip } from 'lucide-react';
+import { ArrowUp, Paperclip, Plus, X } from 'lucide-react';
 import { useRef } from 'react';
 
 interface BottomToolbarProps {
@@ -10,8 +10,9 @@ interface BottomToolbarProps {
     hasMask?: boolean;
     onGenerate?: () => void;
     isGenerating?: boolean;
-    referenceImage?: string | null;  // NEW: Pass from parent
-    onReferenceImageChange?: (url: string | null) => void;  // NEW: Callback to parent
+    referenceImages?: string[];  // Array of reference images (up to 4)
+    onReferenceImagesChange?: (images: string[]) => void;  // Callback to update images
+    maxReferenceImages?: number;  // Maximum allowed reference images
 }
 
 export function BottomToolbar({
@@ -20,12 +21,14 @@ export function BottomToolbar({
     hasMask = false,
     onGenerate,
     isGenerating = false,
-    referenceImage = null,  // NEW: Use prop
-    onReferenceImageChange  // NEW: Use callback
+    referenceImages = [],
+    onReferenceImagesChange,
+    maxReferenceImages = 4
 }: BottomToolbarProps) {
     const paperclipInputRef = useRef<HTMLInputElement>(null);
 
     const isGenerateDisabled = !hasMask || !inpaintPrompt.trim() || isGenerating;
+    const canAddMoreReferences = referenceImages.length < maxReferenceImages;
 
     const handlePaperclipUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -69,9 +72,9 @@ export function BottomToolbar({
 
                 console.log('📸 Reference uploaded to Supabase:', signedData.signedUrl);
 
-                // ✅ IMPORTANT: Call parent callback to update state
-                if (onReferenceImageChange) {
-                    onReferenceImageChange(signedData.signedUrl);
+                // ✅ Add new reference image to array
+                if (onReferenceImagesChange && referenceImages.length < maxReferenceImages) {
+                    onReferenceImagesChange([...referenceImages, signedData.signedUrl]);
                 }
 
             } catch (error) {
@@ -79,6 +82,12 @@ export function BottomToolbar({
             }
         }
         e.target.value = '';
+    };
+
+    const handleRemoveReference = (indexToRemove: number) => {
+        if (onReferenceImagesChange) {
+            onReferenceImagesChange(referenceImages.filter((_, i) => i !== indexToRemove));
+        }
     };
 
     return (
@@ -96,23 +105,42 @@ export function BottomToolbar({
 
                     {/* Input Row */}
                     <div className="flex items-center gap-2">
-                        {/* Reference thumbnail - left side under Prompt */}
-                        {referenceImage && (
-                            <div className="relative group flex-shrink-0">
-                                <img
-                                    src={referenceImage}
-                                    className="w-[72px] h-[72px] object-cover rounded-lg border border-white/10"
-                                />
-                                <button
-                                    onClick={() => onReferenceImageChange?.(null)}
-                                    className="absolute top-1 right-1 w-5 h-5 rounded-full 
-                                    bg-white/10 backdrop-blur-sm border border-white/20 
-                                    hover:bg-white/20 transition-all
-                                    opacity-0 group-hover:opacity-100 
-                                    flex items-center justify-center text-white text-sm"
-                                    title="Remove reference">
-                                    ×
-                                </button>
+                        {/* Reference thumbnails - left side under Prompt */}
+                        {referenceImages.length > 0 && (
+                            <div className="flex gap-2 flex-shrink-0 items-end">
+                                {/* Counter badge */}
+                                <span className="text-xs text-gray-500 mb-1">
+                                    {referenceImages.length}/{maxReferenceImages}
+                                </span>
+                                {referenceImages.map((refImage, index) => (
+                                    <div key={index} className="relative group flex-shrink-0">
+                                        <img
+                                            src={refImage}
+                                            className="w-[72px] h-[72px] object-cover rounded-lg border border-white/10"
+                                        />
+                                        <button
+                                            onClick={() => handleRemoveReference(index)}
+                                            className="absolute top-1 right-1 w-5 h-5 rounded-full 
+                                            bg-white/10 backdrop-blur-sm border border-white/20 
+                                            hover:bg-white/20 transition-all
+                                            opacity-0 group-hover:opacity-100 
+                                            flex items-center justify-center text-white text-sm"
+                                            title="Remove reference">
+                                            <X size={12} />
+                                        </button>
+                                    </div>
+                                ))}
+                                {/* Add more button - only show if can add more */}
+                                {canAddMoreReferences && (
+                                    <button
+                                        onClick={() => paperclipInputRef.current?.click()}
+                                        className="w-[72px] h-[72px] rounded-lg border border-dashed border-white/20 
+                                        flex items-center justify-center text-white/40 hover:text-white/60 
+                                        hover:border-white/40 transition-colors"
+                                        title={`Add reference (${referenceImages.length}/${maxReferenceImages})`}>
+                                        <Plus size={24} />
+                                    </button>
+                                )}
                             </div>
                         )}
 
@@ -120,7 +148,7 @@ export function BottomToolbar({
                         <textarea
                             value={inpaintPrompt}
                             onChange={(e) => setInpaintPrompt(e.target.value)}
-                            placeholder="Describe what you want to change..."
+                            placeholder="Describe what you want to add... (attach up to 4 reference images)"
                             rows={3}
                             className="flex-1 bg-[#1a1a1a] border border-white/10 rounded-lg text-white text-base 
                             placeholder:text-white/20 outline-none px-3 py-2 resize-none h-[72px]
@@ -129,13 +157,13 @@ export function BottomToolbar({
 
                         {/* Right side buttons */}
                         <div className="flex items-center gap-2">
-                            {/* Paperclip button - hide when reference exists */}
-                            {!referenceImage && (
+                            {/* Paperclip button - show when no references or can add more */}
+                            {referenceImages.length === 0 && (
                                 <button
                                     onClick={() => paperclipInputRef.current?.click()}
                                     className="w-10 h-10 rounded-lg bg-[#1a1a1a] hover:bg-[#242424] 
                                     flex items-center justify-center transition-colors text-white/40 hover:text-[#ff6b35]"
-                                    title="Attach reference image">
+                                    title="Add reference image (up to 4)">
                                     <Paperclip size={18} />
                                 </button>
                             )}
