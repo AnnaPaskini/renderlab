@@ -216,7 +216,7 @@ export default function InpaintPage() {
         // Check aspect ratio mismatch with ANY reference image
         if (referenceImages.length > 0 && !pendingGeneration) {
             const originalAspect = canvasSize.width / canvasSize.height;
-            
+
             for (const refUrl of referenceImages) {
                 try {
                     const refImg = new window.Image();
@@ -225,9 +225,9 @@ export default function InpaintPage() {
                         refImg.onload = resolve;
                         refImg.onerror = reject;
                     });
-                    
+
                     const refAspect = refImg.width / refImg.height;
-                    
+
                     if (Math.abs(refAspect - originalAspect) > 0.1) {
                         setShowAspectWarning(true);
                         return; // Stop, wait for user confirmation

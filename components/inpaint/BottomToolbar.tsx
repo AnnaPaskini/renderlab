@@ -93,30 +93,30 @@ export function BottomToolbar({
     return (
         <div className="flex justify-center w-full">
             <div className="w-[90%] max-w-4xl">
-                <div className="bg-[#2a2a2a] rounded-2xl border border-white/10 p-4
+                <div className="bg-[#2a2a2a] rounded-2xl border border-white/10 p-5
                     shadow-[0_8px_32px_rgba(0,0,0,0.6)] relative">
 
-                    {/* Tabs */}
+                    {/* Label */}
                     <div className="flex items-center gap-2 mb-3">
-                        <div className="px-3 py-1.5 rounded-lg text-sm font-medium bg-white text-black">
+                        <span className="text-sm font-medium text-white/60">
                             Prompt
-                        </div>
+                        </span>
                     </div>
 
                     {/* Input Row */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                         {/* Reference thumbnails - left side under Prompt */}
                         {referenceImages.length > 0 && (
-                            <div className="flex gap-2 flex-shrink-0 items-end">
+                            <div className="flex gap-3 flex-shrink-0 items-end">
                                 {/* Counter badge */}
-                                <span className="text-xs text-gray-500 mb-1">
+                                <span className="text-sm text-gray-400 mb-1">
                                     {referenceImages.length}/{maxReferenceImages}
                                 </span>
                                 {referenceImages.map((refImage, index) => (
                                     <div key={index} className="relative group flex-shrink-0">
                                         <img
                                             src={refImage}
-                                            className="w-[72px] h-[72px] object-cover rounded-lg border border-white/10"
+                                            className="w-20 h-20 object-cover rounded-lg border border-white/10"
                                         />
                                         <button
                                             onClick={() => handleRemoveReference(index)}
@@ -134,11 +134,11 @@ export function BottomToolbar({
                                 {canAddMoreReferences && (
                                     <button
                                         onClick={() => paperclipInputRef.current?.click()}
-                                        className="w-[72px] h-[72px] rounded-lg border border-dashed border-white/20 
+                                        className="w-20 h-20 rounded-lg border-2 border-dashed border-white/20 
                                         flex items-center justify-center text-white/40 hover:text-white/60 
                                         hover:border-white/40 transition-colors"
                                         title={`Add reference (${referenceImages.length}/${maxReferenceImages})`}>
-                                        <Plus size={24} />
+                                        <Plus size={28} />
                                     </button>
                                 )}
                             </div>
@@ -150,8 +150,8 @@ export function BottomToolbar({
                             onChange={(e) => setInpaintPrompt(e.target.value)}
                             placeholder="Describe what you want to add... (attach up to 4 reference images)"
                             rows={3}
-                            className="flex-1 bg-[#1a1a1a] border border-white/10 rounded-lg text-white text-base 
-                            placeholder:text-white/20 outline-none px-3 py-2 resize-none h-[72px]
+                            className="flex-1 bg-[#1a1a1a] border border-white/10 rounded-xl text-white text-base 
+                            placeholder:text-white/30 outline-none px-4 py-3 resize-none h-20
                             focus:border-[#ff6b35]/50 transition-colors"
                         />
 
