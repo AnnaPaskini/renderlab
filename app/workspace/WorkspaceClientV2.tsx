@@ -149,6 +149,9 @@ const AVOID_ELEMENTS: PillItem[] = [
   { label: "Clutter", value: "clutter and mess" },
 ];
 
+// Consistency prompt for architectural visualization
+const CONSISTENCY_PROMPT = "Maintain the exact architectural composition, perspective, materials, and proportions of the original image. Preserve all structural elements, lighting direction, and spatial relationships. Only modify what is explicitly requested.";
+
 // ============================================================================
 // COMPONENTS
 // ============================================================================
@@ -299,6 +302,9 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
   // Avoid elements
   const [selectedAvoid, setSelectedAvoid] = useState<Set<string>>(new Set());
 
+  // Consistency mode for architectural projects
+  const [keepConsistent, setKeepConsistent] = useState(false);
+
   // Generation states
   const [isGenerating, setIsGenerating] = useState(false);
   const [aiModel, setAiModel] = useState("nano-banana");
@@ -403,7 +409,7 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
           (payload) => {
             const newImage = payload.new as PreviewImage;
             setHistoryImages((prev) => {
-              if (prev.some(img => img.id === newImage.id)) return prev;
+              if (prev.some(img => img.id === newImage.id || img.url === newImage.url)) return prev;
               return [newImage, ...prev];
             });
             toast.success("New image generated!", {
@@ -499,11 +505,35 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
   const toggleAvoid = (item: PillItem) => {
     setSelectedAvoid((prev) => {
       const next = new Set(prev);
-      if (next.has(item.label)) {
+      const isRemoving = next.has(item.label);
+
+      if (isRemoving) {
         next.delete(item.label);
       } else {
         next.add(item.label);
       }
+
+      // Rebuild avoid sentence and update prompt
+      const avoidValues = AVOID_ELEMENTS
+        .filter((a) => next.has(a.label))
+        .map((a) => a.value);
+
+      const newAvoidSentence = avoidValues.length > 0
+        ? `Please avoid ${avoidValues.join(", ")}.`
+        : "";
+
+      // Update prompt text - remove old avoid sentence and add new one
+      setPromptText((currentPrompt) => {
+        // Remove any existing "Please avoid..." sentence
+        let cleanedPrompt = currentPrompt.replace(/\s*Please avoid[^.]*\./gi, "").trim();
+
+        // Add new avoid sentence if there are selections
+        if (newAvoidSentence) {
+          return cleanedPrompt + " " + newAvoidSentence;
+        }
+        return cleanedPrompt;
+      });
+
       return next;
     });
   };
@@ -660,12 +690,8 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
     setIsGenerating(true);
 
     try {
-      // Build final prompt with avoid sentence
-      let finalPrompt = basePrompt;
-      const avoidSentence = buildAvoidSentence();
-      if (avoidSentence) {
-        finalPrompt += ` ${avoidSentence}`;
-      }
+      // Prompt already contains consistency instruction (added via useEffect)
+      const finalPrompt = basePrompt;
 
       console.log("📝 Final prompt:", finalPrompt);
 
@@ -728,6 +754,9 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
         };
 
         setHistoryImages((prev) => [newImage, ...prev]);
+
+        // Smooth scroll to top to see the new image
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
         toast.success(
           uploadedImage ? "Generated from reference" : "Generated from prompt",
@@ -833,6 +862,7 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
               value={promptText}
               onChange={(e) => setPromptText(e.target.value)}
               placeholder={getDefaultPrompt()}
+              maxLength={2000}
               className={cn(
                 "w-full px-5 py-4 text-sm border border-white/10 rounded-2xl",
                 "bg-gradient-to-b from-[#0f0f0f] to-[#0a0a0a]",
@@ -847,6 +877,14 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
             <div className="absolute inset-x-0 top-0 h-8 rounded-t-2xl bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
           </div>
 
+          {/* Character counter */}
+          <div className="flex justify-between mt-1 px-1">
+            <span className="text-xs text-gray-500">Max 2000 characters</span>
+            <span className={cn("text-xs", promptText.length > 1800 ? "text-orange-400" : "text-gray-500")}>
+              {promptText.length}/2000
+            </span>
+          </div>
+
           {loadedTemplateName && (
             <p className="mt-2 text-xs text-violet-400">
               Loaded: "{loadedTemplateName}"
@@ -858,6 +896,29 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
         {/* 4. GENERATE BUTTON — gap-6 (24px) after */}
         {/* ================================================================ */}
         <div className="mb-6">
+          {/* Consistency Toggle - for architectural projects */}
+          {uploadedImage && (
+            <label className="flex items-center gap-3 px-1 mb-4 cursor-pointer group">
+              <div
+                className={cn(
+                  "relative w-10 h-5 rounded-full transition-colors duration-200",
+                  keepConsistent ? "bg-[#ff6b35]" : "bg-white/10"
+                )}
+                onClick={() => setKeepConsistent(!keepConsistent)}
+              >
+                <div
+                  className={cn(
+                    "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200",
+                    keepConsistent ? "translate-x-5" : "translate-x-0.5"
+                  )}
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-white/90">Keep Consistent</span>
+                <span className="text-xs text-gray-500">Preserve architectural composition & style</span>
+              </div>
+            </label>
+          )}
           <button
             onClick={handleGenerate}
             disabled={!hasAnySelection || isGenerating}
@@ -1074,11 +1135,6 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
                     />
                   ))}
                 </div>
-                {selectedAvoid.size > 0 && (
-                  <p className="text-xs text-red-400/70">
-                    Will add: "{buildAvoidSentence()}"
-                  </p>
-                )}
               </div>
             </div>
           )}
