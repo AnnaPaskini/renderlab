@@ -111,6 +111,7 @@ export function buildBlackWhiteMaskPrompt(
     imageSize?: { width: number; height: number }
 ): string {
     let prompt = `You are an expert image editor specializing in seamless inpainting.\n\n`;
+    prompt += `CRITICAL REQUIREMENT: The output image MUST be exactly ${imageSize?.width}x${imageSize?.height} pixels. Do NOT change the aspect ratio or dimensions.\n\n`;
 
     prompt += `IMAGES PROVIDED:\n`;
     prompt += `1. ORIGINAL IMAGE: The base scene you will edit\n`;
@@ -161,7 +162,9 @@ export function buildBlackWhiteMaskPrompt(
 
     prompt += `7. Blend edges seamlessly - no visible boundaries between edited and original areas\n`;
     prompt += `8. Maintain consistent quality and resolution throughout\n`;
+    prompt += `9. CRITICAL: Output image MUST have the SAME dimensions and aspect ratio as the input original image\n`;
 
+    prompt += `\nOUTPUT DIMENSIONS: Return image at exactly ${imageSize?.width}x${imageSize?.height} pixels - same as input.\n`;
     prompt += `\nOUTPUT: Return the edited image with your modifications applied ONLY to the white mask area.`;
 
     return prompt;

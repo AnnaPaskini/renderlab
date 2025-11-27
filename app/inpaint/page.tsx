@@ -47,6 +47,8 @@ export default function InpaintPage() {
     const [isSaved, setIsSaved] = useState(false); // Track if result is saved to history
     const [isSaveButtonPulsing, setIsSaveButtonPulsing] = useState(false); // Pulse animation for Save button
     const [showSaveHint, setShowSaveHint] = useState(false); // Show hint to save after generation
+    const [showAspectWarning, setShowAspectWarning] = useState(false); // Aspect ratio mismatch warning
+    const [pendingGeneration, setPendingGeneration] = useState(false); // User confirmed to proceed despite aspect ratio
 
     // Drawing state for panel visibility
     const [isDrawing, setIsDrawing] = useState(false);
@@ -211,6 +213,32 @@ export default function InpaintPage() {
             return;
         }
 
+        // Check aspect ratio mismatch with reference image
+        if (referenceImage && !pendingGeneration) {
+            try {
+                const refImg = new window.Image();
+                refImg.src = referenceImage;
+                await new Promise((resolve, reject) => {
+                    refImg.onload = resolve;
+                    refImg.onerror = reject;
+                });
+
+                const refAspect = refImg.width / refImg.height;
+                const originalAspect = canvasSize.width / canvasSize.height;
+
+                if (Math.abs(refAspect - originalAspect) > 0.1) {
+                    setShowAspectWarning(true);
+                    return; // Stop here, wait for user confirmation
+                }
+            } catch (err) {
+                console.warn('Failed to check reference image aspect ratio:', err);
+                // Continue anyway if we can't load reference
+            }
+        }
+
+        // Reset pending state for next generation
+        setPendingGeneration(false);
+
         try {
             setIsGenerating(true);
             console.log('🚀 Starting inpaint generation...');
@@ -317,6 +345,10 @@ export default function InpaintPage() {
             });
 
             const result = await response.json();
+
+            if (result.warning) {
+                toast.warning(result.warning);
+            }
 
             if (!response.ok) {
                 throw new Error(result.error || 'API request failed');
@@ -784,6 +816,42 @@ export default function InpaintPage() {
                     />
                 </div>
             </div>
+
+            {/* Aspect Ratio Warning Modal */}
+            {showAspectWarning && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
+                    <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 max-w-md mx-4 shadow-2xl">
+                        <h3 className="text-lg font-semibold text-white mb-2">
+                            Aspect Ratio Mismatch
+                        </h3>
+                        <p className="text-gray-400 text-sm mb-6">
+                            Reference image has a different aspect ratio than your original image.
+                            The result may be cropped to match. Continue anyway?
+                        </p>
+                        <div className="flex gap-3 justify-end">
+                            <button
+                                onClick={() => {
+                                    setShowAspectWarning(false);
+                                    setPendingGeneration(false);
+                                }}
+                                className="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setShowAspectWarning(false);
+                                    setPendingGeneration(true);
+                                    handleGenerate(); // Retry with pendingGeneration=true
+                                }}
+                                className="px-4 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                            >
+                                Continue Anyway
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

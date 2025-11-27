@@ -23,17 +23,14 @@ const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/
 interface RequestBody {
     userId: string;
     imageUrl: string;
-    maskUrl: string;  // ✅ Actual mask PNG (red contour)
+    maskUrl: string;
     maskBounds: MaskBounds;
     userPrompt: string;
     referenceUrls?: string[];
-    width: number;    // ✅ Canvas width for aspect ratio
-    height: number;   // ✅ Canvas height for aspect ratio
+    width: number;
+    height: number;
 }
 
-/**
- * Convert URL to base64
- */
 async function urlToBase64(url: string): Promise<string> {
     const response = await fetch(url);
     const arrayBuffer = await response.arrayBuffer();
@@ -49,7 +46,6 @@ export async function POST(request: NextRequest) {
         const body: RequestBody = await request.json();
         const { userId, imageUrl, maskUrl, maskBounds, userPrompt, referenceUrls = [], width, height } = body;
 
-        // Validate inputs
         if (!userId || !imageUrl || !maskUrl || !maskBounds || !userPrompt) {
             return NextResponse.json(
                 { error: 'Missing required fields' },
@@ -57,14 +53,14 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        if (referenceUrls.length > 3) {
+        if (referenceUrls.length > 4) {
             return NextResponse.json(
-                { error: 'Maximum 3 reference images allowed' },
+                { error: 'Maximum 4 reference images allowed' },
                 { status: 400 }
             );
         }
 
-        // ✅ STEP 1: Get original image AND RESIZE to match mask/canvas size
+        // STEP 1: Fetch and resize original image
         console.log('[Step 1/5] Fetching and resizing image to match mask...');
         const imageResponse = await fetch(imageUrl);
         if (!imageResponse.ok) {
@@ -73,24 +69,20 @@ export async function POST(request: NextRequest) {
         const imageArrayBuffer = await imageResponse.arrayBuffer();
         const imageBuffer = Buffer.from(imageArrayBuffer);
 
-        // Resize to match mask/canvas dimensions (critical for coordinate alignment!)
         const resizedImageBuffer = await sharp(imageBuffer)
-            .resize(width, height, {
-                fit: 'fill',
-                position: 'center'
-            })
+            .resize(width, height, { fit: 'fill' })
             .jpeg({ quality: 95 })
             .toBuffer();
 
         const fullImageBase64 = resizedImageBuffer.toString('base64');
         console.log(`✅ Image resized to ${width}x${height} (${Math.round(resizedImageBuffer.length / 1024)}KB)`);
 
-        // ✅ STEP 2: Convert user's red mask to black/white
+        // STEP 2: Convert mask
         console.log('[Step 2] Converting mask (RED → BLACK/WHITE)...');
         const blackWhiteMaskBase64 = await convertRedMaskToBlackWhite(maskUrl);
-        console.log(`✅ Mask converted to black/white`);
+        console.log('✅ Mask converted to black/white');
 
-        // ✅ STEP 3: Build prompt
+        // STEP 3: Build prompt
         console.log('[Step 3] Building mask-based prompt...');
         const smartPrompt = buildBlackWhiteMaskPrompt(
             userPrompt,
@@ -104,14 +96,13 @@ export async function POST(request: NextRequest) {
         console.log(smartPrompt);
         console.log('═══════════════════════════════════════════');
 
-        // ✅ STEP 4: Build API request parts
+        // STEP 4: Build API parts
         const parts: any[] = [
             { text: smartPrompt },
             { inlineData: { mimeType: 'image/jpeg', data: fullImageBase64 } },
             { inlineData: { mimeType: 'image/png', data: blackWhiteMaskBase64 } }
         ];
 
-        // Add reference images if provided
         if (referenceUrls.length > 0) {
             console.log(`[Step 4/5] Adding ${referenceUrls.length} reference image(s)...`);
             for (let i = 0; i < referenceUrls.length; i++) {
@@ -122,7 +113,7 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // ✅ STEP 5: Call Gemini API
+        // STEP 5: Call Gemini
         console.log('[Step 5/5] Calling Gemini API...');
         const geminiResponse = await fetch(
             `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
@@ -148,50 +139,58 @@ export async function POST(request: NextRequest) {
         }
 
         const geminiData = await geminiResponse.json();
-
-        // Extract generated image (using camelCase inlineData)
         const imagePart = geminiData.candidates?.[0]?.content?.parts?.find(
             (part: any) => part.inlineData
         );
-
         const generatedImageBase64 = imagePart?.inlineData?.data;
 
         if (!generatedImageBase64) {
             if (process.env.NODE_ENV === 'development') {
-                console.error('❌ No image in response. Full response:', JSON.stringify(geminiData, null, 2));
+                console.error('❌ No image in response:', JSON.stringify(geminiData, null, 2));
             }
             throw new Error('No image in Gemini response');
         }
 
-        // ✅ Post-process to preserve aspect ratio
+        // Post-process: resize to original dimensions
         console.log('[Post-processing] Resizing to original aspect ratio...');
         console.log(`[Post-processing] Original size: ${width}x${height}`);
 
         const generatedBuffer: Buffer = Buffer.from(generatedImageBase64, 'base64');
 
-        // Resize to original aspect ratio using Sharp
+        // Log what Gemini returned
+        const geminiMeta = await sharp(generatedBuffer).metadata();
+        console.log(`[Post-processing] Gemini returned: ${geminiMeta.width}x${geminiMeta.height}`);
+
+        // Check for aspect ratio mismatch
+        const originalAspect = width / height;
+        const geminiAspect = (geminiMeta.width || width) / (geminiMeta.height || height);
+        const aspectMismatch = Math.abs(originalAspect - geminiAspect) > 0.1;
+
+        if (aspectMismatch) {
+            console.warn(`⚠️ Aspect ratio mismatch! Original: ${originalAspect.toFixed(2)}, Gemini: ${geminiAspect.toFixed(2)}`);
+        }
+
         let resizedBuffer: Buffer;
         try {
             resizedBuffer = await sharp(generatedBuffer)
-                .resize(width, height, {
-                    fit: 'cover',
-                    position: 'center'
-                })
+                .resize(width, height, { fit: 'cover', position: 'center' })
                 .jpeg({ quality: 90 })
                 .toBuffer() as Buffer;
-            console.log(`✅ [Post-processing] Resized to ${width}x${height}`);
+
+            const finalMeta = await sharp(resizedBuffer).metadata();
+            console.log(`✅ [Post-processing] Final size: ${finalMeta.width}x${finalMeta.height}`);
         } catch (resizeError: any) {
             console.error('⚠️ [Post-processing] Resize failed:', resizeError.message);
-            resizedBuffer = generatedBuffer; // Use original if resize fails
+            resizedBuffer = generatedBuffer;
         }
 
-        // ✅ Upload result to Supabase
+        // Upload to Supabase
         const supabase = await createClient();
         const timestamp = Date.now();
         const fileName = `inpaint_${timestamp}.jpg`;
         const filePath = `${userId}/inpaint/${fileName}`;
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
             .from('renderlab-images-v2')
             .upload(filePath, resizedBuffer, {
                 contentType: 'image/jpeg',
@@ -205,14 +204,14 @@ export async function POST(request: NextRequest) {
 
         const { data: signedData, error: signedError } = await supabase.storage
             .from('renderlab-images-v2')
-            .createSignedUrl(filePath, 3600); // 1 hour
+            .createSignedUrl(filePath, 3600);
 
         if (signedError) {
             console.error('❌ Signed URL error:', signedError);
             throw signedError;
         }
 
-        // ✅ Save to database
+        // Save to database
         const { data: dbData, error: dbError } = await supabase
             .from('inpaint_edits')
             .insert({
@@ -222,7 +221,7 @@ export async function POST(request: NextRequest) {
                 mask_bounds: maskBounds,
                 user_prompt: userPrompt,
                 reference_urls: referenceUrls,
-                model: 'gemini-2.5-flash-image-v3-actual-mask',
+                model: 'gemini-2.5-flash-image',
                 processing_time_ms: Date.now() - startTime
             })
             .select()
@@ -240,7 +239,7 @@ export async function POST(request: NextRequest) {
             url: signedData.signedUrl,
             editId: dbData?.id,
             processingTimeMs: totalTime,
-            approach: 'full-image-with-actual-mask'
+            warning: aspectMismatch ? 'Image was cropped because reference image has different aspect ratio' : undefined
         });
 
     } catch (error: any) {
@@ -248,10 +247,7 @@ export async function POST(request: NextRequest) {
         console.error(`❌ Inpaint error after ${totalTime}ms:`, error.message);
 
         return NextResponse.json(
-            {
-                error: error.message || 'Processing failed',
-                processingTimeMs: totalTime
-            },
+            { error: error.message || 'Processing failed', processingTimeMs: totalTime },
             { status: 500 }
         );
     }
