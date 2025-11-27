@@ -446,6 +446,22 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
     }
   }, [promptText]);
 
+  // Update prompt when consistency toggle changes
+  useEffect(() => {
+    setPromptText((currentPrompt) => {
+      // Remove existing consistency prompt if present
+      let cleanedPrompt = currentPrompt.replace(CONSISTENCY_PROMPT, "").trim();
+      // Remove double spaces
+      cleanedPrompt = cleanedPrompt.replace(/\s+/g, " ").trim();
+
+      if (keepConsistent && uploadedImage) {
+        // Add consistency prompt at the beginning
+        return CONSISTENCY_PROMPT + " " + cleanedPrompt;
+      }
+      return cleanedPrompt;
+    });
+  }, [keepConsistent, uploadedImage]);
+
   // ─────────────────────────────────────────────────────────────────────────
   // PILL LOGIC - Adds semantic phrase to prompt
   // ─────────────────────────────────────────────────────────────────────────
