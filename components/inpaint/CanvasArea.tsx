@@ -399,8 +399,10 @@ export function CanvasArea({
             {!image && (
                 <div className={clsx(
                     "absolute inset-0 flex items-center justify-center cursor-pointer",
-                    "border-2 border-dashed rounded-2xl transition-all duration-300",
-                    isDragActive ? "bg-black/50 border-white/20 shadow-[0_0_0_1px_rgba(220,220,225,0.6),0_0_4px_rgba(220,220,225,0.2)]" : "bg-black/50 border-white/12 hover:bg-black/60 hover:border-white/20 hover:shadow-[0_0_0_1px_rgba(220,220,225,0.4),0_0_2px_rgba(220,220,225,0.1)]"
+                    "border border-dashed rounded-2xl transition-all duration-300",
+                    isDragActive
+                      ? "bg-black/50 border-white/20 shadow-[0_0_15px_rgba(139,92,246,0.10),inset_0_0_30px_rgba(139,92,246,0.03)]"
+                      : "bg-black/50 border-white/12 hover:bg-black/60 hover:border-white/20 hover:shadow-[0_0_8px_rgba(139,92,246,0.06)]"
                 )}>
                     <div className="text-center pointer-events-none">
                         <div className="mb-4">
