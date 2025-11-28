@@ -33,6 +33,7 @@ export async function POST(req: Request) {
     const body = await req.json().catch(() => ({}));
     const prompt = typeof body?.prompt === "string" ? body.prompt.trim() : "";
     const model = typeof body?.model === "string" ? body.model.trim() : undefined;
+    const aspectRatio = typeof body?.aspectRatio === "string" ? body.aspectRatio : undefined;
 
     // ✅ Reference image logic
     // 1. Prefer thumbnailUrl (pre-processed 1024px)
@@ -124,6 +125,7 @@ export async function POST(req: Request) {
       model,
       imageUrl: referenceImageUrl,
       styleReferenceUrls,
+      aspectRatio,
     });
     console.log(`✅ Generation complete in ${Date.now() - genStart}ms`);
 

@@ -309,6 +309,16 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
   // Generation states
   const [isGenerating, setIsGenerating] = useState(false);
   const [aiModel, setAiModel] = useState("nano-banana");
+  const [aspectRatio, setAspectRatio] = useState<string>("match_input_image");
+
+  const ASPECT_RATIOS = [
+    { id: "match_input_image", label: "Match input" },
+    { id: "1:1", label: "1:1 Square" },
+    { id: "4:3", label: "4:3" },
+    { id: "3:4", label: "3:4" },
+    { id: "16:9", label: "16:9 Wide" },
+    { id: "9:16", label: "9:16 Vertical" },
+  ];
 
   // History
   const [historyImages, setHistoryImages] = useState<PreviewImage[]>(initialHistoryImages);
@@ -750,6 +760,7 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
           imageUrl: uploadedImage || null,
           referenceUrls: styleReferences,
           thumbnailUrl: null,
+          aspectRatio: aspectRatio,
         }),
       });
 
@@ -818,7 +829,7 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
           />
           {/* Orange label under base image */}
           {uploadedImage && (
-            <p className="text-xs mt-2 text-center" style={{ color: '#ff6b35' }}>#1</p>
+            <p className="text-xs mt-2 text-center" style={{ color: '#ff6b35' }}>@img1</p>
           )}
         </div>
 
@@ -906,7 +917,7 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
               {/* Prompt hint for using @img1/@img2 */}
               {(uploadedImage || styleReferences.length > 0) && (
                 <span className="text-xs text-white/40">
-                  Use <span style={{ color: '#ff6b35' }}>#1</span> and <span style={{ color: '#ff6b35' }}>#2</span> in your prompt
+                  Use <span style={{ color: '#ff6b35' }}>@img1</span> and <span style={{ color: '#ff6b35' }}>@img2</span> in your prompt
                 </span>
               )}
             </div>
@@ -915,16 +926,16 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
             </span>
           </div>
 
-          {/* Style References - up to 4, not for flux */}
+          {/* References - up to 4, not for flux */}
           {aiModel !== "flux" && (
             <div className="flex items-center gap-2 mt-4">
-              <span className="text-sm text-white/60">Style refs:</span>
+              <span className="text-sm text-white/60">References:</span>
 
               {/* Existing references with orange label below */}
               {styleReferences.map((ref, index) => (
                 <div key={index} className="flex flex-col items-center">
                   <div className="relative group">
-                    <img src={ref} className="w-14 h-14 object-cover rounded-lg border border-white/10" alt={`Style ref ${index + 1}`} />
+                    <img src={ref} className="w-14 h-14 object-cover rounded-lg border border-white/10" alt={`Reference ${index + 1}`} />
                     <button
                       onClick={() => setStyleReferences(prev => prev.filter((_, i) => i !== index))}
                       className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-black/80 border border-white/20 rounded-full text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
@@ -932,7 +943,7 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
                       ×
                     </button>
                   </div>
-                  <span className="text-[10px] mt-1" style={{ color: '#ff6b35' }}>#{index + 2}</span>
+                  <span className="text-[10px] mt-1" style={{ color: '#ff6b35' }}>@img{index + 2}</span>
                 </div>
               ))}
 
@@ -1102,11 +1113,9 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
             className="w-full h-[40px] flex items-center justify-between text-white/85 hover:text-white transition-colors border-b border-white/[0.08]"
           >
             <span className="text-sm font-medium">Advanced Tools</span>
-            {showAdvanced ? (
-              <IconChevronDown size={16} className="opacity-60" />
-            ) : (
-              <IconChevronRight size={16} className="opacity-60" />
-            )}
+            <span className="text-orange-500">
+              {showAdvanced ? "▲" : "▼"}
+            </span>
           </button>
 
           {/* Accordion content */}
@@ -1136,6 +1145,35 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
                     {AI_MODELS.map((model) => (
                       <option key={model.id} value={model.id} className="bg-[#1a1a1a]">
                         {model.label} — {model.description}
+                      </option>
+                    ))}
+                  </select>
+                  <IconChevronDown
+                    size={16}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 pointer-events-none"
+                  />
+                </div>
+              </div>
+
+              {/* Aspect Ratio Selector */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-white/90">Aspect Ratio</label>
+                <div className="relative">
+                  <select
+                    value={aspectRatio}
+                    onChange={(e) => setAspectRatio(e.target.value)}
+                    disabled={isGenerating}
+                    className={cn(
+                      "w-full h-[44px] px-4 text-sm font-medium rounded-xl appearance-none cursor-pointer",
+                      "bg-white/[0.06] border border-white/[0.15] text-white/90",
+                      "focus:ring-2 focus:ring-[#ff6b35]/50 focus:border-[#ff6b35]",
+                      "disabled:opacity-50 disabled:cursor-not-allowed",
+                      "transition-all"
+                    )}
+                  >
+                    {ASPECT_RATIOS.map((ar) => (
+                      <option key={ar.id} value={ar.id} className="bg-[#1a1a1a]">
+                        {ar.label}
                       </option>
                     ))}
                   </select>

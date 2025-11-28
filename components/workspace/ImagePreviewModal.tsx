@@ -207,15 +207,6 @@ function ImagePreviewModal({ src, onClose, images = [], currentIndex = 0, onNavi
         <X className="h-5 w-5" />
       </button>
 
-      <button
-        type="button"
-        aria-label="Download image"
-        onClick={handleDownload}
-        className="fixed bottom-6 right-6 z-[10000] bg-black/80 hover:bg-black border border-white/20 text-white rounded-full p-2.5 shadow-md shadow-black/40 transition-all duration-200 ease-out active:scale-95"
-      >
-        <Download className="h-5 w-5" />
-      </button>
-
       <div
         onClick={(e) => e.stopPropagation()}
         className={`
@@ -242,6 +233,16 @@ function ImagePreviewModal({ src, onClose, images = [], currentIndex = 0, onNavi
           draggable={false}
           className="max-h-[90vh] max-w-[90vw] rounded-2xl shadow-2xl select-none"
         />
+
+        {/* Download button - positioned on image bottom-right corner */}
+        <button
+          type="button"
+          aria-label="Download image"
+          onClick={handleDownload}
+          className="absolute bottom-3 right-3 z-[10001] bg-black/70 hover:bg-black/90 border border-white/20 text-white rounded-full p-2.5 shadow-md shadow-black/40 transition-all duration-200 ease-out active:scale-95"
+        >
+          <Download className="h-5 w-5" />
+        </button>
       </div>
 
       {/* Подсказка */}

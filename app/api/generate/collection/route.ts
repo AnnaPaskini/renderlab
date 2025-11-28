@@ -126,7 +126,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const limit = pLimit(5);
+    const limit = pLimit(10);
     const hasReplicateToken = Boolean(process.env.REPLICATE_API_TOKEN);
 
     const stream = new ReadableStream<Uint8Array>({

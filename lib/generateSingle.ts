@@ -50,21 +50,15 @@ export async function generateSingle({
   model,
   imageUrl,
   styleReferenceUrls = [],
+  aspectRatio,
 }: {
   prompt: string;
   model?: string;
   imageUrl?: string | null;
   styleReferenceUrls?: string[];
+  aspectRatio?: string;
 }) {
   try {
-    // Convert user-friendly #1, #2 to @img1, @img2
-    let processedPrompt = prompt
-      .replace(/#1\b/g, '@img1')
-      .replace(/#2\b/g, '@img2')
-      .replace(/#3\b/g, '@img3')
-      .replace(/#4\b/g, '@img4')
-      .replace(/#5\b/g, '@img5');
-
     const replicate = new Replicate({
       auth: process.env.REPLICATE_API_TOKEN,
     });
@@ -82,7 +76,7 @@ export async function generateSingle({
     }
 
     console.log("🟣 Model:", safeModel, "→", selectedModel);
-    console.log("🟣 Prompt:", processedPrompt.slice(0, 100));
+    console.log("🟣 Prompt:", prompt.slice(0, 100));
     console.log("🟣 Has reference:", !!imageUrl);
     console.log("🟣 Style references count:", styleReferenceUrls.length);
 
@@ -94,7 +88,7 @@ export async function generateSingle({
     // FLUX: Uses input_image as single URL string
     if (safeModel === "flux") {
       input = {
-        prompt: processedPrompt,
+        prompt: prompt,
         output_format: "jpg",
         safety_tolerance: 2,
         prompt_upsampling: false,
@@ -103,7 +97,7 @@ export async function generateSingle({
       // Add reference image if provided
       if (imageUrl) {
         input.input_image = imageUrl;
-        input.aspect_ratio = "match_input_image";
+        input.aspect_ratio = aspectRatio || "match_input_image";
       }
     }
 
@@ -115,16 +109,16 @@ export async function generateSingle({
       imageInputs.push(...styleReferenceUrls);
 
       // Enhance prompt with @img references
-      let finalPrompt = processedPrompt;
+      let finalPrompt = prompt;
       if (imageUrl && styleReferenceUrls.length > 0) {
         const refLabels = styleReferenceUrls.map((_, i) => `@img${i + 2}`).join(', ');
         finalPrompt = `@img1 is the base image. ${refLabels} ${styleReferenceUrls.length > 1 ? 'are reference images' : 'is a reference image'}. 
 
-Task: ${processedPrompt}
+Task: ${prompt}
 
 Apply elements or style from ${refLabels} to @img1 as described.`;
       } else if (imageUrl) {
-        finalPrompt = `Edit @img1: ${processedPrompt}`;
+        finalPrompt = `Edit @img1: ${prompt}`;
       }
 
       input = {
@@ -133,9 +127,9 @@ Apply elements or style from ${refLabels} to @img1 as described.`;
         enhance_prompt: true,
         ...(imageInputs.length > 0 ? {
           image_input: imageInputs,
-          aspect_ratio: "match_input_image"
+          aspect_ratio: aspectRatio || "match_input_image"
         } : {
-          aspect_ratio: "4:3"
+          aspect_ratio: aspectRatio || "4:3"
         })
       };
     }
@@ -149,24 +143,26 @@ Apply elements or style from ${refLabels} to @img1 as described.`;
       imageInputs.push(...styleReferenceUrls);
 
       // Enhance prompt with @img references for multi-image understanding
-      let finalPrompt = processedPrompt;
+      let finalPrompt = prompt;
       if (imageUrl && styleReferenceUrls.length > 0) {
         const refLabels = styleReferenceUrls.map((_, i) => `@img${i + 2}`).join(', ');
         finalPrompt = `@img1 is the base image. ${refLabels} ${styleReferenceUrls.length > 1 ? 'are reference images' : 'is a reference image'}. 
 
-Task: ${processedPrompt}
+Task: ${prompt}
 
 Apply elements or style from ${refLabels} to @img1 as described.`;
       } else if (imageUrl) {
-        finalPrompt = `Edit @img1: ${processedPrompt}`;
+        finalPrompt = `Edit @img1: ${prompt}`;
       }
 
       input = {
         prompt: finalPrompt,
         output_format: "jpg",
-        ...(imageInputs.length > 0 && {
+        ...(imageInputs.length > 0 ? {
           image_input: imageInputs,
-          aspect_ratio: "match_input_image"
+          aspect_ratio: aspectRatio || "match_input_image"
+        } : {
+          aspect_ratio: aspectRatio || "1:1"
         })
       };
 
@@ -180,9 +176,45 @@ Apply elements or style from ${refLabels} to @img1 as described.`;
     console.log("🟣 Final input:", input);
 
     // ======================================
-    // RUN REPLICATE
+    // RUN REPLICATE WITH TIMEOUT HANDLING
     // ======================================
-    const output = await replicate.run(selectedModel as any, { input });
+    const waitOptions = { wait: { mode: "block" as const, timeout: 60 } }; // Replicate max is 60 seconds
+
+    let output;
+    try {
+      output = await replicate.run(selectedModel as any, { input, ...waitOptions });
+    } catch (replicateError: any) {
+      console.error("❌ [REPLICATE ERROR]", {
+        model: safeModel,
+        error: replicateError?.message || replicateError,
+        code: replicateError?.code,
+        status: replicateError?.status,
+        input: JSON.stringify(input).slice(0, 500), // truncate for logs
+      });
+
+      // User-friendly error messages
+      let userMessage = "Generation failed. Please try again.";
+
+      if (replicateError?.message?.includes('timeout') || replicateError?.code === 'ETIMEDOUT') {
+        userMessage = safeModel === 'nano-banana-pro'
+          ? "4K generation timed out (>5 min). Try 'Nano Banana' for faster results."
+          : "Generation timed out. The model may be overloaded, please try again.";
+      } else if (replicateError?.status === 429) {
+        userMessage = "Rate limit reached. Please wait a moment and try again.";
+      } else if (replicateError?.message?.includes('failed')) {
+        userMessage = `Model error: ${replicateError.message.slice(0, 100)}`;
+      }
+
+      return {
+        status: "error",
+        message: userMessage,
+        debugInfo: {
+          model: safeModel,
+          errorType: replicateError?.code || 'unknown',
+          timestamp: new Date().toISOString(),
+        }
+      };
+    }
     console.log("🟣 Raw output:", output);
 
     // ======================================
@@ -209,6 +241,11 @@ Apply elements or style from ${refLabels} to @img1 as described.`;
     return {
       status: "error",
       message: error?.message || "Replicate generation failed",
+      debugInfo: {
+        model: model || 'unknown',
+        errorType: error?.code || 'unknown',
+        timestamp: new Date().toISOString(),
+      }
     };
   }
 }
