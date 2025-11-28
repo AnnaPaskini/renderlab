@@ -7,7 +7,7 @@ import { useWorkspace } from "@/lib/context/WorkspaceContext";
 import { createClient } from "@/lib/supabaseBrowser";
 import { defaultToastStyle } from "@/lib/toast-config";
 import { cn } from "@/lib/utils";
-import { IconChevronDown, IconChevronRight } from "@tabler/icons-react";
+import { IconChevronDown } from "@tabler/icons-react";
 import { Link as LinkIcon, Loader2, Sparkles, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -717,8 +717,12 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
     setIsGenerating(true);
 
     try {
-      // Prompt already contains consistency instruction (added via useEffect)
-      const finalPrompt = basePrompt;
+      // Add aspect ratio hint if changing canvas size
+      const promptWithAspectHint = (aspectRatio && aspectRatio !== "match_input_image" && uploadedImage)
+        ? `${basePrompt}. Fill/extend the canvas naturally to fit the new aspect ratio.`
+        : basePrompt;
+
+      const finalPrompt = promptWithAspectHint;
 
       console.log("📝 Final prompt:", finalPrompt);
 

@@ -25,14 +25,14 @@ export function MainNavbar() {
           <div className="flex space-x-8">
             {tabs.map((tab) => {
               // Extract base path and query params
-              const [basePath, queryString] = href.split('?');
+              const [basePath, queryString] = tab.href.split('?');
               const isActive = queryString
                 ? pathname === basePath && searchParams.toString().includes(queryString)
                 : pathname.startsWith(basePath);
               return (
                 <Link
-                  key={href}
-                  href={href}
+                  key={tab.href}
+                  href={tab.href}
                   className={cn(
                     "py-4 px-1 border-b-2 font-medium text-sm transition-colors",
                     isActive
@@ -40,7 +40,7 @@ export function MainNavbar() {
                       : "border-transparent text-gray-400 hover:text-white hover:border-gray-600"
                   )}
                 >
-                  {name}
+                  {tab.name}
                 </Link>
               );
             })}

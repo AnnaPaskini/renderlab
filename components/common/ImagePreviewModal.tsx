@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { X, ZoomIn, ZoomOut } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface ImagePreviewModalProps {
   imageUrl: string | null;
@@ -21,7 +21,7 @@ export function ImagePreviewModal({ imageUrl, onClose }: ImagePreviewModalProps)
     setIsClosing(true);
     setTimeout(() => {
       onClose();
-      // Reset closing state after animation completes
+      // Reset closing state after animation completes if needed
       setIsClosing(false);
     }, 200); // Match animation duration
   }, [onClose]);
@@ -56,9 +56,9 @@ export function ImagePreviewModal({ imageUrl, onClose }: ImagePreviewModalProps)
 
     const handleWheel = (e: WheelEvent) => {
       if (!imageRef.current?.contains(e.target as Node)) return;
-      
+
       e.preventDefault();
-      
+
       const delta = e.deltaY > 0 ? -0.1 : 0.1;
       setScale((prev) => {
         const newScale = prev + delta;
@@ -185,7 +185,7 @@ export function ImagePreviewModal({ imageUrl, onClose }: ImagePreviewModalProps)
               }}
               draggable={false}
             />
-            
+
             {/* Close button - top right, offset outside image */}
             <button
               onClick={handleClose}
