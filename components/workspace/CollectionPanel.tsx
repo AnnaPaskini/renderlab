@@ -1110,7 +1110,7 @@ export function CollectionsPanel() {
 				<div className="space-y-6">
 					{/* Reference Image Upload */}
 					{!referenceImage ? (
-						<div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-[#ff6b35] transition-colors cursor-pointer">
+						<div className="border border-dashed border-white/30 bg-black/30 rounded-2xl p-8 text-center hover:border-white/40 hover:shadow-[0_0_12px_rgba(139,92,246,0.10)] transition-all cursor-pointer">
 							<input
 								type="file"
 								accept="image/*"

@@ -177,18 +177,16 @@ export function ImageUpload({ onUploadComplete, currentImage }: ImageUploadProps
           onClick={() => fileInputRef.current?.click()}
           className={`
             flex flex-col items-center justify-center
-            w-full rounded-lg border-2 border-dashed
+            w-full max-w-3xl aspect-[4/3] rounded-2xl border border-dashed border-white/30 bg-black/30
             cursor-pointer transition-all
             ${uploading ? 'opacity-50 cursor-not-allowed' : ''}
           `}
           style={{
             paddingTop: '56.25%',
             position: 'relative',
-            background: isDragging ? '#1f1f1f' : '#1a1a1a',
-            borderColor: isDragging ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.1)',
             boxShadow: isDragging
-              ? 'inset 0 2px 8px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.4)'
-              : 'inset 0 2px 8px rgba(0, 0, 0, 0.3)'
+              ? '0 0 20px rgba(139, 92, 246, 0.15), inset 0 0 30px rgba(139, 92, 246, 0.03)'
+              : undefined
           }}
         >
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6">

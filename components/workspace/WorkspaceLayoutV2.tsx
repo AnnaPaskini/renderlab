@@ -292,8 +292,8 @@ export function WorkspaceLayoutV2({
             ref={leftColumnRef}
             className="rounded-2xl p-6 border border-white/[0.06]"
             style={{
-              background: "#1a1a1a",
-              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.5)",
+              background: "rgba(20, 20, 20, 0.12)",
+              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
             }}
           >
             {children}
@@ -305,8 +305,8 @@ export function WorkspaceLayoutV2({
           <div
             className="rounded-2xl p-4 border border-white/[0.06] flex flex-col"
             style={{
-              background: "#1a1a1a",
-              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.5)",
+              background: "rgba(20, 20, 20, 0.25)",
+              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
               height: leftColumnHeight ? `${leftColumnHeight}px` : "auto",
               minHeight: "400px",
             }}
@@ -326,8 +326,8 @@ export function WorkspaceLayoutV2({
             <div
               className="flex-1 overflow-y-auto rounded-xl p-3"
               style={{
-                background: "#0f0f0f",
-                boxShadow: "inset 0 2px 8px rgba(0, 0, 0, 0.6)",
+                background: "rgba(15, 15, 15, 0.6)",
+                boxShadow: "inset 0 2px 8px rgba(0, 0, 0, 0.4)",
               }}
             >
               {historyImages.length === 0 ? (

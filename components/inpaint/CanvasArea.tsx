@@ -401,20 +401,20 @@ export function CanvasArea({
                     "absolute inset-0 flex items-center justify-center cursor-pointer",
                     "border border-dashed rounded-2xl transition-all duration-300",
                     isDragActive
-                      ? "bg-black/50 border-white/20 shadow-[0_0_15px_rgba(139,92,246,0.10),inset_0_0_30px_rgba(139,92,246,0.03)]"
-                      : "bg-black/50 border-white/12 hover:bg-black/60 hover:border-white/20 hover:shadow-[0_0_8px_rgba(139,92,246,0.06)]"
+                        ? "bg-black/40 border-white/40 shadow-[0_0_20px_rgba(139,92,246,0.15),inset_0_0_30px_rgba(139,92,246,0.03)]"
+                        : "bg-black/30 border-white/30 hover:bg-black/40 hover:border-white/40 hover:shadow-[0_0_12px_rgba(139,92,246,0.10)]"
                 )}>
                     <div className="text-center pointer-events-none">
-                        <div className="mb-4">
-                            <svg className="w-16 h-16 mx-auto text-purple-400/30 group-hover:text-purple-400/50 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        <div className="mb-3">
+                            <svg className="w-10 h-10 mx-auto text-white/25" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                             </svg>
                         </div>
-                        <p className="text-xl font-medium text-white mb-2">
+                        <p className="text-lg font-medium text-white/80 mb-2">
                             Drag & Drop your image
                         </p>
-                        <p className="text-sm text-purple-400/70">or click to upload</p>
-                        <p className="text-xs text-purple-400/50 mt-2">
+                        <p className="text-sm text-white/40">or click to upload</p>
+                        <p className="text-xs text-white/30 mt-2">
                             PNG, JPG, WebP • Max 100MB
                         </p>
                     </div>

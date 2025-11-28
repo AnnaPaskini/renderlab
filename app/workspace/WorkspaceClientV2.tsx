@@ -861,7 +861,7 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
                 }
               }}
               placeholder="https://example.com/image.jpg"
-              className="flex-1 px-4 py-2.5 text-sm border border-white/10 rounded-xl bg-[#0a0a0a] text-white placeholder:text-gray-500 focus:ring-2 focus:ring-[#ff6b35]/50 focus:border-[#ff6b35] outline-none transition-all"
+              className="flex-1 px-4 py-2.5 text-sm border border-white/10 rounded-xl bg-black/30 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-[#ff6b35]/50 focus:border-[#ff6b35] outline-none transition-all"
               disabled={isValidatingUrl}
             />
             <button
@@ -899,7 +899,7 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
               maxLength={2000}
               className={cn(
                 "w-full px-5 py-4 text-sm border border-white/10 rounded-2xl",
-                "bg-gradient-to-b from-[#0f0f0f] to-[#0a0a0a]",
+                "bg-black/30",
                 "text-white placeholder:text-gray-500",
                 "focus:ring-2 focus:ring-[#ff6b35]/50 focus:border-[#ff6b35]",
                 "outline-none transition-all resize-none",
@@ -951,7 +951,7 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
               {/* Add button (if < 4) */}
               {styleReferences.length < 4 && (
                 <div className="flex flex-col items-center">
-                  <label className="flex items-center justify-center w-14 h-14 border border-dashed border-white/20 rounded-lg cursor-pointer hover:border-white/40 hover:bg-white/5 transition-all">
+                  <label className="flex items-center justify-center w-14 h-14 border border-dashed border-white/30 bg-black/30 rounded-2xl cursor-pointer hover:border-white/40 hover:shadow-[0_0_12px_rgba(139,92,246,0.10)] active:bg-black/40 active:border-white/40 active:shadow-[0_0_20px_rgba(139,92,246,0.15)] transition-all">
                     <span className="text-lg text-white/30">+</span>
                     <input
                       type="file"

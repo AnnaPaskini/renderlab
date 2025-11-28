@@ -9,10 +9,10 @@
     --rl-grid-opacity: 1;
 
     /* Layer B — GLOW */
-    --rl-glow: radial-gradient(circle at 50% 46%,
-            rgba(139, 92, 246, 0.15) 0%,
-            rgba(139, 92, 246, 0.07) 22%,
-            transparent 48%);
+    --rl-glow: radial-gradient(circle at 55% 40%,
+            rgba(139, 92, 246, 0.08) 0%,
+            rgba(139, 92, 246, 0.04) 55%,
+            transparent 95%);
 
     /* Layer C — VIGNETTE */
     --rl-vignette: radial-gradient(ellipse at center,

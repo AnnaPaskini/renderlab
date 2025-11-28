@@ -3,7 +3,7 @@
 import { defaultToastStyle } from "@/lib/toast-config";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { Upload, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
@@ -106,28 +106,32 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage, onFileCha
           onDragOver={handleDrag}
           onDrop={handleDrop}
           className={clsx(
-            "relative mx-auto flex min-h-[360px] max-h-[60vh] w-full max-w-full flex-col items-center justify-center overflow-hidden rounded-2xl transition-all duration-300 p-16 sm:max-h-[65vh] lg:max-h-[70vh] cursor-pointer border-2 border-dashed",
-            isDragActive ? "bg-[#2a2a2a] border-white/20 shadow-[0_0_0_1px_rgba(220,220,225,0.6),0_0_4px_rgba(220,220,225,0.2)]" : "bg-[#262626] border-white/12 hover:bg-[#2a2a2a] hover:border-white/20 hover:shadow-[0_0_0_1px_rgba(220,220,225,0.4),0_0_2px_rgba(220,220,225,0.1)]"
+            "relative mx-auto flex min-h-[360px] max-h-[60vh] w-full max-w-3xl flex-col items-center justify-center overflow-hidden rounded-2xl transition-all duration-300 p-16 sm:max-h-[65vh] lg:max-h-[70vh] cursor-pointer border !border-dashed",
+            isDragActive
+              ? "bg-black/40 border-white/40 shadow-[0_0_20px_rgba(139,92,246,0.15),inset_0_0_30px_rgba(139,92,246,0.03)]"
+              : "bg-black/30 border-white/30 hover:bg-black/40 hover:border-white/40 hover:shadow-[0_0_12px_rgba(139,92,246,0.10)]"
           )}
         >
           <label className="relative z-20 flex flex-col items-center justify-center cursor-pointer text-center w-full">
-            <div className="mb-3 w-14 h-14 flex items-center justify-center rounded-full bg-rl-surface">
-              <Upload size={26} className="text-rl-text-secondary" />
+            <div className="mb-3">
+              <svg className="w-10 h-10 mx-auto text-white/25" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
             </div>
-            <p className="text-base font-semibold text-rl-text">
-              Drag and drop your image here
+            <p className="text-lg font-medium text-white/80 mb-2">
+              Drag & Drop your image
             </p>
-            <p className="text-sm font-medium text-rl-text-secondary">
-              or click to browse
+            <p className="text-sm text-white/40">
+              or click to upload
             </p>
-            <p className="mt-2 text-xs font-medium text-rl-text-secondary">
+            <p className="mt-2 text-xs text-white/30">
               JPG, PNG, WebP • Max 50 MB
             </p>
             <input
               type="file"
               accept="image/jpeg,image/png,image/jpg,image/webp"
               onChange={handleFileInput}
-              className="hidden"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               disabled={isLoading}
             />
           </label>
@@ -143,8 +147,10 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage, onFileCha
           onDragOver={handleDrag}
           onDrop={handleDrop}
           className={clsx(
-            "relative mx-auto flex min-h-[360px] max-h-[60vh] w-full max-w-full items-center justify-center overflow-hidden rounded-2xl transition-all duration-300 p-6 sm:max-h-[65vh] lg:max-h-[70vh] cursor-pointer border-2 border-dashed",
-            isDragActive ? "bg-[#2a2a2a] border-white/20 shadow-[0_0_0_1px_rgba(220,220,225,0.6),0_0_4px_rgba(220,220,225,0.2)]" : "bg-[#262626] border-white/12 hover:bg-[#2a2a2a] hover:border-white/20 hover:shadow-[0_0_0_1px_rgba(220,220,225,0.4),0_0_2px_rgba(220,220,225,0.1)]"
+            "relative mx-auto flex min-h-[360px] max-h-[60vh] w-full max-w-3xl items-center justify-center overflow-hidden rounded-2xl transition-all duration-300 p-6 sm:max-h-[65vh] lg:max-h-[70vh] cursor-pointer border !border-dashed",
+            isDragActive
+              ? "bg-black/20 border-white/40 shadow-[0_0_20px_rgba(139,92,246,0.15),inset_0_0_30px_rgba(139,92,246,0.03)]"
+              : "bg-transparent border-white/30 hover:border-white/40 hover:shadow-[0_0_12px_rgba(139,92,246,0.10)]"
           )}
         >
           <div className="relative z-10 flex items-center justify-center w-full h-full">

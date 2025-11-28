@@ -134,9 +134,9 @@ export function BottomToolbar({
                                 {canAddMoreReferences && (
                                     <button
                                         onClick={() => paperclipInputRef.current?.click()}
-                                        className="w-20 h-20 rounded-lg border-2 border-dashed border-white/20 
+                                        className="w-20 h-20 rounded-lg border border-dashed border-white/30 bg-black/30
                                         flex items-center justify-center text-white/40 hover:text-white/60 
-                                        hover:border-white/40 transition-colors"
+                                        hover:border-white/40 hover:shadow-[0_0_12px_rgba(139,92,246,0.10)] active:bg-black/40 active:border-white/40 active:shadow-[0_0_20px_rgba(139,92,246,0.15)] transition-all"
                                         title={`Add reference (${referenceImages.length}/${maxReferenceImages})`}>
                                         <Plus size={28} />
                                     </button>
