@@ -1,20 +1,29 @@
 "use client";
 import { RenderLabButton } from "@/components/ui/RenderLabButton";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { useRef } from "react";
 
 export function HeroParallax() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start start", "end start"]
+    offset: ["start start", "end start"],
+    layoutEffect: false
   });
 
-  // Multi-layer parallax speeds
-  const yBg = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]);
-  const yMid = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
-  const yFg = useTransform(scrollYProgress, [0, 1], ["0%", "10%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0]);
+  // Premium smooth scrolling wrapper
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 20,      // Медленный старт
+    damping: 60,        // Тяжелое сопротивление  
+    mass: 3,            // Большой "вес"
+    restSpeed: 0.001,   // Плавная остановка
+    restDelta: 0.001
+  });
+
+  // Multi-layer parallax speeds - reduced distances for premium feel
+  const yBg = useTransform(smoothProgress, [0, 1], ["0%", "25%"]);
+  const yFg = useTransform(smoothProgress, [0, 1], ["0%", "6%"]);
+  const opacity = useTransform(smoothProgress, [0, 0.5, 1], [1, 0.8, 0]);
 
   return (
     <section

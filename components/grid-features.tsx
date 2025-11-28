@@ -45,7 +45,7 @@ export const GridFeatures = () => {
               <h3 className="text-3xl font-bold text-white mb-4">
                 Simple, Transparent Pricing
               </h3>
-              <div className="text-5xl font-bold mb-4" style={{ color: '#F97316' }}>
+              <div className="text-5xl font-bold mb-4" style={{ color: '#ff6b35' }}>
                 $0.3
               </div>
               <p className="text-xl text-gray-300 mb-6">

@@ -175,6 +175,8 @@ export default function Home() {
 
         {/* Companies */}
         <section className="relative w-full py-32 -mt-24">
+          {/* Smooth gradient backdrop */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent from-10% via-purple-900/5 via-50% to-transparent to-90% pointer-events-none" />
           <div className="relative z-10">
             <Companies />
           </div>
@@ -183,12 +185,18 @@ export default function Home() {
         {/* Divider - REMOVED for smooth flow */}
 
         {/* Features Grid */}
-        <GridFeatures />
+        <div className="relative">
+          {/* Smooth gradient backdrop */}
+          <div className="absolute inset-0 bg-gradient-to-b from-purple-900/4 from-0% via-purple-900/6 via-40% to-purple-900/4 to-100% pointer-events-none" />
+          <GridFeatures />
+        </div>
 
         {/* Divider - REMOVED for smooth flow */}
 
         {/* Templates */}
         <section className="relative py-32">
+          {/* Smooth gradient backdrop */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent from-0% via-purple-900/5 via-60% to-purple-900/4 to-100% pointer-events-none" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-orange-500/5 rounded-full blur-[150px]" />
 
           <Container className="relative z-10">
@@ -212,7 +220,7 @@ export default function Home() {
               {templates.map(template => (
                 <div
                   key={template.id}
-                  className="group relative bg-gray-900/50 border border-white/10 rounded-2xl overflow-hidden hover:border-purple-500/30 transition-all duration-300 hover:scale-105"
+                  className="group relative bg-gray-900/50 border border-white/10 rounded-2xl overflow-hidden hover:border-[var(--rl-accent)]/30 transition-all duration-300 hover:scale-105"
                 >
                   {/* Image - BIGGER */}
                   <div className="aspect-[4/3] relative overflow-hidden">
@@ -238,7 +246,7 @@ export default function Home() {
 
                     {/* Badge if popular */}
                     {template.isPopular && (
-                      <span className="inline-block mt-2 px-2 py-1 bg-purple-500/20 border border-purple-500/30 text-purple-400 text-xs rounded">
+                      <span className="inline-block mt-2 px-2 py-1 bg-[var(--rl-accent)]/20 text-[var(--rl-accent)] text-xs rounded">
                         Most Popular
                       </span>
                     )}
@@ -253,6 +261,8 @@ export default function Home() {
 
         {/* Testimonials */}
         <section className="relative py-32">
+          {/* Smooth gradient backdrop */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent from-10% via-purple-900/5 via-50% to-transparent to-90% pointer-events-none" />
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-orange-500/5 rounded-full blur-[120px]" />
 
           <Container className="relative z-10">

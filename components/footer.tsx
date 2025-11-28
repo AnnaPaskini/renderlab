@@ -1,5 +1,4 @@
 import Link from "next/link";
-import React from "react";
 import { Logo } from "./Logo";
 
 export const Footer = () => {
@@ -94,7 +93,7 @@ export const Footer = () => {
         </div>
       </div>
       <p className="text-center text-5xl md:text-9xl lg:text-[18rem] font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 dark:from-neutral-950 to-neutral-200 dark:to-neutral-800 inset-x-0">
-        EVERY AI
+        RENDERLAB
       </p>
     </div>
   );

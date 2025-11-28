@@ -1,9 +1,7 @@
 import { cn } from "@/lib/utils";
-import Image from "next/image";
-import { useId } from "react";
 
-import { HorizontalGradient } from "@/components/horizontal-gradient";
 import { FeaturedTestimonials } from "@/components/featured-testimonials";
+import { HorizontalGradient } from "@/components/horizontal-gradient";
 
 export function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -18,7 +16,7 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
                 "font-semibold text-xl text-center text-muted dark:text-muted-dark"
               )}
             >
-              Every AI is used by thousands of users
+              RenderLab is used by thousands of users
             </p>
             <p
               className={cn(

@@ -1,9 +1,9 @@
 import { Background } from "@/components/background";
-import { Metadata } from "next";
-import { FeaturedTestimonials } from "@/components/featured-testimonials";
-import { cn } from "@/lib/utils";
-import { HorizontalGradient } from "@/components/horizontal-gradient";
 import { ContactForm } from "@/components/contact";
+import { FeaturedTestimonials } from "@/components/featured-testimonials";
+import { HorizontalGradient } from "@/components/horizontal-gradient";
+import { cn } from "@/lib/utils";
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Contact Us - Everything AI",
@@ -28,7 +28,7 @@ export default function PricingPage() {
                 "font-semibold text-xl text-center dark:text-muted-dark text-muted"
               )}
             >
-              Every AI is used by thousands of users
+              RenderLab is used by thousands of users
             </p>
             <p
               className={cn(

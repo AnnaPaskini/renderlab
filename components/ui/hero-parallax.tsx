@@ -59,6 +59,8 @@ export const HeroParallax = ({
       ref={ref}
       className="h-[180vh] py-20 overflow-hidden antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d]"
     >
+      {/* Purple glow accent */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(147,51,234,0.15)_0%,transparent_50%)] pointer-events-none z-[5]" />
       <div
         className="absolute bottom-0 left-0 w-full h-[400px] bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent pointer-events-none z-[20]"
       />
@@ -210,7 +212,7 @@ export const HeroHeader = () => {
         >
           Start <span
             style={{
-              background: 'linear-gradient(135deg, #F97316 0%, #FB923C 100%)',
+              background: 'linear-gradient(135deg, #ff6b35 0%, #ff6b35 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
@@ -255,20 +257,20 @@ export const HeroHeader = () => {
                 fontSize: '17px',
                 fontWeight: 500,
                 color: 'white',
-                background: 'linear-gradient(135deg, #F97316 0%, #FB923C 100%)',
+                background: 'linear-gradient(135deg, #ff6b35 0%, #ff6b35 100%)',
                 border: 'none',
                 borderRadius: '14px',
-                boxShadow: '0 8px 24px rgba(249, 115, 22, 0.25)',
+                boxShadow: '0 8px 24px rgba(255, 107, 53, 0.25)',
                 transition: 'all 0.3s ease',
                 cursor: 'pointer'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 12px 32px rgba(249, 115, 22, 0.35)';
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(255, 107, 53, 0.35)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 8px 24px rgba(249, 115, 22, 0.25)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(255, 107, 53, 0.25)';
               }}
             >
               Start Free Trial

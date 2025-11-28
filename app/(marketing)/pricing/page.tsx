@@ -1,11 +1,11 @@
-import { Container } from "@/components/container";
 import { Background } from "@/components/background";
-import { Heading } from "@/components/heading";
-import { Subheading } from "@/components/subheading";
-import { Pricing } from "@/components/pricing";
-import { PricingTable } from "./pricing-table";
 import { Companies } from "@/components/companies";
+import { Container } from "@/components/container";
+import { Heading } from "@/components/heading";
+import { Pricing } from "@/components/pricing";
+import { Subheading } from "@/components/subheading";
 import { Metadata } from "next";
+import { PricingTable } from "./pricing-table";
 
 export const metadata: Metadata = {
   title: "Pricing - Everything AI",
@@ -24,7 +24,7 @@ export default function PricingPage() {
         <div className="relative z-20 py-10 md:pt-40">
           <Heading as="h1">Simple pricing for your ease</Heading>
           <Subheading className="text-center">
-            Every AI offers a wide range of services. You can choose the one
+            RenderLab offers a wide range of services. You can choose the one
             that suits your needs. Select from your favourite plan and get
             started instantly.
           </Subheading>
