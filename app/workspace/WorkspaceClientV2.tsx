@@ -48,16 +48,12 @@ interface Template {
   created_at: string;
 }
 
-// ============================================================================
-// AI MODELS
-// ============================================================================
-
 const AI_MODELS = [
   { id: "nano-banana", label: "Nano Banana", description: "Fast, high quality" },
-  { id: "nano-banana-pro", label: "Nano Banana Pro", description: "Enhanced creative output" },
+  { id: "nano-banana-pro", label: "Nano Banana Pro", description: "4K enhanced output - SLOWER- NEW" },
   { id: "seedream4", label: "Seedream 4", description: "High fidelity rendering" },
   { id: "flux-pro-kontext", label: "Flux Pro Kontext", description: "Context-aware generation" },
-  { id: "flux-2-pro", label: "Flux 2 Pro", description: "Premium quality" },
+  { id: "flux-2-pro", label: "Flux 2 Pro", description: "Premium model NEW" },
 ];
 
 // ============================================================================
