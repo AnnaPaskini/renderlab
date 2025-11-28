@@ -150,7 +150,7 @@ After testing, check Supabase:
 
 ## 📊 Cost Tracking
 - **API Cost:** $0.039 per edit (Nano Banana)
-- **RenderLab Price:** $0.90 per edit
+- **RenderLab Price:** $0.3 per edit
 - **Profit Margin:** $0.861 (96% margin)
 - All costs tracked in `inpaint_edits.cost` field
 - Token usage stored in `inpaint_edits.tokens_used` (JSONB)

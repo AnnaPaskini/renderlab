@@ -1,0 +1,38 @@
+/* ============================================
+   RENDERLAB UNIFIED BACKGROUND SYSTEM
+   ============================================ */
+
+:root {
+    /* Layer A — GRID */
+    --rl-grid-color: rgba(167, 139, 250, 0.08);
+    --rl-grid-size: 24px;
+    --rl-grid-opacity: 1;
+
+    /* Layer B — GLOW */
+    --rl-glow: radial-gradient(circle at 50% 46%,
+            rgba(139, 92, 246, 0.15) 0%,
+            rgba(139, 92, 246, 0.07) 22%,
+            transparent 48%);
+
+    /* Layer C — VIGNETTE */
+    --rl-vignette: radial-gradient(ellipse at center,
+            transparent 0%,
+            transparent 60%,
+            rgba(0, 0, 0, 0.32) 100%);
+}
+
+/* Unified Background Class */
+.renderlab-bg {
+    background-color: #0a0a0a;
+    background-image:
+        var(--rl-vignette),
+        var(--rl-glow),
+        linear-gradient(var(--rl-grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--rl-grid-color) 1px, transparent 1px);
+    background-size:
+        100% 100%,
+        100% 100%,
+        var(--rl-grid-size) var(--rl-grid-size),
+        var(--rl-grid-size) var(--rl-grid-size);
+    background-blend-mode: normal;
+}

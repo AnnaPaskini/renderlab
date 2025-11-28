@@ -15,7 +15,7 @@ export const CTA = () => {
         </button>
       </Link>
       <p className="text-sm text-gray-500">
-        5 free renders • No credit card required • Cancel anytime
+        5 free renders • Cancel anytime
       </p>
     </div>
   );

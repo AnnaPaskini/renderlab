@@ -1,4 +1,5 @@
 @import "./renderlab-theme.css";
+@import "../styles/renderlab-background.css";
 
 @tailwind base;
 @tailwind components;

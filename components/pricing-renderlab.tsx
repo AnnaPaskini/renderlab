@@ -38,7 +38,7 @@ export function PricingRenderLab() {
 
           <div className="text-5xl font-bold mb-4" style={{ color: '#F97316' }}
           >
-            $0.90
+            $0.3
             <span className="text-lg font-medium text-gray-500 dark:text-gray-400"> / edit</span>
           </div>
 

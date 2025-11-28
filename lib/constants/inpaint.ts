@@ -9,7 +9,7 @@ export const INPAINT_CONSTANTS = {
 
     // Pricing
     NANO_BANANA_COST: 0.039,
-    RENDERLAB_PRICE: 0.90,
+    RENDERLAB_PRICE: 0.3,
     FREE_QUOTA_DAILY: 500,
 
     // Image specs

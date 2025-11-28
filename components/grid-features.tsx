@@ -46,7 +46,7 @@ export const GridFeatures = () => {
                 Simple, Transparent Pricing
               </h3>
               <div className="text-5xl font-bold mb-4" style={{ color: '#F97316' }}>
-                $0.90
+                $0.3
               </div>
               <p className="text-xl text-gray-300 mb-6">
                 Per render. No subscriptions. No hidden fees. Pay only for what you use.

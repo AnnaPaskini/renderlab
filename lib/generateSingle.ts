@@ -197,7 +197,7 @@ Apply elements or style from ${refLabels} to @img1 as described.`;
 
       if (replicateError?.message?.includes('timeout') || replicateError?.code === 'ETIMEDOUT') {
         userMessage = safeModel === 'nano-banana-pro'
-          ? "4K generation timed out (>5 min). Try 'Nano Banana' for faster results."
+          ? "4K generation timed out. Try 'Nano Banana' for faster results."
           : "Generation timed out. The model may be overloaded, please try again.";
       } else if (replicateError?.status === 429) {
         userMessage = "Rate limit reached. Please wait a moment and try again.";

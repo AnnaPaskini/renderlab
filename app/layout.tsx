@@ -37,7 +37,7 @@ export default async function RootLayout({
       <body
         className={cn(
           GeistSans.className,
-          "dark antialiased bg-grid"
+          "dark antialiased renderlab-bg"
         )}
         suppressHydrationWarning
       >

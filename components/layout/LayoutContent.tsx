@@ -18,10 +18,10 @@ export const LayoutContent = ({ children }: { children: ReactNode }) => {
         pathname.startsWith("/collections") ||
         pathname.startsWith("/batch");
 
-    // Internal pages get grid background
+    // Internal pages get grid background with purple glow
     if (showAppNavbar) {
         return (
-            <div className="relative min-h-screen bg-transparent">
+            <div className="relative min-h-screen bg-transparent bg-glow">
                 {/* Content */}
                 <div className="relative z-10 min-h-screen">
                     {children}

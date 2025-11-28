@@ -311,9 +311,9 @@ export const HeroHeader = () => {
             opacity: 1
           }}
         >
-          5 free renders • No credit card required •{' '}
+          5 free renders •{' '}
           <span style={{ color: 'rgba(167, 139, 250, 0.7)', fontWeight: 500 }}>
-            $0.90 per render
+            $0.3 per render
           </span>
         </p>
 
