@@ -109,7 +109,13 @@ function HistoryCard({
 
       {/* Model Badge - bottom right (if available) */}
       {image.model && (
-        <div className="absolute bottom-1.5 right-1.5 bg-[#ff6b35]/90 text-white text-[9px] font-semibold px-1.5 py-0.5 rounded">
+        <div
+          className="absolute bottom-1.5 right-1.5 text-white text-[9px] font-medium px-2 py-0.5 rounded-md"
+          style={{
+            background: 'rgba(255, 255, 255, 0.06)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+          }}
+        >
           {image.model}
         </div>
       )}

@@ -5,6 +5,7 @@ const MODEL_MAP: Record<string, string> = {
   "nano-banana-pro": "google/nano-banana-pro",
   "seedream4": "bytedance/seedream-4",
   "flux": "black-forest-labs/flux-kontext-pro",
+  "flux-2-pro": "black-forest-labs/flux-2-pro",
 };
 
 // ==========================================
@@ -98,6 +99,25 @@ export async function generateSingle({
       if (imageUrl) {
         input.input_image = imageUrl;
         input.aspect_ratio = aspectRatio || "match_input_image";
+      }
+    }
+
+    // FLUX 2 PRO: Similar to flux but newer model
+    else if (safeModel === "flux-2-pro") {
+      input = {
+        prompt: prompt,
+        output_format: "png",
+      };
+      // Add reference images if provided
+      if (imageUrl) {
+        input.input_images = [imageUrl, ...styleReferenceUrls];
+        // Only set aspect_ratio if not match_input_image (Flux 2 Pro doesn't support it)
+        if (aspectRatio && aspectRatio !== "match_input_image") {
+          input.aspect_ratio = aspectRatio;
+        }
+      } else {
+        // Text-to-image mode
+        input.aspect_ratio = aspectRatio || "1:1";
       }
     }
 

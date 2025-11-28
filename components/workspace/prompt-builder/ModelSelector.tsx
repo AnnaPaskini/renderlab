@@ -28,6 +28,11 @@ const MODEL_OPTIONS = [
         label: 'Flux Pro',
         description: 'Best quality',
     },
+    {
+        value: 'flux-2-pro',
+        label: 'Flux 2 Pro',
+        description: 'Premium quality',
+    },
 ];
 
 export function ModelSelector({ value, onChange, disabled }: ModelSelectorProps) {

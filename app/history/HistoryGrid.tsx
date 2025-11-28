@@ -176,10 +176,10 @@ export function HistoryGrid({ images, onDelete }: HistoryGridProps) {
                             {/* Model Badge - bottom right (if available) */}
                             {img.model && (
                                 <div
-                                    className="absolute bottom-1.5 right-1.5 text-white text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+                                    className="absolute bottom-1.5 right-1.5 text-white text-[10px] font-medium px-2 py-0.5 rounded-md"
                                     style={{
-                                        background: '#FF6A2A',
-                                        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.25)',
+                                        background: 'rgba(255, 255, 255, 0.06)',
+                                        border: '1px solid rgba(255, 255, 255, 0.1)',
                                         maxWidth: 'calc(50% - 8px)',
                                         whiteSpace: 'nowrap',
                                         overflow: 'hidden',

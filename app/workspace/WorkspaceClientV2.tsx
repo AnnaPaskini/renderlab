@@ -57,6 +57,7 @@ const AI_MODELS = [
   { id: "nano-banana-pro", label: "Nano Banana Pro", description: "Enhanced creative output" },
   { id: "seedream4", label: "Seedream 4", description: "High fidelity rendering" },
   { id: "flux-pro-kontext", label: "Flux Pro Kontext", description: "Context-aware generation" },
+  { id: "flux-2-pro", label: "Flux 2 Pro", description: "Premium quality" },
 ];
 
 // ============================================================================
@@ -1114,10 +1115,10 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
           {/* Accordion header */}
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="w-full h-[40px] flex items-center justify-between text-white/85 hover:text-white transition-colors border-b border-white/[0.08]"
+            className="w-full h-[40px] flex items-center justify-between pr-1 text-white/85 hover:text-white transition-colors border-b border-white/[0.08]"
           >
             <span className="text-sm font-medium">Advanced Tools</span>
-            <span className="text-orange-500">
+            <span className="text-[#ff6b35]">
               {showAdvanced ? "▲" : "▼"}
             </span>
           </button>
