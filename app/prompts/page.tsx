@@ -3,9 +3,9 @@
 
 import { FilterBar } from '@/components/prompts/FilterBar';
 import { PromptCard } from '@/components/prompts/PromptCard';
+import { RenderLabButton } from '@/components/ui/RenderLabButton';
 import { createClient } from '@/lib/supabaseBrowser';
 import type { Prompt, PromptBadge, PromptCategory } from '@/lib/types/prompts';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -106,12 +106,12 @@ export default function PromptsLibraryPage() {
                 : 'Be the first to submit a prompt!'}
             </p>
             {isAuthenticated === true && !filters.category && !filters.badge && !filters.search && (
-              <button
+              <RenderLabButton
+                variant="gradient"
                 onClick={() => router.push('/prompts/submit')}
-                className="rl-btn-primary"
               >
                 Submit First Prompt
-              </button>
+              </RenderLabButton>
             )}
           </div>
         ) : (
@@ -141,12 +141,13 @@ export default function PromptsLibraryPage() {
               <p className="text-gray-400 mb-6">
                 Help the community by contributing your best architectural visualization prompts
               </p>
-              <Link
-                href="/prompts/submit"
-                className="rl-btn-primary inline-flex items-center gap-2"
+              <RenderLabButton
+                variant="gradient"
+                onClick={() => router.push('/prompts/submit')}
+                className="inline-flex items-center gap-2"
               >
                 Submit Your Prompt
-              </Link>
+              </RenderLabButton>
             </div>
           </div>
         )}

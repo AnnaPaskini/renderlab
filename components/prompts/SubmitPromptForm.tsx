@@ -144,15 +144,9 @@ export function SubmitPromptForm({ onSuccess, onCancel }: SubmitPromptFormProps)
             setErrors(prev => ({ ...prev, title: '' }));
           }}
           placeholder="Modern exterior with glass facade"
-          style={{
-            background: '#0f0f0f',
-            boxShadow: errors.title
-              ? 'inset 0 2px 4px rgba(0, 0, 0, 0.3)'
-              : 'inset 0 2px 4px rgba(0, 0, 0, 0.3)'
-          }}
-          className={`w-full border text-white px-4 py-3 rounded-lg focus:outline-none placeholder:text-gray-500 transition-all ${errors.title
+          className={`w-full bg-black/30 border border-white/10 text-white px-4 py-3 rounded-xl focus:outline-none placeholder:text-gray-500 transition-all ${errors.title
             ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-            : 'border-white/[0.08] focus:border-white/[0.15] focus:ring-2 focus:ring-white/[0.05]'
+            : 'focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/10'
             }`}
         />
         {errors.title ? (
@@ -182,13 +176,9 @@ export function SubmitPromptForm({ onSuccess, onCancel }: SubmitPromptFormProps)
           }}
           placeholder="Transform the building facade into a modern glass structure with reflective panels. Add warm evening lighting and contemporary landscaping..."
           rows={6}
-          style={{
-            background: '#0f0f0f',
-            boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.3)'
-          }}
-          className={`w-full border text-white px-4 py-3 rounded-lg focus:outline-none resize-none placeholder:text-gray-500 transition-all ${errors.prompt
+          className={`w-full bg-black/30 border border-white/10 text-white px-4 py-3 rounded-xl focus:outline-none resize-none placeholder:text-gray-500 transition-all ${errors.prompt
             ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-            : 'border-white/[0.08] focus:border-white/[0.15] focus:ring-2 focus:ring-white/[0.05]'
+            : 'focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/10'
             }`}
         />
         {errors.prompt ? (
@@ -216,9 +206,9 @@ export function SubmitPromptForm({ onSuccess, onCancel }: SubmitPromptFormProps)
             setFormData(prev => ({ ...prev, category: e.target.value as PromptCategory }));
             setErrors(prev => ({ ...prev, category: '' }));
           }}
-          className={`w-full bg-[#1a1a1a] border text-white px-4 py-3 rounded-lg focus:outline-none transition-colors ${errors.category
+          className={`w-full bg-black/30 border border-white/10 text-white px-4 py-3 rounded-xl focus:outline-none transition-colors ${errors.category
             ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-            : 'border-white/8 focus:border-[#ff6b35] focus:ring-2 focus:ring-[#ff6b35]/20'
+            : 'focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/10'
             }`}
         >
           <option value="" className="bg-[#1a1a1a]">Select category</option>
@@ -248,7 +238,7 @@ export function SubmitPromptForm({ onSuccess, onCancel }: SubmitPromptFormProps)
           value={formData.tags}
           onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
           placeholder="modern, glass, evening, landscape"
-          className="w-full bg-[#1a1a1a] border border-white/8 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-[#ff6b35] focus:ring-2 focus:ring-[#ff6b35]/20 placeholder:text-gray-500"
+          className="w-full bg-black/30 border border-white/10 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/10 placeholder:text-gray-500"
         />
         <p className="text-xs text-gray-400 mt-1">
           Separate tags with commas. Only lowercase letters, numbers, and hyphens allowed.
@@ -260,7 +250,7 @@ export function SubmitPromptForm({ onSuccess, onCancel }: SubmitPromptFormProps)
         <button
           type="submit"
           disabled={submitting || !formData.image_url}
-          className="flex-1 px-6 py-3 bg-[#ff6b35] text-white rounded-lg hover:bg-[#ff8555] disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-md shadow-orange-500/20 hover:shadow-lg hover:shadow-orange-500/25 transition-all duration-200"
+          className={`premium-generate-button flex-1 px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed ${submitting ? 'opacity-70' : ''}`}
         >
           {submitting ? 'Submitting...' : 'Submit for Review'}
         </button>
@@ -268,7 +258,7 @@ export function SubmitPromptForm({ onSuccess, onCancel }: SubmitPromptFormProps)
           type="button"
           onClick={onCancel}
           disabled={submitting}
-          className="px-6 py-3 bg-[#1a1a1a] text-white rounded-lg border border-white/8 hover:bg-[#202020] hover:border-white/12 disabled:opacity-50 transition-all duration-200"
+          className="px-6 py-3 bg-[#1a1a1a] text-white rounded-xl border border-white/8 hover:bg-[#202020] hover:border-white/12 disabled:opacity-50 transition-all duration-200"
         >
           Cancel
         </button>

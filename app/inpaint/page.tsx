@@ -583,7 +583,14 @@ export default function InpaintPage() {
             : 'text-gray-400 hover:text-white hover:bg-[#1a1a1a]'}`;
 
     return (
-        <div className="min-h-screen pt-40 pb-8 px-8">
+        <div className="min-h-screen pt-24 pb-8 px-8">
+            <div className="pt-8 pb-10 px-8">
+                <div className="flex items-center gap-3 mb-4">
+                    <Paintbrush className="w-7 h-7 text-orange-500" />
+                    <h1 className="text-3xl font-bold text-white">Inpaint Studio</h1>
+                </div>
+                <p className="text-gray-400">Edit and transform your images with AI-powered inpainting</p>
+            </div>
             <div className="relative w-full max-w-7xl mx-auto">
                 <div className="relative flex items-center justify-center gap-8 mb-8">
                     <div className="flex-shrink-0">

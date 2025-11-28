@@ -59,7 +59,7 @@ export default function SubmitPromptPage() {
   }
 
   return (
-    <div className="rl-ambient-bg min-h-screen pt-32 pb-12">
+    <div className="rl-ambient-bg renderlab-bg min-h-screen pt-32 pb-12">
       {/* Content - z-index above grid */}
       <div className="relative" style={{ zIndex: 1 }}>
         {/* Header */}
@@ -84,14 +84,7 @@ export default function SubmitPromptPage() {
 
         {/* Form */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-12">
-          <div
-            className="rounded-3xl p-8"
-            style={{
-              background: '#1a1a1a',
-              border: '1px solid rgba(255, 255, 255, 0.06)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.6), 0 20px 64px rgba(0, 0, 0, 0.4)'
-            }}
-          >
+          <div className="bg-black/20 border border-white/5 rounded-2xl p-8">
             <SubmitPromptForm
               onSuccess={handleSuccess}
               onCancel={handleCancel}
@@ -99,7 +92,7 @@ export default function SubmitPromptPage() {
           </div>
 
           {/* Guidelines Box - Standard Panel Style */}
-          <div className="mt-6 rounded-xl p-5 bg-[#161616] border border-white/5">
+          <div className="mt-6 rounded-2xl p-6 bg-black/20 border border-white/5">
             <h3 className="text-sm font-semibold text-white mb-3">
               Submission Guidelines
             </h3>
