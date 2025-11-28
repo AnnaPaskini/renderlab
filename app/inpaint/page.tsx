@@ -3,6 +3,7 @@
 import { BottomToolbar } from '@/components/inpaint/BottomToolbar';
 import { CanvasArea } from '@/components/inpaint/CanvasArea';
 import { ResultView } from '@/components/inpaint/ResultView';
+import { RenderLabButton } from '@/components/ui/RenderLabButton';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { createClient } from '@/lib/supabaseBrowser';
 import { extractMaskBounds } from '@/lib/utils/inpaint/maskExtractor';
@@ -840,16 +841,17 @@ export default function InpaintPage() {
                             >
                                 Cancel
                             </button>
-                            <button
+                            <RenderLabButton
+                                variant="gradient"
+                                size="md"
                                 onClick={() => {
                                     setShowAspectWarning(false);
                                     setPendingGeneration(true);
                                     handleGenerate(); // Retry with pendingGeneration=true
                                 }}
-                                className="px-4 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600 transition-colors"
                             >
                                 Continue Anyway
-                            </button>
+                            </RenderLabButton>
                         </div>
                     </div>
                 </div>

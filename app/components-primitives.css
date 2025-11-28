@@ -89,14 +89,19 @@
 }
 
 .rl-btn-primary {
-    background: var(--rl-accent-gradient);
+    background: linear-gradient(180deg, #FF7038 0%, #E84F23 100%);
     color: white;
-    box-shadow: 0 0 0 1px rgba(220, 220, 225, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(255, 98, 64, 0.30);
+    border-radius: 12px;
+    font-weight: 600;
+    border: none;
+    transition: transform 0.15s ease-out, box-shadow 0.25s ease-out, background 0.25s ease-out;
 }
 
 .rl-btn-primary:hover {
-    box-shadow: 0 0 0 1px rgba(220, 220, 225, 0.6), 0 0 4px rgba(220, 220, 225, 0.2);
-    transform: scale(1.02);
+    background: linear-gradient(180deg, #FF8652 0%, #FF6430 100%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.32), 0 6px 12px rgba(255, 120, 70, 0.30), inset 0 1px 1px rgba(255, 255, 255, 0.22);
+    transform: translateY(-2px);
 }
 
 .rl-btn-primary:active {

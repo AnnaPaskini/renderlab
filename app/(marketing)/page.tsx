@@ -7,6 +7,7 @@ import { GridFeatures } from "@/components/grid-features";
 import { Testimonials } from "@/components/testimonials";
 import { AvatarCircles } from "@/components/ui/avatar-circles";
 import { HeroParallax } from "@/components/ui/hero-parallax";
+import { RenderLabButton } from "@/components/ui/RenderLabButton";
 import { Spotlight } from "@/components/ui/spotlight";
 
 export default function Home() {
@@ -223,9 +224,9 @@ export default function Home() {
                     {/* Hover overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <div className="absolute bottom-4 left-4 right-4">
-                        <button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-lg">
+                        <RenderLabButton variant="gradient" size="md" className="w-full">
                           Try This Style
-                        </button>
+                        </RenderLabButton>
                       </div>
                     </div>
                   </div>

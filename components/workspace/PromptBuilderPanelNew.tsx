@@ -1095,26 +1095,29 @@ export function PromptBuilderPanel({
       {/* Delete Template Dialog */}
       <Dialog open={isDeleteTemplateOpen} onOpenChange={setIsDeleteTemplateOpen}>
         <DialogContent
-          className="rounded-xl text-rl-text w-full max-w-md border border-white/[0.08]"
+          className="max-w-md w-full rounded-2xl bg-[#1a1a1a] border border-white/10 shadow-2xl p-8"
         >
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-rl-text">
+          <DialogHeader className="mb-6">
+            <DialogTitle className="text-xl font-semibold text-white">
               Delete Template?
             </DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{deleteTemplateTarget?.name || deleteTemplateTarget?.title || 'this template'}"? This action cannot be undone.
-            </DialogDescription>
           </DialogHeader>
 
-          <DialogFooter className="mt-6 flex justify-end gap-3">
+          <div className="space-y-4">
+            <p className="text-sm text-purple-400/70">
+              Are you sure you want to delete "<strong className="text-white">{deleteTemplateTarget?.name || deleteTemplateTarget?.title || 'this template'}</strong>"? This action cannot be undone.
+            </p>
+          </div>
+
+          <DialogFooter className="mt-8 flex justify-end gap-3">
             <button
-              className="rl-btn rl-btn-secondary px-6"
+              className="px-6 py-2.5 text-sm font-medium bg-[#2a2a2a] text-white rounded-xl hover:bg-[#3a3a3a] transition-all"
               onClick={() => setIsDeleteTemplateOpen(false)}
             >
               Cancel
             </button>
             <button
-              className="rl-btn bg-red-600 hover:bg-red-700 text-white px-6 transition-all"
+              className="px-6 py-2.5 text-sm font-medium bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all"
               onClick={handleDeleteTemplateConfirm}
             >
               Delete

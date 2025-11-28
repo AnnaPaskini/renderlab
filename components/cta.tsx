@@ -1,4 +1,5 @@
 "use client";
+import { RenderLabButton } from "@/components/ui/RenderLabButton";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -53,13 +54,9 @@ export const CTA = () => {
           className="flex-1 px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-gray-400 focus:outline-none focus:border-orange-500 transition-colors"
           disabled={status === "loading"}
         />
-        <button
-          type="submit"
-          disabled={status === "loading"}
-          className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg shadow-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        <RenderLabButton type="submit" variant="gradient" size="lg" disabled={status === "loading"}>
           {status === "loading" ? "..." : "Get Early Access"}
-        </button>
+        </RenderLabButton>
       </form>
 
       {/* Status Message */}

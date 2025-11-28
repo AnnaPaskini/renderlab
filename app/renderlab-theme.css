@@ -34,6 +34,7 @@
   --rl-accent: #ff6b35;
   --rl-accent-hover: #ff8555;
   --rl-accent-light: rgba(255, 107, 53, 0.06);
+  --rl-accent-gradient: linear-gradient(135deg, #ff6b35 0%, #ff7849 50%, #ff8c5d 100%);
 
   /* === LUXURY GRADIENT SYSTEM === */
   /* Gradient stops for premium feel */
@@ -114,20 +115,23 @@
 
 /* === PRIMARY BUTTON === */
 .rl-btn-primary {
-  background: linear-gradient(135deg, #ff6b35 0%, #ff7849 50%, #ff8c5d 100%);
+  background: linear-gradient(180deg, #FF7038 0%, #E84F23 100%);
   color: white;
-  padding: 0.875rem 2rem;
-  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(255, 98, 64, 0.30);
+  border-radius: 12px;
   font-weight: 600;
   border: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: all 0.2s ease;
-  cursor: pointer;
+  transition: transform 0.15s ease-out, box-shadow 0.25s ease-out, background 0.25s ease-out;
 }
 
 .rl-btn-primary:hover {
-  box-shadow: 0 0 0 1px rgba(220, 220, 225, 0.6), 0 0 4px rgba(220, 220, 225, 0.2);
-  transform: translateY(-1px);
+  background: linear-gradient(180deg, #FF8652 0%, #FF6430 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.32), 0 6px 12px rgba(255, 120, 70, 0.30), inset 0 1px 1px rgba(255, 255, 255, 0.22);
+  transform: translateY(-2px);
+}
+
+.rl-btn-primary:active {
+  transform: translateY(0);
 }
 
 .rl-btn-primary:disabled {
@@ -296,6 +300,7 @@
   --rl-accent: #ff6b35;
   --rl-accent-hover: #ff8555;
   --rl-accent-light: rgba(255, 107, 53, 0.06);
+  --rl-accent-gradient: linear-gradient(135deg, #ff6b35 0%, #ff7849 50%, #ff8c5d 100%);
   --rl-success: #10b981;
   --rl-error: #ef4444;
   --rl-warning: #f59e0b;

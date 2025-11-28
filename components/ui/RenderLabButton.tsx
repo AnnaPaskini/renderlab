@@ -1,7 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { ButtonHTMLAttributes } from "react";
 import { Loader2 } from "lucide-react";
+import { ButtonHTMLAttributes } from "react";
 
 interface RenderLabButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "filled" | "outline" | "gradient";
@@ -33,7 +33,7 @@ export function RenderLabButton({
     outline:
       "border border-[var(--rl-border)] text-[var(--rl-text)] bg-transparent hover:bg-[var(--rl-surface)]/70 hover:border-[var(--rl-accent)]",
     gradient:
-      "text-white bg-gradient-to-r from-[var(--rl-accent)] to-[var(--rl-accent-hover)] hover:opacity-90 hover:scale-[1.02] shadow-md hover:shadow-xl",
+      "premium-generate-button",
   };
 
   return (

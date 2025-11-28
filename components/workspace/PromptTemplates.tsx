@@ -1,5 +1,6 @@
 "use client";
 
+import { RenderLabButton } from "@/components/ui/RenderLabButton";
 import { useWorkspace } from "@/lib/context/WorkspaceContext";
 import { createClient } from "@/lib/supabaseBrowser";
 import { defaultToastStyle } from "@/lib/toast-config";
@@ -533,7 +534,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
       {/* Templates */}
       {templates.length === 0 ? (
-        <p className="text-sm text-purple-400/70">No templates saved yet.</p>
+        <p className="text-sm text-white/70">No templates saved yet.</p>
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
           {templates.map((t, index) => (
@@ -604,15 +605,10 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
         </div>
       )}
 
-      {/* Modal - Template Preview with glass effect */}
+      {/* Modal - Template Preview */}
       <Dialog open={!!previewTemplate} onOpenChange={() => setPreviewTemplate(null)}>
         <DialogContent
-          className="rounded-xl text-rl-text w-full max-w-xl border border-white/[0.08]"
-          style={{
-            background: 'rgba(30, 30, 30, 0.95)',
-            backdropFilter: 'blur(20px) saturate(180%)',
-            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0, 0, 0, 0.8), 0 32px 96px rgba(0, 0, 0, 0.5)'
-          }}
+          className="rounded-2xl text-rl-text w-full max-w-xl border border-white/10 bg-[#1a1a1a] shadow-2xl p-8"
         >
           {previewTemplate && (
             <>
@@ -696,7 +692,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
       {/* Rename Template Dialog */}
       <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
         <DialogContent
-          className="max-w-md w-full rounded-2xl bg-gray-900/95 backdrop-blur-xl border border-white/10 shadow-2xl p-8"
+          className="max-w-md w-full rounded-2xl bg-[#1a1a1a] border border-white/10 shadow-2xl p-8"
         >
           <DialogHeader className="mb-6">
             <DialogTitle className="text-xl font-semibold text-white">
@@ -705,7 +701,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
           </DialogHeader>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-purple-400/70">
+            <label className="text-sm font-medium text-white/70">
               Template Name
             </label>
             <input
@@ -713,7 +709,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
               value={renameDraft}
               onChange={(e) => setRenameDraft(e.target.value)}
               placeholder="Enter new name..."
-              className="w-full px-4 py-3 bg-gray-800/50 border border-white/10 rounded-xl text-white placeholder-purple-400/50 focus:ring-2 focus:ring-purple-500 transition-all duration-200"
+              className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white placeholder-white/30 focus:ring-2 focus:ring-[#ff6b35]/50 focus:border-[#ff6b35] transition-all duration-200"
               autoFocus
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
@@ -727,9 +723,9 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
             />
           </div>
 
-          <DialogFooter className="mt-8 flex justify-between gap-3">
+          <DialogFooter className="mt-8 flex justify-end gap-3">
             <button
-              className="rl-btn rl-btn-secondary px-6"
+              className="px-6 py-2.5 text-sm font-medium bg-[#2a2a2a] text-white rounded-xl hover:bg-[#3a3a3a] transition-all"
               onClick={() => {
                 setIsRenameOpen(false);
                 setRenameDraft("");
@@ -737,13 +733,13 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
             >
               Cancel
             </button>
-            <button
-              className="rl-btn rl-btn-primary px-6"
+            <RenderLabButton
+              variant="gradient"
               onClick={handleRenameSubmit}
               disabled={!renameDraft.trim()}
             >
               Rename
-            </button>
+            </RenderLabButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -751,7 +747,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
       {/* Delete Template Dialog */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent
-          className="max-w-md w-full rounded-2xl bg-gray-900/95 backdrop-blur-xl border border-white/10 shadow-2xl p-8"
+          className="max-w-md w-full rounded-2xl bg-[#1a1a1a] border border-white/10 shadow-2xl p-8"
         >
           <DialogHeader className="mb-6">
             <DialogTitle className="text-xl font-semibold text-white">
@@ -760,20 +756,20 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
           </DialogHeader>
 
           <div className="space-y-4">
-            <p className="text-sm text-purple-400/70">
+            <p className="text-sm text-white/70">
               Are you sure you want to delete "<strong className="text-white">{deleteTarget?.name || deleteTarget?.title || 'this template'}</strong>"? This action cannot be undone.
             </p>
           </div>
 
-          <DialogFooter className="mt-8 flex justify-between gap-3">
+          <DialogFooter className="mt-8 flex justify-end gap-3">
             <button
-              className="rl-btn rl-btn-secondary px-6"
+              className="px-6 py-2.5 text-sm font-medium bg-[#2a2a2a] text-white rounded-xl hover:bg-[#3a3a3a] transition-all"
               onClick={() => setIsDeleteOpen(false)}
             >
               Cancel
             </button>
             <button
-              className="rl-btn bg-red-600 hover:bg-red-700 text-white px-6 transition-all"
+              className="px-6 py-2.5 text-sm font-medium bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all"
               onClick={handleDeleteConfirm}
             >
               Delete
@@ -796,7 +792,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
           <div className="space-y-6">
             {/* Template Name */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-purple-400/70">
+              <label className="text-sm font-medium text-white/70">
                 Template Name
               </label>
               <input
@@ -804,7 +800,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                 value={newTemplateName}
                 onChange={(e) => setNewTemplateName(e.target.value)}
                 placeholder="e.g., Summer bird view"
-                className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white placeholder-purple-400/50 focus:ring-2 focus:ring-purple-500 transition-all duration-200"
+                className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white placeholder-white/30 focus:ring-2 focus:ring-[#ff6b35]/50 transition-all duration-200"
                 autoFocus
                 onKeyDown={(event) => {
                   if (event.key === "Enter") {
@@ -820,7 +816,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
 
             {/* Prompt */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-purple-400/70">
+              <label className="text-sm font-medium text-white/70">
                 Prompt
               </label>
               <textarea
@@ -828,14 +824,14 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                 value={newTemplatePrompt}
                 onChange={(e) => setNewTemplatePrompt(e.target.value)}
                 placeholder="Describe the style and transformation you want..."
-                className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white placeholder-purple-400/50 focus:ring-2 focus:ring-purple-500 transition-all duration-200 resize-none"
+                className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white placeholder-white/30 focus:ring-2 focus:ring-[#ff6b35]/50 transition-all duration-200 resize-none"
               />
             </div>
           </div>
 
-          <DialogFooter className="mt-8 flex justify-between gap-3">
+          <DialogFooter className="mt-8 flex justify-end gap-3">
             <button
-              className="rl-btn rl-btn-secondary px-6"
+              className="px-6 py-2.5 text-sm font-medium bg-[#2a2a2a] text-white rounded-xl hover:bg-[#3a3a3a] transition-all"
               onClick={() => {
                 setIsCreateOpen(false);
                 setNewTemplateName("");
@@ -844,13 +840,13 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
             >
               Cancel
             </button>
-            <button
-              className="rl-btn rl-btn-primary px-6"
+            <RenderLabButton
+              variant="gradient"
               onClick={handleCreateTemplate}
               disabled={!newTemplateName.trim()}
             >
               Create Template
-            </button>
+            </RenderLabButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>

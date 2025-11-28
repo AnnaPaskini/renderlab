@@ -1,5 +1,6 @@
 "use client";
 
+import { RenderLabButton } from "@/components/ui/RenderLabButton";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -52,11 +53,8 @@ export const NavBar = () => {
             >
               Login
             </Link>
-            <Link
-              href="/signup"
-              className="px-5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full text-sm font-medium hover:shadow-lg hover:shadow-orange-500/20 transition-all duration-200"
-            >
-              Sign Up
+            <Link href="/signup">
+              <RenderLabButton variant="gradient" size="sm">Sign Up</RenderLabButton>
             </Link>
           </div>
 
@@ -117,10 +115,10 @@ export const NavBar = () => {
                 </Link>
                 <Link
                   href="/signup"
-                  className="block px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-center rounded-lg text-sm font-medium"
                   onClick={() => setMobileMenuOpen(false)}
+                  className="block"
                 >
-                  Sign Up
+                  <RenderLabButton variant="gradient" size="sm" className="w-full">Sign Up</RenderLabButton>
                 </Link>
               </div>
             </div>
