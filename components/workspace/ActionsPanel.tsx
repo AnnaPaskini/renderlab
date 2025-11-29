@@ -104,7 +104,7 @@ export function ActionsPanel({ onDuplicate, onRename, onSave, onAddTemplate, onD
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: "100%", opacity: 0 }}
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              className={`fixed top-0 right-0 h-full w-80 max-w-full rounded-l-2xl border-l border-rl-border bg-rl-surface shadow-xl`}
+              className="fixed top-0 right-0 h-full w-80 max-w-full rounded-l-2xl rl-panel-sidebar"
               style={{ zIndex: Z.SIDEBAR }}
             >
               <div className="relative flex h-full flex-col overflow-hidden">
@@ -128,7 +128,7 @@ export function ActionsPanel({ onDuplicate, onRename, onSave, onAddTemplate, onD
                         onGenerate();
                         closePanel();
                       }}
-                      className="w-full text-left px-4 py-3 text-white font-medium rounded-lg bg-gradient-to-r from-[#ff6b35] to-[#ff8c42] hover:from-[#ff8c42] hover:to-[#ff6b35] transition-all duration-200 border-0 shadow-lg shadow-[#ff6b35]/30"
+                      className="w-full text-left px-4 py-3 premium-generate-button"
                     >
                       Generate Collection
                     </button>

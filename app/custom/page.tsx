@@ -1,6 +1,5 @@
 'use client';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CollectionsPanel } from '@/components/workspace/CollectionPanel';
 import { PromptTemplates } from '@/components/workspace/PromptTemplates';
 import { useSearchParams } from 'next/navigation';
@@ -33,48 +32,38 @@ export default function CustomPage() {
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="flex justify-start gap-4 mb-8 bg-transparent p-0 h-auto border-0">
-            <TabsTrigger
-              value="templates"
-              className="bg-[#262626] text-white px-8 py-3.5 rounded-xl font-medium border border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.3)] transition-all duration-200 hover:bg-[#2d2d2d] hover:border-white/15 hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] data-[state=active]:border-b-2 data-[state=active]:border-[--rl-accent] data-[state=active]:text-white data-[state=active]:shadow-md"
-            >
-              Templates
-            </TabsTrigger>
-            <TabsTrigger
-              value="collections"
-              className="bg-[#262626] text-white px-8 py-3.5 rounded-xl font-medium border border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.3)] transition-all duration-200 hover:bg-[#2d2d2d] hover:border-white/15 hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] data-[state=active]:border-b-2 data-[state=active]:border-[--rl-accent] data-[state=active]:text-white data-[state=active]:shadow-md"
-            >
-              Collections
-            </TabsTrigger>
-          </TabsList>
+        <div className="flex gap-2 mb-8">
+          <button
+            onClick={() => setActiveTab('templates')}
+            className={`px-6 py-2.5 rounded-xl text-sm font-medium transition-all ${activeTab === 'templates'
+                ? 'premium-generate-button'
+                : 'bg-transparent border border-white/20 text-white hover:bg-white/5'
+              }`}
+          >
+            Templates
+          </button>
+          <button
+            onClick={() => setActiveTab('collections')}
+            className={`px-6 py-2.5 rounded-xl text-sm font-medium transition-all ${activeTab === 'collections'
+                ? 'premium-generate-button'
+                : 'bg-transparent border border-white/20 text-white hover:bg-white/5'
+              }`}
+          >
+            Collections
+          </button>
+        </div>
 
-          <TabsContent value="templates" className="mt-0">
-            <div
-              className="rounded-3xl p-8"
-              style={{
-                background: '#1a1a1a',
-                border: '1px solid rgba(255, 255, 255, 0.06)',
-                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 20px 56px rgba(0, 0, 0, 0.3)'
-              }}
-            >
-              <PromptTemplates />
-            </div>
-          </TabsContent>
+        {activeTab === 'templates' && (
+          <div className="rl-panel-wrapper">
+            <PromptTemplates />
+          </div>
+        )}
 
-          <TabsContent value="collections" className="mt-0">
-            <div
-              className="rounded-3xl p-8"
-              style={{
-                background: '#1a1a1a',
-                border: '1px solid rgba(255, 255, 255, 0.06)',
-                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 20px 56px rgba(0, 0, 0, 0.3)'
-              }}
-            >
-              <CollectionsPanel />
-            </div>
-          </TabsContent>
-        </Tabs>
+        {activeTab === 'collections' && (
+          <div className="rl-panel-wrapper">
+            <CollectionsPanel />
+          </div>
+        )}
       </div>
     </div>
   );

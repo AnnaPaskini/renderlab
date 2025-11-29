@@ -527,9 +527,12 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     <div className="h-full overflow-auto">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold leading-none text-gray-900 dark:text-gray-100">My Templates</h2>
-        <Button onClick={() => setIsCreateOpen(true)} size="lg">
+        <button
+          onClick={() => setIsCreateOpen(true)}
+          className="premium-generate-button px-6 py-2.5 text-sm"
+        >
           + New Template
-        </Button>
+        </button>
       </div>
 
       {/* Templates */}

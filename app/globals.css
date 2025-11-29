@@ -567,3 +567,67 @@ body.actions-open nav {
   cursor: not-allowed;
   opacity: 0.50;
 }
+
+/* RenderLab Panel Wrapper */
+.rl-panel-wrapper {
+  border-radius: 1rem;
+  /* rounded-2xl */
+  padding: 1.5rem;
+  /* p-6 */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(20, 20, 20, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Compact variant for smaller panels like History */
+.rl-panel-wrapper-compact {
+  border-radius: 1rem;
+  padding: 1rem;
+  /* p-4 */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(20, 20, 20, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* RenderLab Card - Transparent style */
+.rl-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.rl-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+/* RenderLab Selectable Item - for collection cards */
+.rl-item-selectable {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.rl-item-selectable:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.rl-item-selectable.selected {
+  background: rgba(255, 107, 53, 0.1);
+  border-color: rgba(255, 107, 53, 0.4);
+}
+
+/* RenderLab Sidebar - more opaque for overlays */
+.rl-panel-sidebar {
+  border-radius: 1rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(20, 20, 20, 0.85);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}

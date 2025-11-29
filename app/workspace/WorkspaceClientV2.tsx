@@ -816,6 +816,7 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
       historyImages={historyImages}
       onRemoveFromHistory={handleRemoveFromHistory}
       onRefetchHistory={refetchHistory}
+      isGenerating={isGenerating}
     >
       <div className="flex flex-col">
         {/* ================================================================ */}

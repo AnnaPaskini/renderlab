@@ -172,11 +172,15 @@ function ImagePreviewModal({ src, onClose, images = [], currentIndex = 0, onNavi
 
     try {
       const response = await fetch(src);
-      const blob = await response.blob();
+      const contentType = response.headers.get('content-type') || 'image/png';
+      const originalBlob = await response.blob();
+      const blob = new Blob([originalBlob], { type: contentType });
+
+      const ext = contentType.includes('png') ? 'png' : 'jpg';
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `renderlab-image-${Date.now()}.jpg`;
+      a.download = `renderlab-${Date.now()}.${ext}`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

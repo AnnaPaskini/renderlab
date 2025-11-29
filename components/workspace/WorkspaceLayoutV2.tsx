@@ -10,6 +10,7 @@ import { Toaster } from "react-hot-toast";
 import { useAuth } from "@/components/providers/SupabaseAuthProvider";
 import { RenderLabButton } from "@/components/ui/RenderLabButton";
 import ImagePreviewModal from "@/components/workspace/ImagePreviewModal";
+import { SkeletonCard } from "@/components/workspace/SkeletonCard";
 
 // ============================================================================
 // TYPES
@@ -32,6 +33,8 @@ interface WorkspaceLayoutV2Props {
   onRemoveFromHistory?: (id: string) => void;
   /** Callback to refetch history */
   onRefetchHistory?: () => void;
+  /** Whether generation is in progress */
+  isGenerating?: boolean;
 }
 
 // ============================================================================
@@ -186,6 +189,7 @@ export function WorkspaceLayoutV2({
   historyImages,
   onRemoveFromHistory,
   onRefetchHistory,
+  isGenerating = false,
 }: WorkspaceLayoutV2Props) {
   const { user } = useAuth();
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
@@ -270,7 +274,7 @@ export function WorkspaceLayoutV2({
               </RenderLabButton>
             </Link>
             <Link href="/inpaint">
-              <RenderLabButton variant="outline" size="sm">
+              <RenderLabButton variant="outline" size="sm" className="border-white/[0.12]">
                 Edit / Inpaint
               </RenderLabButton>
             </Link>
@@ -289,11 +293,7 @@ export function WorkspaceLayoutV2({
           {/* ============================================================== */}
           <div
             ref={leftColumnRef}
-            className="rounded-2xl p-6 border border-white/[0.06]"
-            style={{
-              background: "rgba(20, 20, 20, 0.12)",
-              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
-            }}
+            className="rl-panel-wrapper"
           >
             {children}
           </div>
@@ -302,10 +302,8 @@ export function WorkspaceLayoutV2({
           {/* RIGHT COLUMN: History — height matches left column */}
           {/* ============================================================== */}
           <div
-            className="rounded-2xl p-4 border border-white/[0.06] flex flex-col"
+            className="rl-panel-wrapper-compact flex flex-col"
             style={{
-              background: "rgba(20, 20, 20, 0.25)",
-              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
               height: leftColumnHeight ? `${leftColumnHeight}px` : "auto",
               minHeight: "400px",
             }}
@@ -337,6 +335,7 @@ export function WorkspaceLayoutV2({
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
+                  {isGenerating && <SkeletonCard isGenerating={isGenerating} />}
                   {historyImages.map((img, index) => (
                     <HistoryCard
                       key={img.id}
