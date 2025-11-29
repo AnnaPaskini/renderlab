@@ -22,12 +22,12 @@ export const CTA = () => {
 
       if (res.ok) {
         setStatus("success");
-        setMessage("Thanks! We'll notify you when we launch.");
+        setMessage("Thank you! You're on the list. We'll reach out soon with early access.");
         setEmail("");
       } else {
         const data = await res.json();
         setStatus("error");
-        setMessage(data.error || "Something went wrong. Please try again.");
+        setMessage(data.error?.includes("Already") ? "You're already registered. We'll be in touch soon!" : "Something went wrong. Please try again.");
       }
     } catch (err) {
       setStatus("error");
@@ -61,7 +61,7 @@ export const CTA = () => {
 
       {/* Status Message */}
       {message && (
-        <p className={`text-sm ${status === "success" ? "text-green-400" : "text-red-400"}`}>
+        <p className="text-sm text-[var(--rl-text-secondary)]">
           {message}
         </p>
       )}

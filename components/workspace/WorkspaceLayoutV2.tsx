@@ -8,6 +8,7 @@ import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Toaster } from "react-hot-toast";
 
 import { useAuth } from "@/components/providers/SupabaseAuthProvider";
+import { RenderLabButton } from "@/components/ui/RenderLabButton";
 import ImagePreviewModal from "@/components/workspace/ImagePreviewModal";
 
 // ============================================================================
@@ -263,17 +264,15 @@ export function WorkspaceLayoutV2({
 
           {/* Quick Actions */}
           <div className="flex gap-2">
-            <Link
-              href="/inpaint"
-              className="px-4 py-2 text-sm font-medium text-white bg-white/[0.06] border border-white/10 rounded-lg hover:bg-white/[0.1] transition-colors"
-            >
-              Edit in Inpaint
+            <Link href="/batch">
+              <RenderLabButton variant="gradient" size="sm">
+                Batch Studio
+              </RenderLabButton>
             </Link>
-            <Link
-              href="/custom"
-              className="px-4 py-2 text-sm font-medium text-white bg-white/[0.06] border border-white/10 rounded-lg hover:bg-white/[0.1] transition-colors"
-            >
-              Manage Templates
+            <Link href="/inpaint">
+              <RenderLabButton variant="outline" size="sm">
+                Edit / Inpaint
+              </RenderLabButton>
             </Link>
           </div>
         </div>
