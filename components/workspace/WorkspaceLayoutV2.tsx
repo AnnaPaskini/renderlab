@@ -88,9 +88,16 @@ function HistoryCard({
     return `${day} ${month} ${hours}:${minutes}`;
   };
 
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData("text/plain", image.url);
+    e.dataTransfer.effectAllowed = "copy";
+  };
+
   return (
     <div
       className="relative aspect-square rounded-lg overflow-hidden border border-white/[0.08] bg-[#141414] cursor-pointer group"
+      draggable
+      onDragStart={handleDragStart}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
