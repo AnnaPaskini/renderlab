@@ -176,7 +176,7 @@ function ImagePreviewModal({ src, onClose, images = [], currentIndex = 0, onNavi
       const originalBlob = await response.blob();
       const blob = new Blob([originalBlob], { type: contentType });
 
-      const ext = contentType.includes('png') ? 'png' : 'jpg';
+      const ext = contentType.includes('png') ? 'png' : contentType.includes('webp') ? 'webp' : 'jpg';
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

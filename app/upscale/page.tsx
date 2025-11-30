@@ -3,7 +3,9 @@
 import { ImagePreviewModal } from '@/components/workspace/ImagePreviewModal';
 import { ImageUploadPanel } from '@/components/workspace/ImageUploadPanel';
 import { SkeletonCard } from '@/components/workspace/SkeletonCard';
+import { createUpscaleInput } from '@/core/thumbnail/createUpscaleInput';
 import { createClient } from '@/lib/supabaseBrowser';
+import { uploadImageToStorage } from '@/lib/utils/uploadToStorage';
 import { ArrowUpCircle, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -17,14 +19,15 @@ interface UpscaleImage {
 }
 
 const UPSCALE_MODELS = [
-    { id: 'recraft-crisp', name: 'Recraft Crisp', description: 'Sharp, detailed upscaling' },
-    { id: 'real-esrgan', name: 'Real-ESRGAN 4x', description: 'Classic 4x upscaler' },
+    { id: 'google-upscaler', name: 'Google Upscaler', description: 'Google Official AI 4x upscaling' },
+    { id: 'real-esrgan', name: 'Real-ESRGAN 4x', description: 'Classic 4x enlargement' },
+    { id: 'recraft-crisp', name: 'Recraft Crisp', description: 'AI-enhanced sharpness' },
 ];
 
 export default function UpscalePage() {
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
     const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-    const [selectedModel, setSelectedModel] = useState<string>('recraft-crisp');
+    const [selectedModel, setSelectedModel] = useState<string>('google-upscaler');
     const [isGenerating, setIsGenerating] = useState(false);
     const [historyImages, setHistoryImages] = useState<UpscaleImage[]>([]);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -67,11 +70,43 @@ export default function UpscalePage() {
         setIsGenerating(true);
 
         try {
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) {
+                toast.error('Please log in');
+                return;
+            }
+
+            let imageUrlForUpscale = uploadedImage;
+
+            // If we have the original file, check if resize needed
+            if (uploadedFile) {
+                const { blob, wasResized } = await createUpscaleInput(uploadedFile);
+
+                if (wasResized) {
+                    toast.info('Resizing image for upscale...', { duration: 2000 });
+
+                    // Upload resized image to storage
+                    const resizedUrl = await uploadImageToStorage(
+                        supabase,
+                        blob,
+                        user.id,
+                        'workspace',
+                        `upscale-input-${Date.now()}.png`
+                    );
+
+                    if (resizedUrl) {
+                        imageUrlForUpscale = resizedUrl;
+                    }
+                }
+            }
+
             const response = await fetch('/api/upscale', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    imageUrl: uploadedImage,
+                    imageUrl: imageUrlForUpscale,
                     model: selectedModel,
                 }),
             });

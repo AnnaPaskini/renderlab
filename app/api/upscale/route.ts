@@ -2,14 +2,16 @@ import { createClient } from "@/lib/supabaseServer";
 import { uploadImageToStorage } from "@/lib/utils/uploadToStorage";
 import { NextRequest, NextResponse } from "next/server";
 import Replicate from "replicate";
+import sharp from "sharp";
 
 const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
 const MODELS = {
-  "recraft-crisp": "recraft-ai/recraft-crisp-upscale",
+  "google-upscaler": "google/upscaler",
   "real-esrgan": "nightmareai/real-esrgan",
+  "recraft-crisp": "recraft-ai/recraft-crisp-upscale",
 };
 
 export async function POST(request: NextRequest) {
@@ -38,10 +40,11 @@ export async function POST(request: NextRequest) {
 
     let output: any;
 
-    if (model === "recraft-crisp") {
+    if (model === "google-upscaler") {
       output = await replicate.run(modelId as `${string}/${string}`, {
         input: {
           image: imageUrl,
+          upscale_factor: "x4",
         },
       });
     } else if (model === "real-esrgan") {
@@ -50,6 +53,12 @@ export async function POST(request: NextRequest) {
           image: imageUrl,
           scale: 4,
           face_enhance: false,
+        },
+      });
+    } else if (model === "recraft-crisp") {
+      output = await replicate.run(modelId as `${string}/${string}`, {
+        input: {
+          image: imageUrl,
         },
       });
     }
@@ -81,10 +90,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Upscale failed - no output" }, { status: 500 });
     }
 
+    // Download image and convert to PNG
+    const imageResponse = await fetch(tempUrl);
+    if (!imageResponse.ok) {
+      return NextResponse.json({ error: "Failed to download upscaled image" }, { status: 500 });
+    }
+
+    const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+
+    // Convert to PNG using sharp
+    const pngBuffer = await sharp(imageBuffer)
+      .png({ quality: 95 })
+      .toBuffer();
+
+    // Create blob for upload (convert Buffer to Uint8Array for Blob compatibility)
+    const pngBlob = new Blob([new Uint8Array(pngBuffer)], { type: "image/png" });
+
     // Upload to Supabase Storage using existing utility
     const permanentUrl = await uploadImageToStorage(
       supabase,
-      tempUrl,
+      pngBlob,
       user.id,
       "workspace", // context - using workspace for upscale results
       `upscale-${Date.now()}.png`
