@@ -164,7 +164,7 @@ export const AppNavbar = () => {
                             </button>
                             {isDropdownOpen && (
                                 <div className="absolute right-0 top-[60px] w-64 rounded-2xl backdrop-blur-xl bg-neutral-900/95 border border-white/10 shadow-2xl shadow-black/50 p-2 z-50">
-                                    <MenuItem icon={<Settings className="w-5 h-5" />} label="Account Settings" href="/account" />
+                                    <MenuItem icon={<Settings className="w-5 h-5" />} label="Account Settings" href="/account?tab=profile" />
                                     <div className="w-full h-px bg-white/10 my-1" />
                                     <MenuItem icon={<FileText className="w-5 h-5" />} label="My Prompts" href="/account?tab=prompts" />
                                     <MenuItem icon={<PenLine className="w-5 h-5" />} label="Submit Prompt" href="/prompts/submit" />

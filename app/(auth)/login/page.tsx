@@ -48,11 +48,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-neutral-950 text-neutral-100">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_20%,rgba(255,107,53,0.18),transparent_42%),radial-gradient(circle_at_88%_25%,rgba(250,204,21,0.16),transparent_40%),radial-gradient(circle_at_50%_88%,rgba(255,138,85,0.15),transparent_45%)]" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-grid text-neutral-100">
       <form
         onSubmit={handleLogin}
-        className="relative z-10 flex w-full max-w-md flex-col gap-5 rounded-3xl border border-white/10 bg-[#1a1a1a] p-10 shadow-[0_8px_32px_rgba(0,0,0,0.8)]"
+        className="relative z-10 flex w-full max-w-md flex-col gap-5 rl-panel-sidebar rl-glow-purple p-10"
       >
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-semibold tracking-tight text-white">Welcome back</h1>
@@ -66,7 +65,7 @@ export default function LoginPage() {
             placeholder="Email address"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="h-11 rounded-xl border-white/20 bg-white/10 text-white placeholder:text-neutral-400 focus-visible:ring-[#ff6b35] focus:border-[#ff6b35]"
+            className="h-11 rounded-xl border-white/15 bg-white/5 text-white text-base placeholder:text-white/40 focus-visible:ring-[#ff6b35] focus:border-[#ff6b35] autofill:bg-white/5 autofill:text-white [-webkit-autofill]:bg-white/5 [-webkit-autofill]:text-white [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:shadow-[0_0_0px_1000px_rgba(255,255,255,0.05)_inset]"
             required
           />
           <div className="relative">
@@ -76,7 +75,7 @@ export default function LoginPage() {
               placeholder="Password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="h-11 rounded-xl border-white/20 bg-white/10 text-white placeholder:text-neutral-400 focus-visible:ring-[#ff6b35] focus:border-[#ff6b35] pr-10"
+              className="h-11 rounded-xl border-white/15 bg-white/5 text-white text-base placeholder:text-white/40 focus-visible:ring-[#ff6b35] focus:border-[#ff6b35] pr-10 [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:shadow-[0_0_0px_1000px_rgba(255,255,255,0.05)_inset]"
               required
             />
             <button

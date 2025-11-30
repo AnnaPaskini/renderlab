@@ -631,3 +631,8 @@ body.actions-open nav {
   background: rgba(20, 20, 20, 0.85);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
+
+/* RenderLab Purple Glow - for modals and focused panels */
+.rl-glow-purple {
+  box-shadow: 0 0 80px rgba(167, 139, 250, 0.15), 0 0 32px rgba(167, 139, 250, 0.1);
+}

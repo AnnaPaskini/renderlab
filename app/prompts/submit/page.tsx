@@ -84,7 +84,7 @@ export default function SubmitPromptPage() {
 
         {/* Form */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-12">
-          <div className="bg-black/20 border border-white/5 rounded-2xl p-8">
+          <div className="rl-panel-wrapper">
             <SubmitPromptForm
               onSuccess={handleSuccess}
               onCancel={handleCancel}
@@ -92,7 +92,7 @@ export default function SubmitPromptPage() {
           </div>
 
           {/* Guidelines Box - Standard Panel Style */}
-          <div className="mt-6 rounded-2xl p-6 bg-black/20 border border-white/5">
+          <div className="mt-6 rl-panel-wrapper">
             <h3 className="text-sm font-semibold text-white mb-3">
               Submission Guidelines
             </h3>

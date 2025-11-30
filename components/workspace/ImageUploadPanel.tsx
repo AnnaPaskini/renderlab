@@ -56,7 +56,7 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage, onFileCha
       e.preventDefault();
       e.stopPropagation();
       setIsDragActive(false);
-      
+
       // Check if it's a URL from History drag
       const droppedUrl = e.dataTransfer.getData("text/plain");
       if (droppedUrl && (droppedUrl.startsWith("http://") || droppedUrl.startsWith("https://"))) {
@@ -64,7 +64,7 @@ export function ImageUploadPanel({ image, onImageChange, onClearImage, onFileCha
         toast.success("Image loaded from History", { style: defaultToastStyle });
         return;
       }
-      
+
       // Otherwise handle as file
       const file = e.dataTransfer.files?.[0];
       if (file) processFile(file);

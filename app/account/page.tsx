@@ -11,9 +11,14 @@ type TabType = 'profile' | 'prompts';
 export default function AccountPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialTab = searchParams.get('tab') === 'prompts' ? 'prompts' : 'profile';
-  const [activeTab, setActiveTab] = useState<TabType>(initialTab as TabType);
+  const tabFromUrl = searchParams.get('tab') === 'prompts' ? 'prompts' : 'profile';
+  const [activeTab, setActiveTab] = useState<TabType>(tabFromUrl);
   const [loading, setLoading] = useState(true);
+
+  // Sync activeTab with URL when searchParams change
+  useEffect(() => {
+    setActiveTab(tabFromUrl);
+  }, [tabFromUrl]);
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [myPrompts, setMyPrompts] = useState<Prompt[]>([]);
