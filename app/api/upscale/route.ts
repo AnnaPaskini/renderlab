@@ -103,8 +103,15 @@ export async function POST(request: NextRequest) {
       .png({ quality: 95 })
       .toBuffer();
 
-    // Create blob for upload (convert Buffer to Uint8Array for Blob compatibility)
+    // Generate thumbnail (400px max dimension)
+    const thumbnailBuffer = await sharp(imageBuffer)
+      .resize(400, 400, { fit: 'inside', withoutEnlargement: true })
+      .png({ quality: 80 })
+      .toBuffer();
+
+    // Create blobs for upload (convert Buffer to Uint8Array for Blob compatibility)
     const pngBlob = new Blob([new Uint8Array(pngBuffer)], { type: "image/png" });
+    const thumbnailBlob = new Blob([new Uint8Array(thumbnailBuffer)], { type: "image/png" });
 
     // Upload to Supabase Storage using existing utility
     const permanentUrl = await uploadImageToStorage(
@@ -119,13 +126,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to save image to storage" }, { status: 500 });
     }
 
+    // Upload thumbnail
+    const thumbnailUrl = await uploadImageToStorage(
+      supabase,
+      thumbnailBlob,
+      user.id,
+      'workspace',
+      `upscale-thumb-${Date.now()}.png`
+    );
+
     console.log("✅ Permanent URL:", permanentUrl);
+    console.log("✅ Thumbnail URL:", thumbnailUrl);
 
     // Save to database with type 'upscale'
     const { error: insertError } = await supabase.from("images").insert({
       user_id: user.id,
       url: permanentUrl,
-      thumbnail_url: permanentUrl,
+      thumbnail_url: thumbnailUrl || permanentUrl,
       reference_url: imageUrl,
       model: model,
       type: "upscale",
