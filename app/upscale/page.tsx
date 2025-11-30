@@ -3,6 +3,7 @@
 import { ImagePreviewModal } from '@/components/workspace/ImagePreviewModal';
 import { ImageUploadPanel } from '@/components/workspace/ImageUploadPanel';
 import { SkeletonCard } from '@/components/workspace/SkeletonCard';
+import { AppNavbar } from '@/components/navbar/AppNavbar';
 import { createUpscaleInput } from '@/core/thumbnail/createUpscaleInput';
 import { createClient } from '@/lib/supabaseBrowser';
 import { uploadImageToStorage } from '@/lib/utils/uploadToStorage';
@@ -151,6 +152,8 @@ export default function UpscalePage() {
 
     return (
         <div className="min-h-screen">
+            <AppNavbar />
+            
             <div className="max-w-7xl mx-auto px-8 pt-32 pb-12">
                 {/* Header */}
                 <div className="mb-10">
@@ -253,9 +256,9 @@ export default function UpscalePage() {
                                             {formatDateTime(img.created_at)}
                                         </div>
 
-                                        {/* Model Badge - Purple for upscale (same style as workspace but purple) */}
+                                        {/* Model Badge - Top left (purple for upscale) */}
                                         <div
-                                            className="absolute bottom-1.5 right-1.5 text-white text-[9px] font-medium px-2 py-0.5 rounded-md"
+                                            className="absolute top-1.5 left-1.5 text-white text-[9px] font-medium px-2 py-0.5 rounded-md"
                                             style={{
                                                 background: 'rgba(168, 85, 247, 0.15)',
                                                 border: '1px solid rgba(168, 85, 247, 0.3)',

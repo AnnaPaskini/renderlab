@@ -174,10 +174,10 @@ export function HistoryGrid({ images, onDelete }: HistoryGridProps) {
                                 })}
                             </div>
 
-                            {/* Model Badge - bottom right (purple for upscale, orange for generation) */}
+                            {/* Model Badge - top left (purple for upscale, orange for generation) */}
                             {img.model && (
                                 <div
-                                    className="absolute bottom-1.5 right-1.5 text-white text-[10px] font-medium px-2 py-0.5 rounded-md"
+                                    className="absolute top-1.5 left-1.5 text-white text-[10px] font-medium px-2 py-0.5 rounded-md"
                                     style={{
                                         background: img.type === 'upscale'
                                             ? 'rgba(168, 85, 247, 0.15)'

@@ -119,10 +119,10 @@ function HistoryCard({
         {formatDateTime(image.created_at)}
       </div>
 
-      {/* Model Badge - bottom right (orange for generation, purple for upscale) */}
+      {/* Model Badge - top left (orange for generation, purple for upscale) */}
       {image.model && (
         <div
-          className="absolute bottom-1.5 right-1.5 text-white text-[9px] font-medium px-2 py-0.5 rounded-md"
+          className="absolute top-1.5 left-1.5 text-white text-[9px] font-medium px-2 py-0.5 rounded-md"
           style={{
             background: image.type === 'upscale'
               ? 'rgba(168, 85, 247, 0.15)'
