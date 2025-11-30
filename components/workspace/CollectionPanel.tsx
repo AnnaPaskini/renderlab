@@ -280,9 +280,9 @@ export function CollectionsPanel() {
 
 		// Check template limit
 		const currentCollection = collections.find(c => c.id === selectedCollectionId);
-		if (currentCollection && (currentCollection.templates?.length ?? 0) >= 5) {
+		if (currentCollection && (currentCollection.templates?.length ?? 0) >= 10) {
 			toast.error("Collection limit reached", {
-				description: "Maximum 5 templates per collection",
+				description: "Maximum 10 templates per collection",
 			});
 			return;
 		}
@@ -310,9 +310,9 @@ export function CollectionsPanel() {
 
 			// Check template limit
 			const currentCollection = collections.find(c => c.id === selectedCollectionId);
-			if (currentCollection && (currentCollection.templates?.length ?? 0) >= 5) {
+			if (currentCollection && (currentCollection.templates?.length ?? 0) >= 10) {
 				toast.error("Collection limit reached", {
-					description: "Maximum 5 templates per collection",
+					description: "Maximum 10 templates per collection",
 				});
 				return;
 			}
@@ -693,7 +693,7 @@ export function CollectionsPanel() {
 						<div className="text-center flex-1">
 							<h2 className="text-lg font-medium">{activeCollection?.title || "Untitled Collection"}</h2>
 							<p className="text-xs opacity-60">
-								{(activeCollection.templates?.length ?? 0)}/5 templates
+								{(activeCollection.templates?.length ?? 0)}/10 templates
 							</p>
 						</div>
 
@@ -727,7 +727,7 @@ export function CollectionsPanel() {
 							</div>
 						) : (
 							activeCollection.templates?.map((template) => (
-								<Card key={template.id} className="p-4 transition hover:shadow-md">
+								<Card key={template.id} className="rl-card p-4 transition hover:shadow-md">
 									<div className="flex items-start justify-between gap-3">
 										<div className="min-w-0 flex-1">
 											<div className="truncate font-medium text-gray-900 dark:text-gray-100">
@@ -1231,7 +1231,7 @@ export function CollectionsPanel() {
 								<button
 									onClick={handleBatchGenerate}
 									disabled={!referenceImage || (activeCollection?.templates?.length || 0) === 0}
-									className="flex-1 px-4 py-2 text-sm font-medium bg-gradient-to-r from-[#ff6b35] to-[#ff8c42] text-white rounded-lg hover:from-[#ff8c42] hover:to-[#ff6b35] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#ff6b35]/30"
+									className="flex-1 px-4 py-2.5 text-sm font-semibold premium-generate-button disabled:opacity-50 disabled:cursor-not-allowed"
 								>
 									Generate Collection
 								</button>
@@ -1254,7 +1254,7 @@ export function CollectionsPanel() {
 								</button>
 								<button
 									onClick={handleSaveToHistory}
-									className="flex-1 px-4 py-2 text-sm font-medium bg-gradient-to-r from-[#ff6b35] to-[#ff8c42] text-white rounded-lg hover:from-[#ff8c42] hover:to-[#ff6b35] transition shadow-lg shadow-[#ff6b35]/30"
+									className="flex-1 px-4 py-2.5 text-sm font-semibold premium-generate-button"
 								>
 									Save to History
 								</button>
