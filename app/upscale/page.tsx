@@ -1,5 +1,6 @@
 'use client';
 
+import { ImagePreviewModal } from '@/components/workspace/ImagePreviewModal';
 import { ImageUploadPanel } from '@/components/workspace/ImageUploadPanel';
 import { SkeletonCard } from '@/components/workspace/SkeletonCard';
 import { createClient } from '@/lib/supabaseBrowser';
@@ -217,12 +218,12 @@ export default function UpscalePage() {
                                             {formatDateTime(img.created_at)}
                                         </div>
 
-                                        {/* Model Badge - Purple for upscale */}
+                                        {/* Model Badge - Purple for upscale (same style as workspace but purple) */}
                                         <div
                                             className="absolute bottom-1.5 right-1.5 text-white text-[9px] font-medium px-2 py-0.5 rounded-md"
                                             style={{
-                                                background: 'rgba(168, 85, 247, 0.3)',
-                                                border: '1px solid rgba(168, 85, 247, 0.5)',
+                                                background: 'rgba(168, 85, 247, 0.15)',
+                                                border: '1px solid rgba(168, 85, 247, 0.3)',
                                             }}
                                         >
                                             {img.model}
@@ -243,16 +244,10 @@ export default function UpscalePage() {
 
             {/* Preview Modal */}
             {previewImage && (
-                <div
-                    className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                    onClick={() => setPreviewImage(null)}
-                >
-                    <img
-                        src={previewImage}
-                        alt="Preview"
-                        className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
-                    />
-                </div>
+                <ImagePreviewModal
+                    src={previewImage}
+                    onClose={() => setPreviewImage(null)}
+                />
             )}
         </div>
     );

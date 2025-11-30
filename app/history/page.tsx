@@ -14,6 +14,7 @@ interface HistoryImage {
     prompt: string;
     created_at: string;
     model?: string;
+    type?: string;
 }
 
 const PAGE_SIZE = 20;
@@ -62,7 +63,7 @@ export default function HistoryPage() {
 
             const { data, error } = await supabase
                 .from('images')
-                .select('id, thumbnail_url, url, prompt, created_at, model')
+                .select('id, thumbnail_url, url, prompt, created_at, model, type')
                 .eq('user_id', user.id)
                 .order('created_at', { ascending: false })
                 .range(from, to);

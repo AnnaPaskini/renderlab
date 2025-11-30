@@ -22,6 +22,7 @@ interface PreviewImage {
   url: string;
   created_at: string;
   model?: string;
+  type?: string;
 }
 
 interface WorkspaceLayoutV2Props {
@@ -118,13 +119,17 @@ function HistoryCard({
         {formatDateTime(image.created_at)}
       </div>
 
-      {/* Model Badge - bottom right (if available) */}
+      {/* Model Badge - bottom right (orange for generation, purple for upscale) */}
       {image.model && (
         <div
           className="absolute bottom-1.5 right-1.5 text-white text-[9px] font-medium px-2 py-0.5 rounded-md"
           style={{
-            background: 'rgba(255, 255, 255, 0.06)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
+            background: image.type === 'upscale'
+              ? 'rgba(168, 85, 247, 0.15)'
+              : 'rgba(255, 107, 53, 0.15)',
+            border: image.type === 'upscale'
+              ? '1px solid rgba(168, 85, 247, 0.3)'
+              : '1px solid rgba(255, 107, 53, 0.3)',
           }}
         >
           {image.model}

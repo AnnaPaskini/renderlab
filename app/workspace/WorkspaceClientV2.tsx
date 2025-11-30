@@ -23,6 +23,7 @@ interface PreviewImage {
   url: string;
   created_at: string;
   model?: string;
+  type?: string;
 }
 
 interface WorkspaceClientV2Props {
@@ -582,8 +583,9 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
 
       const { data } = await supabase
         .from("images")
-        .select("id, thumbnail_url, url, created_at, model")
+        .select("id, thumbnail_url, url, created_at, model, type")
         .eq("user_id", user.id)
+        .or("type.is.null,type.eq.generation")
         .order("created_at", { ascending: false })
         .limit(200);
 

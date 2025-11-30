@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabaseServer";
+import { uploadImageToStorage } from "@/lib/utils/uploadToStorage";
 import { NextRequest, NextResponse } from "next/server";
 import Replicate from "replicate";
 
@@ -8,7 +9,7 @@ const replicate = new Replicate({
 
 const MODELS = {
   "recraft-crisp": "recraft-ai/recraft-crisp-upscale",
-  "real-esrgan": "nightmareai/real-esrgan:350d32041630ffbe63c8352783a26d94f5e86a6343ac71e52422f6a684154e4e",
+  "real-esrgan": "nightmareai/real-esrgan",
 };
 
 export async function POST(request: NextRequest) {
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
         },
       });
     } else if (model === "real-esrgan") {
-      output = await replicate.run(modelId as `${string}/${string}:${string}`, {
+      output = await replicate.run(modelId as `${string}/${string}`, {
         input: {
           image: imageUrl,
           scale: 4,
@@ -53,32 +54,66 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    console.log("✅ Upscale output:", output);
+    console.log("✅ Upscale raw output:", output);
 
-    const outputUrl = typeof output === "string" ? output : output?.[0] || output?.output;
+    // Handle FileOutput from Replicate - call .url() to get the URL
+    let tempUrl: string | null = null;
 
-    if (!outputUrl) {
+    if (output && typeof output.url === "function") {
+      tempUrl = output.url();
+    } else if (typeof output === "string") {
+      tempUrl = output;
+    } else if (Array.isArray(output)) {
+      const first = output[0];
+      tempUrl = typeof first?.url === "function" ? first.url() : first;
+    } else if (output && typeof output === "object") {
+      tempUrl = output.output || output.url || output.image || null;
+    }
+
+    // Handle URL object
+    if (tempUrl && typeof tempUrl === "object" && "href" in tempUrl) {
+      tempUrl = (tempUrl as URL).href;
+    }
+
+    console.log("✅ Temp URL from Replicate:", tempUrl);
+
+    if (!tempUrl) {
       return NextResponse.json({ error: "Upscale failed - no output" }, { status: 500 });
     }
 
-    // Save to history with type 'upscale'
+    // Upload to Supabase Storage using existing utility
+    const permanentUrl = await uploadImageToStorage(
+      supabase,
+      tempUrl,
+      user.id,
+      "workspace", // context - using workspace for upscale results
+      `upscale-${Date.now()}.png`
+    );
+
+    if (!permanentUrl) {
+      return NextResponse.json({ error: "Failed to save image to storage" }, { status: 500 });
+    }
+
+    console.log("✅ Permanent URL:", permanentUrl);
+
+    // Save to database with type 'upscale'
     const { error: insertError } = await supabase.from("images").insert({
       user_id: user.id,
-      url: outputUrl,
-      thumbnail_url: outputUrl,
+      url: permanentUrl,
+      thumbnail_url: permanentUrl,
       reference_url: imageUrl,
       model: model,
       type: "upscale",
     });
 
     if (insertError) {
-      console.error("Failed to save to history:", insertError);
+      console.error("❌ Failed to save to database:", insertError);
     }
 
     return NextResponse.json({
       status: "succeeded",
       output: {
-        imageUrl: outputUrl,
+        imageUrl: permanentUrl,
       },
     });
   } catch (error) {

@@ -8,6 +8,7 @@ interface HistoryImage {
   url: string;
   created_at: string;
   model?: string;
+  type?: string;
 }
 
 export default async function WorkspaceV2Page() {
@@ -24,11 +25,12 @@ export default async function WorkspaceV2Page() {
     redirect("/login");
   }
 
-  // Load history images
+  // Load history images (only generations, not upscale)
   const { data: historyImages } = await supabase
     .from("images")
-    .select("id, thumbnail_url, url, created_at, model")
+    .select("id, thumbnail_url, url, created_at, model, type")
     .eq("user_id", user.id)
+    .or("type.is.null,type.eq.generation")
     .order("created_at", { ascending: false })
     .limit(200);
 

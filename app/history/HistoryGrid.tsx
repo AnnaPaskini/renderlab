@@ -22,6 +22,7 @@ interface HistoryImage {
     prompt: string;
     created_at: string;
     model?: string;
+    type?: string;
 }
 
 interface HistoryGridProps {
@@ -173,13 +174,17 @@ export function HistoryGrid({ images, onDelete }: HistoryGridProps) {
                                 })}
                             </div>
 
-                            {/* Model Badge - bottom right (if available) */}
+                            {/* Model Badge - bottom right (purple for upscale, orange for generation) */}
                             {img.model && (
                                 <div
                                     className="absolute bottom-1.5 right-1.5 text-white text-[10px] font-medium px-2 py-0.5 rounded-md"
                                     style={{
-                                        background: 'rgba(255, 255, 255, 0.06)',
-                                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                                        background: img.type === 'upscale'
+                                            ? 'rgba(168, 85, 247, 0.15)'
+                                            : 'rgba(255, 107, 53, 0.15)',
+                                        border: img.type === 'upscale'
+                                            ? '1px solid rgba(168, 85, 247, 0.3)'
+                                            : '1px solid rgba(255, 107, 53, 0.3)',
                                         maxWidth: 'calc(50% - 8px)',
                                         whiteSpace: 'nowrap',
                                         overflow: 'hidden',
