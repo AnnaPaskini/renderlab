@@ -4,8 +4,7 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+    DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { createClient } from "@/lib/supabaseBrowser";
 import { ChevronDown, FileText, LogOut, PenLine, Settings } from "lucide-react";
@@ -55,7 +54,7 @@ export const AppNavbar = () => {
     };
 
     // Check if current page is a Studio page
-    const studioPages = ['/workspace', '/batch', '/inpaint', '/templates', '/collections', '/custom'];
+    const studioPages = ['/workspace', '/batch', '/inpaint', '/upscale', '/templates', '/collections', '/custom'];
     const isStudioActive = studioPages.some(page => pathname?.startsWith(page));
 
     return (
@@ -106,7 +105,12 @@ export const AppNavbar = () => {
                                         InPaint
                                     </DropdownMenuItem>
                                 </Link>
-                                <DropdownMenuSeparator />
+                                <Link href="/upscale">
+                                    <DropdownMenuItem className="cursor-pointer">
+                                        Upscale
+                                    </DropdownMenuItem>
+                                </Link>
+                                <div className="h-px bg-white/10 my-1 mx-2" />
                                 <Link href="/templates">
                                     <DropdownMenuItem className="cursor-pointer">
                                         My Templates
