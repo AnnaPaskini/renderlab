@@ -67,7 +67,7 @@ export const Hero = () => {
         className="text-center mt-6 text-base md:text-xl text-muted dark:text-muted-dark max-w-3xl mx-auto relative z-10"
       >
         <Balancer>
-          Everything AI seamlessly integrated all the modern AI generation tools
+          RenderLab seamlessly integrated all the modern AI generation tools
           into one platform so that you can generate content with a single
           click.
         </Balancer>

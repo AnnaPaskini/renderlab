@@ -6,11 +6,11 @@ import { cn } from "@/lib/utils";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Contact Us - Everything AI",
+  title: "Contact Us - RenderLab",
   description:
-    "Everything AI is a platform that provides a wide range of AI tools and services to help you stay on top of your business. Generate images, text and everything else that you need to get your business off the ground.",
+    "RenderLab is an AI-powered image generation platform that helps creators, businesses, and developers bring their ideas to life. Generate stunning images, edit photos, and create visual content with advanced AI technology.",
   openGraph: {
-    images: ["https://ai-saas-template-aceternity.vercel.app/banner.png"],
+    images: [],
   },
 };
 
@@ -35,8 +35,8 @@ export default function PricingPage() {
                 "font-normal text-base text-center text-neutral-500 dark:text-neutral-200 mt-8"
               )}
             >
-              With lots of AI applications around, Everything AI stands out with
-              its state of the art Shitposting capabilities.
+              With advanced AI image generation technology, RenderLab delivers
+              professional-quality results for creators and businesses worldwide.
             </p>
           </div>
           <HorizontalGradient className="top-20" />

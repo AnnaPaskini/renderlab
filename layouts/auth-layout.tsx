@@ -23,8 +23,8 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
                 "font-normal text-base text-center text-neutral-500 dark:text-neutral-400 mt-8"
               )}
             >
-              With lots of AI applications around, Everything AI stands out with
-              its state of the art Shitposting capabilities.
+              With advanced AI image generation technology, RenderLab delivers
+              professional-quality results for creators and businesses worldwide.
             </p>
           </div>
           <HorizontalGradient className="top-20" />

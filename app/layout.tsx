@@ -18,9 +18,9 @@ import { WorkspaceProvider } from "@/lib/context/WorkspaceContext";
 
 export const metadata = {
   title: "RenderLab",
-  description: "Everything AI platform built on RenderLab template",
+  description: "AI-powered image generation platform for creators and businesses. Generate stunning images, edit photos, and create visual content with advanced AI technology.",
   openGraph: {
-    images: ["https://ai-saas-template-aceternity.vercel.app/banner.png"],
+    images: [],
   },
 };
 

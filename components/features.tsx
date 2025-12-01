@@ -45,7 +45,7 @@ export const Features = () => {
     <div className={`relative z-[${Z.FLOAT}] py-10 lg:py-40 overflow-hidden`}>
       <Heading as="h2">Packed with thousands of features</Heading>
       <Subheading className="text-center ">
-        From Image generation to video generation, Everything AI has APIs for
+        From Image generation to video generation, RenderLab has APIs for
         literally everything. It can even create this website copy for you.
       </Subheading>
 
