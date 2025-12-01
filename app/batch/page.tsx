@@ -26,34 +26,17 @@ interface Collection {
     created_at: string;
 }
 
-interface GeneratedResult {
+// NEW: Unified batch item interface
+interface BatchItem {
     templateId: string;
     templateName: string;
-    imageUrl: string;
-    prompt: string;
-    model: string;
-    saved?: boolean;
-    imageRecordId?: string;
+    status: 'pending' | 'generating' | 'done' | 'error';
+    imageUrl?: string;
+    prompt?: string;
+    model?: string;
 }
 
-function RenderLabSkeletonRow({ count }: { count: number }) {
-    return (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
-            {Array.from({ length: count }).map((_, i) => (
-                <div
-                    key={i}
-                    className="rl-skeleton"
-                    style={{
-                        width: "100%",
-                        paddingBottom: "100%", // square
-                    }}
-                />
-            ))}
-        </div>
-    );
-}
-
-export default function BatchStudioPage() {
+export default function BatchStudioPageV2() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const collectionIdFromUrl = searchParams.get('collection');
@@ -68,7 +51,9 @@ export default function BatchStudioPage() {
     const [isGenerating, setIsGenerating] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
 
-    const [generatedResults, setGeneratedResults] = useState<GeneratedResult[]>([]);
+    // NEW: Unified batch items array (replaces separate skeletons + results)
+    const [batchItems, setBatchItems] = useState<BatchItem[]>([]);
+
     const [templateStatuses, setTemplateStatuses] = useState<
         Record<string, 'pending' | 'generating' | 'done' | 'error'>
     >({});
@@ -81,7 +66,7 @@ export default function BatchStudioPage() {
     const [fakeInterval, setFakeInterval] = useState<NodeJS.Timeout | null>(null);
 
     const scrollRef = useRef<HTMLDivElement>(null);
-    const skeletonRef = useRef<HTMLDivElement | null>(null);
+    const resultsGridRef = useRef<HTMLDivElement | null>(null);
     const generateBtnRef = useRef<HTMLButtonElement | null>(null);
 
     // Fetch collections on mount
@@ -150,24 +135,17 @@ export default function BatchStudioPage() {
         }
     }, [selectedCollection]);
 
-    // Auto-scroll to results when generation completes
+    // Auto-scroll to results grid when generation starts
     useEffect(() => {
-        if (generatedResults.length > 0) {
+        if (batchItems.length > 0 && resultsGridRef.current) {
             setTimeout(() => {
-                scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+                resultsGridRef.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
             }, 150);
         }
-    }, [generatedResults]);
-
-    // Auto-scroll to skeleton when generation starts
-    useEffect(() => {
-        if (isGenerating && skeletonRef.current) {
-            skeletonRef.current.scrollIntoView({
-                behavior: "smooth",
-                block: "center"
-            });
-        }
-    }, [isGenerating]);
+    }, [batchItems.length > 0]);
 
     // Auto-scroll to Generate button when collection is selected OR when image is uploaded
     useEffect(() => {
@@ -252,27 +230,7 @@ export default function BatchStudioPage() {
 
             setIsGenerating(true);
             setProgress(0);
-            setGeneratedResults([]);
             setSelectedImages(new Set());
-
-            // Smooth progress to 80%, then freeze until completion
-            let current = 0;
-            const speed = 0.25; // slower initial speed for smoother progression
-
-            const interval = setInterval(() => {
-                // Smooth progression to 80%
-                current += (0.8 - current) * speed;
-                setProgress(current * 100);
-
-                // Stop at 80%, wait for real completion
-                if (current > 0.79) {
-                    clearInterval(interval);
-                }
-            }, 100);
-
-            setFakeInterval(interval);
-
-            setFakeInterval(interval);
 
             // Prepare templates payload
             const templatesPayload = selectedCollection.templates.map((t: any, index: number) => ({
@@ -281,6 +239,31 @@ export default function BatchStudioPage() {
                 prompt: t.prompt || '',
                 model: t.model || t.aiModel || 'flux-dev',
             }));
+
+            // NEW: Initialize batchItems with pending status (shows skeletons)
+            const initialItems: BatchItem[] = templatesPayload.map((t: any) => ({
+                templateId: t.id,
+                templateName: t.name,
+                status: 'pending' as const,
+                prompt: t.prompt,
+                model: t.model,
+            }));
+            setBatchItems(initialItems);
+
+            // Smooth progress to 80%, then freeze until completion
+            let current = 0;
+            const speed = 0.25;
+
+            const interval = setInterval(() => {
+                current += (0.8 - current) * speed;
+                setProgress(current * 100);
+
+                if (current > 0.79) {
+                    clearInterval(interval);
+                }
+            }, 100);
+
+            setFakeInterval(interval);
 
             console.log('🔵 [GENERATION] Starting batch generation...', {
                 templates: templatesPayload.length,
@@ -341,7 +324,6 @@ export default function BatchStudioPage() {
                         }
 
                         try {
-
                             if (data.type === 'progress') {
                                 console.log('🔵 [PROGRESS]', data);
 
@@ -351,38 +333,28 @@ export default function BatchStudioPage() {
                                 }));
 
                                 if (data.status === 'done' && data.imageUrl) {
-                                    // Find template data
-                                    const template = templatesPayload.find(t => t.id === data.templateId);
-
-                                    // Add result incrementally
-                                    const result: GeneratedResult = {
-                                        templateId: data.templateId,
-                                        templateName: data.templateName,
-                                        imageUrl: data.imageUrl,
-                                        prompt: template?.prompt || '',
-                                        model: template?.model || selectedModel,
-                                        saved: false, // Will be updated if saved
-                                        imageRecordId: undefined,
-                                    };
-
-                                    setGeneratedResults(prev => [...prev, result]);
+                                    // NEW: Update specific item from pending to done
+                                    setBatchItems(prev => prev.map(item =>
+                                        item.templateId === data.templateId
+                                            ? { ...item, status: 'done' as const, imageUrl: data.imageUrl }
+                                            : item
+                                    ));
                                     setSelectedImages(prev => new Set([...prev, data.templateId]));
                                     toast.success(`✓ ${data.templateName}`);
+                                } else if (data.status === 'generating') {
+                                    // NEW: Update to generating status
+                                    setBatchItems(prev => prev.map(item =>
+                                        item.templateId === data.templateId
+                                            ? { ...item, status: 'generating' as const }
+                                            : item
+                                    ));
                                 } else if (data.status === 'error') {
-                                    // Find template data
-                                    const template = templatesPayload.find(t => t.id === data.templateId);
-
-                                    // Add error result for failed templates
-                                    const errorResult: GeneratedResult = {
-                                        templateId: data.templateId,
-                                        templateName: data.templateName,
-                                        imageUrl: '', // No image for errors
-                                        prompt: template?.prompt || '',
-                                        model: template?.model || selectedModel,
-                                        saved: false,
-                                    };
-
-                                    setGeneratedResults(prev => [...prev, errorResult]);
+                                    // NEW: Update to error status
+                                    setBatchItems(prev => prev.map(item =>
+                                        item.templateId === data.templateId
+                                            ? { ...item, status: 'error' as const }
+                                            : item
+                                    ));
                                     toast.error(`✗ ${data.templateName}: ${data.error || 'Failed'}`);
                                 }
                             }
@@ -390,9 +362,8 @@ export default function BatchStudioPage() {
                             if (data.type === 'complete') {
                                 console.log('✅ [COMPLETE]', data);
 
-                                // Results are already added incrementally, just update final status
-                                const successCount = generatedResults.filter(r => r.imageUrl).length;
-                                toast.success(`Batch complete! ${successCount} images generated`);
+                                const doneCount = batchItems.filter(i => i.status === 'done').length;
+                                toast.success(`Batch complete! ${doneCount} images generated`);
 
                                 // Smooth transition from 80% to 100%
                                 setProgress(100);
@@ -426,27 +397,23 @@ export default function BatchStudioPage() {
 
                     if (data) {
                         try {
-
                             if (data.type === 'complete') {
                                 console.log('✅ [COMPLETE] (from trailing buffer)', data);
 
-                                const validResults = data.results.filter((result: any) => {
-                                    if (!result.templateId || !result.templateName || !result.imageUrl) {
-                                        console.warn('⚠️ Invalid image data, skipping:', result);
-                                        return false;
-                                    }
-                                    return true;
-                                });
+                                // Update any remaining items from the complete event
+                                if (data.results) {
+                                    setBatchItems(prev => prev.map(item => {
+                                        const result = data.results.find((r: any) => r.templateId === item.templateId);
+                                        if (result && result.imageUrl) {
+                                            return { ...item, status: 'done' as const, imageUrl: result.imageUrl };
+                                        }
+                                        return item;
+                                    }));
+                                }
 
-                                setGeneratedResults(validResults);
+                                const doneCount = batchItems.filter(i => i.status === 'done').length;
+                                toast.success(`Batch complete! ${doneCount} images generated`);
 
-                                const allIds = new Set<string>(
-                                    validResults.map((r: GeneratedResult) => r.templateId),
-                                );
-                                setSelectedImages(allIds);
-
-                                toast.success(`Batch complete! ${validResults.length} images generated`);
-                                // Smooth transition to 100%
                                 setProgress(100);
 
                                 setTimeout(() => {
@@ -493,14 +460,21 @@ export default function BatchStudioPage() {
                 for (const key in prev) reset[key] = 'pending';
                 return reset;
             });
-            setGeneratedResults([]);
+            // Keep batchItems but reset statuses to show what was completed
+            setBatchItems(prev => prev.map(item =>
+                item.status === 'pending' || item.status === 'generating'
+                    ? { ...item, status: 'error' as const }
+                    : item
+            ));
             setAbortController(null);
         }
     };
 
     const handleDownloadSelected = async () => {
         const selectedIds = new Set(selectedImages);
-        const selected = generatedResults.filter((r) => selectedIds.has(r.templateId));
+        const selected = batchItems.filter((item) =>
+            selectedIds.has(item.templateId) && item.status === 'done' && item.imageUrl
+        );
 
         if (selected.length === 0) {
             toast.error('No images selected');
@@ -516,22 +490,22 @@ export default function BatchStudioPage() {
         let successCount = 0;
 
         for (let i = 0; i < selected.length; i++) {
-            const result = selected[i];
+            const item = selected[i];
 
-            if (!result.imageUrl || !result.templateName) {
-                console.warn('⚠️ Skipping invalid image data during download:', result);
+            if (!item.imageUrl || !item.templateName) {
+                console.warn('⚠️ Skipping invalid image data during download:', item);
                 toast.error('Invalid image data, skipping...');
                 continue;
             }
 
             try {
-                const cleanTemplateName = result.templateName
+                const cleanTemplateName = item.templateName
                     .replace(/[^a-z0-9_\-]+/gi, '_')
                     .toLowerCase();
 
-                const cleanModel = result.model.replace(/[^a-z0-9_\-]+/gi, '_').toLowerCase();
+                const cleanModel = (item.model || 'unknown').replace(/[^a-z0-9_\-]+/gi, '_').toLowerCase();
 
-                const response = await fetch(result.imageUrl);
+                const response = await fetch(item.imageUrl);
                 if (!response.ok) {
                     throw new Error(`Failed to fetch image: ${response.status}`);
                 }
@@ -549,8 +523,8 @@ export default function BatchStudioPage() {
 
                 successCount++;
             } catch (error) {
-                console.error(`Failed to download ${result.templateName}:`, error);
-                toast.error(`Failed to download ${result.templateName}`);
+                console.error(`Failed to download ${item.templateName}:`, error);
+                toast.error(`Failed to download ${item.templateName}`);
             }
         }
 
@@ -559,6 +533,10 @@ export default function BatchStudioPage() {
         }
     };
 
+    // Computed values
+    const doneCount = batchItems.filter(i => i.status === 'done').length;
+    const totalCount = batchItems.length;
+
     return (
         <div className="min-h-screen">
             <div className="max-w-7xl mx-auto px-8 pt-32 pb-12">
@@ -566,7 +544,7 @@ export default function BatchStudioPage() {
                 <div className="mb-10">
                     <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
                         <Zap className="w-8 h-8 text-[--rl-accent]" />
-                        Batch Studio
+                        Batch Studio <span className="text-sm text-orange-400 ml-2">(v2)</span>
                     </h1>
                     <p className="text-neutral-400">Generate multiple images from collections in batch</p>
                 </div>
@@ -589,8 +567,7 @@ export default function BatchStudioPage() {
 
                     {/* Step 2: Select Collection & Model */}
                     <div className="space-y-4">
-                        <div className="flex items
--center gap-3">
+                        <div className="flex items-center gap-3">
                             <Layers className="w-5 h-5 text-[--rl-accent]" />
                             <h2 className="text-xl font-semibold text-white">Step 2: Select Collection & Model</h2>
                         </div>
@@ -642,6 +619,7 @@ export default function BatchStudioPage() {
                                                         key={collection.id}
                                                         onClick={() => {
                                                             setSelectedCollection(collection);
+                                                            setBatchItems([]); // Clear previous results
                                                             console.log('✅ Selected collection:', collection.title);
                                                         }}
                                                         className="text-white hover:bg-[#2a2a2a] cursor-pointer"
@@ -675,9 +653,9 @@ export default function BatchStudioPage() {
                             <div
                                 className="grid justify-start"
                                 style={{
-                                    gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-                                    rowGap: '24px',
-                                    columnGap: '24px',
+                                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                                    rowGap: '16px',
+                                    columnGap: '16px',
                                 }}
                             >
                                 {selectedCollection.templates.map((template: any, index: number) => {
@@ -686,21 +664,21 @@ export default function BatchStudioPage() {
                                     return (
                                         <Card
                                             key={template.id || index}
-                                            className={`p-4 border-2 transition-all ${status === 'generating'
-                                                ? 'border-orange-500/50 bg-orange-500/5'
+                                            className={`p-0.5 border transition-all ${status === 'generating'
+                                                ? 'border-orange-500/30 bg-orange-500/[0.02]'
                                                 : status === 'done'
-                                                    ? 'border-green-500/50 bg-green-500/5'
+                                                    ? 'border-white/20 bg-white/[0.02]'
                                                     : status === 'error'
-                                                        ? 'border-red-500/50 bg-red-500/5'
-                                                        : 'border-white/10 bg-[#1a1a1a] hover:border-white/20'
+                                                        ? 'border-red-500/30 bg-red-500/[0.02]'
+                                                        : 'border-white/10 bg-[#1a1a1a] hover:border-white/15'
                                                 }`}
                                         >
-                                            <div className="flex flex-col items-center text-center space-y-3">
-                                                <div className="w-8 h-8 rounded-full bg-[#1e1e1e] flex items-center justify-center">
-                                                    <FileText className="w-5 h-5 text-gray-400" />
+                                            <div className="flex flex-col items-center text-center space-y-2">
+                                                <div className="w-6 h-6 rounded-full bg-[#1e1e1e] flex items-center justify-center">
+                                                    <FileText className="w-4 h-4 text-gray-400" />
                                                 </div>
-                                                <div className="space-y-1">
-                                                    <h3 className="font-medium text-white text-sm">
+                                                <div className="space-y-0.5">
+                                                    <h3 className="font-medium text-white text-xs">
                                                         {(template.name && template.name.trim()) ||
                                                             (template.title && template.title.trim()) ||
                                                             `Template ${index + 1}`}
@@ -708,13 +686,13 @@ export default function BatchStudioPage() {
                                                     <div className="flex items-center justify-center gap-1">
                                                         {status === 'pending' && (
                                                             <>
-                                                                <div className="w-2 h-2 bg-gray-500 rounded-full" />
+                                                                <div className="w-1.5 h-1.5 bg-gray-500 rounded-full" />
                                                                 <span className="text-xs text-gray-400">Pending</span>
                                                             </>
                                                         )}
                                                         {status === 'generating' && (
                                                             <>
-                                                                <div className="rl-skeleton" style={{ width: '8px', height: '8px' }} />
+                                                                <div className="rl-skeleton" style={{ width: '6px', height: '6px' }} />
                                                                 <span className="text-xs text-orange-500">Generating...</span>
                                                             </>
                                                         )}
@@ -797,8 +775,8 @@ export default function BatchStudioPage() {
                                         onMouseLeave={(e) => {
                                             if (canGenerate && !isGenerating && !isUploading) {
                                                 e.currentTarget.style.background =
-                                                    'linear-gradient(180deg, #FF7038 0%, #E84F23 100%)';
-                                                e.currentTarget.style.boxShadow =
+                                                    'linear-gradient(180deg, #FF7038 0%, #E84F23 100%)',
+                                                    e.currentTarget.style.boxShadow =
                                                     '0 4px 12px rgba(0,0,0,0.35), 0 2px 8px rgba(255,98,64,0.30)';
                                                 e.currentTarget.style.transform = 'translateY(0)';
                                             }
@@ -839,13 +817,13 @@ export default function BatchStudioPage() {
                         </div>
                     )}
 
-                    {/* Results Section */}
-                    {(generatedResults.length > 0 || isGenerating) && (
+                    {/* NEW: Unified Results Section — skeletons and images in ONE grid */}
+                    {batchItems.length > 0 && (
                         <div ref={scrollRef} className="mt-8 space-y-6">
                             {/* Header */}
                             <div className="flex items-center justify-between">
                                 <h3 className="text-xl font-semibold text-white">
-                                    Generated Images ({generatedResults.length})
+                                    Generated Images ({doneCount}/{totalCount})
                                 </h3>
 
                                 <div className="flex flex-col items-end">
@@ -853,7 +831,7 @@ export default function BatchStudioPage() {
                                         <button
                                             onClick={() => {
                                                 const allIds = new Set<string>(
-                                                    generatedResults.map((r) => r.templateId),
+                                                    batchItems.filter(i => i.status === 'done').map((i) => i.templateId),
                                                 );
                                                 setSelectedImages(allIds);
                                             }}
@@ -870,7 +848,7 @@ export default function BatchStudioPage() {
                                         </button>
                                     </div>
 
-                                    {generatedResults.length > 0 && (
+                                    {doneCount > 0 && (
                                         <p className="text-sm text-gray-400 mt-1 flex items-center gap-1">
                                             <Check className="w-4 h-4 text-green-500" />
                                             Auto-saved to History
@@ -879,15 +857,9 @@ export default function BatchStudioPage() {
                                 </div>
                             </div>
 
-                            {/* Skeleton Placeholder */}
-                            <div ref={skeletonRef}>
-                                {isGenerating && (
-                                    <RenderLabSkeletonRow count={selectedCollection?.templates?.length || 4} />
-                                )}
-                            </div>
-
-                            {/* Results Grid */}
+                            {/* NEW: Unified Grid — shows skeleton OR image based on status */}
                             <div
+                                ref={resultsGridRef}
                                 className="grid justify-start"
                                 style={{
                                     gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
@@ -895,22 +867,96 @@ export default function BatchStudioPage() {
                                     columnGap: '24px',
                                 }}
                             >
-                                {generatedResults.map((result) => (
-                                    <ResultCard
-                                        key={result.templateId}
-                                        result={result}
-                                        isSelected={selectedImages.has(result.templateId)}
-                                        onToggle={() => {
-                                            setSelectedImages((prev) => {
-                                                const newSet = new Set(prev);
-                                                if (newSet.has(result.templateId)) newSet.delete(result.templateId);
-                                                else newSet.add(result.templateId);
-                                                return newSet;
-                                            });
-                                        }}
-                                        onImageClick={(imageUrl) => setModalImage(imageUrl)}
-                                    />
-                                ))}
+                                {batchItems.map((item) => {
+                                    // Skeleton for pending/generating
+                                    if (item.status === 'pending' || item.status === 'generating') {
+                                        return (
+                                            <div
+                                                key={item.templateId}
+                                                className="relative"
+                                            >
+                                                <div
+                                                    className="rl-skeleton rounded-lg"
+                                                    style={{ width: "100%", paddingBottom: "100%" }}
+                                                />
+                                                {/* Template name overlay */}
+                                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 rounded-b-lg">
+                                                    <p className="text-xs text-white/70 truncate">{item.templateName}</p>
+                                                    {item.status === 'generating' && (
+                                                        <p className="text-xs text-orange-400">Generating...</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+
+                                    // Error card
+                                    if (item.status === 'error') {
+                                        return (
+                                            <Card key={item.templateId} className="relative border-red-500/30 bg-[#18181b] overflow-hidden">
+                                                <div className="aspect-square flex items-center justify-center">
+                                                    <ErrorCard />
+                                                </div>
+                                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                                                    <p className="text-sm font-medium text-white">{item.templateName}</p>
+                                                </div>
+                                            </Card>
+                                        );
+                                    }
+
+                                    // Done — show image
+                                    const isSelected = selectedImages.has(item.templateId);
+                                    return (
+                                        <Card
+                                            key={item.templateId}
+                                            className="relative group transition-transform overflow-hidden cursor-pointer hover:scale-[1.02]"
+                                            onClick={() => {
+                                                setSelectedImages((prev) => {
+                                                    const newSet = new Set(prev);
+                                                    if (newSet.has(item.templateId)) newSet.delete(item.templateId);
+                                                    else newSet.add(item.templateId);
+                                                    return newSet;
+                                                });
+                                            }}
+                                        >
+                                            {/* Checkbox */}
+                                            <div className="absolute top-3 left-3 z-10">
+                                                <div
+                                                    className={`
+                                                        w-6 h-6 rounded border-2 flex items-center justify-center transition-all
+                                                        ${isSelected
+                                                            ? 'bg-gray-500 border-gray-500'
+                                                            : 'bg-black/50 border-white/30 group-hover:border-white/50'
+                                                        }
+                                                    `}
+                                                >
+                                                    {isSelected && <Check className="w-4 h-4 text-white" />}
+                                                </div>
+                                            </div>
+
+                                            {/* Image */}
+                                            <img
+                                                src={item.imageUrl}
+                                                alt={item.templateName}
+                                                className="w-full aspect-square object-cover"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setModalImage(item.imageUrl || null);
+                                                }}
+                                            />
+
+                                            {/* Overlay with info */}
+                                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                                                <p className="text-sm font-medium text-white">{item.templateName}</p>
+                                            </div>
+
+                                            {/* Selected overlay */}
+                                            {isSelected && (
+                                                <div className="absolute inset-0 border-4 border-orange-500/50 pointer-events-none" />
+                                            )}
+                                        </Card>
+                                    );
+                                })}
                             </div>
 
                             {/* Action Buttons */}
@@ -931,75 +977,5 @@ export default function BatchStudioPage() {
             {/* Image Preview Modal */}
             <ImagePreviewModal imageUrl={modalImage} onClose={() => setModalImage(null)} />
         </div>
-    );
-}
-
-// ResultCard Component
-interface ResultCardProps {
-    result: GeneratedResult;
-    isSelected: boolean;
-    onToggle: () => void;
-    onImageClick: (imageUrl: string) => void;
-}
-
-function ResultCard({ result, isSelected, onToggle, onImageClick }: ResultCardProps) {
-    if (!result || !result.templateName) {
-        return null;
-    }
-
-    const hasImage = !!result.imageUrl;
-
-    return (
-        <Card
-            className={`relative group transition-transform ${hasImage
-                ? 'overflow-hidden cursor-pointer hover:scale-[1.02]'
-                : 'border-red-500/30 bg-[#18181b] shadow-[0_0_20px_rgba(255,0,0,0.08)]'
-                }`}
-            onClick={hasImage ? onToggle : undefined}
-        >
-            {/* Checkbox - only for successful results */}
-            {hasImage && (
-                <div className="absolute top-3 left-3 z-10">
-                    <div
-                        className={`
-              w-6 h-6 rounded border-2 flex items-center justify-center transition-all
-              ${isSelected
-                                ? 'bg-gray-500 border-gray-500'
-                                : 'bg-black/50 border-white/30 group-hover:border-white/50'
-                            }
-            `}
-                    >
-                        {isSelected && <Check className="w-4 h-4 text-white" />}
-                    </div>
-                </div>
-            )}
-
-            {/* Image or Error Card */}
-            {hasImage ? (
-                <img
-                    src={result.imageUrl}
-                    alt={result.templateName}
-                    className="w-full aspect-square object-cover"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onImageClick(result.imageUrl);
-                    }}
-                />
-            ) : (
-                <ErrorCard />
-            )}
-
-            {/* Overlay with info - only for successful results */}
-            {hasImage && (
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                    <p className="text-sm font-medium text-white">{result.templateName}</p>
-                </div>
-            )}
-
-            {/* Selected overlay - only for successful results */}
-            {isSelected && hasImage && (
-                <div className="absolute inset-0 border-4 border-orange-500/50 pointer-events-none" />
-            )}
-        </Card>
     );
 }

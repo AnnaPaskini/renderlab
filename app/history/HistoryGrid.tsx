@@ -198,9 +198,9 @@ export function HistoryGrid({ images, onDelete }: HistoryGridProps) {
                             {/* 3-dot menu */}
                             <button
                                 onClick={() => setOpenMenuId(openMenuId === img.id ? null : img.id)}
-                                className="absolute top-3 right-3 flex items-center justify-center w-10 h-10 bg-gray-500/60 backdrop-blur-sm rounded-xl text-white hover:bg-gray-500/70 transition"
+                                className="absolute top-3 right-3 flex items-center justify-center w-7 h-7 bg-gray-700/80 backdrop-blur-sm rounded-lg text-white hover:bg-gray-800/90 transition"
                             >
-                                <MoreVertical className="w-5 h-5 text-white" />
+                                <MoreVertical className="w-4 h-4 text-white" />
                             </button>
                             <div className="absolute top-2 right-2" style={{ pointerEvents: 'none', visibility: 'hidden' }}>
 
