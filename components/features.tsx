@@ -1,13 +1,13 @@
-import React from "react";
-import { Heading } from "./heading";
-import { Subheading } from "./subheading";
 import { cn } from "@/lib/utils";
-import { GridLineHorizontal, GridLineVertical } from "./grid-lines";
-import { SkeletonOne } from "./skeletons/first";
-import { SkeletonTwo } from "./skeletons/second";
-import { SkeletonFour } from "./skeletons/fourth";
-import { SkeletonThree } from "./skeletons/third";
 import { Z } from "@/lib/z-layer-guide";
+import React from "react";
+import { GridLineHorizontal, GridLineVertical } from "./grid-lines";
+import { Heading } from "./heading";
+import { SkeletonOne } from "./skeletons/first";
+import { SkeletonFour } from "./skeletons/fourth";
+import { SkeletonTwo } from "./skeletons/second";
+import { SkeletonThree } from "./skeletons/third";
+import { Subheading } from "./subheading";
 
 export const Features = () => {
   const features = [

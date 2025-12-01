@@ -41,6 +41,15 @@ type CompletePayload = {
 
 const encoder = new TextEncoder();
 
+function shuffle<T>(array: T[]): T[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
 function enqueue(
     controller: ReadableStreamDefaultController<Uint8Array>,
     payload: ProgressPayload | CompletePayload,
@@ -131,7 +140,8 @@ export async function POST(req: Request) {
                     return;
                 }
 
-                const tasks = templates.map((template, index) =>
+                const shuffledTemplates = shuffle(templates);
+                const tasks = shuffledTemplates.map((template, index) =>
                     limit(async () => {
                         // Send generating status
                         enqueue(controller, {

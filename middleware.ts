@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 export async function middleware(req: NextRequest) {
   // Копируем запрос, чтобы можно было модифицировать заголовки
