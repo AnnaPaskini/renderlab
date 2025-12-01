@@ -1,8 +1,14 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
+import { useEffect } from "react";
 
 export default function Error({ error, reset }: { error: Error; reset: () => void }) {
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-[#0a0a0a] relative">
       {/* Purple glow */}
