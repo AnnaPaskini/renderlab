@@ -44,3 +44,6 @@ next-env.d.ts
 
 # Sentry Config File
 .env.sentry-build-plugin
+.DS_Store
+PROJECT_FILES.txt
+project_structure.txt
