@@ -112,13 +112,19 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
     if (!template) return;
 
     // Load template into Workspace Context
-    loadTemplate(template);
+    try {
+      loadTemplate(template);
+    } catch (err) {
+      console.error('Failed to load template:', err);
+      toast.error('Failed to load template');
+      return;
+    }
 
     // Also store in localStorage for immediate pickup by PromptBuilder
     localStorage.setItem("RenderAI_activeTemplate", JSON.stringify(template));
 
     // Show success message
-    toast.success("Template loaded into Builder", {
+    toast.success("Template loaded into Workspace", {
       style: defaultToastStyle,
     });
 
@@ -684,7 +690,7 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                   onClick={handleOpenInBuild}
                   className="px-6 bg-orange-600 hover:bg-orange-700"
                 >
-                  Open in Build
+                  Open in Workspace
                 </Button>
               </div>
             </>
