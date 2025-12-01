@@ -125,8 +125,8 @@ function HistoryCard({
           className="absolute top-1.5 left-1.5 text-white text-[9px] font-medium px-2 py-0.5 rounded-md"
           style={{
             background: image.type === 'upscale'
-              ? 'rgba(168, 85, 247, 0.15)'
-              : 'rgba(255, 107, 53, 0.15)',
+              ? 'rgba(168, 85, 247, 0.3)'
+              : 'rgba(255, 107, 53, 0.6)',
             border: image.type === 'upscale'
               ? '1px solid rgba(168, 85, 247, 0.3)'
               : '1px solid rgba(255, 107, 53, 0.3)',

@@ -687,12 +687,12 @@ export default function BatchStudioPage() {
                                         <Card
                                             key={template.id || index}
                                             className={`p-4 border-2 transition-all ${status === 'generating'
-                                                ? 'border-orange-500 bg-orange-500/10'
+                                                ? 'border-orange-500/50 bg-orange-500/5'
                                                 : status === 'done'
-                                                    ? 'border-green-500 bg-green-500/10'
+                                                    ? 'border-green-500/50 bg-green-500/5'
                                                     : status === 'error'
-                                                        ? 'border-red-500 bg-red-500/10'
-                                                        : 'border-gray-700 bg-[#1a1a1a] hover:border-gray-600'
+                                                        ? 'border-red-500/50 bg-red-500/5'
+                                                        : 'border-white/10 bg-[#1a1a1a] hover:border-white/20'
                                                 }`}
                                         >
                                             <div className="flex flex-col items-center text-center space-y-3">

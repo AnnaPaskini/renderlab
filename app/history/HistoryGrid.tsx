@@ -180,8 +180,8 @@ export function HistoryGrid({ images, onDelete }: HistoryGridProps) {
                                     className="absolute top-1.5 left-1.5 text-white text-[10px] font-medium px-2 py-0.5 rounded-md"
                                     style={{
                                         background: img.type === 'upscale'
-                                            ? 'rgba(168, 85, 247, 0.15)'
-                                            : 'rgba(255, 107, 53, 0.15)',
+                                            ? 'rgba(168, 85, 247, 0.3)'
+                                            : 'rgba(255, 107, 53, 0.6)',
                                         border: img.type === 'upscale'
                                             ? '1px solid rgba(168, 85, 247, 0.3)'
                                             : '1px solid rgba(255, 107, 53, 0.3)',

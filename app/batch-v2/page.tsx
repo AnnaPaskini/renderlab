@@ -53,7 +53,7 @@ export default function BatchStudioPageV2() {
 
     // NEW: Unified batch items array (replaces separate skeletons + results)
     const [batchItems, setBatchItems] = useState<BatchItem[]>([]);
-    
+
     const [templateStatuses, setTemplateStatuses] = useState<
         Record<string, 'pending' | 'generating' | 'done' | 'error'>
     >({});
@@ -413,7 +413,7 @@ export default function BatchStudioPageV2() {
 
                                 const doneCount = batchItems.filter(i => i.status === 'done').length;
                                 toast.success(`Batch complete! ${doneCount} images generated`);
-                                
+
                                 setProgress(100);
 
                                 setTimeout(() => {
@@ -461,9 +461,9 @@ export default function BatchStudioPageV2() {
                 return reset;
             });
             // Keep batchItems but reset statuses to show what was completed
-            setBatchItems(prev => prev.map(item => 
-                item.status === 'pending' || item.status === 'generating' 
-                    ? { ...item, status: 'error' as const } 
+            setBatchItems(prev => prev.map(item =>
+                item.status === 'pending' || item.status === 'generating'
+                    ? { ...item, status: 'error' as const }
                     : item
             ));
             setAbortController(null);
@@ -472,7 +472,7 @@ export default function BatchStudioPageV2() {
 
     const handleDownloadSelected = async () => {
         const selectedIds = new Set(selectedImages);
-        const selected = batchItems.filter((item) => 
+        const selected = batchItems.filter((item) =>
             selectedIds.has(item.templateId) && item.status === 'done' && item.imageUrl
         );
 
@@ -653,9 +653,9 @@ export default function BatchStudioPageV2() {
                             <div
                                 className="grid justify-start"
                                 style={{
-                                    gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-                                    rowGap: '24px',
-                                    columnGap: '24px',
+                                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                                    rowGap: '16px',
+                                    columnGap: '16px',
                                 }}
                             >
                                 {selectedCollection.templates.map((template: any, index: number) => {
@@ -664,21 +664,21 @@ export default function BatchStudioPageV2() {
                                     return (
                                         <Card
                                             key={template.id || index}
-                                            className={`p-4 border-2 transition-all ${status === 'generating'
-                                                ? 'border-orange-500 bg-orange-500/10'
+                                            className={`p-0.5 border transition-all ${status === 'generating'
+                                                ? 'border-orange-500/30 bg-orange-500/[0.02]'
                                                 : status === 'done'
-                                                    ? 'border-green-500 bg-green-500/10'
+                                                    ? 'border-white/20 bg-white/[0.02]'
                                                     : status === 'error'
-                                                        ? 'border-red-500 bg-red-500/10'
-                                                        : 'border-gray-700 bg-[#1a1a1a] hover:border-gray-600'
+                                                        ? 'border-red-500/30 bg-red-500/[0.02]'
+                                                        : 'border-white/10 bg-[#1a1a1a] hover:border-white/15'
                                                 }`}
                                         >
-                                            <div className="flex flex-col items-center text-center space-y-3">
-                                                <div className="w-8 h-8 rounded-full bg-[#1e1e1e] flex items-center justify-center">
-                                                    <FileText className="w-5 h-5 text-gray-400" />
+                                            <div className="flex flex-col items-center text-center space-y-2">
+                                                <div className="w-6 h-6 rounded-full bg-[#1e1e1e] flex items-center justify-center">
+                                                    <FileText className="w-4 h-4 text-gray-400" />
                                                 </div>
-                                                <div className="space-y-1">
-                                                    <h3 className="font-medium text-white text-sm">
+                                                <div className="space-y-0.5">
+                                                    <h3 className="font-medium text-white text-xs">
                                                         {(template.name && template.name.trim()) ||
                                                             (template.title && template.title.trim()) ||
                                                             `Template ${index + 1}`}
@@ -686,13 +686,13 @@ export default function BatchStudioPageV2() {
                                                     <div className="flex items-center justify-center gap-1">
                                                         {status === 'pending' && (
                                                             <>
-                                                                <div className="w-2 h-2 bg-gray-500 rounded-full" />
+                                                                <div className="w-1.5 h-1.5 bg-gray-500 rounded-full" />
                                                                 <span className="text-xs text-gray-400">Pending</span>
                                                             </>
                                                         )}
                                                         {status === 'generating' && (
                                                             <>
-                                                                <div className="rl-skeleton" style={{ width: '8px', height: '8px' }} />
+                                                                <div className="rl-skeleton" style={{ width: '6px', height: '6px' }} />
                                                                 <span className="text-xs text-orange-500">Generating...</span>
                                                             </>
                                                         )}
