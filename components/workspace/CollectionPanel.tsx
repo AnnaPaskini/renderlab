@@ -1,6 +1,6 @@
 "use client";
 
-import { IconDotsVertical, IconUpload } from "@tabler/icons-react";
+import { IconDotsVertical } from "@tabler/icons-react";
 import { useEffect, useState, type DragEvent } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
@@ -17,7 +17,6 @@ import {
 import { Input } from "../ui/input";
 import { RenderLabButton } from "../ui/RenderLabButton";
 import { ActionsPanel } from "./ActionsPanel";
-import { uploadReferenceImageOnce } from "./uploadReferenceImageOnce";
 
 type TemplateLike = {
 	id?: string;
@@ -31,13 +30,6 @@ type TemplateLike = {
 	createdAt?: string;
 	addedAt?: string;
 	source?: string;
-};
-
-type GenerationResult = {
-	templateName: string;
-	imageUrl: string;
-	templateId: string;
-	prompt: string;
 };
 
 const CUSTOM_TEMPLATES_STORAGE = "RenderAI_customTemplates";
@@ -143,12 +135,6 @@ export function CollectionsPanel() {
 	const [duplicateDraft, setDuplicateDraft] = useState("");
 	const [isDropActive, setIsDropActive] = useState(false);
 
-	// Generation states
-	const [isGenerationDialogOpen, setIsGenerationDialogOpen] = useState(false);
-	const [referenceImage, setReferenceImage] = useState<string | null>(null);
-	const [isGenerating, setIsGenerating] = useState(false);
-	const [generationResults, setGenerationResults] = useState<GenerationResult[]>([]);
-	const [currentGenerating, setCurrentGenerating] = useState(0);
 	const [allTemplates, setAllTemplates] = useState<TemplateLike[]>([]);
 
 	// Validation helpers
@@ -404,230 +390,6 @@ export function CollectionsPanel() {
 		loadTemplatesFromSupabase();
 	}, []);
 
-	// === HANDLE IMAGE UPLOAD ===
-	const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const file = event.target.files?.[0];
-		if (!file) return;
-
-		if (!file.type.startsWith('image/')) {
-			toast.error('Please upload an image file');
-			return;
-		}
-
-		const reader = new FileReader();
-		reader.onload = (e) => {
-			const result = e.target?.result as string;
-			setReferenceImage(result);
-		};
-		reader.readAsDataURL(file);
-	};
-
-	// === BATCH GENERATION LOGIC ===
-	const handleBatchGenerate = async () => {
-		if (!referenceImage) {
-			toast.error('Upload reference image first');
-			return;
-		}
-
-		try {
-			setIsGenerating(true);
-			setGenerationResults([]);
-
-			// Get user id for upload
-			const supabase = createClient();
-			const { data: { user }, error: authError } = await supabase.auth.getUser();
-			if (authError || !user) {
-				toast.error('User not authenticated');
-				return;
-			}
-
-			// Upload reference image ONCE
-			const uploadedImageUrl = await uploadReferenceImageOnce(referenceImage, user.id);
-			if (!uploadedImageUrl) {
-				toast.error('Failed to upload reference image');
-				return;
-			}
-
-			const templateIds = activeCollection?.templates || [];
-			const templateDetails = allTemplates.filter(t =>
-				templateIds.some(ct => ct.id === t.id)
-			);
-
-			console.log(`Starting sequential generation for ${templateDetails.length} templates`);
-
-			let successCount = 0;
-
-			// SEQUENTIAL - one at a time
-			for (let i = 0; i < templateDetails.length; i++) {
-				const template = templateDetails[i];
-				setCurrentGenerating(i + 1);
-
-				console.log(`[${i + 1}/${templateDetails.length}] Generating: ${template.name}`);
-
-
-
-				let retries = 1;
-				let success = false;
-				for (let attempt = 0; attempt <= retries; attempt++) {
-					try {
-						console.log(`⏰ [${i + 1}] START: ${Date.now()} (attempt ${attempt + 1})`);
-						console.log(`📸 Reference image size: ${referenceImage.length} chars`);
-
-						const startTime = Date.now();
-						const response = await fetch('/api/generate', {
-							method: 'POST',
-							headers: { 'Content-Type': 'application/json' },
-							body: JSON.stringify({
-								prompt: template.prompt || '',
-								model: template.model || 'nano-banana', // ✅ Use template model
-								imageUrl: uploadedImageUrl, // Use uploaded URL
-							}),
-						});
-
-						const duration = Date.now() - startTime;
-						console.log(`⏱️ [${i + 1}] Request took: ${duration}ms`);
-
-						if (!response.ok) {
-							const errorText = await response.text();
-							console.error(`❌ [${i + 1}] API ERROR:`, {
-								status: response.status,
-								statusText: response.statusText,
-								body: errorText,
-								duration: `${duration}ms`
-							});
-							throw new Error(`Generation failed: ${response.status}`);
-						}
-
-						const result = await response.json();
-						console.log(`✅ [${i + 1}] SUCCESS in ${duration}ms:`, result);
-
-						const imageUrl = result.output?.imageUrl;
-						if (!imageUrl) {
-							console.error(`No imageUrl in response for ${template.name}:`, result);
-							throw new Error('No image URL in response');
-						}
-
-						// Add to results
-						setGenerationResults(prev => [...prev, {
-							templateName: template.name || 'Untitled',
-							imageUrl: imageUrl,
-							templateId: template.id || '',
-							prompt: template.prompt || '',
-						}]);
-
-						successCount++;
-						console.log(`✓ Success [${i + 1}/${templateDetails.length}]: ${template.name}`);
-						toast.success(`Generated ${i + 1}/${templateDetails.length}`);
-
-						// Small delay between generations to avoid rate limits
-						if (i < templateDetails.length - 1) {
-							await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
-						}
-
-						success = true;
-						break; // Success, exit retry loop
-					} catch (error) {
-						if (attempt === retries) {
-							console.error(`✗ Failed [${i + 1}/${templateDetails.length}]: ${template.name}`, error);
-							toast.error(`Failed: ${template.name}`);
-						} else {
-							console.log(`Retry ${attempt + 1}/${retries + 1}...`);
-							await new Promise(r => setTimeout(r, 3000));
-						}
-					}
-				}
-			}
-
-			toast.success(`Batch complete: ${successCount}/${templateDetails.length} succeeded`);
-
-		} catch (error) {
-			console.error('Batch generation error:', error);
-			toast.error('Batch generation failed');
-		} finally {
-			setIsGenerating(false);
-			setCurrentGenerating(0);
-		}
-	};
-
-	// === SAVE TO HISTORY ===
-	const handleSaveToHistory = async () => {
-		try {
-			const supabase = createClient();
-			const { data: { user } } = await supabase.auth.getUser();
-			if (!user) {
-				toast.error('Please log in to save to history');
-				return;
-			}
-
-			if (generationResults.length === 0) {
-				toast.error('No results to save');
-				return;
-			}
-
-			console.log(`💾 Saving ${generationResults.length} results to history`);
-
-			for (const result of generationResults) {
-				const { error } = await supabase.from('history').insert({
-					user_id: user.id,
-					image_url: result.imageUrl,
-					prompt: result.prompt,
-					model: 'leonardo-phoenix-1.0',
-					reference_image: referenceImage,
-					collection_id: activeCollection?.id || null,
-					created_at: new Date().toISOString(),
-				});
-
-				if (error) {
-					console.error('Failed to save to history:', error);
-					throw error;
-				}
-			}
-
-			toast.success('Saved to history', {
-				description: `${generationResults.length} images saved`,
-			});
-
-		} catch (error) {
-			console.error('Save to history failed:', error);
-			toast.error('Failed to save to history');
-		}
-	};
-
-	// === DOWNLOAD ALL ===
-	const handleDownloadAll = async () => {
-		try {
-			for (let i = 0; i < generationResults.length; i++) {
-				const result = generationResults[i];
-				const response = await fetch(result.imageUrl);
-				const blob = await response.blob();
-				const url = window.URL.createObjectURL(blob);
-				const a = document.createElement('a');
-				a.href = url;
-				a.download = `${result.templateName.replace(/\s+/g, '-')}-${i + 1}.png`;
-				document.body.appendChild(a);
-				a.click();
-				document.body.removeChild(a);
-				window.URL.revokeObjectURL(url);
-
-				// Small delay between downloads
-				await new Promise(resolve => setTimeout(resolve, 500));
-			}
-
-			toast.success('All images downloaded');
-		} catch (error) {
-			console.error('Download failed:', error);
-			toast.error('Failed to download images');
-		}
-	};
-
-	// === OPEN GENERATION DIALOG ===
-	const handleOpenGenerationDialog = () => {
-		setIsGenerationDialogOpen(true);
-		setReferenceImage(null);
-		setGenerationResults([]);
-		setCurrentGenerating(0);
-	};
-
 	const renderCollectionMenu = (collection: Collection) => (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -716,7 +478,6 @@ export function CollectionsPanel() {
 								}
 							}}
 							onBack={closeDetailView}
-							onGenerate={handleOpenGenerationDialog}
 						/>
 					</div>
 
@@ -1099,175 +860,6 @@ export function CollectionsPanel() {
 						})}
 					</div>
 				)}
-			</LeonardoDialog>
-
-			{/* Generation Dialog */}
-			<LeonardoDialog
-				open={isGenerationDialogOpen}
-				onClose={() => !isGenerating && setIsGenerationDialogOpen(false)}
-				title={`Generate Collection: ${activeCollection?.title || 'Untitled'}`}
-			>
-				<div className="space-y-6">
-					{/* Reference Image Upload */}
-					{!referenceImage ? (
-						<div className="border border-dashed border-white/30 bg-black/30 rounded-2xl p-8 text-center hover:border-white/40 hover:shadow-[0_0_12px_rgba(139,92,246,0.10)] transition-all cursor-pointer">
-							<input
-								type="file"
-								accept="image/*"
-								onChange={handleImageUpload}
-								className="hidden"
-								id="reference-image-upload"
-								disabled={isGenerating}
-							/>
-							<label htmlFor="reference-image-upload" className="cursor-pointer">
-								<IconUpload size={48} className="mx-auto mb-3 text-purple-400/30" />
-								<p className="text-sm text-white/70 mb-1">Upload reference image</p>
-								<p className="text-xs text-white/70">Click or drag to upload</p>
-							</label>
-						</div>
-					) : (
-						<div className="relative">
-							<img
-								src={referenceImage}
-								alt="Reference"
-								className="w-full h-48 object-cover rounded-lg"
-							/>
-							{!isGenerating && (
-								<button
-									onClick={() => setReferenceImage(null)}
-									className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded px-3 py-1 text-sm"
-								>
-									Remove
-								</button>
-							)}
-						</div>
-					)}
-
-					{/* Templates Preview */}
-					{referenceImage && (
-						<div>
-							<p className="text-sm text-white/70 mb-3">
-								Templates in collection: <span className="text-white font-medium">{activeCollection?.templates?.length || 0}</span>
-							</p>
-							<div className="space-y-2 max-h-48 overflow-y-auto pr-2">
-								{allTemplates
-									.filter(t => activeCollection?.templates?.some(ct => ct.id === t.id))
-									.map((t, idx) => (
-										<div
-											key={t.id}
-											className={`p-3 rounded-lg transition-colors ${isGenerating && idx < currentGenerating
-												? 'bg-green-900/30 border border-green-500/50'
-												: isGenerating && idx === currentGenerating - 1
-													? 'bg-[#ff6b35]/20 border border-[#ff6b35]'
-													: 'bg-neutral-800/50 border border-neutral-700'
-												}`}
-										>
-											<div className="flex items-center justify-between">
-												<span className="text-sm text-white">{t.name || t.title || 'Untitled'}</span>
-												{isGenerating && idx < currentGenerating && (
-													<span className="text-xs text-green-400">Done</span>
-												)}
-												{isGenerating && idx === currentGenerating - 1 && (
-													<span className="text-xs text-[#ff6b35]">Generating...</span>
-												)}
-											</div>
-										</div>
-									))}
-							</div>
-						</div>
-					)}
-
-					{/* Progress Bar */}
-					{isGenerating && (
-						<div className="space-y-2">
-							<div className="flex justify-between text-sm">
-								<span className="text-white/70">
-									Generating {currentGenerating}/{activeCollection?.templates?.length || 0}...
-								</span>
-								<span className="text-[#ff6b35] font-medium">
-									{Math.round((currentGenerating / (activeCollection?.templates?.length || 1)) * 100)}%
-								</span>
-							</div>
-							<div className="w-full bg-gray-700 rounded-full h-2.5 overflow-hidden">
-								<div
-									className="bg-gradient-to-r from-[#ff6b35] to-[#ff8c42] h-2.5 rounded-full transition-all duration-500 ease-out"
-									style={{
-										width: `${(currentGenerating / (activeCollection?.templates?.length || 1)) * 100}%`
-									}}
-								/>
-							</div>
-						</div>
-					)}
-
-					{/* Results Grid */}
-					{generationResults.length > 0 && (
-						<div>
-							<p className="text-sm text-white/70 mb-3">Generated Images ({generationResults.length})</p>
-							<div className="grid grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-2">
-								{generationResults.map((result, i) => (
-									<div key={i} className="space-y-2">
-										<img
-											src={result.imageUrl}
-											alt={result.templateName}
-											className="w-full h-32 object-cover rounded-lg border border-neutral-700"
-										/>
-										<p className="text-xs text-white/70 truncate">{result.templateName}</p>
-									</div>
-								))}
-							</div>
-						</div>
-					)}
-
-					{/* Action Buttons */}
-					<div className="flex gap-3 pt-4 border-t border-neutral-700">
-						{!isGenerating && generationResults.length === 0 && (
-							<>
-								<button
-									onClick={() => setIsGenerationDialogOpen(false)}
-									className="flex-1 px-4 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-neutral-800 transition rounded-lg border border-neutral-700"
-								>
-									Cancel
-								</button>
-								<button
-									onClick={handleBatchGenerate}
-									disabled={!referenceImage || (activeCollection?.templates?.length || 0) === 0}
-									className="flex-1 px-4 py-2.5 text-sm font-semibold premium-generate-button disabled:opacity-50 disabled:cursor-not-allowed"
-								>
-									Generate Collection
-								</button>
-							</>
-						)}
-
-						{generationResults.length > 0 && !isGenerating && (
-							<>
-								<button
-									onClick={() => setIsGenerationDialogOpen(false)}
-									className="flex-1 px-4 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-neutral-800 transition rounded-lg border border-neutral-700"
-								>
-									Close
-								</button>
-								<button
-									onClick={handleDownloadAll}
-									className="flex-1 px-4 py-2 text-sm font-medium text-white bg-neutral-700 hover:bg-neutral-600 transition rounded-lg"
-								>
-									Download All
-								</button>
-								<button
-									onClick={handleSaveToHistory}
-									className="flex-1 px-4 py-2.5 text-sm font-semibold premium-generate-button"
-								>
-									Save to History
-								</button>
-							</>
-						)}
-
-						{isGenerating && (
-							<div className="flex-1 text-center py-2 text-sm text-white/70">
-								Generation in progress...
-							</div>
-						)}
-					</div>
-				</div>
 			</LeonardoDialog>
 		</>
 	);

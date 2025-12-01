@@ -13,10 +13,9 @@ type ActionsPanelProps = {
   onAddTemplate: () => void;
   onDelete?: () => void;
   onBack: () => void;
-  onGenerate?: () => void;
 };
 
-export function ActionsPanel({ onDuplicate, onRename, onSave, onAddTemplate, onDelete, onBack, onGenerate }: ActionsPanelProps) {
+export function ActionsPanel({ onDuplicate, onRename, onSave, onAddTemplate, onDelete, onBack }: ActionsPanelProps) {
   const [open, setOpen] = useState(false);
   useEffect(() => {
     document.body.classList.toggle("actions-open", open);
@@ -122,18 +121,6 @@ export function ActionsPanel({ onDuplicate, onRename, onSave, onAddTemplate, onD
                 </div>
 
                 <div className="flex flex-col items-center space-y-3 mt-4 px-4">
-                  {onGenerate && (
-                    <button
-                      onClick={() => {
-                        onGenerate();
-                        closePanel();
-                      }}
-                      className="w-full text-left px-4 py-3 premium-generate-button"
-                    >
-                      Generate Collection
-                    </button>
-                  )}
-
                   <button
                     onClick={() => {
                       onAddTemplate();
