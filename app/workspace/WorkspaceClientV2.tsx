@@ -355,20 +355,26 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
 
   // Load prompt from URL (from Prompts Library)
   useEffect(() => {
-    if (hasLoadedFromUrlRef.current) return;
-
     const promptFromUrl = searchParams.get("prompt");
-    if (promptFromUrl) {
+    if (promptFromUrl && !hasLoadedFromUrlRef.current) {
       setPromptText(decodeURIComponent(promptFromUrl));
       toast.info("Prompt loaded from library", { style: defaultToastStyle });
       hasLoadedFromUrlRef.current = true;
+    } else if (!promptFromUrl) {
+      // Reset ref when URL has no prompt (allows loading new prompt later)
+      hasLoadedFromUrlRef.current = false;
     }
   }, [searchParams]);
 
   // Sync with WorkspaceContext
   useEffect(() => {
-    if (activeItem.type === "temporary" && activeItem.data?.reference_url) {
-      setUploadedImage(activeItem.data.reference_url);
+    if (activeItem.type === "temporary") {
+      if (activeItem.data?.reference_url) {
+        setUploadedImage(activeItem.data.reference_url);
+      }
+      if (activeItem.data?.prompt) {
+        setPromptText(activeItem.data.prompt);
+      }
     }
     if (activeItem.type === "template" && activeItem.data?.prompt) {
       setPromptText(activeItem.data.prompt);

@@ -1,5 +1,6 @@
 'use client';
 
+import { useWorkspace } from '@/lib/context/WorkspaceContext';
 import type { Prompt } from '@/lib/types/prompts';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -13,6 +14,7 @@ interface PromptCardProps {
 
 export function PromptCard({ prompt, onLikeToggle, initialLiked = false }: PromptCardProps) {
   const router = useRouter();
+  const { loadTemporary } = useWorkspace();
   const [isFlipped, setIsFlipped] = useState(false);
   const [liked, setLiked] = useState(initialLiked);
   const [likesCount, setLikesCount] = useState(prompt.likes_count);
@@ -56,9 +58,9 @@ export function PromptCard({ prompt, onLikeToggle, initialLiked = false }: Promp
 
   const handleAddToTemplate = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const encodedPrompt = encodeURIComponent(prompt.prompt);
-    router.push(`/workspace?additionalPrompt=${encodedPrompt}`);
-    toast.success('Opening workspace...');
+    loadTemporary(prompt.prompt, null);
+    router.push('/workspace');
+    toast.success('Opening Workspace...');
   };
 
   const toggleMenu = (e: React.MouseEvent) => {
@@ -182,7 +184,7 @@ export function PromptCard({ prompt, onLikeToggle, initialLiked = false }: Promp
                     onClick={handleAddToTemplate}
                     className="w-full px-4 py-2.5 text-left text-sm text-white hover:bg-white/5 transition-colors rounded-b-lg border-t border-white/5"
                   >
-                    Send to Build
+                    Send to Workspace
                   </button>
                 </div>
               )}
