@@ -1,8 +1,6 @@
-"use client";
-
 import Link from "next/link";
 
-export default function Error({ error, reset }: { error: Error; reset: () => void }) {
+export default function NotFound() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-[#0a0a0a] relative">
       {/* Purple glow */}
@@ -15,29 +13,29 @@ export default function Error({ error, reset }: { error: Error; reset: () => voi
         <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mb-8 text-2xl font-bold text-white mx-auto shadow-lg shadow-orange-500/20">
           R
         </div>
-
+        
         <h1 className="text-3xl font-semibold text-white mb-3">
-          Something went wrong
+          Page not found
         </h1>
-
+        
         <p className="text-neutral-400 mb-8 leading-relaxed">
-          Your request cannot be completed. This might be a temporary issue.
+          The page you're looking for doesn't exist or has been moved.
         </p>
-
+        
         {/* Links */}
         <div className="flex flex-col gap-4">
-          <button
-            onClick={() => reset()}
+          <Link 
+            href="/workspace"
             className="text-white hover:text-orange-400 transition-colors font-medium"
           >
-            Try again
-          </button>
-
-          <Link
-            href="/workspace"
+            Go to Workspace
+          </Link>
+          
+          <Link 
+            href="/"
             className="text-neutral-400 hover:text-white transition-colors"
           >
-            Back to Workspace
+            Back to Home
           </Link>
         </div>
       </div>
