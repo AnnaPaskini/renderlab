@@ -370,6 +370,9 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
     if (activeItem.type === "temporary" && activeItem.data?.reference_url) {
       setUploadedImage(activeItem.data.reference_url);
     }
+    if (activeItem.type === "template" && activeItem.data?.prompt) {
+      setPromptText(activeItem.data.prompt);
+    }
   }, [activeItem]);
 
   // Load templates from Supabase
