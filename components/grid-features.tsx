@@ -72,7 +72,7 @@ export const GridFeatures = () => {
                 RenderLab-Powered Rendering
               </h3>
               <p className="text-gray-400 mb-6 leading-relaxed">
-                Professional results in 60 seconds. Upload, select style, generate.
+                Professional results in less than60 seconds. Upload, select style, generate.
               </p>
 
               {/* Visual Preview */}
@@ -134,7 +134,7 @@ export const GridFeatures = () => {
                 Batch Processing
               </h3>
               <p className="text-gray-400 mb-6 leading-relaxed">
-                Transform 5 renders at once. Same style, consistent quality.
+                Transform up to 10 renders at once!
               </p>
 
               {/* Visual Preview */}

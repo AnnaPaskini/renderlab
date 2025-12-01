@@ -10,11 +10,11 @@ export function Companies() {
         </div>
         <div className="flex justify-center gap-12 text-white/60">
           <div className="text-center">
-            <div className="text-3xl font-bold text-white">50,000+</div>
+            <div className="text-3xl font-bold text-white">5,000+</div>
             <div className="text-sm">Renders Created</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-white">10,000+</div>
+            <div className="text-3xl font-bold text-white">400+</div>
             <div className="text-sm">Architects & Designers</div>
           </div>
           <div className="text-center">

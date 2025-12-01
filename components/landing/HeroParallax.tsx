@@ -8,7 +8,7 @@ export function HeroParallax() {
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
-    layoutEffect: false
+
   });
 
   // Premium smooth scrolling wrapper
