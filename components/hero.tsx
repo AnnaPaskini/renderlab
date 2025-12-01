@@ -29,8 +29,8 @@ export const Hero = () => {
         }}
         className="flex justify-center"
       >
-        <Badge onClick={() => router.push("/blog/top-5-llm-of-all-time")}>
-          We&apos;ve raised $69M seed funding
+        <Badge onClick={() => router.push("/workspace")}>
+          Try RenderLab for free
         </Badge>
       </motion.div>
       <motion.h1

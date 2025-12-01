@@ -8,10 +8,6 @@ export const Footer = () => {
       href: "/pricing",
     },
     {
-      name: "Blog",
-      href: "/blog",
-    },
-    {
       name: "Contact",
       href: "/contact",
     },
@@ -52,7 +48,7 @@ export const Footer = () => {
             <div className="mr-4  md:flex mb-4">
               <Logo />
             </div>
-            <div>Copyright &copy; 2024 Every Labs</div>
+            <div>Copyright &copy; 2024 RenderLab</div>
             <div className="mt-2">All rights reserved</div>
           </div>
           <div className="grid grid-cols-3 gap-10 items-start mt-10 md:mt-0">

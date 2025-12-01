@@ -10,7 +10,6 @@ export const NavbarWrapper = () => {
     const showNavbar =
         pathname === "/" ||
         pathname.startsWith("/pricing") ||
-        pathname.startsWith("/blog") ||
         pathname.startsWith("/contact");
 
     const showAppNavbar =

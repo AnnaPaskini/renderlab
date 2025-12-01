@@ -12,7 +12,6 @@ export const NavBar = () => {
   const navItems = [
     { name: "Workspace", href: "/workspace" },
     { name: "Pricing", href: "/pricing" },
-    { name: "Blog", href: "/blog" },
   ];
 
   return (
