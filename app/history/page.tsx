@@ -27,6 +27,15 @@ export default function HistoryPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [showSkeleton, setShowSkeleton] = useState(false);
+    const [filter, setFilter] = useState<'all' | 'generations' | 'upscale'>('all');
+
+    // Filter images based on selected filter
+    const filteredImages = items.filter(img => {
+        if (filter === 'all') return true;
+        if (filter === 'upscale') return img.type === 'upscale';
+        if (filter === 'generations') return img.type !== 'upscale';
+        return true;
+    });
 
     // Check authentication
     useEffect(() => {
@@ -123,6 +132,43 @@ export default function HistoryPage() {
                             Images are stored for 14 days. Please download any generations you wish to keep.
                         </p>
                     </div>
+
+                    {/* Filter tabs */}
+                    <div className="flex items-center gap-2 mt-6">
+                        <button
+                            onClick={() => setFilter('all')}
+                            className="px-3 py-1 rounded-md text-xs font-medium transition-colors"
+                            style={{
+                                background: filter === 'all' ? 'rgba(255, 107, 53, 0.6)' : 'rgba(255, 255, 255, 0.05)',
+                                border: filter === 'all' ? '1px solid rgba(255, 107, 53, 0.3)' : '1px solid transparent',
+                                color: filter === 'all' ? '#fff' : '#9ca3af'
+                            }}
+                        >
+                            All
+                        </button>
+                        <button
+                            onClick={() => setFilter('generations')}
+                            className="px-3 py-1 rounded-md text-xs font-medium transition-colors"
+                            style={{
+                                background: filter === 'generations' ? 'rgba(255, 107, 53, 0.6)' : 'rgba(255, 255, 255, 0.05)',
+                                border: filter === 'generations' ? '1px solid rgba(255, 107, 53, 0.3)' : '1px solid transparent',
+                                color: filter === 'generations' ? '#fff' : '#9ca3af'
+                            }}
+                        >
+                            Generations
+                        </button>
+                        <button
+                            onClick={() => setFilter('upscale')}
+                            className="px-3 py-1 rounded-md text-xs font-medium transition-colors"
+                            style={{
+                                background: filter === 'upscale' ? 'rgba(168, 85, 247, 0.3)' : 'rgba(255, 255, 255, 0.05)',
+                                border: filter === 'upscale' ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid transparent',
+                                color: filter === 'upscale' ? '#fff' : '#9ca3af'
+                            }}
+                        >
+                            Upscale
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -136,7 +182,7 @@ export default function HistoryPage() {
                     </div>
                 ) : (
                     <HistoryGrid
-                        images={items}
+                        images={filteredImages}
                         onDelete={(imageId) =>
                             setItems(prev => prev.filter(img => img.id !== imageId))
                         }

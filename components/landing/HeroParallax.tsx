@@ -13,17 +13,17 @@ export function HeroParallax() {
 
   // Premium smooth scrolling wrapper
   const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 20,      // Медленный старт
-    damping: 60,        // Тяжелое сопротивление  
-    mass: 3,            // Большой "вес"
-    restSpeed: 0.001,   // Плавная остановка
+    stiffness: 100,     // Быстрее реагирует
+    damping: 30,        // Мягкое сопротивление
+    mass: 0.5,          // Лёгкий, без инерции
+    restSpeed: 0.001,
     restDelta: 0.001
   });
 
   // Multi-layer parallax speeds - reduced distances for premium feel
-  const yBg = useTransform(smoothProgress, [0, 1], ["0%", "25%"]);
-  const yFg = useTransform(smoothProgress, [0, 1], ["0%", "6%"]);
-  const opacity = useTransform(smoothProgress, [0, 0.5, 1], [1, 0.8, 0]);
+  const yBg = useTransform(smoothProgress, [0, 1], ["0%", "15%"]);
+  const yFg = useTransform(smoothProgress, [0, 1], ["0%", "-10%"]);
+  const opacity = useTransform(smoothProgress, [0, 0.3, 0.8], [1, 1, 0.3]);
 
   return (
     <section

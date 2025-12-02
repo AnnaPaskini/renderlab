@@ -14,7 +14,7 @@ export const GridFeatures = () => {
 
       {/* Background Gradients */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ transform: 'translateZ(0)', WebkitBackfaceVisibility: 'hidden' }}>
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px]" />
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-neutral-500/8 rounded-full blur-[100px]" />
         <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-orange-500/10 rounded-full blur-[100px]" />
       </div>
 
@@ -22,11 +22,11 @@ export const GridFeatures = () => {
         {/* Header */}
         <div className="text-center mb-20">
           <div className="flex items-center justify-center gap-4 mb-6">
-            <div className="w-12 h-px bg-gradient-to-r from-transparent to-purple-500" />
-            <span className="text-purple-400 text-sm font-medium uppercase tracking-widest">
+            <div className="w-12 h-px bg-gradient-to-r from-transparent to-orange-500" />
+            <span className="text-orange-400 text-sm font-medium uppercase tracking-widest">
               Features
             </span>
-            <div className="w-12 h-px bg-gradient-to-l from-transparent to-purple-500" />
+            <div className="w-12 h-px bg-gradient-to-l from-transparent to-orange-500" />
           </div>
 
           <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
@@ -46,7 +46,7 @@ export const GridFeatures = () => {
                 Simple, Transparent Pricing
               </h3>
               <div className="text-5xl font-bold mb-4" style={{ color: '#ff6b35' }}>
-                $0.3
+                only $0.03
               </div>
               <p className="text-xl text-gray-300 mb-6">
                 Per render. No subscriptions. No hidden fees. Pay only for what you use.
@@ -61,11 +61,11 @@ export const GridFeatures = () => {
 
           {/* Feature 1: RenderLab-Powered */}
           <div className="group relative p-8 bg-gray-900/50 shadow-lg shadow-black/20 rounded-3xl hover:scale-[1.02] overflow-hidden">
-            <div className="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
             <div className="relative z-10">
-              <div className="w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-500/5 border border-purple-500/20 flex items-center justify-center shadow-lg shadow-purple-500/10">
-                <IconTerminal2 className="w-8 h-8 text-purple-400" />
+              <div className="w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br from-orange-500/20 to-orange-500/5 border border-orange-500/20 flex items-center justify-center shadow-lg shadow-orange-500/10">
+                <IconTerminal2 className="w-8 h-8 text-orange-400" />
               </div>
 
               <h3 className="text-2xl font-bold text-white mb-3">
@@ -76,8 +76,8 @@ export const GridFeatures = () => {
               </p>
 
               {/* Visual Preview */}
-              <div className="aspect-video bg-gray-900/50 rounded-xl border border-white/5 overflow-hidden relative group-hover:border-purple-500/20 transition-colors">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent" />
+              <div className="aspect-video bg-gray-900/50 rounded-xl border border-white/5 overflow-hidden relative group-hover:border-orange-500/20 transition-colors">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-transparent" />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-3/4 h-3/4 bg-gray-800 rounded-lg border border-white/10 flex items-center justify-center overflow-hidden">
                     <div className="w-full h-full bg-[url('/renders/1.jpg')] bg-cover bg-center opacity-50 group-hover:opacity-80 transition-opacity duration-500" />
@@ -123,11 +123,11 @@ export const GridFeatures = () => {
 
           {/* Feature 3: Batch */}
           <div className="group relative p-8 bg-gray-900/50 shadow-lg shadow-black/20 rounded-3xl hover:scale-[1.02] overflow-hidden">
-            <div className="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
             <div className="relative z-10">
-              <div className="w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-500/5 border border-purple-500/20 flex items-center justify-center shadow-lg shadow-purple-500/10">
-                <IconCloud className="w-8 h-8 text-purple-400" />
+              <div className="w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br from-orange-500/20 to-orange-500/5 border border-orange-500/20 flex items-center justify-center shadow-lg shadow-orange-500/10">
+                <IconCloud className="w-8 h-8 text-orange-400" />
               </div>
 
               <h3 className="text-2xl font-bold text-white mb-3">
@@ -138,11 +138,15 @@ export const GridFeatures = () => {
               </p>
 
               {/* Visual Preview */}
-              <div className="relative h-32 mt-4">
-                <div className="absolute top-0 left-0 w-3/4 h-24 bg-gray-800 rounded-lg border border-white/10 transform -rotate-6 z-10 bg-[url('/renders/5.jpg')] bg-cover bg-center opacity-60" />
-                <div className="absolute top-2 left-4 w-3/4 h-24 bg-gray-800 rounded-lg border border-white/10 transform -rotate-3 z-20 bg-[url('/renders/6.jpg')] bg-cover bg-center opacity-80" />
-                <div className="absolute top-4 left-8 w-3/4 h-24 bg-gray-800 rounded-lg border border-white/10 transform rotate-0 z-30 bg-[url('/renders/7.jpg')] bg-cover bg-center group-hover:scale-105 transition-transform" />
+              <div className="relative h-44 mt-4">
+                <div className="absolute top-8 left-1/2 -translate-x-1/2 w-4/5 h-28 bg-gray-800 rounded-lg border border-white/10 transform -rotate-3 z-10 bg-[url('/renders/5.jpg')] bg-cover bg-center opacity-40" />
+                <div className="absolute top-12 left-1/2 -translate-x-1/2 w-4/5 h-28 bg-gray-800 rounded-lg border border-white/10 transform rotate-1 z-20 bg-[url('/renders/6.jpg')] bg-cover bg-center opacity-60" />
+                <div className="absolute top-16 left-1/2 -translate-x-1/2 w-4/5 h-28 bg-gray-800 rounded-lg border border-white/10 transform rotate-3 z-30 bg-[url('/renders/7.jpg')] bg-cover bg-center group-hover:scale-105 transition-transform" />
               </div>
+
+              <p className="text-center text-2xl font-bold text-white mt-16">
+                Get 10 renders in one click
+              </p>
             </div>
           </div>
         </div>
@@ -153,7 +157,7 @@ export const GridFeatures = () => {
             {
               title: 'Real-time Collaboration',
               desc: 'Share and iterate instantly',
-              icon: <IconRouteAltLeft className="w-6 h-6 text-purple-400" />
+              icon: <IconRouteAltLeft className="w-6 h-6 text-gray-400" />
             },
             {
               title: 'Expert Support',
@@ -163,7 +167,7 @@ export const GridFeatures = () => {
             {
               title: 'Quality Assurance',
               desc: 'Automated checks',
-              icon: <IconAdjustmentsBolt className="w-6 h-6 text-purple-400" />
+              icon: <IconAdjustmentsBolt className="w-6 h-6 text-gray-400" />
             },
             {
               title: 'Version Control',

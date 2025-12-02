@@ -49,7 +49,7 @@ export const HeroParallax = ({
     springConfig
   );
   const translateY = useSpring(
-    useTransform(scrollYProgress, [0, 0.2], [-700, 300]),
+    useTransform(scrollYProgress, [0, 0.2], [-400, 100]),
     springConfig
   );
 
@@ -58,13 +58,13 @@ export const HeroParallax = ({
   return (
     <div
       ref={ref}
-      className="h-[180vh] py-20 overflow-hidden antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d]"
+      className="h-[140vh] py-20 overflow-hidden antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d]"
       style={{ transform: 'translateZ(0)', WebkitBackfaceVisibility: 'hidden' }}
     >
       {/* Purple glow accent */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(147,51,234,0.15)_0%,transparent_50%)] pointer-events-none z-[5]" style={{ transform: 'translateZ(0)' }} />
       <div
-        className="absolute bottom-0 left-0 w-full h-[400px] bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent pointer-events-none z-[20]"
+        className="absolute bottom-0 left-0 w-full h-[200px] bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent pointer-events-none z-[20]"
       />
       <div className="relative z-[30]">
         <HeroHeader />
@@ -77,7 +77,7 @@ export const HeroParallax = ({
           translateY,
         }}
       >
-        <motion.div className="flex flex-row-reverse space-x-reverse space-x-10 md:space-x-20 mb-10 md:mb-20 pl-20">
+        <motion.div className="flex flex-row-reverse gap-3 md:gap-5 mb-6 md:mb-8 pl-20">
           {firstRow.map((product, idx) => (
             <ProductCard
               product={product}
@@ -87,7 +87,7 @@ export const HeroParallax = ({
             />
           ))}
         </motion.div>
-        <motion.div className="flex flex-row mb-10 md:mb-20 space-x-10 md:space-x-20 pr-20">
+        <motion.div className="flex flex-row gap-3 md:gap-5 mb-6 md:mb-8 pr-20">
           {secondRow.map((product, idx) => (
             <ProductCard
               product={product}
@@ -97,7 +97,7 @@ export const HeroParallax = ({
             />
           ))}
         </motion.div>
-        <motion.div className="flex flex-row-reverse space-x-reverse space-x-10 md:space-x-20 pl-20">
+        <motion.div className="flex flex-row-reverse gap-3 md:gap-5 pl-20">
           {thirdRow.map((product, idx) => (
             <ProductCard
               product={product}
@@ -162,7 +162,7 @@ export const ProductCard = ({
 };
 export const HeroHeader = () => {
   return (
-    <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden px-6 pt-40 pb-40">
+    <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden px-6 pt-32 pb-24">
 
       {/* Content */}
       <div className="relative z-10 text-center max-w-6xl mx-auto">
@@ -256,28 +256,7 @@ export const HeroHeader = () => {
           }}
         >
           <Link href="/workspace">
-            <button
-              style={{
-                padding: '18px 40px',
-                fontSize: '17px',
-                fontWeight: 500,
-                color: 'white',
-                background: 'linear-gradient(135deg, #ff6b35 0%, #ff6b35 100%)',
-                border: 'none',
-                borderRadius: '14px',
-                boxShadow: '0 8px 24px rgba(255, 107, 53, 0.25)',
-                transition: 'all 0.3s ease',
-                cursor: 'pointer'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 12px 32px rgba(255, 107, 53, 0.35)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 8px 24px rgba(255, 107, 53, 0.25)';
-              }}
-            >
+            <button className="premium-generate-button px-10 py-4 text-lg">
               Start Free Trial
             </button>
           </Link>
