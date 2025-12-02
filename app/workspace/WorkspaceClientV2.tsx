@@ -3,6 +3,7 @@
 import { ImageUploadPanel } from "@/components/workspace/ImageUploadPanel";
 import { WorkspaceLayoutV2 } from "@/components/workspace/WorkspaceLayoutV2";
 import { createClientThumbnail } from "@/core/thumbnail/createClientThumbnail";
+import { createReferenceImage } from "@/core/thumbnail/createReferenceImage";
 import { useWorkspace } from "@/lib/context/WorkspaceContext";
 import { createClient } from "@/lib/supabaseBrowser";
 import { defaultToastStyle } from "@/lib/toast-config";
@@ -734,44 +735,52 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
 
       console.log("📝 Final prompt:", finalPrompt);
 
-      // Create thumbnail if file uploaded
-      let thumbBlob: Blob | null = null;
+      // Prepare reference image URL (compress & upload to avoid 413 errors)
+      let referenceImageUrl: string | null = null;
+
       if (uploadedFile) {
         try {
-          thumbBlob = await createClientThumbnail(uploadedFile);
-        } catch (err) {
-          console.error("Thumbnail generation failed:", err);
-        }
-      }
+          // 1. Compress to 1536px max
+          const refBlob = await createReferenceImage(uploadedFile);
 
-      // Upload thumbnail if exists
-      if (uploadedFile && thumbBlob) {
-        try {
+          // 2. Upload to Supabase Storage
           const supabase = createClient();
           const { data: { user } } = await supabase.auth.getUser();
 
           if (user) {
-            const fileName = `thumb_${Date.now()}.webp`;
+            const fileName = `ref_${Date.now()}.webp`;
             const filePath = `${user.id}/workspace/${fileName}`;
-            await supabase.storage
+
+            const { error } = await supabase.storage
               .from("renderlab-images-v2")
-              .upload(filePath, thumbBlob, { contentType: "image/webp", upsert: false });
+              .upload(filePath, refBlob, { contentType: "image/webp", upsert: false });
+
+            if (!error) {
+              const { data: urlData } = supabase.storage
+                .from("renderlab-images-v2")
+                .getPublicUrl(filePath);
+              referenceImageUrl = urlData.publicUrl;
+            } else {
+              console.error("Reference image upload error:", error);
+            }
           }
         } catch (err) {
-          console.error("Thumbnail upload error:", err);
+          console.error("Reference image processing failed:", err);
         }
+      } else if (uploadedImage && uploadedImage.startsWith('http')) {
+        // Already a URL (from URL input or history)
+        referenceImageUrl = uploadedImage;
       }
 
-      // Call API
+      // Call API with URL instead of base64
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt: finalPrompt,
           model: aiModel,
-          imageUrl: uploadedImage || null,
+          imageUrl: referenceImageUrl,
           referenceUrls: styleReferences,
-          thumbnailUrl: null,
           aspectRatio: aspectRatio,
         }),
       });
