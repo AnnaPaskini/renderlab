@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Download, Eye, MoreVertical } from "lucide-react";
+import { ArrowUpCircle, Download, Eye, MoreVertical } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
@@ -173,6 +173,16 @@ function HistoryCard({
           >
             <Eye size={12} />
             Edit (Inpaint)
+          </button>
+          <button
+            onClick={() => {
+              router.push(`/upscale?image=${encodeURIComponent(image.url)}`);
+              setShowMenu(false);
+            }}
+            className="w-full px-3 py-2 text-left text-xs text-white hover:bg-white/10 flex items-center gap-2 transition-colors"
+          >
+            <ArrowUpCircle size={12} />
+            Upscale
           </button>
           {onRemove && (
             <button

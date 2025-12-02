@@ -1,6 +1,6 @@
 'use client';
 
-import { Download, MoreVertical } from 'lucide-react';
+import { ArrowUpCircle, Download, MoreVertical } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -40,6 +40,10 @@ export function WorkspacePreviewStrip({ images, onRemoveFromView }: WorkspacePre
         border: 'none'
       }
     });
+  };
+
+  const handleUpscale = (url: string) => {
+    router.push(`/upscale?image=${encodeURIComponent(url)}`);
   };
 
   const handleRemoveFromView = (imageId: string) => {
@@ -309,6 +313,36 @@ export function WorkspacePreviewStrip({ images, onRemoveFromView }: WorkspacePre
                   >
                     <Download size={14} />
                     Download
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleUpscale(img.url);
+                      setMenuOpenId(null);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      background: 'none',
+                      border: 'none',
+                      color: '#fff',
+                      fontSize: '14px',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      transition: 'background 0.2s'
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.background = '#333';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.background = 'none';
+                    }}
+                  >
+                    <ArrowUpCircle size={14} />
+                    Upscale
                   </button>
                   <button
                     onClick={(e) => {

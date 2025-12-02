@@ -8,6 +8,7 @@ import { createUpscaleInput } from '@/core/thumbnail/createUpscaleInput';
 import { createClient } from '@/lib/supabaseBrowser';
 import { uploadImageToStorage } from '@/lib/utils/uploadToStorage';
 import { ArrowUpCircle, Download, MoreVertical, Sparkles, Trash2 } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -33,6 +34,16 @@ export default function UpscalePage() {
     const [historyImages, setHistoryImages] = useState<UpscaleImage[]>([]);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+    const searchParams = useSearchParams();
+
+    // Load image from URL parameter
+    useEffect(() => {
+        const imageParam = searchParams.get('image');
+        if (imageParam && !uploadedImage) {
+            setUploadedImage(imageParam);
+            toast.success('Image loaded from History');
+        }
+    }, [searchParams]);
 
     // Close menu when clicking outside
     useEffect(() => {

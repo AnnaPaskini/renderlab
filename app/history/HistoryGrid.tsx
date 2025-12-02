@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import ImagePreviewModal from '@/components/workspace/ImagePreviewModal';
 import { AnimatePresence } from 'framer-motion';
-import { Eye, MoreVertical, Trash2 } from 'lucide-react';
+import { ArrowUpCircle, Eye, MoreVertical, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -281,6 +281,18 @@ export function HistoryGrid({ images, onDelete }: HistoryGridProps) {
                                         >
                                             <Eye size={16} />
                                             Edit (Inpaint)
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                const imageUrl = img.url || img.thumbnail_url || '';
+                                                router.push(`/upscale?image=${encodeURIComponent(imageUrl)}`);
+                                                setOpenMenuId(null);
+                                            }}
+                                            className="w-full px-4 py-2.5 text-left text-sm hover:bg-white/5 transition-colors flex items-center gap-2"
+                                            style={{ color: '#ccc' }}
+                                        >
+                                            <ArrowUpCircle size={16} />
+                                            Upscale
                                         </button>
                                         <button
                                             onClick={() => openDeleteDialog(img)}
