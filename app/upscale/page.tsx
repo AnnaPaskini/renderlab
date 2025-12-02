@@ -7,7 +7,7 @@ import { SkeletonCard } from '@/components/workspace/SkeletonCard';
 import { createUpscaleInput } from '@/core/thumbnail/createUpscaleInput';
 import { createClient } from '@/lib/supabaseBrowser';
 import { uploadImageToStorage } from '@/lib/utils/uploadToStorage';
-import { ArrowUpCircle, Sparkles } from 'lucide-react';
+import { ArrowUpCircle, Download, MoreVertical, Sparkles, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -32,6 +32,16 @@ export default function UpscalePage() {
     const [isGenerating, setIsGenerating] = useState(false);
     const [historyImages, setHistoryImages] = useState<UpscaleImage[]>([]);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = () => setOpenMenuId(null);
+        if (openMenuId) {
+            document.addEventListener('click', handleClickOutside);
+            return () => document.removeEventListener('click', handleClickOutside);
+        }
+    }, [openMenuId]);
 
     // Load upscale history
     useEffect(() => {
@@ -150,6 +160,31 @@ export default function UpscalePage() {
         return `${day} ${month} ${hours}:${minutes}`;
     };
 
+    const handleDownload = async (url: string, id: string) => {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = `upscaled_${id}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(downloadUrl);
+            setOpenMenuId(null);
+            toast.success('Downloaded successfully');
+        } catch (error) {
+            toast.error('Failed to download image');
+        }
+    };
+
+    const handleRemoveFromView = (id: string) => {
+        setHistoryImages(prev => prev.filter(img => img.id !== id));
+        setOpenMenuId(null);
+        toast.info('Removed from view');
+    };
+
     return (
         <div className="min-h-screen">
             <AppNavbar />
@@ -242,14 +277,54 @@ export default function UpscalePage() {
                                     <div
                                         key={img.id}
                                         className="relative aspect-square rounded-lg overflow-hidden border border-white/[0.08] bg-[#141414] cursor-pointer group"
-                                        onClick={() => setPreviewImage(img.url)}
                                     >
+                                        {/* Image - onClick opens preview */}
                                         <img
                                             src={img.thumbnail_url || img.url}
                                             alt=""
                                             loading="lazy"
                                             className="absolute inset-0 w-full h-full object-cover"
+                                            onClick={() => setPreviewImage(img.url)}
                                         />
+
+                                        {/* 3-dot menu button - top right */}
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setOpenMenuId(openMenuId === img.id ? null : img.id);
+                                            }}
+                                            className="absolute top-1.5 right-1.5 w-6 h-6 rounded-md bg-black/60 
+                                                       opacity-0 group-hover:opacity-100 transition-opacity
+                                                       flex items-center justify-center text-white/80 hover:text-white z-10"
+                                        >
+                                            <MoreVertical size={14} />
+                                        </button>
+
+                                        {/* Dropdown menu */}
+                                        {openMenuId === img.id && (
+                                            <div
+                                                className="absolute top-7 right-1 bg-[#1a1a1a] border border-white/10 
+                                                           rounded-md shadow-xl z-20 py-0.5 min-w-[110px]"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <button
+                                                    onClick={() => handleDownload(img.url, img.id)}
+                                                    className="w-full px-2 py-1.5 text-left text-xs text-white/80 
+                                                               hover:bg-white/10 flex items-center gap-1.5"
+                                                >
+                                                    <Download size={12} />
+                                                    Download
+                                                </button>
+                                                <button
+                                                    onClick={() => handleRemoveFromView(img.id)}
+                                                    className="w-full px-2 py-1.5 text-left text-xs text-red-400 
+                                                               hover:bg-white/10 flex items-center gap-1.5"
+                                                >
+                                                    <Trash2 size={12} />
+                                                    Remove from view
+                                                </button>
+                                            </div>
+                                        )}
 
                                         {/* Date Badge */}
                                         <div className="absolute bottom-1.5 left-1.5 bg-black/80 text-white text-[10px] font-medium px-1.5 py-0.5 rounded">
