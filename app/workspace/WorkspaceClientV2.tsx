@@ -795,6 +795,49 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
         }
       }
 
+      // Upload style references to Storage (avoid 413 error)
+      let uploadedStyleRefs: string[] = [];
+      if (styleReferences.length > 0) {
+        try {
+          const supabase = createClient();
+          const { data: { user } } = await supabase.auth.getUser();
+
+          if (user) {
+            for (let i = 0; i < styleReferences.length; i++) {
+              const ref = styleReferences[i];
+              // Skip if already a URL (not base64)
+              if (ref.startsWith('http')) {
+                uploadedStyleRefs.push(ref);
+                continue;
+              }
+
+              // Convert base64 to blob
+              const response = await fetch(ref);
+              const blob = await response.blob();
+
+              // Upload to Storage
+              const fileName = `style_ref_${Date.now()}_${i}.webp`;
+              const filePath = `${user.id}/workspace/${fileName}`;
+              const { error: uploadError } = await supabase.storage
+                .from("renderlab-images-v2")
+                .upload(filePath, blob, { contentType: blob.type, upsert: false });
+
+              if (!uploadError) {
+                const { data: urlData } = supabase.storage
+                  .from("renderlab-images-v2")
+                  .getPublicUrl(filePath);
+                uploadedStyleRefs.push(urlData.publicUrl);
+                console.log(`📸 Style ref ${i} uploaded:`, urlData.publicUrl);
+              } else {
+                console.error(`Failed to upload style ref ${i}:`, uploadError);
+              }
+            }
+          }
+        } catch (err) {
+          console.error("Style references upload error:", err);
+        }
+      }
+
       // Call API
       const response = await fetch("/api/generate", {
         method: "POST",
@@ -803,7 +846,7 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
           prompt: finalPrompt,
           model: aiModel,
           imageUrl: uploadedImage || null,
-          referenceUrls: styleReferences,
+          referenceUrls: uploadedStyleRefs.length > 0 ? uploadedStyleRefs : styleReferences,
           thumbnailUrl: null,
           aspectRatio: aspectRatio,
         }),
