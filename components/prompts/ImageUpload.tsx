@@ -22,9 +22,11 @@ export function ImageUpload({ onUploadComplete, currentImage }: ImageUploadProps
       return false;
     }
 
-    // Validate file size (100MB max)
-    if (file.size > 100 * 1024 * 1024) {
-      toast.error('Image must be less than 100MB');
+    // Validate file size (5MB max for prompt submissions)
+    const maxSizeMB = 5;
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
+      toast.error(`Image too large: ${fileSizeMB}MB (max ${maxSizeMB}MB)`);
       return false;
     }
 
@@ -209,7 +211,7 @@ export function ImageUpload({ onUploadComplete, currentImage }: ImageUploadProps
                 {uploading ? 'Uploading...' : isDragging ? 'Drop image here' : 'Click or drag image to upload'}
               </p>
               <p className="text-sm text-purple-400/70">
-                PNG, JPG, WEBP up to 5MB
+                PNG, JPG, WEBP • Max 5MB
               </p>
             </div>
           </div>
