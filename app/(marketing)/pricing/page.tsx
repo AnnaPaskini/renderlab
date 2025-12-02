@@ -2,7 +2,7 @@ import { Background } from "@/components/background";
 import { Companies } from "@/components/companies";
 import { Container } from "@/components/container";
 import { Heading } from "@/components/heading";
-import { Pricing } from "@/components/pricing";
+import { PricingRenderLab } from "@/components/pricing-renderlab";
 import { Subheading } from "@/components/subheading";
 import { Metadata } from "next";
 import { PricingTable } from "./pricing-table";
@@ -29,7 +29,7 @@ export default function PricingPage() {
             started instantly.
           </Subheading>
         </div>
-        <Pricing />
+        <PricingRenderLab />
         <PricingTable />
         <Companies />
       </Container>

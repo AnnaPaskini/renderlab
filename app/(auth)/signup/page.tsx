@@ -15,7 +15,9 @@ export default function SignupPage() {
   const supabase = createClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const persistSessionCookies = (session: Session | null) => {
@@ -34,6 +36,13 @@ export default function SignupPage() {
   const handleSignup = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
+
+    // Validate passwords match
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      setLoading(false);
+      return;
+    }
 
     const { data, error } = await supabase.auth.signUp({ email, password });
 
@@ -85,6 +94,24 @@ export default function SignupPage() {
               className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-300 hover:text-white transition-colors duration-200"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
+          <div className="relative">
+            <Input
+              type={showConfirmPassword ? "text" : "password"}
+              autoComplete="new-password"
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              className="h-11 rounded-xl border-white/15 bg-white/5 text-white text-base placeholder:text-white/40 focus-visible:ring-[#ff6b35] focus:border-[#ff6b35] pr-10 [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:shadow-[0_0_0px_1000px_rgba(255,255,255,0.05)_inset]"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-300 hover:text-white transition-colors duration-200"
+            >
+              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
         </div>
