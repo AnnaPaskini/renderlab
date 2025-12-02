@@ -13,7 +13,7 @@ export const GridFeatures = () => {
     <section className="relative py-32 overflow-hidden">
 
       {/* Background Gradients */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ transform: 'translateZ(0)', WebkitBackfaceVisibility: 'hidden' }}>
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px]" />
         <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-orange-500/10 rounded-full blur-[100px]" />
       </div>

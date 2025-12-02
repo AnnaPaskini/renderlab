@@ -27,16 +27,17 @@ export const HeroParallax = ({
 
   const springConfig = { stiffness: 100, damping: 30, bounce: 0 };
 
+  // Larger translation values for visible parallax effect across all cards
   const translateX = useSpring(
-    useTransform(scrollYProgress, [0, 1], [0, 200]),
+    useTransform(scrollYProgress, [0, 1], [0, 1000]),
     springConfig
   );
   const translateXReverse = useSpring(
-    useTransform(scrollYProgress, [0, 1], [0, -200]),
+    useTransform(scrollYProgress, [0, 1], [0, -1000]),
     springConfig
   );
   const rotateX = useSpring(
-    useTransform(scrollYProgress, [0, 0.2], [8, 0]),
+    useTransform(scrollYProgress, [0, 0.2], [15, 0]),
     springConfig
   );
   const opacity = useSpring(
@@ -44,11 +45,11 @@ export const HeroParallax = ({
     springConfig
   );
   const rotateZ = useSpring(
-    useTransform(scrollYProgress, [0, 0.1], [20, 0]),
+    useTransform(scrollYProgress, [0, 0.2], [10, 0]),
     springConfig
   );
   const translateY = useSpring(
-    useTransform(scrollYProgress, [0, 0.1], [-300, 150]),
+    useTransform(scrollYProgress, [0, 0.2], [-700, 300]),
     springConfig
   );
 
@@ -58,9 +59,10 @@ export const HeroParallax = ({
     <div
       ref={ref}
       className="h-[180vh] py-20 overflow-hidden antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d]"
+      style={{ transform: 'translateZ(0)', WebkitBackfaceVisibility: 'hidden' }}
     >
       {/* Purple glow accent */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(147,51,234,0.15)_0%,transparent_50%)] pointer-events-none z-[5]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(147,51,234,0.15)_0%,transparent_50%)] pointer-events-none z-[5]" style={{ transform: 'translateZ(0)' }} />
       <div
         className="absolute bottom-0 left-0 w-full h-[400px] bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent pointer-events-none z-[20]"
       />
@@ -75,7 +77,7 @@ export const HeroParallax = ({
           translateY,
         }}
       >
-        <motion.div className="flex flex-row-reverse space-x-reverse space-x-20 mb-20">
+        <motion.div className="flex flex-row-reverse space-x-reverse space-x-10 md:space-x-20 mb-10 md:mb-20 pl-20">
           {firstRow.map((product, idx) => (
             <ProductCard
               product={product}
@@ -85,7 +87,7 @@ export const HeroParallax = ({
             />
           ))}
         </motion.div>
-        <motion.div className="flex flex-row mb-20 space-x-20">
+        <motion.div className="flex flex-row mb-10 md:mb-20 space-x-10 md:space-x-20 pr-20">
           {secondRow.map((product, idx) => (
             <ProductCard
               product={product}
@@ -95,7 +97,7 @@ export const HeroParallax = ({
             />
           ))}
         </motion.div>
-        <motion.div className="flex flex-row-reverse space-x-reverse space-x-20">
+        <motion.div className="flex flex-row-reverse space-x-reverse space-x-10 md:space-x-20 pl-20">
           {thirdRow.map((product, idx) => (
             <ProductCard
               product={product}
@@ -129,12 +131,14 @@ export const ProductCard = ({
       style={{
         x: translate,
         opacity: cardOpacity,
+        transform: 'translateZ(0)', // Safari GPU acceleration fix
+        WebkitBackfaceVisibility: 'hidden',
       }}
       whileHover={{
         y: -20,
       }}
       key={product.title}
-      className="group/product h-96 w-[30rem] relative flex-shrink-0"
+      className="group/product h-64 md:h-96 w-[20rem] md:w-[28rem] relative flex-shrink-0 rounded-xl overflow-hidden"
     >
       <Link
         href={product.link}
@@ -144,11 +148,12 @@ export const ProductCard = ({
           src={product.thumbnail}
           height="600"
           width="600"
-          className="object-cover object-left-top absolute h-full w-full inset-0"
+          className="object-cover object-center absolute h-full w-full inset-0 rounded-xl"
           alt={product.title}
+          loading="eager"
         />
       </Link>
-      <div className="absolute inset-0 h-full w-full opacity-0 group-hover/product:opacity-80 bg-black pointer-events-none"></div>
+      <div className="absolute inset-0 h-full w-full opacity-0 group-hover/product:opacity-80 bg-black pointer-events-none rounded-xl"></div>
       <h2 className="absolute bottom-4 left-4 opacity-0 group-hover/product:opacity-100 text-white">
         {product.title}
       </h2>

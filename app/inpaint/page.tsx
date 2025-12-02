@@ -428,9 +428,34 @@ export default function InpaintPage() {
         if (!resultImage) return;
 
         try {
-            // FIX #6: Properly download the image
-            const response = await fetch(resultImage);
-            const blob = await response.blob();
+            // Load image and redraw through canvas for proper preview metadata
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+
+            await new Promise<void>((resolve, reject) => {
+                img.onload = () => resolve();
+                img.onerror = () => reject(new Error('Failed to load image'));
+                img.src = resultImage;
+            });
+
+            // Create canvas and draw image
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) throw new Error('Failed to get canvas context');
+
+            ctx.drawImage(img, 0, 0);
+
+            // Convert to blob with proper metadata for preview
+            const blob = await new Promise<Blob>((resolve, reject) => {
+                canvas.toBlob(
+                    (b) => b ? resolve(b) : reject(new Error('Failed to create blob')),
+                    'image/png',
+                    1.0
+                );
+            });
+
             const url = window.URL.createObjectURL(blob);
             const filename = `renderlab_inpaint_${Date.now()}.png`;
 
@@ -443,7 +468,7 @@ export default function InpaintPage() {
             window.URL.revokeObjectURL(url);
         } catch (error) {
             console.error('Download failed:', error);
-            alert('Failed to download image');
+            toast.error('Failed to download image');
         }
     };
 
@@ -672,7 +697,7 @@ export default function InpaintPage() {
                         </div>
                     </div>
 
-                    <div className="relative w-full max-w-4xl aspect-square">
+                    <div className="relative w-full max-w-4xl aspect-square rounded-xl ring-1 ring-white/20 shadow-[0_0_60px_rgba(0,0,0,0.7)] overflow-hidden bg-black/40">
                         {showResult && resultImage && image ? (
                             <ResultView
                                 originalImage={image}
@@ -806,8 +831,14 @@ export default function InpaintPage() {
                     </div>
                 </div>
 
-                {/* Save Hint */}
-                {showSaveHint && (
+                {/* Tips between canvas and prompt */}
+                {image && !showResult && !isGenerating && (
+                    <p className="text-center text-sm mb-3" style={{ color: '#ff6b35' }}>
+                        * Nano Banana uses semantic editing — describe the change in your prompt
+                    </p>
+                )}
+
+                {showResult && !isSaved && (
                     <p className="text-center text-sm mb-4 flex items-center justify-center gap-1" style={{ color: '#ff6b35' }}>
                         Edits are not saved automatically. Click <Save size={14} className="inline" /> to save to History.
                     </p>

@@ -176,7 +176,7 @@ export default function Home() {
         {/* Companies */}
         <section className="relative w-full py-32 -mt-24">
           {/* Smooth gradient backdrop */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent from-10% via-purple-900/5 via-50% to-transparent to-90% pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent from-10% via-purple-900/5 via-50% to-transparent to-90% pointer-events-none" style={{ transform: 'translateZ(0)', WebkitBackfaceVisibility: 'hidden' }} />
           <div className="relative z-10">
             <Companies />
           </div>
@@ -187,7 +187,7 @@ export default function Home() {
         {/* Features Grid */}
         <div className="relative">
           {/* Smooth gradient backdrop */}
-          <div className="absolute inset-0 bg-gradient-to-b from-purple-900/4 from-0% via-purple-900/6 via-40% to-purple-900/4 to-100% pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-purple-900/4 from-0% via-purple-900/6 via-40% to-purple-900/4 to-100% pointer-events-none" style={{ transform: 'translateZ(0)', WebkitBackfaceVisibility: 'hidden' }} />
           <GridFeatures />
         </div>
 
@@ -196,8 +196,8 @@ export default function Home() {
         {/* Templates */}
         <section className="relative py-32">
           {/* Smooth gradient backdrop */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent from-0% via-purple-900/5 via-60% to-purple-900/4 to-100% pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-orange-500/5 rounded-full blur-[150px]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent from-0% via-purple-900/5 via-60% to-purple-900/4 to-100% pointer-events-none" style={{ transform: 'translateZ(0)', WebkitBackfaceVisibility: 'hidden' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-orange-500/5 rounded-full blur-[150px]" style={{ transform: 'translate(-50%, -50%) translateZ(0)', WebkitBackfaceVisibility: 'hidden' }} />
 
           <Container className="relative z-10">
             <div className="text-center mb-20 space-y-6">
@@ -262,8 +262,8 @@ export default function Home() {
         {/* Testimonials */}
         <section className="relative py-32">
           {/* Smooth gradient backdrop */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent from-10% via-purple-900/5 via-50% to-transparent to-90% pointer-events-none" />
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-orange-500/5 rounded-full blur-[120px]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent from-10% via-purple-900/5 via-50% to-transparent to-90% pointer-events-none" style={{ transform: 'translateZ(0)', WebkitBackfaceVisibility: 'hidden' }} />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-orange-500/5 rounded-full blur-[120px]" style={{ transform: 'translateX(-50%) translateZ(0)', WebkitBackfaceVisibility: 'hidden' }} />
 
           <Container className="relative z-10">
             <div className="text-center mb-20 space-y-6">
@@ -304,7 +304,7 @@ export default function Home() {
 
         {/* CTA */}
         <section className="relative">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[800px] bg-orange-500/10 rounded-full blur-[200px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[800px] bg-orange-500/10 rounded-full blur-[200px]" style={{ transform: 'translate(-50%, -50%) translateZ(0)', WebkitBackfaceVisibility: 'hidden' }} />
 
           <div className="relative z-10">
             <CTA />
