@@ -340,10 +340,19 @@ export function WorkspaceLayoutV2({
               }}
             >
               {historyImages.length === 0 ? (
-                <div className="flex items-center justify-center h-full min-h-[200px]">
-                  <p className="text-sm text-gray-500">
-                    No images yet. Generate your first!
-                  </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="aspect-[4/3] bg-white/[0.015] rounded-lg" />
+                  <div className="aspect-[4/3] bg-white/[0.015] rounded-lg" />
+                  <div className="aspect-[4/3] bg-white/[0.015] rounded-lg" />
+                  <div className="aspect-[4/3] bg-white/[0.015] rounded-lg" />
+                  <div className="aspect-[4/3] bg-white/[0.015] rounded-lg" />
+                  <div className="aspect-[4/3] bg-white/[0.015] rounded-lg" />
+                  <div className="aspect-[4/3] bg-white/[0.015] rounded-lg" />
+                  <div className="aspect-[4/3] bg-white/[0.015] rounded-lg" />
+                  <div className="aspect-[4/3] bg-white/[0.015] rounded-lg" />
+                  <div className="aspect-[4/3] bg-white/[0.015] rounded-lg" />
+                  <div className="aspect-[4/3] bg-white/[0.015] rounded-lg" />
+                  <div className="aspect-[4/3] bg-white/[0.015] rounded-lg" />
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-2">

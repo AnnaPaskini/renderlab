@@ -93,8 +93,7 @@ export function BottomToolbar({
     return (
         <div className="flex justify-center w-full">
             <div className="w-[90%] max-w-4xl">
-                <div className="bg-[#2a2a2a] rounded-2xl border border-white/10 p-5
-                    shadow-[0_8px_32px_rgba(0,0,0,0.6)] relative">
+                <div className="rl-panel-wrapper">
 
                     {/* Label */}
                     <div className="flex items-center gap-2 mb-3">
@@ -150,9 +149,7 @@ export function BottomToolbar({
                             onChange={(e) => setInpaintPrompt(e.target.value)}
                             placeholder="Describe what you want to add... (attach up to 4 reference images)"
                             rows={3}
-                            className="flex-1 bg-[#1a1a1a] border border-white/10 rounded-xl text-white text-base 
-                            placeholder:text-white/30 outline-none px-4 py-3 resize-none h-20
-                            focus:border-[#ff6b35]/50 transition-colors"
+                            className="rl-textarea-inset flex-1 text-base placeholder:text-white/30 resize-none h-20"
                         />
 
                         {/* Right side buttons */}

@@ -542,11 +542,21 @@ export default function BatchStudioPageV2() {
             <div className="max-w-7xl mx-auto px-8 pt-32 pb-12">
                 {/* Header */}
                 <div className="mb-10">
-                    <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-                        <Zap className="w-8 h-8 text-[--rl-accent]" />
-                        Batch Studio <span className="text-sm text-orange-400 ml-2">(v2)</span>
-                    </h1>
-                    <p className="text-neutral-400">Generate multiple images from collections in batch</p>
+                    <div className="flex items-start justify-between">
+                        <div>
+                            {/* Existing header: icon + Batch Studio + subtitle */}
+                            <div className="flex items-center gap-3 mb-2">
+                                <Zap className="w-7 h-7 text-orange-500" />
+                                <h1 className="text-3xl font-bold text-white">Batch Studio</h1>
+                            </div>
+                            <p className="text-gray-400">One image - multiple prompts</p>
+                        </div>
+
+                        {/* Right side promo text */}
+                        <div className="text-right">
+                            <p className="text-white font-semibold text-2xl">Get 10 renders in one go!</p>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Main Content */}
@@ -590,7 +600,7 @@ export default function BatchStudioPageV2() {
                                         </div>
                                     </div>
                                 ) : allCollections.length === 0 ? (
-                                    <Card className="bg-[#1a1a1a] border border-white/10 p-6">
+                                    <div className="rl-textarea-inset">
                                         <p className="text-center text-neutral-400">
                                             No collections yet. Create one first in the{' '}
                                             <a href="/custom?tab=collections" className="text-[--rl-accent] hover:underline">
@@ -598,7 +608,7 @@ export default function BatchStudioPageV2() {
                                             </a>
                                             .
                                         </p>
-                                    </Card>
+                                    </div>
                                 ) : (
                                     <div className="space-y-4">
                                         <DropdownMenu>
