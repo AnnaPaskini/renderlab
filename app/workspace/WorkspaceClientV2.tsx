@@ -3,7 +3,6 @@
 import { ImageUploadPanel } from "@/components/workspace/ImageUploadPanel";
 import { WorkspaceLayoutV2 } from "@/components/workspace/WorkspaceLayoutV2";
 import { createClientThumbnail } from "@/core/thumbnail/createClientThumbnail";
-import { createReferenceImage } from "@/core/thumbnail/createReferenceImage";
 import { useWorkspace } from "@/lib/context/WorkspaceContext";
 import { createClient } from "@/lib/supabaseBrowser";
 import { defaultToastStyle } from "@/lib/toast-config";
@@ -378,7 +377,25 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
       }
     }
     if (activeItem.type === "template" && activeItem.data?.prompt) {
-      setPromptText(activeItem.data.prompt);
+      const templatePrompt = activeItem.data.prompt;
+
+      setPromptText((currentPrompt) => {
+        const trimmed = currentPrompt.trim();
+
+        if (trimmed === "") {
+          return templatePrompt;
+        }
+
+        const combined = `${trimmed}\n\n${templatePrompt}`;
+
+        if (combined.length > 2000) {
+          setTimeout(() => toast.error("Combined prompt too long (max 2000)", { style: defaultToastStyle }), 0);
+          return currentPrompt;
+        }
+
+        setTimeout(() => toast.success("Template added", { style: defaultToastStyle }), 0);
+        return combined;
+      });
     }
   }, [activeItem]);
 
@@ -675,9 +692,24 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
 
     const template = templates.find((t) => t.id === selectedTemplateId);
     if (template) {
-      setPromptText(template.prompt);
+      setPromptText((currentPrompt) => {
+        const trimmed = currentPrompt.trim();
+
+        if (trimmed === "") {
+          return template.prompt;
+        }
+
+        const combined = `${trimmed}\n\n${template.prompt}`;
+
+        if (combined.length > 2000) {
+          setTimeout(() => toast.error("Combined prompt too long (max 2000)", { style: defaultToastStyle }), 0);
+          return currentPrompt;
+        }
+
+        return combined;
+      });
       setLoadedTemplateName(template.name);
-      setSelectedPills({}); // Clear pill tracking since we replaced text
+      // Don't clear pills when appending
       toast.success(`Loaded: "${template.name}"`, { style: defaultToastStyle });
     }
   };
@@ -735,42 +767,7 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
 
       console.log("📝 Final prompt:", finalPrompt);
 
-      // Upload reference image to Storage if file uploaded
-      let referenceImageUrl: string | null = null;
-      if (uploadedFile) {
-        try {
-          const supabase = createClient();
-          const { data: { user } } = await supabase.auth.getUser();
-          
-          if (user) {
-            // Create resized reference image (1536px max)
-            const refBlob = await createReferenceImage(uploadedFile);
-            
-            // Upload to Storage
-            const fileName = `ref_${Date.now()}.webp`;
-            const filePath = `${user.id}/workspace/${fileName}`;
-            const { error: uploadError } = await supabase.storage
-              .from("renderlab-images-v2")
-              .upload(filePath, refBlob, { contentType: "image/webp", upsert: false });
-            
-            if (!uploadError) {
-              // Get public URL
-              const { data: urlData } = supabase.storage
-                .from("renderlab-images-v2")
-                .getPublicUrl(filePath);
-              referenceImageUrl = urlData.publicUrl;
-              console.log("📸 Reference image uploaded:", referenceImageUrl);
-            }
-          }
-        } catch (err) {
-          console.error("Reference image upload error:", err);
-        }
-      } else if (uploadedImage && uploadedImage.startsWith('http')) {
-        // Already a URL (from URL input or history)
-        referenceImageUrl = uploadedImage;
-      }
-
-      // Create thumbnail for history (smaller, 512px)
+      // Create thumbnail if file uploaded
       let thumbBlob: Blob | null = null;
       if (uploadedFile) {
         try {
@@ -780,7 +777,7 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
         }
       }
 
-      // Upload thumbnail if exists (for history display)
+      // Upload thumbnail if exists
       if (uploadedFile && thumbBlob) {
         try {
           const supabase = createClient();
@@ -798,14 +795,14 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
         }
       }
 
-      // Call API with URL instead of base64
+      // Call API
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt: finalPrompt,
           model: aiModel,
-          imageUrl: referenceImageUrl,  // URL instead of base64!
+          imageUrl: uploadedImage || null,
           referenceUrls: styleReferences,
           thumbnailUrl: null,
           aspectRatio: aspectRatio,
