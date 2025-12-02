@@ -299,7 +299,7 @@ export const HeroHeader = () => {
         >
           5 free renders •{' '}
           <span style={{ color: 'rgba(167, 139, 250, 0.7)', fontWeight: 500 }}>
-            $0.3 per render
+            only $0.03 per render
           </span>
         </p>
 
