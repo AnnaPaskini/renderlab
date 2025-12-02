@@ -562,52 +562,39 @@ export function PromptTemplates({ activeTab, setActiveTab }: PromptTemplatesProp
                   </div>
                 </div>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      aria-label="Template options"
-                      className="inline-flex items-center justify-center rounded-full p-1.5 text-[var(--rl-text-muted)] transition hover:text-[var(--rl-text)] focus-visible:outline-none"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
-                    >
-                      <IconDotsVertical size={16} stroke={1.5} />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-[var(--rl-panel)] text-[var(--rl-text)]">
-                    <DropdownMenuItem
-                      className="hover:bg-[var(--rl-panel-hover)]"
-                      onSelect={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        handleDuplicateTemplate(t);
-                      }}
-                    >
-                      Duplicate
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="hover:bg-[var(--rl-panel-hover)]"
-                      onSelect={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        openRenameDialog(t);
-                      }}
-                    >
-                      Rename
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="text-[var(--rl-error)] hover:bg-[var(--rl-panel-hover)] focus:text-[var(--rl-error)]"
-                      onSelect={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        openDeleteDialog(t);
-                      }}
-                    >
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label="Template options"
+                        className="inline-flex items-center justify-center rounded-full p-1.5 text-[var(--rl-text-muted)] transition hover:text-[var(--rl-text)] focus-visible:outline-none"
+                      >
+                        <IconDotsVertical size={16} stroke={1.5} />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="bg-[var(--rl-panel)] text-[var(--rl-text)]">
+                      <DropdownMenuItem
+                        className="hover:bg-[var(--rl-panel-hover)]"
+                        onSelect={() => handleDuplicateTemplate(t)}
+                      >
+                        Duplicate
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="hover:bg-[var(--rl-panel-hover)]"
+                        onSelect={() => openRenameDialog(t)}
+                      >
+                        Rename
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-[var(--rl-error)] hover:bg-[var(--rl-panel-hover)] focus:text-[var(--rl-error)]"
+                        onSelect={() => openDeleteDialog(t)}
+                      >
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
             </Card>
           ))}

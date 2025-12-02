@@ -362,8 +362,7 @@ export default function BatchStudioPageV2() {
                             if (data.type === 'complete') {
                                 console.log('✅ [COMPLETE]', data);
 
-                                const doneCount = batchItems.filter(i => i.status === 'done').length;
-                                toast.success(`Batch complete! ${doneCount} images generated`);
+                                toast.success('Batch complete!');
 
                                 // Smooth transition from 80% to 100%
                                 setProgress(100);
@@ -411,8 +410,7 @@ export default function BatchStudioPageV2() {
                                     }));
                                 }
 
-                                const doneCount = batchItems.filter(i => i.status === 'done').length;
-                                toast.success(`Batch complete! ${doneCount} images generated`);
+                                toast.success('Batch complete!');
 
                                 setProgress(100);
 
