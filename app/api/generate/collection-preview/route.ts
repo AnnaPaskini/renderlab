@@ -1,5 +1,6 @@
 import { generateSingle } from "@/lib/generateSingle";
 import { createClient } from "@/lib/supabaseServer";
+import { uploadImageToStorage } from '@/lib/utils/uploadToStorage';
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import pLimit from "p-limit";
@@ -184,11 +185,37 @@ export async function POST(req: Request) {
                             if (result.status === "ok" && result.url) {
                                 completed += 1;
 
-                                // Prepare result object
+                                // Upload to permanent storage FIRST
+                                console.log(`🔵 [STORAGE] Uploading image for ${template.name}...`);
+                                const permanentUrl = await uploadImageToStorage(
+                                    supabase,
+                                    result.url,
+                                    user.id,
+                                    'history',
+                                    `batch_${batchId}_${template.id}_${Date.now()}.png`
+                                );
+
+                                if (!permanentUrl) {
+                                    console.error(`❌ [STORAGE] Failed to upload image for ${template.name}`);
+                                    enqueue(controller, {
+                                        type: "progress",
+                                        templateId: template.id,
+                                        templateName: template.name,
+                                        status: "error",
+                                        current: completed,
+                                        total: templates.length,
+                                        error: "Failed to upload image to storage",
+                                    });
+                                    return;
+                                }
+
+                                console.log(`✅ [STORAGE] Uploaded image for ${template.name}: ${permanentUrl}`);
+
+                                // Prepare result object with permanent URL
                                 const resultData = {
                                     templateId: template.id,
                                     templateName: template.name,
-                                    imageUrl: result.url,
+                                    imageUrl: permanentUrl,  // ← Use permanent URL!
                                     prompt: template.prompt,
                                     model: model,
                                     saved: false,
@@ -200,17 +227,14 @@ export async function POST(req: Request) {
                                     const timestamp = new Date().toISOString();
                                     const imageName = `${collectionName || 'Batch'} - ${template.name}`;
 
-                                    // Generate thumbnail URL using Supabase Transform API
-                                    const thumbnailUrl = `${result.url}?width=512&quality=80&format=webp`;
-
                                     const { data: newImage, error: dbError } = await supabase
                                         .from("images")
                                         .insert([{
                                             user_id: user.id,
                                             name: imageName,
                                             prompt: template.prompt,
-                                            url: result.url,
-                                            thumbnail_url: thumbnailUrl,
+                                            url: permanentUrl,  // ← Use permanent URL!
+                                            thumbnail_url: null,  // Will be generated
                                             reference_url: baseImageUrl || null,
                                             collection_id: collectionId,
                                             batch_id: batchId,
@@ -233,7 +257,7 @@ export async function POST(req: Request) {
                                             method: 'POST',
                                             headers: { 'Content-Type': 'application/json' },
                                             body: JSON.stringify({
-                                                imageUrl: result.url,
+                                                imageUrl: permanentUrl,
                                                 imageId: newImage.id
                                             })
                                         }).catch(err => console.error('❌ Thumbnail generation failed:', err));
@@ -246,7 +270,7 @@ export async function POST(req: Request) {
                                 // Add to results
                                 results.push(resultData);
 
-                                console.log(`✅ [PREVIEW] Success for ${template.name}, URL: ${result.url}`);
+                                console.log(`✅ [PREVIEW] Success for ${template.name}, URL: ${permanentUrl}`);
 
                                 // Send done status
                                 enqueue(controller, {
@@ -256,7 +280,7 @@ export async function POST(req: Request) {
                                     status: "done",
                                     current: completed,
                                     total: templates.length,
-                                    imageUrl: result.url,
+                                    imageUrl: permanentUrl,  // ← Use permanent URL!
                                 });
                             } else {
                                 completed += 1;

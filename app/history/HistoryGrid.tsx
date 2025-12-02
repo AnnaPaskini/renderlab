@@ -40,8 +40,33 @@ export function HistoryGrid({ images, onDelete }: HistoryGridProps) {
     const handleDownload = async (img: HistoryImage) => {
         try {
             const imageUrl = img.url || img.thumbnail_url || '';
-            const response = await fetch(imageUrl);
+
+            // Fetch with no-cors mode for external URLs
+            const response = await fetch(imageUrl, {
+                mode: 'cors',
+                credentials: 'omit',
+            });
+
+            // Check if response is valid image (not redirect/error)
+            const contentType = response.headers.get('content-type');
+            if (!response.ok || !contentType?.startsWith('image/')) {
+                // Fallback: open in new tab for manual download
+                window.open(imageUrl, '_blank');
+                toast.success('Opening image in new tab');
+                setOpenMenuId(null);
+                return;
+            }
+
             const blob = await response.blob();
+
+            // Verify blob size (39 bytes = error response)
+            if (blob.size < 1000) {
+                window.open(imageUrl, '_blank');
+                toast.success('Opening image in new tab');
+                setOpenMenuId(null);
+                return;
+            }
+
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -54,7 +79,15 @@ export function HistoryGrid({ images, onDelete }: HistoryGridProps) {
             setOpenMenuId(null);
         } catch (error) {
             console.error('Download failed:', error);
-            toast.error('Failed to download image');
+            // Fallback: open in new tab
+            const imageUrl = img.url || img.thumbnail_url || '';
+            if (imageUrl) {
+                window.open(imageUrl, '_blank');
+                toast.success('Opening image in new tab');
+            } else {
+                toast.error('Failed to download image');
+            }
+            setOpenMenuId(null);
         }
     };
 
