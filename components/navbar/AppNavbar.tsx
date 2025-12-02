@@ -10,10 +10,10 @@ import { createClient } from "@/lib/supabaseBrowser";
 import { ChevronDown, FileText, LogOut, PenLine, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Apple-style MenuItem component
-const MenuItem = ({ icon, label, href, onClick }: { icon: React.ReactNode; label: string; href?: string; onClick?: () => void }) => {
+const MenuItem = ({ icon, label, href, onClick, onNavigate }: { icon: React.ReactNode; label: string; href?: string; onClick?: () => void; onNavigate?: () => void }) => {
     const content = (
         <button className="w-full flex items-center gap-3 px-3 h-12 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition">
             {icon}
@@ -22,7 +22,7 @@ const MenuItem = ({ icon, label, href, onClick }: { icon: React.ReactNode; label
     );
 
     if (href) {
-        return <Link href={href}>{content}</Link>;
+        return <Link href={href} onClick={onNavigate}>{content}</Link>;
     }
 
     return <div onClick={onClick}>{content}</div>;
@@ -34,6 +34,7 @@ export const AppNavbar = () => {
     const supabase = createClient();
     const [email, setEmail] = useState<string | null>(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Load user email
     useEffect(() => {
@@ -46,10 +47,37 @@ export const AppNavbar = () => {
         fetchUser();
     }, [supabase]);
 
+    // Close dropdown on route change
+    useEffect(() => {
+        setIsDropdownOpen(false);
+    }, [pathname]);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsDropdownOpen(false);
+            }
+        }
+
+        if (isDropdownOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isDropdownOpen]);
+
     // Logout handler
     const handleLogout = async () => {
+        setIsDropdownOpen(false);
         await supabase.auth.signOut();
         router.replace("/login");
+    };
+
+    // Close dropdown handler for menu items
+    const closeDropdown = () => {
         setIsDropdownOpen(false);
     };
 
@@ -156,7 +184,7 @@ export const AppNavbar = () => {
                     {/* User Menu */}
                     <div className="flex items-center space-x-4">
                         {/* User Menu Dropdown */}
-                        <div className="relative dropdown-container">
+                        <div ref={dropdownRef} className="relative dropdown-container">
                             <button
                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                 className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-sm font-semibold hover:shadow-lg hover:shadow-orange-500/20 transition-all focus:outline-none"
@@ -168,10 +196,10 @@ export const AppNavbar = () => {
                             </button>
                             {isDropdownOpen && (
                                 <div className="absolute right-0 top-[60px] w-64 rounded-2xl backdrop-blur-xl bg-neutral-900/95 border border-white/10 shadow-2xl shadow-black/50 p-2 z-50">
-                                    <MenuItem icon={<Settings className="w-5 h-5" />} label="Account Settings" href="/account?tab=profile" />
+                                    <MenuItem icon={<Settings className="w-5 h-5" />} label="Account Settings" href="/account?tab=profile" onNavigate={closeDropdown} />
                                     <div className="w-full h-px bg-white/10 my-1" />
-                                    <MenuItem icon={<FileText className="w-5 h-5" />} label="My Prompts" href="/account?tab=prompts" />
-                                    <MenuItem icon={<PenLine className="w-5 h-5" />} label="Submit Prompt" href="/prompts/submit" />
+                                    <MenuItem icon={<FileText className="w-5 h-5" />} label="My Prompts" href="/account?tab=prompts" onNavigate={closeDropdown} />
+                                    <MenuItem icon={<PenLine className="w-5 h-5" />} label="Submit Prompt" href="/prompts/submit" onNavigate={closeDropdown} />
                                     <div className="w-full h-px bg-white/10 my-1" />
                                     <MenuItem icon={<LogOut className="w-5 h-5" />} label="Logout" onClick={handleLogout} />
                                 </div>

@@ -1,11 +1,7 @@
-import { Background } from "@/components/background";
-import { Companies } from "@/components/companies";
-import { Container } from "@/components/container";
-import { Heading } from "@/components/heading";
-import { PricingRenderLab } from "@/components/pricing-renderlab";
-import { Subheading } from "@/components/subheading";
+import { PricingCard } from "@/components/pricing/PricingCard";
+import { ArrowUp, Layers, Sparkles, Zap } from "lucide-react";
 import { Metadata } from "next";
-import { PricingTable } from "./pricing-table";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Pricing - RenderLab",
@@ -18,21 +14,120 @@ export const metadata: Metadata = {
 
 export default function PricingPage() {
   return (
-    <div className="relative overflow-hidden py-20 md:py-0">
-      <Background />
-      <Container className="flex flex-col items-center justify-between  pb-20">
-        <div className="relative z-20 py-10 md:pt-40">
-          <Heading as="h1">Simple pricing for your ease</Heading>
-          <Subheading className="text-center">
-            RenderLab offers a wide range of services. You can choose the one
-            that suits your needs. Select from your favourite plan and get
-            started instantly.
-          </Subheading>
+    <div className="bg-grid min-h-screen w-full px-6 pt-28 pb-24">
+      <div className="max-w-5xl mx-auto text-center mt-24">
+        <h1 className="text-5xl md:text-6xl font-semibold text-white mb-4">
+          Pay only for what you use
+        </h1>
+
+        <p className="text-xl text-[var(--rl-text-secondary)] max-w-2xl mx-auto mb-16">
+          Transparent per-image pricing. No subscriptions. No commitments. You stay in control.
+        </p>
+
+        {/* === FAST & EFFICIENT === */}
+        <div className="text-left">
+          <h2 className="text-xl font-semibold text-white">Fast & Efficient</h2>
+          <p className="text-[var(--rl-text-secondary)] text-sm mb-6">
+            Balanced quality & speed
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <PricingCard
+              icon={<Zap size={18} className="text-orange-400" />}
+              title="Nano Banana"
+              subtitle="Fast, high quality"
+              price="$0.04"
+            />
+
+            <PricingCard
+              icon={<Sparkles size={18} className="text-orange-400" />}
+              title="Seedream"
+              subtitle="Creative styles"
+              price="$0.03"
+            />
+
+            <PricingCard
+              icon={<Layers size={18} className="text-orange-400" />}
+              title="Flux Kontext"
+              subtitle="Context-aware edits"
+              price="$0.04"
+            />
+
+            <PricingCard
+              icon={<ArrowUp size={18} className="text-orange-400" />}
+              title="Upscale"
+              subtitle="4× resolution"
+              price="$0.02"
+            />
+          </div>
         </div>
-        <PricingRenderLab />
-        <PricingTable />
-        <Companies />
-      </Container>
+
+        <div className="w-full h-0.5 bg-white/20 my-16" />
+
+        {/* === UPSCALERS === */}
+        <div className="text-left">
+          <h2 className="text-xl font-semibold text-white">Upscalers</h2>
+          <p className="text-[var(--rl-text-secondary)] text-sm mb-6">
+            High-fidelity enhancement
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <PricingCard
+              icon={<ArrowUp size={18} className="text-orange-400" />}
+              title="Real_ESRGAN"
+              subtitle="4× resolution"
+              price="$0.04"
+            />
+
+            <PricingCard
+              icon={<ArrowUp size={18} className="text-orange-400" />}
+              title="Google Upscale"
+              subtitle="AI-guided enhancement"
+              price="$0.04"
+            />
+
+            <PricingCard
+              icon={<ArrowUp size={18} className="text-orange-400" />}
+              title="Recraft Crisp"
+              subtitle="Maximum sharpness"
+              price="$0.06"
+            />
+          </div>
+        </div>
+
+        <div className="w-full h-0.5 bg-white/20 my-16" />
+
+        {/* === PRO MODELS === */}
+        <div className="text-left">
+          <h2 className="text-xl font-semibold text-white">Pro Models</h2>
+          <p className="text-[var(--rl-text-secondary)] text-sm mb-6">
+            Best-in-class fidelity
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <PricingCard
+              icon={<Zap size={18} className="text-orange-400" />}
+              title="Nano Banana Pro"
+              subtitle="Premium quality"
+              price="$0.30"
+            />
+
+            <PricingCard
+              icon={<Layers size={18} className="text-orange-400" />}
+              title="Flux Pro"
+              subtitle="Best-in-class"
+              price="$0.40"
+            />
+          </div>
+        </div>
+
+        {/* CTA */}
+        <Link href="/signup">
+          <button className="premium-generate-button px-6 py-3 mx-auto mt-20">
+            Start Creating
+          </button>
+        </Link>
+      </div>
     </div>
   );
 }
