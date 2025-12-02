@@ -61,7 +61,7 @@ export const CTA = () => {
 
       {/* Status Message */}
       {message && (
-        <p className="text-sm text-[var(--rl-text-secondary)]">
+        <p className="text-base font-medium text-white">
           {message}
         </p>
       )}
