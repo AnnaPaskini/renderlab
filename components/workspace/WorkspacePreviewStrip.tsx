@@ -28,18 +28,35 @@ export function WorkspacePreviewStrip({ images, onRemoveFromView }: WorkspacePre
     router.push(`/inpaint?image=${encodeURIComponent(corsSafeUrl)}`);
   };
 
-  const handleDownload = (url: string) => {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'renderlab-image.jpg';
-    link.click();
-    toast.success('Downloaded successfully', {
-      style: {
-        background: '#10b981',
-        color: 'white',
-        border: 'none'
-      }
-    });
+  const handleDownload = async (url: string) => {
+    try {
+      const response = await fetch(url);
+      const contentType = response.headers.get('content-type') || 'image/png';
+      const originalBlob = await response.blob();
+      // Recreate blob with explicit type to preserve metadata for macOS Finder
+      const blob = new Blob([originalBlob], { type: contentType });
+
+      const ext = contentType.includes('png') ? 'png' : contentType.includes('webp') ? 'webp' : 'jpg';
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `renderlab-${Date.now()}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(blobUrl);
+
+      toast.success('Downloaded successfully', {
+        style: {
+          background: '#10b981',
+          color: 'white',
+          border: 'none'
+        }
+      });
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast.error('Download failed');
+    }
   };
 
   const handleUpscale = (url: string) => {

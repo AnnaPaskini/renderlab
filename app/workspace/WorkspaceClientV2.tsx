@@ -887,9 +887,9 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
 
       if (!response.ok) {
         const errorMsg = data?.error || `Server error: ${response.status}`;
-        
+
         let userMessage = "Generation failed. Try again or switch model.";
-        
+
         if (response.status === 504 || errorMsg.includes('timeout')) {
           userMessage = "Server timeout — AI model is slow. Try again.";
         } else if (errorMsg.includes('Director') || errorMsg.includes('Model error')) {
@@ -899,7 +899,7 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
         } else if (response.status === 413) {
           userMessage = "Image too large. Use smaller file.";
         }
-        
+
         console.error("API error:", { status: response.status, error: errorMsg });
         toast.error(userMessage, { style: defaultToastStyle, duration: 6000 });
         return;
@@ -1056,7 +1056,7 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
               {styleReferences.map((ref, index) => (
                 <div key={index} className="flex flex-col items-center">
                   <div className="relative group">
-                    <img src={ref} className="w-14 h-14 object-cover rounded-lg border border-white/10" alt={`Reference ${index + 1}`} />
+                    <img src={ref} className="w-20 h-20 object-cover rounded-lg border border-white/10" alt={`Reference ${index + 1}`} />
                     <button
                       onClick={() => setStyleReferences(prev => prev.filter((_, i) => i !== index))}
                       className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-black/80 border border-white/20 rounded-full text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
@@ -1069,22 +1069,55 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
               ))}
 
               {/* Add button (if < 4) */}
-              {styleReferences.length < 4 && (
+              {styleReferences.length < (aiModel === "nano-banana" ? 2 : 3) && (
                 <div className="flex flex-col items-center">
-                  <label className="flex items-center justify-center w-14 h-14 border border-dashed border-white/30 bg-black/30 rounded-2xl cursor-pointer hover:border-white/40 hover:shadow-[0_0_12px_rgba(139,92,246,0.10)] active:bg-black/40 active:border-white/40 active:shadow-[0_0_20px_rgba(139,92,246,0.15)] transition-all">
+                  <label className="flex items-center justify-center w-20 h-20 border border-dashed border-white/30 bg-black/30 rounded-2xl cursor-pointer hover:border-white/40 hover:shadow-[0_0_12px_rgba(139,92,246,0.10)] active:bg-black/40 active:border-white/40 active:shadow-[0_0_20px_rgba(139,92,246,0.15)] transition-all">
                     <span className="text-lg text-white/30">+</span>
                     <input
                       type="file"
                       accept="image/*"
                       className="hidden"
-                      onChange={(e) => {
+                      onChange={async (e) => {
                         const file = e.target.files?.[0];
-                        if (file && styleReferences.length < 4) {
-                          const reader = new FileReader();
-                          reader.onload = (ev) => {
-                            setStyleReferences(prev => [...prev, ev.target?.result as string]);
-                          };
-                          reader.readAsDataURL(file);
+                        const maxRefs = aiModel === "nano-banana" ? 2 : 3;
+                        if (file && styleReferences.length < maxRefs) {
+                          // Compress image to max 2MB
+                          const compressed = await new Promise<string>((resolve) => {
+                            const reader = new FileReader();
+                            reader.onload = (ev) => {
+                              const img = new Image();
+                              img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                let { width, height } = img;
+
+                                // Max dimension 2048px
+                                const maxDim = 2048;
+                                if (width > maxDim || height > maxDim) {
+                                  if (width > height) {
+                                    height = (height / width) * maxDim;
+                                    width = maxDim;
+                                  } else {
+                                    width = (width / height) * maxDim;
+                                    height = maxDim;
+                                  }
+                                }
+
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext('2d')!;
+                                ctx.drawImage(img, 0, 0, width, height);
+
+                                // Compress to JPEG quality 0.8
+                                const result = canvas.toDataURL('image/jpeg', 0.85);
+                                console.log(`🗜️ Style ref compressed: ${(file.size / 1024 / 1024).toFixed(1)}MB → ${(result.length / 1024 / 1024 / 1.37).toFixed(1)}MB`);
+                                resolve(result);
+                              };
+                              img.src = ev.target?.result as string;
+                            };
+                            reader.readAsDataURL(file);
+                          });
+
+                          setStyleReferences(prev => [...prev, compressed]);
                         }
                       }}
                     />
@@ -1095,7 +1128,7 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
 
               {/* Counter */}
               {styleReferences.length > 0 && (
-                <span className="text-xs text-white/40 ml-1">{styleReferences.length}/4</span>
+                <span className="text-xs text-white/40 ml-1">{styleReferences.length}/{aiModel === "nano-banana" ? 2 : 3}</span>
               )}
             </div>
           )}

@@ -64,11 +64,16 @@ function HistoryCard({
   const handleDownload = async () => {
     try {
       const response = await fetch(image.url);
-      const blob = await response.blob();
+      const contentType = response.headers.get('content-type') || 'image/png';
+      const originalBlob = await response.blob();
+      // Recreate blob with explicit type to preserve metadata for macOS Finder
+      const blob = new Blob([originalBlob], { type: contentType });
+
+      const ext = contentType.includes('png') ? 'png' : contentType.includes('webp') ? 'webp' : 'jpg';
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `renderlab-${image.id}.png`;
+      a.download = `renderlab-${image.id}.${ext}`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
