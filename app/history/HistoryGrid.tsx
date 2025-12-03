@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import ImagePreviewModal from '@/components/workspace/ImagePreviewModal';
 import { AnimatePresence } from 'framer-motion';
-import { ArrowUpCircle, Eye, MoreVertical, Trash2 } from 'lucide-react';
+import { ArrowUpCircle, Eye, MoreVertical, Send, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -294,6 +294,23 @@ export function HistoryGrid({ images, onDelete }: HistoryGridProps) {
                                             <ArrowUpCircle size={16} />
                                             Upscale
                                         </button>
+                                        {img.prompt && img.type !== 'upscale' && (
+                                            <button
+                                                onClick={() => {
+                                                    const params = new URLSearchParams({
+                                                        image: img.url,
+                                                        prompt: img.prompt,
+                                                    });
+                                                    router.push(`/prompts/submit?${params.toString()}`);
+                                                    setOpenMenuId(null);
+                                                }}
+                                                className="w-full px-4 py-2.5 text-left text-sm hover:bg-white/5 transition-colors flex items-center gap-2"
+                                                style={{ color: '#ccc' }}
+                                            >
+                                                <Send size={16} />
+                                                Submit as prompt
+                                            </button>
+                                        )}
                                         <button
                                             onClick={() => openDeleteDialog(img)}
                                             className="w-full px-4 py-2.5 text-left text-sm hover:bg-red-500/10 transition-colors flex items-center gap-2"

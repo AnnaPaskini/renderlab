@@ -3,11 +3,14 @@
 import { SubmitPromptForm } from '@/components/prompts/SubmitPromptForm';
 import { createClient } from '@/lib/supabaseBrowser';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function SubmitPromptPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialImage = searchParams.get('image') || '';
+  const initialPrompt = searchParams.get('prompt') || '';
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -88,6 +91,8 @@ export default function SubmitPromptPage() {
             <SubmitPromptForm
               onSuccess={handleSuccess}
               onCancel={handleCancel}
+              initialImage={initialImage}
+              initialPrompt={initialPrompt}
             />
           </div>
 

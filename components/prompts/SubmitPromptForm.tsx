@@ -8,13 +8,15 @@ import { ImageUpload } from './ImageUpload';
 interface SubmitPromptFormProps {
   onSuccess: () => void;
   onCancel: () => void;
+  initialImage?: string;
+  initialPrompt?: string;
 }
 
-export function SubmitPromptForm({ onSuccess, onCancel }: SubmitPromptFormProps) {
+export function SubmitPromptForm({ onSuccess, onCancel, initialImage, initialPrompt }: SubmitPromptFormProps) {
   const [formData, setFormData] = useState({
     title: '',
-    prompt: '',
-    image_url: '',
+    prompt: initialPrompt || '',
+    image_url: initialImage || '',
     category: '' as PromptCategory | '',
     tags: '',
   });
