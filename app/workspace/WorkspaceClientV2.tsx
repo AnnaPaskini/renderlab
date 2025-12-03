@@ -883,27 +883,40 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
       });
 
       const rawBody = await response.text();
-
-      if (!response.ok) {
-        throw new Error(`Generation failed: ${response.status}`);
-      }
-
       const data = rawBody ? JSON.parse(rawBody) : null;
 
-      if (data?.status === "succeeded" && data?.output?.imageUrl) {
-        // Smooth scroll to top to see the new image
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (!response.ok) {
+        const errorMsg = data?.error || `Server error: ${response.status}`;
+        
+        let userMessage = "Generation failed. Try again or switch model.";
+        
+        if (response.status === 504 || errorMsg.includes('timeout')) {
+          userMessage = "Server timeout — AI model is slow. Try again.";
+        } else if (errorMsg.includes('Director') || errorMsg.includes('Model error')) {
+          userMessage = "AI model unavailable. Try Seedream 4.";
+        } else if (response.status === 429) {
+          userMessage = "Too many requests. Wait a moment.";
+        } else if (response.status === 413) {
+          userMessage = "Image too large. Use smaller file.";
+        }
+        
+        console.error("API error:", { status: response.status, error: errorMsg });
+        toast.error(userMessage, { style: defaultToastStyle, duration: 6000 });
+        return;
+      }
 
+      if (data?.status === "succeeded" && data?.output?.imageUrl) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         toast.success(
           uploadedImage ? "Generated from reference" : "Generated from prompt",
           { style: defaultToastStyle }
         );
       } else {
-        toast.error("Failed. Try another AI model or try later.");
+        toast.error("Generation failed. Try different model.", { style: defaultToastStyle, duration: 6000 });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Generation error:", error);
-      toast.error("Failed. Try another AI model or try later.");
+      toast.error("Connection error. Check internet.", { style: defaultToastStyle, duration: 6000 });
     } finally {
       setIsGenerating(false);
     }

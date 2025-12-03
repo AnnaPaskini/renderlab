@@ -1,4 +1,4 @@
-export const maxDuration = 60; // 60 seconds instead of default 10
+export const maxDuration = 180; // 60 seconds instead of default 10
 import { generateSingle } from "@/lib/generateSingle";
 import { createClient } from "@/lib/supabaseServer";
 import { uploadImageToStorage } from '@/lib/utils/uploadToStorage';
