@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpCircle, Download, Eye, MoreVertical } from "lucide-react";
+import { ArrowUpCircle, Download, Eye, EyeOff, MoreVertical } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
@@ -195,10 +195,10 @@ function HistoryCard({
                 onRemove(image.id);
                 setShowMenu(false);
               }}
-              className="w-full px-3 py-2 text-left text-xs text-white hover:bg-white/10 flex items-center gap-2 transition-colors"
+              className="w-full px-3 py-2 text-left text-xs text-red-400 hover:text-red-300 hover:bg-white/10 flex items-center gap-2 transition-colors"
             >
-              <span className="text-red-400">✕</span>
-              Remove
+              <EyeOff size={12} />
+              Remove from view
             </button>
           )}
         </div>
