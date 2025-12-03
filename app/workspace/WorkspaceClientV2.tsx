@@ -795,6 +795,36 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
         }
       }
 
+      // Upload main image to Storage if base64 (avoid 413 error)
+      let imageUrlForApi: string | null = uploadedImage;
+      if (uploadedImage && uploadedImage.startsWith('data:')) {
+        try {
+          const supabase = createClient();
+          const { data: { user } } = await supabase.auth.getUser();
+          
+          if (user) {
+            const response = await fetch(uploadedImage);
+            const blob = await response.blob();
+            
+            const fileName = `ref_${Date.now()}.webp`;
+            const filePath = `${user.id}/workspace/${fileName}`;
+            const { error: uploadError } = await supabase.storage
+              .from("renderlab-images-v2")
+              .upload(filePath, blob, { contentType: blob.type, upsert: false });
+            
+            if (!uploadError) {
+              const { data: urlData } = supabase.storage
+                .from("renderlab-images-v2")
+                .getPublicUrl(filePath);
+              imageUrlForApi = urlData.publicUrl;
+              console.log("📸 Main image uploaded:", imageUrlForApi);
+            }
+          }
+        } catch (err) {
+          console.error("Main image upload error:", err);
+        }
+      }
+
       // Upload style references to Storage (avoid 413 error)
       let uploadedStyleRefs: string[] = [];
       if (styleReferences.length > 0) {
@@ -845,7 +875,7 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
         body: JSON.stringify({
           prompt: finalPrompt,
           model: aiModel,
-          imageUrl: uploadedImage || null,
+          imageUrl: imageUrlForApi || null,
           referenceUrls: uploadedStyleRefs.length > 0 ? uploadedStyleRefs : styleReferences,
           thumbnailUrl: null,
           aspectRatio: aspectRatio,
