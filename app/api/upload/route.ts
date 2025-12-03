@@ -1,10 +1,4 @@
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '100mb',
-    },
-  },
-};
+
 
 import { createClient } from "@/lib/supabaseServer";
 import { NextResponse } from "next/server";

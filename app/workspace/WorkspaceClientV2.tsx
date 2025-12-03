@@ -801,17 +801,17 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
         try {
           const supabase = createClient();
           const { data: { user } } = await supabase.auth.getUser();
-          
+
           if (user) {
             const response = await fetch(uploadedImage);
             const blob = await response.blob();
-            
+
             const fileName = `ref_${Date.now()}.webp`;
             const filePath = `${user.id}/workspace/${fileName}`;
             const { error: uploadError } = await supabase.storage
               .from("renderlab-images-v2")
               .upload(filePath, blob, { contentType: blob.type, upsert: false });
-            
+
             if (!uploadError) {
               const { data: urlData } = supabase.storage
                 .from("renderlab-images-v2")
@@ -899,11 +899,11 @@ export function WorkspaceClientV2({ initialHistoryImages }: WorkspaceClientV2Pro
           { style: defaultToastStyle }
         );
       } else {
-        toast.error("Generation failed: " + (data?.error || "Unknown error"));
+        toast.error("Failed. Try another AI model or try later.");
       }
     } catch (error) {
       console.error("Generation error:", error);
-      toast.error("Generation failed");
+      toast.error("Failed. Try another AI model or try later.");
     } finally {
       setIsGenerating(false);
     }
