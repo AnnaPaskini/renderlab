@@ -636,3 +636,74 @@ body.actions-open nav {
 .rl-glow-purple {
   box-shadow: 0 0 80px rgba(167, 139, 250, 0.15), 0 0 32px rgba(167, 139, 250, 0.1);
 }
+
+/* ====================================================================
+   RENDERLAB DROPDOWN MENU SYSTEM
+   Unified style for all dropdown menus, context menus, popovers
+   ==================================================================== */
+
+.rl-dropdown {
+  background: rgba(20, 20, 20, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.75rem;
+  padding: 0.375rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  overflow: visible;
+}
+
+.rl-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+  background: transparent;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.rl-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+.rl-dropdown-item-icon {
+  width: 1rem;
+  height: 1rem;
+  color: rgba(255, 255, 255, 0.5);
+  flex-shrink: 0;
+}
+
+.rl-dropdown-item:hover .rl-dropdown-item-icon {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Danger variant for destructive actions (delete, remove) */
+.rl-dropdown-item-danger {
+  color: rgba(239, 68, 68, 0.8);
+}
+
+.rl-dropdown-item-danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.rl-dropdown-item-danger .rl-dropdown-item-icon {
+  color: rgba(239, 68, 68, 0.6);
+}
+
+.rl-dropdown-item-danger:hover .rl-dropdown-item-icon {
+  color: #ef4444;
+}
+
+/* Separator line between menu sections */
+.rl-dropdown-separator {
+  height: 1px;
+  margin: 0.375rem 0;
+  background: rgba(255, 255, 255, 0.08);
+}

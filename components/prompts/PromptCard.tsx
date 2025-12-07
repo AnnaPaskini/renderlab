@@ -2,6 +2,7 @@
 
 import { useWorkspace } from '@/lib/context/WorkspaceContext';
 import type { Prompt } from '@/lib/types/prompts';
+import { Send } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -173,19 +174,51 @@ export function PromptCard({ prompt, onLikeToggle, initialLiked = false }: Promp
 
               {/* Dropdown menu */}
               {showMenu && (
-                <div className="absolute right-0 top-full mt-1 w-48 bg-[#1a1a1a] border border-white/8 rounded-lg shadow-xl z-10">
-                  <button
-                    onClick={handleCopy}
-                    className="w-full px-4 py-2.5 text-left text-sm text-white hover:bg-white/5 transition-colors rounded-t-lg"
-                  >
-                    Copy Prompt
-                  </button>
-                  <button
-                    onClick={handleAddToTemplate}
-                    className="w-full px-4 py-2.5 text-left text-sm text-white hover:bg-white/5 transition-colors rounded-b-lg border-t border-white/5"
-                  >
-                    Send to Workspace
-                  </button>
+                <div
+                  className="
+                    absolute right-0 top-full mt-2 w-52
+                    bg-[rgba(20,20,20,0.85)]
+                    border border-[rgba(255,255,255,0.12)]
+                    rounded-xl
+                    shadow-[0_8px_32px_rgba(0,0,0,0.4)]
+                    z-50
+                    overflow-hidden
+                    animate-in fade-in-0 zoom-in-95 duration-150
+                  "
+                >
+                  <div className="p-1.5">
+                    <button
+                      onClick={handleCopy}
+                      className="
+                        w-full px-3 py-2.5 
+                        flex items-center gap-3
+                        text-sm text-white/80
+                        hover:bg-[rgba(255,255,255,0.05)] hover:text-white
+                        rounded-lg
+                        transition-all duration-200
+                      "
+                    >
+                      <svg className="w-4 h-4 text-white/50" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Copy Prompt
+                    </button>
+
+                    <button
+                      onClick={handleAddToTemplate}
+                      className="
+                        w-full px-3 py-2.5
+                        flex items-center gap-3
+                        text-sm text-white/80
+                        hover:bg-[rgba(255,255,255,0.05)] hover:text-white
+                        rounded-lg
+                        transition-all duration-200
+                      "
+                    >
+                      <Send className="w-4 h-4 text-white/50" />
+                      Send to Workspace
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

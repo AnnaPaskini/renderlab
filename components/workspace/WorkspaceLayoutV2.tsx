@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpCircle, Download, Eye, EyeOff, MoreVertical } from "lucide-react";
+import { Download, Edit, Maximize, MoreVertical, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
@@ -9,6 +9,13 @@ import { Toaster } from "react-hot-toast";
 
 import { useAuth } from "@/components/providers/SupabaseAuthProvider";
 import { RenderLabButton } from "@/components/ui/RenderLabButton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import ImagePreviewModal from "@/components/workspace/ImagePreviewModal";
 import { SkeletonCard } from "@/components/workspace/SkeletonCard";
 
@@ -53,7 +60,7 @@ function HistoryCard({
 }) {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleViewInEdit = () => {
     const fullUrl = image.url;
@@ -81,7 +88,6 @@ function HistoryCard({
     } catch (error) {
       console.error("Download failed:", error);
     }
-    setShowMenu(false);
   };
 
   const formatDateTime = (timestamp: string) => {
@@ -99,6 +105,10 @@ function HistoryCard({
     e.dataTransfer.effectAllowed = "copy";
   };
 
+  const handleUpscale = () => {
+    router.push(`/upscale?image=${encodeURIComponent(image.url)}`);
+  };
+
   return (
     <div
       className="relative aspect-square rounded-lg overflow-hidden border border-white/[0.08] bg-[#141414] cursor-pointer group"
@@ -106,8 +116,7 @@ function HistoryCard({
       onDragStart={handleDragStart}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
-        setIsHovered(false);
-        setShowMenu(false);
+        if (!isDropdownOpen) setIsHovered(false);
       }}
       onClick={onView}
     >
@@ -146,62 +155,44 @@ function HistoryCard({
         <div className="absolute inset-0 bg-black/40 transition-opacity" />
       )}
 
-      {/* 3-dot Menu Button */}
-      {isHovered && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowMenu(!showMenu);
-          }}
-          className="absolute top-1.5 right-1.5 w-7 h-7 bg-black/70 border border-white/20 rounded flex items-center justify-center hover:bg-black/90 transition-colors z-10"
-        >
-          <MoreVertical size={12} className="text-white" />
-        </button>
-      )}
-
-      {/* Dropdown Menu */}
-      {showMenu && (
-        <div
-          className="absolute top-9 right-1.5 bg-[#1a1a1a] border border-white/20 rounded-lg py-1 min-w-[120px] shadow-xl z-20"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            onClick={handleDownload}
-            className="w-full px-3 py-2 text-left text-xs text-white hover:bg-white/10 flex items-center gap-2 transition-colors"
-          >
-            <Download size={12} />
-            Download
-          </button>
-          <button
-            onClick={handleViewInEdit}
-            className="w-full px-3 py-2 text-left text-xs text-white hover:bg-white/10 flex items-center gap-2 transition-colors"
-          >
-            <Eye size={12} />
-            Edit (Inpaint)
-          </button>
-          <button
-            onClick={() => {
-              router.push(`/upscale?image=${encodeURIComponent(image.url)}`);
-              setShowMenu(false);
-            }}
-            className="w-full px-3 py-2 text-left text-xs text-white hover:bg-white/10 flex items-center gap-2 transition-colors"
-          >
-            <ArrowUpCircle size={12} />
-            Upscale
-          </button>
-          {onRemove && (
+      {/* 3-dot Menu Button with Radix Dropdown */}
+      {(isHovered || isDropdownOpen) && (
+        <DropdownMenu open={isDropdownOpen} onOpenChange={(open) => {
+          setIsDropdownOpen(open);
+          if (!open) setIsHovered(false);
+        }}>
+          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
             <button
-              onClick={() => {
-                onRemove(image.id);
-                setShowMenu(false);
-              }}
-              className="w-full px-3 py-2 text-left text-xs text-red-400 hover:text-red-300 hover:bg-white/10 flex items-center gap-2 transition-colors"
+              onClick={(e) => e.stopPropagation()}
+              className="absolute top-1.5 right-1.5 w-7 h-7 bg-black/70 border border-white/20 rounded flex items-center justify-center hover:bg-black/90 transition-colors z-10"
             >
-              <EyeOff size={12} />
-              Remove from view
+              <MoreVertical size={12} className="text-white" />
             </button>
-          )}
-        </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-auto p-0.5" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem onClick={handleDownload} className="text-[11px] py-1 px-2 gap-1.5 flex-row">
+              <Download className="w-3 h-3" />
+              Download
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleViewInEdit} className="text-[11px] py-1 px-2 gap-1.5 flex-row">
+              <Edit className="w-3 h-3" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleUpscale} className="text-[11px] py-1 px-2 gap-1.5 flex-row">
+              <Maximize className="w-3 h-3" />
+              Upscale
+            </DropdownMenuItem>
+            {onRemove && (
+              <>
+                <DropdownMenuSeparator className="my-0.5" />
+                <DropdownMenuItem variant="danger" onClick={() => onRemove(image.id)} className="text-[11px] py-1 px-2 gap-1.5 flex-row">
+                  <Trash2 className="w-3 h-3" />
+                  Remove from view
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
     </div>
   );

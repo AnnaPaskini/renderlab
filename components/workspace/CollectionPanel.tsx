@@ -1,6 +1,7 @@
 "use client";
 
 import { IconDotsVertical } from "@tabler/icons-react";
+import { Copy, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useState, type DragEvent } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
@@ -404,32 +405,35 @@ export function CollectionsPanel() {
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="bg-[var(--rl-panel)] text-[var(--rl-text)] border-[var(--rl-border)]">
 				<DropdownMenuItem
-					className="hover:bg-[var(--rl-panel-hover)]"
+					className="hover:bg-[var(--rl-panel-hover)] flex items-center gap-2"
 					onSelect={(event) => {
 						event.preventDefault();
 						openDuplicateDialog(collection);
 					}}
 				>
+					<Copy className="rl-dropdown-item-icon" />
 					Duplicate
 				</DropdownMenuItem>
 				<DropdownMenuItem
-					className="hover:bg-[var(--rl-panel-hover)]"
+					className="hover:bg-[var(--rl-panel-hover)] flex items-center gap-2"
 					onSelect={(event) => {
 						event.preventDefault();
 						event.stopPropagation();
 						openRenameDialog(collection);
 					}}
 				>
+					<Pencil className="rl-dropdown-item-icon" />
 					Rename
 				</DropdownMenuItem>
 				<DropdownMenuItem
-					className="text-[var(--rl-error)] hover:bg-[var(--rl-panel-hover)] focus:text-[var(--rl-error)]"
+					className="text-[var(--rl-error)] hover:bg-[var(--rl-panel-hover)] focus:text-[var(--rl-error)] flex items-center gap-2"
 					onSelect={(event) => {
 						event.preventDefault();
 						event.stopPropagation();
 						setDeleteTargetId(collection.id);
 					}}
 				>
+					<Trash2 className="rl-dropdown-item-icon" />
 					Delete
 				</DropdownMenuItem>
 			</DropdownMenuContent>
