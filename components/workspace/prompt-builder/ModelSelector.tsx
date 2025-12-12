@@ -1,39 +1,12 @@
 "use client";
 
+import { AI_MODELS } from "@/lib/constants";
 
 interface ModelSelectorProps {
     value: string;
     onChange: (model: string) => void;
     disabled?: boolean;
 }
-
-const MODEL_OPTIONS = [
-    {
-        value: 'nano-banana',
-        label: 'Nano Banana',
-        description: 'Fast, high quality',
-    },
-    {
-        value: 'nano-banana-pro',
-        label: 'Nano Banana Pro',
-        description: 'Studio quality, 4K',
-    },
-    {
-        value: 'seedream4',
-        label: 'Seedream4',
-        description: 'Balanced',
-    },
-    {
-        value: 'flux',
-        label: 'Flux Pro',
-        description: 'Best quality',
-    },
-    {
-        value: 'flux-2-pro',
-        label: 'Flux 2 Pro',
-        description: 'Premium quality',
-    },
-];
 
 export function ModelSelector({ value, onChange, disabled }: ModelSelectorProps) {
     return (
@@ -56,14 +29,13 @@ export function ModelSelector({ value, onChange, disabled }: ModelSelectorProps)
                         paddingRight: `2.5rem`
                     }}
                 >
-                    {MODEL_OPTIONS.map((model) => (
-                        <option key={model.value} value={model.value}>
-                            {model.label} - {model.description}
+                    {AI_MODELS.map((model) => (
+                        <option key={model.id} value={model.id}>
+                            {model.label} — {model.description}
                         </option>
                     ))}
                 </select>
 
-                {/* Premium Info Display */}
                 {value === 'nano-banana-pro' && (
                     <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3 text-sm animate-in fade-in slide-in-from-top-2 duration-200">
                         <div className="text-purple-400 font-medium mb-2">Premium Quality</div>

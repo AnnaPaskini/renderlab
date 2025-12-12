@@ -4,6 +4,7 @@ const MODEL_MAP: Record<string, string> = {
   "nano-banana": "google/nano-banana",
   "nano-banana-pro": "google/nano-banana-pro",
   "seedream4": "bytedance/seedream-4",
+  "seedream-4.5": "bytedance/seedream-4.5",
   "flux": "black-forest-labs/flux-kontext-pro",
   "flux-2-pro": "black-forest-labs/flux-2-pro",
 };
@@ -123,6 +124,39 @@ export async function generateSingle({
 
     // SEEDREAM4: Uses image_input as URL array
     else if (safeModel === "seedream4") {
+      const imageInputs: string[] = [];
+      if (imageUrl) imageInputs.push(imageUrl);
+      // Add all style references (up to 4)
+      imageInputs.push(...styleReferenceUrls);
+
+      // Enhance prompt with @img references
+      let finalPrompt = prompt;
+      if (imageUrl && styleReferenceUrls.length > 0) {
+        const refLabels = styleReferenceUrls.map((_, i) => `@img${i + 2}`).join(', ');
+        finalPrompt = `@img1 is the base image. ${refLabels} ${styleReferenceUrls.length > 1 ? 'are reference images' : 'is a reference image'}. 
+
+Task: ${prompt}
+
+Apply elements or style from ${refLabels} to @img1 as described.`;
+      } else if (imageUrl) {
+        finalPrompt = `Edit @img1: ${prompt}`;
+      }
+
+      input = {
+        prompt: finalPrompt,
+        size: "2K",
+        enhance_prompt: true,
+        ...(imageInputs.length > 0 ? {
+          image_input: imageInputs,
+          aspect_ratio: aspectRatio || "match_input_image"
+        } : {
+          aspect_ratio: aspectRatio || "4:3"
+        })
+      };
+    }
+
+    // SEEDREAM4.5: Uses image_input as URL array (similar to seedream4)
+    else if (safeModel === "seedream-4.5") {
       const imageInputs: string[] = [];
       if (imageUrl) imageInputs.push(imageUrl);
       // Add all style references (up to 4)

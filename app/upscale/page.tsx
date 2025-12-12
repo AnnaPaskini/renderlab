@@ -5,12 +5,15 @@ import { ImagePreviewModal } from '@/components/workspace/ImagePreviewModal';
 import { ImageUploadPanel } from '@/components/workspace/ImageUploadPanel';
 import { SkeletonCard } from '@/components/workspace/SkeletonCard';
 import { createUpscaleInput } from '@/core/thumbnail/createUpscaleInput';
+import { UPSCALER_MODELS } from "@/lib/constants";
 import { createClient } from '@/lib/supabaseBrowser';
 import { uploadImageToStorage } from '@/lib/utils/uploadToStorage';
 import { ArrowUpCircle, Download, MoreVertical, Sparkles, Trash2 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+
+
 
 interface UpscaleImage {
     id: string;
@@ -20,11 +23,6 @@ interface UpscaleImage {
     created_at: string;
 }
 
-const UPSCALE_MODELS = [
-    { id: 'google-upscaler', name: 'Google Upscaler', description: 'Google Official AI 4x upscaling' },
-    { id: 'real-esrgan', name: 'Real-ESRGAN 4x', description: 'Classic 4x enlargement' },
-    { id: 'recraft-crisp', name: 'Recraft Crisp', description: 'AI-enhanced sharpness' },
-];
 
 export default function UpscalePage() {
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -231,7 +229,7 @@ export default function UpscalePage() {
                                     Upscale Model
                                 </label>
                                 <div className="space-y-2">
-                                    {UPSCALE_MODELS.map((model) => (
+                                    {UPSCALER_MODELS.map((model) => (
                                         <button
                                             key={model.id}
                                             onClick={() => setSelectedModel(model.id)}

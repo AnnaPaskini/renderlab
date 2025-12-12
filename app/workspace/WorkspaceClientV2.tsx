@@ -3,6 +3,7 @@
 import { ImageUploadPanel } from "@/components/workspace/ImageUploadPanel";
 import { WorkspaceLayoutV2 } from "@/components/workspace/WorkspaceLayoutV2";
 import { createClientThumbnail } from "@/core/thumbnail/createClientThumbnail";
+import { AI_MODELS } from "@/lib/constants";
 import { useWorkspace } from "@/lib/context/WorkspaceContext";
 import { createClient } from "@/lib/supabaseBrowser";
 import { defaultToastStyle } from "@/lib/toast-config";
@@ -12,6 +13,7 @@ import { Link as LinkIcon, Loader2, Sparkles, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+
 
 // ============================================================================
 // TYPES
@@ -49,13 +51,7 @@ interface Template {
   created_at: string;
 }
 
-const AI_MODELS = [
-  { id: "nano-banana", label: "Nano Banana", description: "Fast, high quality" },
-  { id: "nano-banana-pro", label: "Nano Banana Pro", description: "4K enhanced output - SLOWER- NEW" },
-  { id: "seedream4", label: "Seedream 4", description: "High fidelity rendering" },
-  { id: "flux-pro-kontext", label: "Flux Pro Kontext", description: "Context-aware generation" },
-  { id: "flux-2-pro", label: "Flux 2 Pro", description: "Premium model NEW" },
-];
+
 
 // ============================================================================
 // PILL CATEGORIES WITH SMART SEMANTICS

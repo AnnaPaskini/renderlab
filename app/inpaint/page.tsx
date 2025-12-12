@@ -728,59 +728,60 @@ export default function InpaintPage() {
                                 onCanvasSizeChange={setCanvasSize}
                             />
                         )}
+                    </div>
 
-                        {showBrushPanel && (
-                            <div className="absolute left-[-220px] top-1/2 -translate-y-1/2 z-50 transition-all duration-200 ease-out animate-fadeIn">
-                                <div className="bg-[#2a2a2a] rounded-xl px-4 py-3 border border-white/10 shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <span className="text-xs font-medium text-purple-400/70">
-                                            {activeTool === 'brush' ? 'Brush Size' : 'Eraser Size'}
-                                        </span>
-                                        <span className="text-sm font-semibold text-white">{brushSize}px</span>
-                                    </div>
+                    {/* Brush Size Panel - positioned outside canvas to avoid overflow clipping */}
+                    {showBrushPanel && (
+                        <div className="absolute left-[90px] top-1/2 -translate-y-1/2 z-50 transition-all duration-200 ease-out animate-fadeIn">
+                            <div className="bg-[#2a2a2a] rounded-xl px-4 py-3 border border-white/10 shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
+                                <div className="flex items-center justify-between mb-3">
+                                    <span className="text-xs font-medium text-purple-400/70">
+                                        {activeTool === 'brush' ? 'Brush Size' : 'Eraser Size'}
+                                    </span>
+                                    <span className="text-sm font-semibold text-white">{brushSize}px</span>
+                                </div>
 
-                                    <input
-                                        type="range"
-                                        min="5"
-                                        max="150"
-                                        value={brushSize}
-                                        onChange={(e) => setBrushSize(Number(e.target.value))}
-                                        className="w-40 h-1.5 bg-gray-700 rounded-full appearance-none cursor-pointer accent-purple-500 hover:accent-purple-400 transition-colors"
-                                    />
+                                <input
+                                    type="range"
+                                    min="5"
+                                    max="150"
+                                    value={brushSize}
+                                    onChange={(e) => setBrushSize(Number(e.target.value))}
+                                    className="w-40 h-1.5 bg-gray-700 rounded-full appearance-none cursor-pointer accent-purple-500 hover:accent-purple-400 transition-colors"
+                                />
 
-                                    <div className="flex gap-2 mt-3">
-                                        <button
-                                            onClick={() => setBrushSize(20)}
-                                            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${brushSize === 20
-                                                ? 'bg-purple-500 text-white'
-                                                : 'bg-[#1a1a1a] text-gray-300 hover:bg-[#242424]'
-                                                }`}
-                                        >
-                                            Small
-                                        </button>
-                                        <button
-                                            onClick={() => setBrushSize(60)}
-                                            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${brushSize === 60
-                                                ? 'bg-purple-500 text-white'
-                                                : 'bg-[#1a1a1a] text-gray-300 hover:bg-[#242424]'
-                                                }`}
-                                        >
-                                            Medium
-                                        </button>
-                                        <button
-                                            onClick={() => setBrushSize(120)}
-                                            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${brushSize === 120
-                                                ? 'bg-purple-500 text-white'
-                                                : 'bg-[#1a1a1a] text-gray-300 hover:bg-[#242424]'
-                                                }`}
-                                        >
-                                            Large
-                                        </button>
-                                    </div>
+                                <div className="flex gap-2 mt-3">
+                                    <button
+                                        onClick={() => setBrushSize(20)}
+                                        className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${brushSize === 20
+                                            ? 'bg-purple-500 text-white'
+                                            : 'bg-[#1a1a1a] text-gray-300 hover:bg-[#242424]'
+                                            }`}
+                                    >
+                                        Small
+                                    </button>
+                                    <button
+                                        onClick={() => setBrushSize(60)}
+                                        className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${brushSize === 60
+                                            ? 'bg-purple-500 text-white'
+                                            : 'bg-[#1a1a1a] text-gray-300 hover:bg-[#242424]'
+                                            }`}
+                                    >
+                                        Medium
+                                    </button>
+                                    <button
+                                        onClick={() => setBrushSize(120)}
+                                        className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${brushSize === 120
+                                            ? 'bg-purple-500 text-white'
+                                            : 'bg-[#1a1a1a] text-gray-300 hover:bg-[#242424]'
+                                            }`}
+                                    >
+                                        Large
+                                    </button>
                                 </div>
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
 
                     <div className="flex-shrink-0">
                         <div className="bg-[#1a1a1a] rounded-2xl border border-white/10 p-2 shadow-[0_8px_32px_rgba(0,0,0,0.6)] flex flex-col gap-2">

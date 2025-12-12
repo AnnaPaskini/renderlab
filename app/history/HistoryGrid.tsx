@@ -70,7 +70,9 @@ export function HistoryGrid({ images, onDelete }: HistoryGridProps) {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `renderlab-${img.id}.jpg`;
+            const date = new Date(img.created_at);
+            const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}_${String(date.getHours()).padStart(2, '0')}-${String(date.getMinutes()).padStart(2, '0')}`;
+            a.download = `renderlab_${img.model || 'generation'}_${dateStr}.jpg`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
